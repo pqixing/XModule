@@ -1,0 +1,36 @@
+// 应用插件
+apply plugin: "groovy"
+apply plugin: "maven"
+
+// 添加依赖
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+}
+
+// 代码仓库
+repositories {
+    jcenter()
+}
+// 上传到本地代码库
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri("/home/pqixing/.repo")) {
+                authentication(userName: "admin", password: "admin123")
+            }
+            pom.groupId = "$maven_group" // 组名
+            pom.artifactId = "$maven_artifactId" // 插件名
+            pom.version = "$maven_version" // 版本号
+        }
+    }
+}
+uploadArchives.doLast {
+    def configFile = file("gradle.properties")
+    def configs = new Properties()
+    configs.load(configFile.newInputStream())
+    def maven_version = configs.getProperty("maven_version")
+    configs.setProperty("maven_version", (maven_version.toInteger() + 1).toString())
+
+    configs.store(configFile.newOutputStream(), "")
+}
