@@ -22,7 +22,7 @@ abstract class BasePlugin implements Plugin<Project> {
         project.extensions.add("moduleConfig", moduleConfig)
 
         project.ext.endConfig = {
-            /*if (it instanceof Closure)*/ it.call(moduleConfig)
+            if (it instanceof Closure) it.call(moduleConfig)
             moduleConfig.onConfigEnd()
             moduleConfig.generatorFile()?.findAll {
                 !NormalUtils.isEmpty(it)

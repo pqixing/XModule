@@ -19,12 +19,12 @@ abstract class BaseExtension {
     }
 
     void updateMeta(Project project) {
-        metaPropertyValues.each { meta ->
-            String key = meta.name.toString()
+        properties.each { map ->
+            String key = map.key
             if ("class" != key && project.hasProperty(key)) try {
-                meta.value = project.ext.get(key)
+                setProperty(key,project.ext.get(key))
             } catch (Exception e) {
-                println("updateMeta error key = $key value = ${project.ext.get(key)} exception = ${e.toString()}")
+                println("updateMeta error key = $key  exception = ${e.toString()}")
             }
         }
     }

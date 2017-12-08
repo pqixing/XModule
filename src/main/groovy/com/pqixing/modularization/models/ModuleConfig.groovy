@@ -51,6 +51,7 @@ class ModuleConfig extends BaseExtension {
 
         this.mavenTypes = mavenTypes
         mavenTypes.whenObjectAdded { it.onCreate(project) }
+
         mavenTypes.add(new MavenType("release"))
         mavenTypes.add(new MavenType("debug"))
         mavenTypes.add(new MavenType("test"))
