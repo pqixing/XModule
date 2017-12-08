@@ -114,7 +114,7 @@ class ModuleConfig extends BaseExtension {
         if (NormalUtils.isEmpty(value)) value = repoVersions[key]
         if (NormalUtils.isEmpty(value)) value = "+"
         BuildConfig buildConfig = project.buildConfig
-        return buildConfig.groupName + ".android:$buildConfig.projectName:$value"
+        return buildConfig.groupName + ".android:$key:$value"
     }
 
     @Override

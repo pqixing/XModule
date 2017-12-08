@@ -5,6 +5,7 @@ import com.pqixing.modularization.models.ModuleConfig
 import com.pqixing.modularization.models.RunType
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import com.pqixing.modularization.utils.NormalUtils
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -22,11 +23,11 @@ abstract class BasePlugin implements Plugin<Project> {
         project.ext.endConfig = {
             if (it instanceof Closure) it.call(moduleConfig)
             moduleConfig.onConfigEnd()
-            moduleConfig.generatorFiles()/*?.findAll {
+            moduleConfig.generatorFiles()?.findAll {
                 !NormalUtils.isEmpty(it)
-            }?.all {
+            }?.each {
                 project.apply from: it
-            }*/
+            }
         }
     }
 }
