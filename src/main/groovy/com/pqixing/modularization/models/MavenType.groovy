@@ -52,8 +52,6 @@ class MavenType extends BaseContainerExtension {
                 }
             }
         }
-        sb.append(this.toString())
-        sb.append("\n maven_url = $maven_url")
         def file = new File(project.buildConfig.cacheDir, "maven.gradle")
         return [FileUtils.write(file, NormalUtils.parseString(sb.toString(), properties))]
     }
