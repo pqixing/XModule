@@ -13,7 +13,7 @@ class MavenType extends BaseContainerExtension {
     boolean uploadEnable = false
 
     String pom_version
-    String url
+    String maven_url
     String artifactId
     String userName
     String password
@@ -34,9 +34,9 @@ class MavenType extends BaseContainerExtension {
         userName = Default.maven_user
         password = Default.maven_password
         groupName = project.buildConfig.groupName
-        if ("release" == name) url = Default.maven_url_release
-        if ("test" == name) url = Default.maven_url_test
-        if ("debug" == name) url = Default.maven_url_debug
+        if ("release" == name) maven_url = Default.maven_url_release
+        if ("test" == name) maven_url = Default.maven_url_test
+        if ("debug" == name) maven_url = Default.maven_url_debug
     }
 
     @Override
@@ -52,6 +52,8 @@ class MavenType extends BaseContainerExtension {
                 }
             }
         }
+        sb.append(this.toString())
+        sb.append("\n maven_url = $maven_url")
         def file = new File(project.buildConfig.cacheDir, "maven.gradle")
         return [FileUtils.write(file, NormalUtils.parseString(sb.toString(), properties))]
     }
@@ -67,7 +69,7 @@ apply plugin: "maven"
 uploadArchives{
     repositories{
         mavenDeployer{
-            repository(url:"#{url}"){
+            repository(url:"#{maven_url}"){
                 authentication(userName: "#{userName}", password: "#{password}")
             }
             pom.groupId = '#{groupName}.android' // 组名
@@ -87,7 +89,7 @@ uploadArchives{
         return '''
 repositories {
      maven {
-         url "#{url}"
+         url "#{maven_url}"
      }
 }
 '''
@@ -96,9 +98,10 @@ repositories {
     @Override
     public String toString() {
         return "MavenType{" +
-                "uploadEnable=" + uploadEnable +
+                "name=" + name +
+                ",uploadEnable=" + uploadEnable +
                 ", pom_version='" + pom_version + '\'' +
-                ", url='" + url + '\'' +
+                ", maven_url='" + maven_url + '\'' +
                 ", artifactId='" + artifactId + '\'' +
                 ", userName='" + userName + '\'' +
                 ", password='" + password + '\'' +

@@ -31,6 +31,7 @@ class AndroidConfig extends BaseExtension {
         this.project = project
     }
 
+
     @Override
     LinkedList<String> generatorFiles() {
         def list = []
@@ -39,7 +40,6 @@ class AndroidConfig extends BaseExtension {
 
         def maps = ["androidPlugin": moduleConfig.compilePluginType]
         maps.putAll(properties)
-
         //输出android.gradle
         list += FileUtils.write(new File(buildConfig.cacheDir, "android.gradle"),
                 NormalUtils.parseString(androidTxt, maps))
@@ -54,13 +54,12 @@ class AndroidConfig extends BaseExtension {
 
     String getAndroidTxt() {
         return '''
-
-apply plugin: "com.android.${androidPlugin}"
+apply plugin: "com.android.#{androidPlugin}"
 android {
-    buildToolsVersion #{buildToolsVersion}"
+    buildToolsVersion '#{buildToolsVersion}'
     compileSdkVersion #{compileSdkVersion}
     defaultConfig {
-        applicationId "#1{applicationId}"
+        applicationId '#1{applicationId}'
         minSdkVersion #{minSdkVersion}
         targetSdkVersion #{targetSdkVersion}
 

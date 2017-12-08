@@ -14,8 +14,8 @@ class NormalUtils {
      * @return
      */
     static boolean isEmpty(def obj) {
-        if(null == obj|| "" == obj.toString() || "null" == obj.toString()) return true
-        if(obj instanceof Collection) return obj.isEmpty()
+        if (null == obj || "" == obj.toString() || "null" == obj.toString()) return true
+        if (obj instanceof Collection) return obj.isEmpty()
         return false
     }
 
@@ -38,13 +38,14 @@ class NormalUtils {
      * @param source
      * @return
      */
-    static String parseString(String source,Map<String,Object> properties) {
+    static String parseString(String source, Map<String, Object> properties) {
+        properties = properties.findAll { map -> !map.key.endsWith("Txt") }
         def builder = new StringBuilder()
         source.eachLine { str ->
             if (NormalUtils.isEmpty(str)) return
 
             boolean ignore = false
-            Default.keyPattern.matcher(source).findAll()?.each { key ->
+            Default.keyPattern.matcher(str).findAll()?.each { key ->
                 if (ignore) return
 
                 def value = properties.find { it.key == (findRealKey(key)) }?.value
