@@ -8,10 +8,10 @@ import org.gradle.api.Project
 
 abstract class BaseExtension {
 
-/**
- * 配置解析
- * @param closure
- */
+    /**
+     * 配置解析
+     * @param closure
+     */
     void configure(Closure closure) {
         closure.delegate = this
         closure.setResolveStrategy(Closure.DELEGATE_ONLY)
@@ -28,4 +28,6 @@ abstract class BaseExtension {
             }
         }
     }
+
+    abstract LinkedList<String> generatorFiles()
 }

@@ -5,4 +5,8 @@ package com.pqixing.modularization.plugins;
  */
 
 class AppPlugin extends BasePlugin {
+    @Override
+    String pluginType() {
+        return "application"
+    }
 }

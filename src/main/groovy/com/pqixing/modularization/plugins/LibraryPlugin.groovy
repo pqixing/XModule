@@ -5,4 +5,8 @@ package com.pqixing.modularization.plugins;
  */
 
 class LibraryPlugin extends BasePlugin {
+    @Override
+    String pluginType() {
+        return "library"
+    }
 }
