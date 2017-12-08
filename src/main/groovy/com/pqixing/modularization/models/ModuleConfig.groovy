@@ -1,10 +1,10 @@
 package com.pqixing.modularization.models
 
 import com.pqixing.modularization.Default
-import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
+import com.pqixing.modularization.utils.FileUtils
 
 /**
  * Created by pqixing on 17-12-7.
@@ -25,8 +25,8 @@ class ModuleConfig extends BaseExtension {
 
     private final HashMap<String, String> repoVersions
 
-    String selectRunType
-    String selectMavenType
+    String selectRunType = ""
+    String selectMavenType = "debug"
 
     ModuleConfig(Project project
                  , NamedDomainObjectContainer<RunType> runTypes
@@ -61,11 +61,13 @@ class ModuleConfig extends BaseExtension {
     }
 
     MavenType getMavenType() {
-        return mavenTypes.getByName(selectMavenType)
+        if (mavenTypes.hasProperty(selectMavenType)) return mavenTypes.getByName(selectMavenType)
+        return null
     }
 
     RunType getRunType() {
-        return runTypes.getByName(selectRunType)
+        if (runTypes.hasProperty(selectRunType)) return runTypes.getByName(selectRunType)
+        return null
     }
 
     String getCompilePluginType() {
@@ -118,15 +120,14 @@ class ModuleConfig extends BaseExtension {
     @Override
     LinkedList<String> generatorFiles() {
         LinkedList<String> files = []
-        files += mavenTypes.getByName(selectMavenType).generatorFiles()
+        if (!NormalUtils.isEmpty(mavenType)) files += mavenType.generatorFiles()
         files += androidConfig.generatorFiles()
-        if (!NormalUtils.isEmpty(runTypes.getByName(selectRunType))) {
-            files += runTypes.getByName(selectRunType).generatorFiles()
-        }
+
+        if (!NormalUtils.isEmpty(runType)) files += runType.generatorFiles()
         if (!NormalUtils.isEmpty(defaultImplRepo)) {
             StringBuilder sb = new StringBuilder("dependencies { \n")
             defaultImplRepo.each { repoKey ->
-                sb.append("implementation '${getRepoVerionStr(repoKey)}' \n")
+                sb.append("    implementation '${getRepoVerionStr(repoKey)}' \n")
             }
             files += FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.append("}").toString())
         }

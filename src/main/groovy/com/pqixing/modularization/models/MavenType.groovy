@@ -53,7 +53,7 @@ class MavenType extends BaseContainerExtension {
             }
         }
         def file = new File(project.buildConfig.cacheDir, "maven.gradle")
-        return FileUtils.write(file, NormalUtils.parseString(sb.toString(), properties))
+        return [FileUtils.write(file, NormalUtils.parseString(sb.toString(), properties))]
     }
 
 /**

@@ -45,10 +45,10 @@ class AndroidConfig extends BaseExtension {
                 NormalUtils.parseString(androidTxt, maps))
         if (kotlinEnable) list += FileUtils.write(new File(buildConfig.cacheDir, "kotlin.gradle"),
                 NormalUtils.parseString(kotlinTxt, maps))
-        if (flavorsEnable) list += ileUtils.write(new File(buildConfig.cacheDir, "flavors.gradle"),
+        if (flavorsEnable) list += FileUtils.write(new File(buildConfig.cacheDir, "flavors.gradle"),
                 NormalUtils.parseString(flavorsTxt, maps))
 
-
+        println("android Config generatorFiles $list")
         return list
     }
 
