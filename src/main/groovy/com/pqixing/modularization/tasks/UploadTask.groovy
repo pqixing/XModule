@@ -4,7 +4,6 @@ import com.pqixing.modularization.Default
 import com.pqixing.modularization.models.MavenType
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
-import com.pqixing.modularization.utils.Print
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -46,12 +45,13 @@ class UploadTask extends DefaultTask {
         }
         def file = new File(project.buildConfig.cacheDir, "${name}maven.gradle")
 
-        project.apply from: FileUtils.write(file, NormalUtils.parseString(mavenTxt, pros))
+        def gradleFilePath = FileUtils.write(file, NormalUtils.parseString(mavenTxt, pros))
+        project.apply from: gradleFilePath
+        new File(gradleFilePath).delete()
     }
 
     @TaskAction
     void uploadFile() {
-        Print.l("uploadFile  name = $mavenInfo.name ---------------------")
         project.uploadArchives.execute()
     }
 

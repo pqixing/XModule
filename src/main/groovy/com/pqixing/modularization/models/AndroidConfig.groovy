@@ -43,12 +43,13 @@ class AndroidConfig extends BaseExtension {
         maps.putAll(properties)
         maps.put("maven_url", mavenType?.maven_url)
         //输出android.gradle
-        list += FileUtils.write(new File(buildConfig.cacheDir, "android.gradle"),
-                NormalUtils.parseString(androidTxt, maps))
-        if (kotlinEnable) list += FileUtils.write(new File(buildConfig.cacheDir, "kotlin.gradle"),
-                NormalUtils.parseString(kotlinTxt, maps))
-        if (flavorsEnable) list += FileUtils.write(new File(buildConfig.cacheDir, "flavors.gradle"),
-                NormalUtils.parseString(flavorsTxt, maps))
+        list += FileUtils.write(new File(buildConfig.cacheDir, "android.gradle"), NormalUtils.parseString(androidTxt, maps))
+
+        if (kotlinEnable)
+            list += FileUtils.write(new File(buildConfig.cacheDir, "kotlin.gradle"), NormalUtils.parseString(kotlinTxt, maps))
+
+        if (flavorsEnable && "library" == moduleConfig.pluginType)
+            list += FileUtils.write(new File(buildConfig.cacheDir, "flavors.gradle"), NormalUtils.parseString(flavorsTxt, maps))
 
         println("android Config generatorFiles $list")
         return list

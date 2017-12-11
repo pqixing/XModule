@@ -106,7 +106,7 @@ class ModuleConfig extends BaseExtension {
             repoVersions.putAll(p.getProperties())
         }
         repoVersions.putAll(mavenType.repoVersions)
-        uploadToMavenTask()
+        if ("library" == pluginType) uploadToMavenTask()
 
         Print.outputFile = new File(buildConfig.outDir, "log.txt")
     }
@@ -133,11 +133,14 @@ class ModuleConfig extends BaseExtension {
                 listTask += project.task(taskName, type: UploadTask) { mavenInfo = m }
             }
         }
-
-        project.task("uploadAll") {
-            group = Default.taskGroup
-            doFirst { listTask.each { it.execute() } }
+        project.afterEvaluate {
+            listTask.each { it.dependsOn project.build }
         }
+
+//        project.task("uploadAll") {
+//            group = Default.taskGroup
+//            doFirst { listTask.each { it.execute() } }
+//        }
     }
 
 /**
