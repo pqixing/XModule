@@ -17,7 +17,7 @@ class BuildConfig extends BaseExtension {
 
     BuildConfig(Project project) {
         projectName = project.name
-        outDir = FileUtils.appendUrls(project.buildDir.path, "outputs", "module")
+        outDir = FileUtils.appendUrls(project.buildDir.path, "outputs", "modularization")
         cacheDir = FileUtils.appendUrls(project.buildDir.path, "temp", "${projectName.hashCode()}", projectName)
         groupName = Default.groupName
         packageName = groupName + '.' + projectName

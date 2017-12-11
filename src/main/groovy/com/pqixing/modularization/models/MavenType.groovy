@@ -10,7 +10,7 @@ import com.pqixing.modularization.utils.NormalUtils
  */
 
 class MavenType extends BaseContainerExtension {
-    boolean uploadEnable = false
+    Boolean uploadEnable
 
     String pom_version
     String maven_url
@@ -27,6 +27,11 @@ class MavenType extends BaseContainerExtension {
         repoVersions = new HashMap<>()
     }
 
+    String getMaven_url() {
+        if (maven_url.startsWith("uri")) return maven_url
+        return "'$maven_url'"
+    }
+
     @Override
     void onCreate(Project project) {
         super.onCreate(project)
@@ -41,19 +46,8 @@ class MavenType extends BaseContainerExtension {
 
     @Override
     LinkedList<String> generatorFiles() {
-        StringBuilder sb = new StringBuilder()
-        sb.append(repoTxt)
-        if (uploadEnable && ("release" != name || Default.uploadKey == uploadKey)) {
-            sb.append(mavenTxt)
-            project.task("upload$project.name") {
-                group = Default.taskGroup
-                doLast {
-                    project.uploadArchives.execute()
-                }
-            }
-        }
-        def file = new File(project.buildConfig.cacheDir, "maven.gradle")
-        return [FileUtils.write(file, NormalUtils.parseString(sb.toString(), properties))]
+        def file = new File(project.buildConfig.cacheDir, "${name}maven.gradle")
+        return [FileUtils.write(file, NormalUtils.parseString(mavenTxt, properties))]
     }
 
 /**
@@ -67,7 +61,7 @@ apply plugin: "maven"
 uploadArchives{
     repositories{
         mavenDeployer{
-            repository(url:"#{maven_url}"){
+            repository(url:#{maven_url}){
                 authentication(userName: "#{userName}", password: "#{password}")
             }
             pom.groupId = '#{groupName}.android' // 组名
@@ -79,19 +73,6 @@ uploadArchives{
 '''
     }
 
-/**
- * 获取依赖仓库的信息
- * @return
- */
-    static String getRepoTxt() {
-        return '''
-repositories {
-     maven {
-         url "#{maven_url}"
-     }
-}
-'''
-    }
 
     @Override
     public String toString() {

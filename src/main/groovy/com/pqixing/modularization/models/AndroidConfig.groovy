@@ -37,9 +37,11 @@ class AndroidConfig extends BaseExtension {
         def list = []
         ModuleConfig moduleConfig = project.moduleConfig
         BuildConfig buildConfig = project.buildConfig
+        MavenType mavenType = moduleConfig.mavenType
 
         def maps = ["androidPlugin": moduleConfig.compilePluginType]
         maps.putAll(properties)
+        maps.put("maven_url", mavenType?.maven_url)
         //输出android.gradle
         list += FileUtils.write(new File(buildConfig.cacheDir, "android.gradle"),
                 NormalUtils.parseString(androidTxt, maps))
@@ -54,6 +56,12 @@ class AndroidConfig extends BaseExtension {
 
     String getAndroidTxt() {
         return '''
+repositories {
+     maven {
+         url #{maven_url}
+     }
+}
+
 apply plugin: "com.android.#{androidPlugin}"
 android {
     buildToolsVersion '#{buildToolsVersion}'
@@ -72,6 +80,7 @@ android {
 }
 '''
     }
+
 
     String getKotlinTxt() {
         '''

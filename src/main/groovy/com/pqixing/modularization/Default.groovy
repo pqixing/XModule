@@ -9,7 +9,7 @@ class Default {
 
     static final uploadKey = "releaseUpload"
     static final groupName ="com.dachen"
-    static final maven_url_test = ""
+    static final maven_url_test = "uri('test')"
     static final maven_url_release = ""
     static final maven_url_debug = ""
 

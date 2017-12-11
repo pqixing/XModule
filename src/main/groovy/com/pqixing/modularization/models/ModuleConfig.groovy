@@ -1,7 +1,9 @@
 package com.pqixing.modularization.models
 
 import com.pqixing.modularization.Default
+import com.pqixing.modularization.tasks.UploadTask
 import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.Print
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import com.pqixing.modularization.utils.FileUtils
@@ -27,6 +29,9 @@ class ModuleConfig extends BaseExtension {
 
     String selectRunType = ""
     String selectMavenType = "debug"
+
+    String pom_version
+    boolean uploadEnable = false
 
     ModuleConfig(Project project
                  , NamedDomainObjectContainer<RunType> runTypes
@@ -101,6 +106,38 @@ class ModuleConfig extends BaseExtension {
             repoVersions.putAll(p.getProperties())
         }
         repoVersions.putAll(mavenType.repoVersions)
+        uploadToMavenTask()
+
+        Print.outputFile = new File(buildConfig.outDir, "log.txt")
+    }
+
+/**
+ * 上传数据到maven仓库
+ */
+    private void uploadToMavenTask() {
+        def listTask = []
+        //添加上传的任务
+        mavenTypes.each { m ->
+            switch (m.name) {
+                case "release":
+                case "test":
+                case "debug":
+                    m.onCreate(project)
+                    break
+            }
+            if (NormalUtils.isEmpty(m.pom_version)) m.pom_version = pom_version
+            if (NormalUtils.isEmpty(m.uploadEnable)) m.uploadEnable = uploadEnable
+
+            if (m.uploadEnable && ("release" != m.name || Default.uploadKey == m.uploadKey)) {
+                String taskName = "up $project.name:$m.name"
+                listTask += project.task(taskName, type: UploadTask) { mavenInfo = m }
+            }
+        }
+
+        project.task("uploadAll") {
+            group = Default.taskGroup
+            doFirst { listTask.each { it.execute() } }
+        }
     }
 
 /**
@@ -109,7 +146,7 @@ class ModuleConfig extends BaseExtension {
  * @param value
  * @return
  */
-    String getRepoVerionStr(String key, String value = "") {
+    String getRepoVersionStr(String key, String value = "") {
         key = key.replace(":", "")
         if (NormalUtils.isEmpty(value)) value = repoVersions[key]
         if (NormalUtils.isEmpty(value)) value = "+"
@@ -120,14 +157,13 @@ class ModuleConfig extends BaseExtension {
     @Override
     LinkedList<String> generatorFiles() {
         LinkedList<String> files = []
-        if (!NormalUtils.isEmpty(mavenType)) files += mavenType.generatorFiles()
         files += androidConfig.generatorFiles()
 
         if (!NormalUtils.isEmpty(runType)) files += runType.generatorFiles()
         if (!NormalUtils.isEmpty(defaultImplRepo)) {
             StringBuilder sb = new StringBuilder("dependencies { \n")
             defaultImplRepo.each { repoKey ->
-                sb.append("    implementation '${getRepoVerionStr(repoKey)}' \n")
+                sb.append("    implementation '${getRepoVersionStr(repoKey)}' \n")
             }
             files += FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.append("}").toString())
         }
