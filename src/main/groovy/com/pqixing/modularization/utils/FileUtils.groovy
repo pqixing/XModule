@@ -1,4 +1,8 @@
 package com.pqixing.modularization.utils
+
+import com.pqixing.modularization.Default
+import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-11-30.
  */
@@ -31,5 +35,29 @@ class FileUtils {
         out.flush()
         out.close()
         return file.path
+    }
+
+    /**
+     * 输出依赖关系
+     * @param project
+     * @return
+     */
+    static void writeDependency(Project project, File outFile) {
+        project.task("dependency", type: org.gradle.api.tasks.diagnostics.DependencyReportTask) {
+            group = Default.taskGroup
+            outputFile = outFile
+            doLast {
+                def strList = new LinkedList<String>()
+                outputFile.eachLine {
+                    if (it.startsWith("No dependencies")) {
+                        strList.removeLast()
+                        strList.removeLast()
+                    } else {
+                        strList.add(it + "\n")
+                    }
+                }
+                FileUtils.write(outputFile, strList.toString())
+            }
+        }.execute()
     }
 }

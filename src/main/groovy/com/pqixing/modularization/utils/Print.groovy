@@ -1,5 +1,8 @@
 package com.pqixing.modularization.utils
 
+import com.pqixing.modularization.Default
+import org.gradle.api.Project
+
 class Print {
     static File outputFile;
     static StringBuilder outputData = new StringBuilder()
@@ -29,4 +32,6 @@ class Print {
         outputFile.append(outputData.toString())
         outputData = null
     }
+
+
 }

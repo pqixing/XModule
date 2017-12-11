@@ -1,7 +1,6 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Default
-
 /**
  * Created by pqixing on 17-12-8.
  */
@@ -66,4 +65,5 @@ class NormalUtils {
     static String findRealKey(String key) {
         return key.substring(key.indexOf("{") + 1, key.lastIndexOf("}"))
     }
+
 }

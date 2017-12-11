@@ -7,6 +7,7 @@ import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -110,8 +111,11 @@ class ModuleConfig extends BaseExtension {
     }
 
     void afterApplyAndroid() {
-        if ("library" == pluginType)  uploadToMavenTask()
-        Print.ln(toString())
+        project.afterEvaluate {
+            if ("library" == pluginType) uploadToMavenTask()
+            Print.ln(toString())
+            FileUtils.writeDependency(project, new File(buildConfig.outDir, "dependency.txt"))
+        }
     }
 /**
  * 上传数据到maven仓库
@@ -135,9 +139,9 @@ class ModuleConfig extends BaseExtension {
                 listTask += project.task(taskName, type: UploadTask) { mavenInfo = m }
             }
         }
-        project.afterEvaluate {
-            listTask.each { it.dependsOn project.assembleRelease }
-        }
+//        project.afterEvaluate {
+        listTask.each { it.dependsOn project.assembleRelease }
+//        }
 
 //        project.task("uploadAll") {
 //            group = Default.taskGroup
