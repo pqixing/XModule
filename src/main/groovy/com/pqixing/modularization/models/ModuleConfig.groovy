@@ -2,12 +2,11 @@ package com.pqixing.modularization.models
 
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.tasks.UploadTask
+import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
-import com.pqixing.modularization.utils.FileUtils
-
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -112,6 +111,7 @@ class ModuleConfig extends BaseExtension {
 
     void afterApplyAndroid() {
         if ("library" == pluginType)  uploadToMavenTask()
+        Print.ln(toString())
     }
 /**
  * 上传数据到maven仓库
@@ -173,5 +173,24 @@ class ModuleConfig extends BaseExtension {
             files += FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.append("}").toString())
         }
         return files
+    }
+
+
+    @Override
+    public String toString() {
+        return "ModuleConfig{" +
+                "\nrunTypes=" + runTypes +
+                ",\n mavenTypes=" + mavenTypes +
+                ",\n buildConfig=" + buildConfig +
+                ",\n androidConfig=" + androidConfig +
+                ", pluginType='" + pluginType + '\'' +
+                ",\n reposPaths=" + reposPaths +
+                ",\n defaultImplRepo=" + defaultImplRepo +
+                ",\n repoVersions=" + repoVersions +
+                ", selectRunType='" + selectRunType + '\'' +
+                ", selectMavenType='" + selectMavenType + '\'' +
+                ", pom_version='" + pom_version + '\'' +
+                ", uploadEnable=" + uploadEnable +
+                '}';
     }
 }

@@ -10,7 +10,7 @@ import org.gradle.api.tasks.TaskAction
 class UploadTask extends DefaultTask {
 
     MavenType mavenInfo
-
+    String gradleFilePath
     UploadTask() {
         group = Default.taskGroup
     }
@@ -45,9 +45,8 @@ class UploadTask extends DefaultTask {
         }
         def file = new File(project.buildConfig.cacheDir, "${name}maven.gradle")
 
-        def gradleFilePath = FileUtils.write(file, NormalUtils.parseString(mavenTxt, pros))
+        gradleFilePath = FileUtils.write(file, NormalUtils.parseString(mavenTxt, pros))
         project.apply from: gradleFilePath
-        new File(gradleFilePath).delete()
     }
 
     @TaskAction
@@ -57,7 +56,7 @@ class UploadTask extends DefaultTask {
 
     @TaskAction
     void deleteMavenFile() {
-
+        new File(gradleFilePath).delete()
     }
 
 /**

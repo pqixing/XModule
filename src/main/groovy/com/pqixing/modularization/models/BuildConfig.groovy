@@ -18,7 +18,7 @@ class BuildConfig extends BaseExtension {
     BuildConfig(Project project) {
         projectName = project.name
         outDir = FileUtils.appendUrls(project.buildDir.path, "outputs", "modularization")
-        cacheDir = FileUtils.appendUrls(project.buildDir.path, "temp", "${projectName.hashCode()}", projectName)
+        cacheDir = FileUtils.appendUrls(project.buildDir.path, "tmp", "${projectName.hashCode()}", projectName)
         groupName = Default.groupName
         packageName = groupName + '.' + projectName
 
@@ -30,5 +30,16 @@ class BuildConfig extends BaseExtension {
     @Override
     LinkedList<String> generatorFiles() {
         return ""
+    }
+
+    @Override
+    public String toString() {
+        return "BuildConfig{" +
+                "cacheDir='" + cacheDir + '\'' +
+                ", outDir='" + outDir + '\'' +
+                ", groupName='" + groupName + '\'' +
+                ", projectName='" + projectName + '\'' +
+                ", packageName='" + packageName + '\'' +
+                '}';
     }
 }

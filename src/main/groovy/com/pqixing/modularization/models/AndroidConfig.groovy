@@ -145,4 +145,23 @@ android{
 }
 '''
     }
+
+
+    @Override
+    public String toString() {
+        return "AndroidConfig{" +
+                "buildToolsVersion='" + buildToolsVersion + '\'' +
+                ", compileSdkVersion='" + compileSdkVersion + '\'' +
+                ", minSdkVersion='" + minSdkVersion + '\'' +
+                ", targetSdkVersion='" + targetSdkVersion + '\'' +
+                ", versionCode='" + versionCode + '\'' +
+                ", versionName='" + versionName + '\'' +
+                ", applicationId='" + applicationId + '\'' +
+                ", support_v4='" + support_v4 + '\'' +
+                ", support_v7='" + support_v7 + '\'' +
+                ", kotlinEnable=" + kotlinEnable +
+                ", kotlin_version='" + kotlin_version + '\'' +
+                ", flavorsEnable=" + flavorsEnable +
+                '}';
+    }
 }

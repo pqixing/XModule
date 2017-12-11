@@ -49,21 +49,19 @@ class MavenType extends BaseContainerExtension {
         return []
     }
 
+
     @Override
     public String toString() {
         return "MavenType{" +
-                "name=" + name +
-                ",uploadEnable=" + uploadEnable +
+                "uploadEnable=" + uploadEnable +
                 ", pom_version='" + pom_version + '\'' +
                 ", maven_url='" + maven_url + '\'' +
                 ", artifactId='" + artifactId + '\'' +
-                ", userName='" + userName + '\'' +
-                ", password='" + password + '\'' +
+//                ", userName='" + userName + '\'' +
+//                ", password='" + password + '\'' +
                 ", groupName='" + groupName + '\'' +
                 ", uploadKey='" + uploadKey + '\'' +
                 ", repoVersions=" + repoVersions +
                 '}';
     }
-
-
 }
