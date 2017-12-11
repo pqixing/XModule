@@ -1,9 +1,7 @@
 package com.pqixing.modularization.models
 
 import com.pqixing.modularization.Default
-import com.pqixing.modularization.utils.FileUtils
 import org.gradle.api.Project
-import com.pqixing.modularization.utils.NormalUtils
 
 /**
  * Created by pqixing on 17-12-7.
@@ -46,33 +44,10 @@ class MavenType extends BaseContainerExtension {
 
     @Override
     LinkedList<String> generatorFiles() {
-        def file = new File(project.buildConfig.cacheDir, "${name}maven.gradle")
-        return [FileUtils.write(file, NormalUtils.parseString(mavenTxt, properties))]
+//        def file = new File(project.buildConfig.cacheDir, "${name}maven.gradle")
+//        return [FileUtils.write(file, NormalUtils.parseString(mavenTxt, properties))]
+        return []
     }
-
-/**
- * 获取maven的文本类型
- * @return
- */
-    static String getMavenTxt() {
-        return '''
-apply plugin: "maven"
-// 上传到本地代码库
-uploadArchives{
-    repositories{
-        mavenDeployer{
-            repository(url:#{maven_url}){
-                authentication(userName: "#{userName}", password: "#{password}")
-            }
-            pom.groupId = '#{groupName}.android' // 组名
-            pom.artifactId = '#{artifactId}' // 插件名
-            pom.version = '#{pom_version}' // 版本号
-        }
-    }
-}
-'''
-    }
-
 
     @Override
     public String toString() {

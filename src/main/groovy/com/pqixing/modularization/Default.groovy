@@ -9,9 +9,9 @@ class Default {
 
     static final uploadKey = "releaseUpload"
     static final groupName ="com.dachen"
-    static final maven_url_test = "uri('test')"
-    static final maven_url_release = ""
-    static final maven_url_debug = ""
+    static final maven_url_test = "uri('/home/pqixing/testRepo')"
+    static final maven_url_release = "uri('/home/pqixing/releaseRepo')"
+    static final maven_url_debug = "uri('/home/pqixing/debugRepo')"
 
     static final maven_user = "admin"
     static final maven_password = "admin123"
