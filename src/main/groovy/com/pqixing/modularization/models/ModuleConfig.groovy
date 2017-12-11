@@ -106,11 +106,13 @@ class ModuleConfig extends BaseExtension {
             repoVersions.putAll(p.getProperties())
         }
         repoVersions.putAll(mavenType.repoVersions)
-        if ("library" == pluginType) uploadToMavenTask()
 
         Print.outputFile = new File(buildConfig.outDir, "log.txt")
     }
 
+    void afterApplyAndroid() {
+        if ("library" == pluginType)  uploadToMavenTask()
+    }
 /**
  * 上传数据到maven仓库
  */
@@ -129,12 +131,12 @@ class ModuleConfig extends BaseExtension {
             if (NormalUtils.isEmpty(m.uploadEnable)) m.uploadEnable = uploadEnable
 
             if (m.uploadEnable && ("release" != m.name || Default.uploadKey == m.uploadKey)) {
-                String taskName = "up-$project.name-$m.name"
+                String taskName = "up-$project.name$m.name"
                 listTask += project.task(taskName, type: UploadTask) { mavenInfo = m }
             }
         }
         project.afterEvaluate {
-            listTask.each { it.dependsOn project.build }
+            listTask.each { it.dependsOn project.assembleRelease }
         }
 
 //        project.task("uploadAll") {
