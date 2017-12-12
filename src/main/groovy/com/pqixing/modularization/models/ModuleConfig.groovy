@@ -91,9 +91,9 @@ class ModuleConfig extends BaseExtension {
         mavenTypes.configure(closure)
     }
 
-//    void buildConfig(Closure closure) {
-//        buildConfig.configure(closure)
-//    }
+    void buildConfig(Closure closure) {
+        buildConfig.configure(closure)
+    }
 
     void androidConfig(Closure closure) {
         androidConfig.configure(closure)

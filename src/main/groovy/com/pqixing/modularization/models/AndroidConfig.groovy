@@ -19,6 +19,7 @@ class AndroidConfig extends BaseExtension {
     String applicationId = ""
     String support_v4 = "27.0.1"
     String support_v7 = "27.0.1"
+    boolean compatApache = false
 
     boolean kotlinEnable = false
     String kotlin_version = "1.2.0"
@@ -77,6 +78,7 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [CHANNEL_NAME: "DACHEN_DOCTOR"]
+        if(#{compatApache}&&compileSdkVersion.toInteger() >=23) useLibrary 'org.apache.http.legacy'
     }
 }
 '''

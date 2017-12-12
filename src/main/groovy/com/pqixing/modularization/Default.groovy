@@ -9,8 +9,8 @@ class Default {
 
     static final uploadKey = "releaseUpload"
     static final groupName ="com.dachen"
-    static final maven_url_test = "uri('/home/pqixing/testRepo')"
-    static final maven_url_release = "uri('/home/pqixing/releaseRepo')"
+    static final maven_url_test = "http://192.168.3.7:9527/nexus/content/repositories/android-test/"
+    static final maven_url_release = "http://192.168.3.7:9527/nexus/content/repositories/android/"
     static final maven_url_debug = "uri('/home/pqixing/debugRepo')"
 
     static final maven_user = "admin"

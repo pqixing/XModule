@@ -58,7 +58,7 @@ class RunType extends BaseContainerExtension {
         FileUtils.write(new File(buildConfig.cacheDir, "AndroidManifest.xml"), inputManifest)
 
         //输出source的gradle配置
-        return FileUtils.write(new File(buildConfig.cacheDir, "sourceSets.gradle"), NormalUtils.parseString(sourceSetTxt, ["cacheDir": buildConfig.cacheDir]))
+        return [FileUtils.write(new File(buildConfig.cacheDir, "sourceSets.gradle"), NormalUtils.parseString(sourceSetTxt, ["cacheDir": buildConfig.cacheDir]))]
     }
 
     String getManifestMetaTxt() {
