@@ -29,8 +29,9 @@ uploadArchives.doLast {
     def configFile = file("gradle.properties")
     def configs = new Properties()
     configs.load(configFile.newInputStream())
-    def maven_version = configs.getProperty("maven_version")
-    configs.setProperty("maven_version", (maven_version.toInteger() + 1).toString())
+    String[] mvs = configs.getProperty("maven_version").split("\\.")
+
+    configs.setProperty("maven_version", "${mvs[0]}.${mvs[1].toInteger() + 1}")
 
     configs.store(configFile.newOutputStream(), "")
 }
