@@ -35,7 +35,7 @@ class RunType extends BaseContainerExtension {
 
     @Override
     LinkedList<String> generatorFiles() {
-        if ("application" == project.moduleConfig.pluginType || !asApp) return ""//不独立运行，不生产缓存类文件
+        if ("application" == project.moduleConfig.pluginType || !asApp) return []//不独立运行，不生产缓存类文件
 
         BuildConfig buildConfig = project.buildConfig
         def maps = properties
