@@ -2,6 +2,7 @@ package com.pqixing.modularization.models
 
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
+import org.gradle.api.Project
 
 /**
  * Created by pqixing on 17-12-7.
@@ -20,6 +21,11 @@ class RunType extends BaseContainerExtension {
         super(name)
     }
 
+    @Override
+    void onCreate(Project project) {
+        super.onCreate(project)
+        app_name = project.name
+    }
 
     @Override
     public String toString() {
@@ -38,8 +44,11 @@ class RunType extends BaseContainerExtension {
         if ("application" == project.moduleConfig.pluginType || !asApp) return []//不独立运行，不生产缓存类文件
 
         BuildConfig buildConfig = project.buildConfig
+        AndroidConfig androidConfig = project.moduleConfig.androidConfig
         def maps = properties
         maps.putAll(buildConfig.properties)
+        maps.put("versionCode", NormalUtils.isEmpty(androidConfig.versionCode) ? "1" : androidConfig.versionCode)
+        maps.put("versionName", NormalUtils.isEmpty(androidConfig.versionName) ? "1.0" : androidConfig.versionName)
 
         //输出Application类
         def applicationFile = new File(FileUtils.appendUrls(buildConfig.cacheDir, "java"
@@ -55,6 +64,7 @@ class RunType extends BaseContainerExtension {
         def inputManifest = new File(FileUtils.appendUrls(project.projectDir.path, "src", "main"), "AndroidManifest.xml").text
         inputManifest = inputManifest.replaceFirst("<manifest(?s).*?>", NormalUtils.parseString(manifestMetaTxt, maps))
                 .replaceFirst("<application(?s).*?>", NormalUtils.parseString(manifestAppTxt, maps))
+        if (!inputManifest.matches("<application(?s).*?>")) inputManifest = inputManifest + NormalUtils.parseString(manifestAppTxt, maps) + "\n     </application> \n</manifest>"
         FileUtils.write(new File(buildConfig.cacheDir, "AndroidManifest.xml"), inputManifest)
 
         //输出source的gradle配置
@@ -76,7 +86,7 @@ class RunType extends BaseContainerExtension {
 <application
         android:allowBackup="true"
         android:name="#{packageName}.DefaultAppCation"
-        android:icon="#{app_icon}"
+        android:icon="#1{app_icon}"
         android:label="#{app_name}"
         android:theme="#1{app_theme}"
         >
@@ -119,7 +129,7 @@ public class DefaultAppCation extends Application {
     public void onCreate() {
         super.onCreate();
         Log.d("DefaultAppCation", "onCreate: app name = "+getPackageName());
-        new #1{applicationLike}().onCreate(this);
+        final #1{applicationLike} like =  new #1{applicationLike}(); like.onCreateOnUI(this); like.onVirtualCreate(this); new Thread(){ public void run(){like.onCreateOnThread(DefaultAppCation.this); }}.start();
     }
 }'''
     }

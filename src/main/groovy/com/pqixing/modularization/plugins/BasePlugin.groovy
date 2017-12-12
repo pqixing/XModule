@@ -31,5 +31,11 @@ abstract class BasePlugin implements Plugin<Project> {
             }
             moduleConfig.afterApplyAndroid()
         }
+        project.ext.fromRepo = { key, value = "" ->
+            moduleConfig.getRepoVersionStr(key, value)
+        }
+        project.ext.support_v7 = moduleConfig.androidConfig.support_v7
+        project.ext.support_v4 = moduleConfig.androidConfig.support_v4
+
     }
 }

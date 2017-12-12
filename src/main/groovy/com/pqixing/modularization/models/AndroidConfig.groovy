@@ -32,7 +32,6 @@ class AndroidConfig extends BaseExtension {
         this.project = project
     }
 
-
     @Override
     LinkedList<String> generatorFiles() {
         def list = []
