@@ -4,8 +4,8 @@ import com.pqixing.modularization.Default
 import com.pqixing.modularization.tasks.UploadTask
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
-import com.pqixing.modularization.utils.Print
 import org.gradle.api.NamedDomainObjectContainer
+import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
 
 /**
@@ -22,11 +22,22 @@ class ModuleConfig extends BaseExtension {
 
     final String pluginType
 
-    LinkedList<String> reposPaths
-    LinkedList<String> defaultImplRepo
+    LinkedList<String> repoVersionPaths
+    /**
+     * 默认依赖，编译时可依赖
+     */
+    LinkedList<String> defaultImpl
+    /**
+     * 默认实现，业务组件设置，编译时不可使用
+     */
+    LinkedList<String> defaultApk
 
     private final HashMap<String, String> repoVersions
 
+    /**
+     * 是否在同步前，更新一遍版本号
+     */
+    boolean updateBeforeSync = false
     String selectRunType = ""
     String selectMavenType = "debug"
 
@@ -45,14 +56,15 @@ class ModuleConfig extends BaseExtension {
         repoVersions = new HashSet<>()
 
 
-        reposPaths = new LinkedList<>()
-        if (project.hasProperty("reposPaths")) {
-            reposPaths += project.ext.get("reposPaths")
+        repoVersionPaths = new LinkedList<>()
+        if (project.hasProperty("repoVersionPaths")) {
+            repoVersionPaths += project.ext.get("repoVersionPaths")
         }
 
-        defaultImplRepo = project.hasProperty("defaultImplRepo") ?
-                new GroovyShell().evaluate(project.ext.get("defaultImplRepo"))
+        defaultImpl = project.hasProperty("defaultImpl") ?
+                new GroovyShell().evaluate(project.ext.get("defaultImpl"))
                 : Default.defaultImplRepo
+        defaultApk = new LinkedHashMap<>()
 
         this.mavenTypes = mavenTypes
         mavenTypes.whenObjectAdded { it.onCreate(project) }
@@ -100,7 +112,9 @@ class ModuleConfig extends BaseExtension {
     }
 
     void onConfigEnd() {
-        reposPaths.each { path ->
+        if (new File(buildConfig.defRepoPath).exists()) repoVersionPaths.addFirst(buildConfig.defRepoPath)
+
+        repoVersionPaths.each { path ->
             Properties p = new Properties()
             p.load(new File(path).newInputStream())
             repoVersions.putAll(p.getProperties())
@@ -169,10 +183,13 @@ class ModuleConfig extends BaseExtension {
         files += androidConfig.generatorFiles()
 
         if (!NormalUtils.isEmpty(runType)) files += runType.generatorFiles()
-        if (!NormalUtils.isEmpty(defaultImplRepo)) {
+        if (!NormalUtils.isEmpty(defaultImpl)) {
             StringBuilder sb = new StringBuilder("dependencies { \n")
-            defaultImplRepo.each { repoKey ->
+            defaultImpl.each { repoKey ->
                 sb.append("    implementation '${getRepoVersionStr(repoKey)}' \n")
+            }
+            defaultApk.each { repoKey ->
+                sb.append("    apk '${getRepoVersionStr(repoKey)}' \n")
             }
             files += FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.append("}").toString())
         }
@@ -188,8 +205,8 @@ class ModuleConfig extends BaseExtension {
                 ",\n buildConfig=" + buildConfig +
                 ",\n androidConfig=" + androidConfig +
                 ", pluginType='" + pluginType + '\'' +
-                ",\n reposPaths=" + reposPaths +
-                ",\n defaultImplRepo=" + defaultImplRepo +
+                ",\n repoVersionPaths=" + repoVersionPaths +
+                ",\n defaultImpl=" + defaultImpl +
                 ",\n repoVersions=" + repoVersions +
                 ", selectRunType='" + selectRunType + '\'' +
                 ", selectMavenType='" + selectMavenType + '\'' +

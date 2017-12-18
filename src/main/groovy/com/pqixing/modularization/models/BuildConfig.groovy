@@ -14,11 +14,13 @@ class BuildConfig extends BaseExtension {
     String groupName = "com.dachen"
     final String projectName
     String packageName
+    String defRepoPath
 
     BuildConfig(Project project) {
         projectName = project.name
         outDir = FileUtils.appendUrls(project.rootProject.projectDir.path, ".modularization", projectName)
         cacheDir = FileUtils.appendUrls(outDir, ".cache")
+        defRepoPath = FileUtils.appendUrls(project.rootProject.projectDir.path, ".modularization", ".repoVersions")
         File ignoreFile = project.rootProject.file(".gitignore")
         if (!ignoreFile.exists()) ignoreFile.createNewFile()
         if (!ignoreFile.text.contains(".modularization")) ignoreFile.append("\n.modularization \n")
