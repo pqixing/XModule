@@ -47,7 +47,7 @@ abstract class BasePlugin implements Plugin<Project> {
         Task t = project.task("updateVersions", type: UpdateVersionsTask) {
             outPath = config.buildConfig.defRepoPath
             mavenUrl = config.mavenType.maven_url
-            comileGroup = config.buildConfig.groupName
+            compileGroup = config.buildConfig.groupName
             modules += config.defaultImpl
             modules += config.defaultApk
         }

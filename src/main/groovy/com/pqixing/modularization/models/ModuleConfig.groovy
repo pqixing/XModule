@@ -117,10 +117,9 @@ class ModuleConfig extends BaseExtension {
         repoVersionPaths.each { path ->
             Properties p = new Properties()
             p.load(new File(path).newInputStream())
-            repoVersions.putAll(p.getProperties())
+            repoVersions.putAll(p.toSpreadMap())
         }
         repoVersions.putAll(mavenType.repoVersions)
-
         Print.outputFile = new File(buildConfig.outDir, "log.txt")
     }
 
@@ -184,16 +183,16 @@ class ModuleConfig extends BaseExtension {
         files += mavenType.generatorFiles()
 
         if (!NormalUtils.isEmpty(runType)) files += runType.generatorFiles()
-        if (!NormalUtils.isEmpty(defaultImpl)) {
-            StringBuilder sb = new StringBuilder("dependencies { \n")
-            defaultImpl.each { repoKey ->
-                sb.append("    implementation '${getRepoVersionStr(repoKey)}' \n")
-            }
-            defaultApk.each { repoKey ->
-                sb.append("    apk '${getRepoVersionStr(repoKey)}' \n")
-            }
-            files += FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.append("}").toString())
+//        if (!NormalUtils.isEmpty(defaultImpl)) {
+        StringBuilder sb = new StringBuilder("dependencies { \n")
+        defaultImpl?.each { repoKey ->
+            sb.append("    implementation '${getRepoVersionStr(repoKey)}' \n")
         }
+        defaultApk?.each { repoKey ->
+            sb.append("    runtimeOnly '${getRepoVersionStr(repoKey)}' \n")
+        }
+        files += FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.append("}").toString())
+//        }
         return files
     }
 
