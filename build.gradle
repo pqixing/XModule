@@ -16,7 +16,7 @@ repositories {
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "http://192.168.3.7:9527/nexus/content/repositories/android/") {
+            repository(url:  uri("/home/pqixing/.repo")) {
                 authentication(userName: "admin", password: "admin123")
             }
             pom.groupId = "$maven_group" // 组名

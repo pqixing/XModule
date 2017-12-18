@@ -17,8 +17,12 @@ class BuildConfig extends BaseExtension {
 
     BuildConfig(Project project) {
         projectName = project.name
-        outDir = FileUtils.appendUrls(project.buildDir.path, "outputs", "modularization")
-        cacheDir = FileUtils.appendUrls(project.buildDir.path, "tmp", "${projectName.hashCode()}", projectName)
+        outDir = FileUtils.appendUrls(project.rootProject.projectDir.path, ".modularization", projectName)
+        cacheDir = FileUtils.appendUrls(outDir, ".cache")
+        File ignoreFile = project.rootProject.file(".gitignore")
+        if (!ignoreFile.exists()) ignoreFile.createNewFile()
+        if (!ignoreFile.text.contains(".modularization")) ignoreFile.append("\n.modularization \n")
+
         groupName = Default.groupName
         packageName = groupName + '.' + projectName
 
