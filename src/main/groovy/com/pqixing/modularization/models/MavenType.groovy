@@ -18,6 +18,7 @@ class MavenType extends BaseContainerExtension {
     String password
     String groupName
     String uploadKey
+    String updateDesc
 
     Map<String, String> repoVersions
 
