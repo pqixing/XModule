@@ -39,7 +39,7 @@ class ModuleConfig extends BaseExtension {
      */
     boolean updateBeforeSync = false
     String selectRunType = ""
-    String selectMavenType = "debug"
+    String selectMavenType = "test"
 
     String pom_version
     boolean uploadEnable = false

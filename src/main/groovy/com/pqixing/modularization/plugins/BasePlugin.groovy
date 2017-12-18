@@ -4,6 +4,7 @@ import com.pqixing.modularization.models.MavenType
 import com.pqixing.modularization.models.ModuleConfig
 import com.pqixing.modularization.models.RunType
 import com.pqixing.modularization.tasks.UpdateVersionsTask
+import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -45,6 +46,7 @@ abstract class BasePlugin implements Plugin<Project> {
 
     void createVersionsUpdateTask(Project project, ModuleConfig config) {
         Task t = project.task("updateVersions", type: UpdateVersionsTask) {
+            config.buildConfig.defRepoPath = FileUtils.appendUrls(config.buildConfig.rootPath, ".modularization",config.selectMavenType, ".repoVersions")
             outPath = config.buildConfig.defRepoPath
             mavenUrl = config.mavenType.maven_url
             compileGroup = config.buildConfig.groupName
