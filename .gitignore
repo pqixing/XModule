@@ -1,7 +1,8 @@
 /build
 *.iml
 .idea
-gradle
+.gradle/
+gradle/
 gradlew
 gradlew.bat
 gradle.properties
