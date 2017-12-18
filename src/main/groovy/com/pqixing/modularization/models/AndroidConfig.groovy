@@ -59,7 +59,7 @@ class AndroidConfig extends BaseExtension {
         return '''
 repositories {
      maven {
-         url #{maven_url}
+         url '#{maven_url}'
      }
 }
 

@@ -10,75 +10,51 @@ import org.gradle.api.tasks.TaskAction
 class UploadTask extends DefaultTask {
 
     MavenType mavenInfo
-    String gradleFilePath
+
     UploadTask() {
         group = Default.taskGroup
     }
 
-
     @TaskAction
-    void generatorMavenFile() {
-        def pros = mavenInfo.properties
-        if ("test" == mavenInfo.name) {//测试环境，读取
-            def versionKey = "${mavenInfo.groupName}android:${mavenInfo.artifactId}".hashCode().toString()
-            def configFile = new File(project.gradle.gradleUserHomeDir, "modularization.config")
-            if (!configFile.exists()) {
-                configFile.parentFile.mkdirs()
-                configFile.createNewFile()
-            }
+    void refreshUploadProperties() {
+        def deployer = project.uploadArchives.repositories.mavenDeployer
+        def pom = deployer.pom
+        def repository = deployer.repository
+        repository.url = mavenInfo.maven_url
+        repository.authentication.userName = mavenInfo.userName
+        repository.authentication.password = mavenInfo.password
+        pom.groupId = mavenInfo.groupName + ".android"
+        pom.artifactId = mavenInfo.artifactId
+        pom.version = getVersion()
+    }
 
+    String getVersion() {
+        switch (mavenInfo.name) {
+            case "debug": return "${mavenInfo.pom_version}.${System.currentTimeMillis()}"
+            case "test":
+                def versionKey = "${mavenInfo.groupName}android:${mavenInfo.artifactId}:${mavenInfo.pom_version}".replace(".","-").replace(":","-")
 
-            def versionPros = new Properties()
-            versionPros.load(configFile.newInputStream())
+                def configFile = new File(FileUtils.appendUrls(project.moduleConfig.buildConfig.rootPath, ".modularization"), "modularization.config")
+                if (!configFile.exists()) {
+                    configFile.parentFile.mkdirs()
+                    configFile.createNewFile()
+                }
+                def versionPros = new Properties()
+                versionPros.load(configFile.newInputStream())
 
-            String version = versionPros.getProperty(versionKey)
+                String version = versionPros.getProperty(versionKey)
 
-            String newVersion = NormalUtils.isEmpty(versionKey) ? "1" : (version.toInteger() + 1).toString()
+                String newVersion = NormalUtils.isEmpty(version) ? "1" : (version.toInteger() + 1).toString()
 
-            versionPros.setProperty(versionKey, newVersion)
-            versionPros.store(configFile.newOutputStream(), "")
-
-            pros["pom_version"] = "${mavenInfo.pom_version}.${newVersion}"
-
-        } else if ("debug" == mavenInfo.name) {//测试环境，直接在版本后添加时间戳
-            pros["pom_version"] = "${mavenInfo.pom_version}.${System.currentTimeMillis()}"
+                versionPros.setProperty(versionKey, newVersion)
+                versionPros.store(configFile.newOutputStream(), "")
+                return "${mavenInfo.pom_version}.${newVersion}"
+            default: return mavenInfo.pom_version
         }
-        def file = new File(project.buildConfig.cacheDir, "${name}maven.gradle")
-
-        gradleFilePath = FileUtils.write(file, NormalUtils.parseString(mavenTxt, pros))
-        project.apply from: gradleFilePath
     }
 
     @TaskAction
     void uploadFile() {
         project.uploadArchives.execute()
-    }
-
-    @TaskAction
-    void deleteMavenFile() {
-        new File(gradleFilePath).delete()
-    }
-
-/**
- * 获取maven的文本类型
- * @return
- */
-    static String getMavenTxt() {
-        return '''
-apply plugin: "maven"
-// 上传到本地代码库
-uploadArchives{
-    repositories{
-        mavenDeployer{
-            repository(url:#{maven_url}){
-                authentication(userName: "#{userName}", password: "#{password}")
-            }
-            pom.groupId = '#{groupName}.android' // 组名
-            pom.artifactId = '#{artifactId}' // 插件名
-            pom.version = '#{pom_version}' // 版本号
-        }
-    }
-}
-'''
     }
 }

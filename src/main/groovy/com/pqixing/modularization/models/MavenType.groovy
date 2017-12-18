@@ -2,7 +2,8 @@ package com.pqixing.modularization.models
 
 import com.pqixing.modularization.Default
 import org.gradle.api.Project
-
+import com.pqixing.modularization.utils.FileUtils
+import com.pqixing.modularization.utils.NormalUtils
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -25,10 +26,10 @@ class MavenType extends BaseContainerExtension {
         repoVersions = new HashMap<>()
     }
 
-    String getMaven_url() {
-        if (maven_url.startsWith("uri")) return maven_url
-        return "'$maven_url'"
-    }
+//    String getMaven_url() {
+//        if (maven_url.startsWith("uri")) return maven_url
+//        return "'$maven_url'"
+//    }
 
     @Override
     void onCreate(Project project) {
@@ -44,11 +45,33 @@ class MavenType extends BaseContainerExtension {
 
     @Override
     LinkedList<String> generatorFiles() {
-//        def file = new File(project.buildConfig.cacheDir, "${name}maven.gradle")
-//        return [FileUtils.write(file, NormalUtils.parseString(mavenTxt, properties))]
-        return []
+        def file = new File(project.buildConfig.cacheDir, "${name}maven.gradle")
+        return [FileUtils.write(file, NormalUtils.parseString(mavenTxt, properties))]
+//        return []
     }
 
+/**
+ * 获取maven的文本类型
+ * @return
+ */
+    static String getMavenTxt() {
+        return '''
+apply plugin: "maven"
+// 上传到本地代码库
+uploadArchives{
+    repositories{
+        mavenDeployer{
+            repository(url:"xxx"){
+                authentication(userName: "xxx", password: "xxx")
+            }
+            pom.groupId = 'xxx' // 组名
+            pom.artifactId = 'xxx' // 插件名
+            pom.version = '1.0' // 版本号
+        }
+    }
+}
+'''
+    }
 
     @Override
     public String toString() {

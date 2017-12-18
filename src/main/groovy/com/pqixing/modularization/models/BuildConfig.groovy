@@ -15,12 +15,14 @@ class BuildConfig extends BaseExtension {
     final String projectName
     String packageName
     String defRepoPath
+    String rootPath
 
     BuildConfig(Project project) {
         projectName = project.name
-        outDir = FileUtils.appendUrls(project.rootProject.projectDir.path, ".modularization", projectName)
+        rootPath = project.rootProject.projectDir.path.replace("\\","/")
+        outDir = FileUtils.appendUrls(rootPath, ".modularization", projectName)
         cacheDir = FileUtils.appendUrls(outDir, ".cache")
-        defRepoPath = FileUtils.appendUrls(project.rootProject.projectDir.path, ".modularization", ".repoVersions")
+        defRepoPath = FileUtils.appendUrls(rootPath, ".modularization", ".repoVersions")
         File ignoreFile = project.rootProject.file(".gitignore")
         if (!ignoreFile.exists()) ignoreFile.createNewFile()
         if (!ignoreFile.text.contains(".modularization")) ignoreFile.append("\n.modularization \n")
