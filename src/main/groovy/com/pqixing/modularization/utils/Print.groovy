@@ -28,7 +28,7 @@ class Print {
     static void setOutputFile(File out) {
         if (NormalUtils.isEmpty(out)) return
         outputFile = out
-
+        checkFile(outputFile)
 
         outputFile.append(outputData.toString())
         outputData = null
