@@ -19,7 +19,7 @@ class BuildConfig extends BaseExtension {
 
     BuildConfig(Project project) {
         projectName = project.name
-        rootPath = project.rootProject.projectDir.path.replace("\\","/")
+        rootPath = project.rootProject.projectDir.path.replace("\\\\","//").replace("\\","/")
         outDir = FileUtils.appendUrls(rootPath, ".modularization", projectName)
         cacheDir = FileUtils.appendUrls(outDir, ".cache")
         defRepoPath = FileUtils.appendUrls(rootPath, ".modularization", ".repoVersions")

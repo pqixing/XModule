@@ -69,7 +69,7 @@ public class UpdateVersionsTask extends DefaultTask {
             if (!NormalUtils.isEmpty(targetStr)) {
                 pros.put(map.key, targetStr.substring(9, targetStr.lastIndexOf("</release>")))
             }
-            FileUtils.write(new File(xmlFiles, map.value), xmlString)
+            FileUtils.write(new File(xmlFiles, map.key), xmlString)
         }
         pros.store(outFile.newOutputStream(), "")
     }
