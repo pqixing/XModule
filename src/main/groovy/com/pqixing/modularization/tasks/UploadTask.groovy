@@ -4,6 +4,7 @@ import com.pqixing.modularization.Default
 import com.pqixing.modularization.models.MavenType
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.Print
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -55,6 +56,16 @@ class UploadTask extends DefaultTask {
 
     @TaskAction
     void uploadFile() {
+        def deployer = project.uploadArchives.repositories.mavenDeployer
+        def pom = deployer.pom
+        def repository = deployer.repository
+        repository.url = mavenInfo.maven_url
+        repository.authentication.userName = mavenInfo.userName
+        repository.authentication.password = mavenInfo.password
+        pom.groupId = mavenInfo.groupName + ".android"
+        pom.artifactId = mavenInfo.artifactId
+        pom.version = getVersion()
+        Print.ln("url : $repository.url version :$pom.version artifactId : $pom.artifactId")
         project.uploadArchives.execute()
     }
 }

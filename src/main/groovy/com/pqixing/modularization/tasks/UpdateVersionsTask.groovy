@@ -24,6 +24,7 @@ public class UpdateVersionsTask extends DefaultTask {
     UpdateVersionsTask() {
         group = Default.taskGroup
         modules = new HashSet<>()
+        modules += Default.allRepo
     }
 
     String getUrl(String moduleName) {
@@ -70,6 +71,6 @@ public class UpdateVersionsTask extends DefaultTask {
             }
             FileUtils.write(new File(xmlFiles, map.value), xmlString)
         }
-        pros.store(outFile.newOutputStream(),"")
+        pros.store(outFile.newOutputStream(), "")
     }
 }

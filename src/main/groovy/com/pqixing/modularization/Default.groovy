@@ -16,6 +16,7 @@ class Default {
     static final maven_user = "admin"
     static final maven_password = "admin123"
 
-    static final defaultImplRepo = []
+    static final defaultImplRepo = ["dcnet","dccommon","dcuser"]
 
+    static final allRepo = ["dcnet","dccommon","dcuser"]
 }
