@@ -1,8 +1,5 @@
 package com.pqixing.modularization.utils
 
-import com.pqixing.modularization.Default
-import org.gradle.api.Project
-
 class Print {
     static File outputFile;
     static StringBuilder outputData = new StringBuilder()
@@ -16,18 +13,22 @@ class Print {
         if (!NormalUtils.isEmpty(str)) {
             print(str)
             def newStr = "${new Date().toLocaleString()} --> $str"
+            checkFile(outputFile)
             if (NormalUtils.isEmpty(outputFile)) outputData?.append(newStr)
             else outputFile.append(newStr)
+        }
+    }
+    static void checkFile(File f){
+        if (f!=null&&!f.exists()) {
+            f.parentFile.mkdirs()
+            f.createNewFile()
         }
     }
 
     static void setOutputFile(File out) {
         if (NormalUtils.isEmpty(out)) return
         outputFile = out
-        if (!outputFile.exists()) {
-            outputFile.parentFile.mkdirs()
-            outputFile.createNewFile()
-        }
+
 
         outputFile.append(outputData.toString())
         outputData = null

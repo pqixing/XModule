@@ -1,5 +1,6 @@
 package com.pqixing.modularization.plugins
 
+import com.pqixing.modularization.Default
 import com.pqixing.modularization.models.MavenType
 import com.pqixing.modularization.models.ModuleConfig
 import com.pqixing.modularization.models.RunType
@@ -53,7 +54,12 @@ abstract class BasePlugin implements Plugin<Project> {
             modules += config.defaultImpl
             modules += config.defaultApk
         }
-
+        project.task("cleanCache"){
+            group = Default.taskGroup
+            doLast {
+                new File(config.buildConfig.outDir).deleteDir()
+            }
+        }
         if (config.updateBeforeSync) t.execute()
     }
 
