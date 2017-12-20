@@ -31,6 +31,7 @@ class ModuleConfig extends BaseExtension {
      * 默认实现，业务组件设置，编译时不可使用
      */
     LinkedList<String> defaultApk
+    LinkedList<String> docFiles
 
     private final HashMap<String, String> repoVersions
 
@@ -55,7 +56,8 @@ class ModuleConfig extends BaseExtension {
         androidConfig.updateMeta(project)
         repoVersions = new HashSet<>()
 
-
+        docFiles = new LinkedList<>()
+        docFiles += "doc-${project.name}.md"
         repoVersionPaths = new LinkedList<>()
         if (project.hasProperty("repoVersionPaths")) {
             repoVersionPaths += project.ext.get("repoVersionPaths")
@@ -148,7 +150,7 @@ class ModuleConfig extends BaseExtension {
             if (NormalUtils.isEmpty(m.uploadEnable)) m.uploadEnable = uploadEnable
 
             if (m.uploadEnable && ("release" != m.name || Default.uploadKey == m.uploadKey)) {
-                String taskName = "up-$project.name$m.name"
+                String taskName = "$project.name -upto-$m.name"
                 listTask += project.task(taskName, type: UploadTask) { mavenInfo = m }
             }
         }
