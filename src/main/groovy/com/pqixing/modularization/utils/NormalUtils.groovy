@@ -1,8 +1,6 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Default
-import okhttp3.OkHttpClient
-import okhttp3.Request
 
 import java.util.regex.Pattern
 
@@ -79,9 +77,7 @@ class NormalUtils {
     static String parseLastVersion(String url) {
         String version;
         try {
-            String xmlString = new OkHttpClient().newCall(new Request.Builder()
-                    .url(url).build()).execute().body().string()
-            String targetStr = xmlString.find(Pattern.compile("<release>(?s).*?</release>"))
+            String targetStr = new URL(url).openStream().text.find(Pattern.compile("<release>(?s).*?</release>"))
             if (!isEmpty(targetStr)) {
                 version = targetStr.substring(9, targetStr.lastIndexOf("</release>"))
             }
