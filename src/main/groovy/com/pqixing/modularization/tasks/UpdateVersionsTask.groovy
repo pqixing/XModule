@@ -1,7 +1,6 @@
 package com.pqixing.modularization.tasks
 
 import com.pqixing.modularization.Default
-import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -25,6 +24,7 @@ public class UpdateVersionsTask extends DefaultTask {
         group = Default.taskGroup
         modules = new HashSet<>()
         modules += Default.allRepo
+        if (project.hasProperty("allRepo")) modules += new GroovyShell().evaluate(project.ext.get("defaultImpl"))
     }
 
     String getUrl(String moduleName) {
@@ -34,11 +34,15 @@ public class UpdateVersionsTask extends DefaultTask {
                 .append("/android/").append(moduleName).append("/maven-metadata.xml").toString()
     }
 
-    String getBogy(String url, OkHttpClient client) {
-        return client.newCall(new Request.Builder()
-                .url(url)
-                .build()).execute()
-                .body().string();
+    String getBody(String url, OkHttpClient client) {
+        try {
+            return client.newCall(new Request.Builder()
+                    .url(url)
+                    .build()).execute()
+                    .body().string();
+        } catch (Exception e) {
+            return ""
+        }
     }
 
     @TaskAction
@@ -61,16 +65,19 @@ public class UpdateVersionsTask extends DefaultTask {
 
         def pros = new Properties()
         pros.load(outFile.newInputStream())
+//        Long lastTime = pros.getProperty("lastUpdateTime")?.toLong()
+        //1分钟内不重新加载
+//        if (lastTime != null && System.currentTimeMillis() - lastTime > 1000 * 60) return
 
         OkHttpClient client = new OkHttpClient()
         urls.each { map ->
-            String xmlString = getBogy(map.value, client)
+            String xmlString = getBody(map.value, client)
             String targetStr = xmlString.find(Pattern.compile("<release>(?s).*?</release>"))
             if (!NormalUtils.isEmpty(targetStr)) {
                 pros.put(map.key, targetStr.substring(9, targetStr.lastIndexOf("</release>")))
             }
-            FileUtils.write(new File(xmlFiles, map.key), xmlString)
         }
+        pros.put("lastUpdateTime", System.currentTimeMillis())
         pros.store(outFile.newOutputStream(), "")
     }
 }
