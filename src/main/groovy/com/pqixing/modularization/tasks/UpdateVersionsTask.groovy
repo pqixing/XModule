@@ -67,7 +67,7 @@ public class UpdateVersionsTask extends DefaultTask {
         pros.load(outFile.newInputStream())
         Long lastTime = pros.getProperty("lastUpdateTime")?.toLong()
         //30秒内不重新加载
-        if (lastTime != null && System.currentTimeMillis() - lastTime > 1000 * 30) return
+        if (lastTime != null && System.currentTimeMillis() - lastTime <= 1000 * 30) return
 
         OkHttpClient client = new OkHttpClient()
         urls.each { map ->
@@ -77,7 +77,7 @@ public class UpdateVersionsTask extends DefaultTask {
                 pros.put(map.key, targetStr.substring(9, targetStr.lastIndexOf("</release>")))
             }
         }
-        pros.put("lastUpdateTime", System.currentTimeMillis())
+        pros.put("lastUpdateTime", System.currentTimeMillis().toString())
         pros.store(outFile.newOutputStream(), "")
     }
 }
