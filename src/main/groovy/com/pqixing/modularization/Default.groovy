@@ -19,4 +19,6 @@ class Default {
     static final defaultImplRepo = ["dcnet","dccommon","dcuser"]
 
     static final allRepo = ["dcnet","dccommon","dcuser"]
+
+    static final docGitName = "Document"
 }

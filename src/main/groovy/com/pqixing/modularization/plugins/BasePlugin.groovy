@@ -37,15 +37,16 @@ abstract class BasePlugin implements Plugin<Project> {
                 project.apply from: it
             }
             moduleConfig.afterApplyAndroid()
+
+            project.task("doc-sync", type: DocSyncTask) {
+                files = moduleConfig.docFiles
+            }
         }
         project.ext.fromRepo = { key, value = "" ->
             moduleConfig.getRepoVersionStr(key, value)
         }
         project.ext.support_v7 = moduleConfig.androidConfig.support_v7
         project.ext.support_v4 = moduleConfig.androidConfig.support_v4
-        project.task("doc-sync", type: DocSyncTask) {
-
-        }
     }
 
     void createVersionsUpdateTask(Project project, ModuleConfig config) {
