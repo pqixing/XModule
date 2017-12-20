@@ -27,6 +27,7 @@ class UploadTask extends DefaultTask {
         pom.groupId = mavenInfo.groupName + ".android"
         pom.artifactId = mavenInfo.artifactId
         pom.version = getVersion()
+        pom.name = mavenInfo.updateDesc
     }
 
     String getVersion() {
