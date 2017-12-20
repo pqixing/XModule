@@ -2,7 +2,6 @@ package com.pqixing.modularization.tasks
 
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.models.MavenType
-import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.DefaultTask
@@ -14,6 +13,16 @@ class UploadTask extends DefaultTask {
 
     UploadTask() {
         group = Default.taskGroup
+    }
+
+    @TaskAction
+    void checkVail() {
+        switch (mavenInfo.name) {
+            case "release":
+            case "test":
+                if (NormalUtils.isEmpty(mavenInfo.updateDesc)) throw new RuntimeException("lose update log ,please config updateDesc")
+                break
+        }
     }
 
     @TaskAction
@@ -34,23 +43,16 @@ class UploadTask extends DefaultTask {
         switch (mavenInfo.name) {
             case "debug": return "${mavenInfo.pom_version}.${System.currentTimeMillis()}"
             case "test":
-                def versionKey = "${mavenInfo.groupName}android:${mavenInfo.artifactId}:${mavenInfo.pom_version}".replace(".","-").replace(":","-")
+                int lastVersion = 0
+                StringBuilder url = new StringBuilder(mavenInfo.maven_url)
+                if (!mavenInfo.maven_url.endsWith("/")) url.append("/")
+                url.append(mavenInfo.groupName.replace(".", "/")).append("/android/").append(mavenInfo.artifactId).append("/maven-metadata.xml")
 
-                def configFile = new File(FileUtils.appendUrls(project.moduleConfig.buildConfig.rootPath, ".modularization"), "modularization.config")
-                if (!configFile.exists()) {
-                    configFile.parentFile.mkdirs()
-                    configFile.createNewFile()
+                try {
+                    lastVersion = NormalUtils.parseLastVersion(url.toString()).replace("${mavenInfo.pom_version}.", "").toInteger()
+                } catch (Exception e) {
                 }
-                def versionPros = new Properties()
-                versionPros.load(configFile.newInputStream())
-
-                String version = versionPros.getProperty(versionKey)
-
-                String newVersion = NormalUtils.isEmpty(version) ? "1" : (version.toInteger() + 1).toString()
-
-                versionPros.setProperty(versionKey, newVersion)
-                versionPros.store(configFile.newOutputStream(), "")
-                return "${mavenInfo.pom_version}.${newVersion}"
+                return "${mavenInfo.pom_version}.${lastVersion + 1}"
             default: return mavenInfo.pom_version
         }
     }

@@ -2,13 +2,8 @@ package com.pqixing.modularization.tasks
 
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.utils.NormalUtils
-import com.pqixing.modularization.utils.Print
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-
-import java.util.regex.Pattern
 
 /**
  * Created by pqixing on 17-12-18.
@@ -35,16 +30,6 @@ public class UpdateVersionsTask extends DefaultTask {
                 .append("/android/").append(moduleName).append("/maven-metadata.xml").toString()
     }
 
-    String getBody(String url, OkHttpClient client) {
-        try {
-            return client.newCall(new Request.Builder()
-                    .url(url)
-                    .build()).execute()
-                    .body().string();
-        } catch (Exception e) {
-            return ""
-        }
-    }
 
     @TaskAction
     void makeUrls() {
@@ -62,21 +47,17 @@ public class UpdateVersionsTask extends DefaultTask {
         outFile.parentFile.mkdirs()
         if (!outFile.exists()) outFile.createNewFile()
 
-        def xmlFiles = new File(outFile.parentFile, ".xmls")
 
         def pros = new Properties()
         pros.load(outFile.newInputStream())
         long diff = System.currentTimeMillis() - (pros.getProperty("lastUpdateTime")?.toLong() ?: 0L)
-        Print.ln("diff = " + diff)
         //30秒内不重新加载
-        if (lastTime != null && diff <= 1000 * 30) return
+        if (diff <= 1000 * 30) return
 
-        OkHttpClient client = new OkHttpClient()
         urls.each { map ->
-            String xmlString = getBody(map.value, client)
-            String targetStr = xmlString.find(Pattern.compile("<release>(?s).*?</release>"))
-            if (!NormalUtils.isEmpty(targetStr)) {
-                pros.put(map.key, targetStr.substring(9, targetStr.lastIndexOf("</release>")))
+            String version = NormalUtils.parseLastVersion(map.value)
+            if (!NormalUtils.isEmpty(version)) {
+                pros.put(map.key, version)
             }
         }
         pros.put("lastUpdateTime", System.currentTimeMillis().toString())

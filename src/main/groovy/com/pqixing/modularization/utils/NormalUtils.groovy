@@ -1,6 +1,11 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Default
+import okhttp3.OkHttpClient
+import okhttp3.Request
+
+import java.util.regex.Pattern
+
 /**
  * Created by pqixing on 17-12-8.
  */
@@ -64,6 +69,27 @@ class NormalUtils {
      */
     static String findRealKey(String key) {
         return key.substring(key.indexOf("{") + 1, key.lastIndexOf("}"))
+    }
+
+    /**
+     * 解析最后的版本号
+     * @param url
+     * @return
+     */
+    static String parseLastVersion(String url) {
+        String version;
+        try {
+            String xmlString = new OkHttpClient().newCall(new Request.Builder()
+                    .url(url).build()).execute().body().string()
+            String targetStr = xmlString.find(Pattern.compile("<release>(?s).*?</release>"))
+            if (!isEmpty(targetStr)) {
+                version = targetStr.substring(9, targetStr.lastIndexOf("</release>"))
+            }
+        } catch (Exception e) {
+            Print.ln("${e.toString()}")
+        }
+        Print.ln("parseLastVersion : version ${version} url :$url")
+        return version
     }
 
 }
