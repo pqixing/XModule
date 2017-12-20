@@ -2,6 +2,7 @@ package com.pqixing.modularization.tasks
 
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.Print
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.gradle.api.DefaultTask
@@ -65,9 +66,10 @@ public class UpdateVersionsTask extends DefaultTask {
 
         def pros = new Properties()
         pros.load(outFile.newInputStream())
-        Long lastTime = pros.getProperty("lastUpdateTime")?.toLong()
+        long diff = System.currentTimeMillis() - (pros.getProperty("lastUpdateTime")?.toLong() ?: 0L)
+        Print.ln("diff = " + diff)
         //30秒内不重新加载
-        if (lastTime != null && System.currentTimeMillis() - lastTime <= 1000 * 30) return
+        if (lastTime != null && diff <= 1000 * 30) return
 
         OkHttpClient client = new OkHttpClient()
         urls.each { map ->
