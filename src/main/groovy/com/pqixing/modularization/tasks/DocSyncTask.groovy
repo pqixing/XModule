@@ -1,5 +1,6 @@
-package com.pqixing.modularization.tasks;
+package com.pqixing.modularization.tasks
 
+import com.pqixing.modularization.Default;
 import org.gradle.api.tasks.Copy;
 
 /**
@@ -8,4 +9,7 @@ import org.gradle.api.tasks.Copy;
  */
 
 public class DocSyncTask extends Copy {
+    DocSyncTask(){
+        group = Default.taskGroup
+    }
 }

@@ -1,5 +1,6 @@
 package com.pqixing.modularization.plugins
 
+import com.pqixing.modularization.Default
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
@@ -22,7 +23,7 @@ public class GitManager implements Plugin<Project> {
         settingFile.write(configGradleTxt + "\n" + settingGradleTxt)
         if (!exit) throw new RuntimeException("generator setting file, please sync again")
         project.task("cloneAllProjects", type: Exec) {
-            group = "git"
+            group = Default.taskGroup
             if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
                 commandLine 'cmd', '/c', 'build\\clone.bat'
             } else {
