@@ -1,21 +1,23 @@
 package com.pqixing.modularization.tasks
 
 import com.pqixing.modularization.Default
-import org.gradle.api.tasks.Exec
+import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-
 /**
  * Created by pqixing on 17-12-20.
  * 同步文档的任务
  */
 
-public class DocSyncTask extends Exec {
+public class DocSyncTask extends DefaultTask {
     String docGitPath;
-    LinkedList<String> files = []
-
+    String docFileDirs
+    String defaultDoc
     DocSyncTask() {
         group = Default.taskGroup
         docGitPath = Default.docGitName
+
+        defaultDoc = "doc-${project.name}.md"
+        docFileDirs = "document"
     }
 
     @TaskAction

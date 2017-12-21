@@ -39,7 +39,7 @@ abstract class BasePlugin implements Plugin<Project> {
             moduleConfig.afterApplyAndroid()
 
             project.task("doc-sync", type: DocSyncTask) {
-                files = moduleConfig.docFiles
+                docFileDirs = moduleConfig.docFileDirs
             }
         }
         project.ext.fromRepo = { key, value = "" ->

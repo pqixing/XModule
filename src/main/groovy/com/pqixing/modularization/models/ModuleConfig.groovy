@@ -31,7 +31,7 @@ class ModuleConfig extends BaseExtension {
      * 默认实现，业务组件设置，编译时不可使用
      */
     LinkedList<String> defaultApk
-    LinkedList<String> docFiles
+    String docFileDirs = "document"
 
     private final HashMap<String, String> repoVersions
 
@@ -56,8 +56,6 @@ class ModuleConfig extends BaseExtension {
         androidConfig.updateMeta(project)
         repoVersions = new HashSet<>()
 
-        docFiles = new LinkedList<>()
-        docFiles += "doc-${project.name}.md"
         repoVersionPaths = new LinkedList<>()
         if (project.hasProperty("repoVersionPaths")) {
             repoVersionPaths += project.ext.get("repoVersionPaths")
