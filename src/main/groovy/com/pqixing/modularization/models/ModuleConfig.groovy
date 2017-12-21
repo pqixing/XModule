@@ -31,7 +31,7 @@ class ModuleConfig extends BaseExtension {
      * 默认实现，业务组件设置，编译时不可使用
      */
     LinkedList<String> defaultApk
-    String docFileDirs = "document"
+    String docFileDirs
 
     private final HashMap<String, String> repoVersions
 

@@ -29,9 +29,13 @@ public class UpdateVersionsTask extends DefaultTask {
         return url.append(compileGroup.replace(".", "/"))
                 .append("/android/").append(moduleName).append("/maven-metadata.xml").toString()
     }
-
-
     @TaskAction
+    void run(){
+        makeUrls()
+        updateVersions()
+    }
+
+
     void makeUrls() {
         urls = new HashMap<>()
         modules.each {
@@ -41,7 +45,6 @@ public class UpdateVersionsTask extends DefaultTask {
         println("urls : $urls")
     }
 
-    @TaskAction
     void updateVersions() {
         def outFile = new File(outPath)
         outFile.parentFile.mkdirs()

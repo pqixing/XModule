@@ -41,6 +41,10 @@ abstract class BasePlugin implements Plugin<Project> {
 
             project.task("doc-sync", type: DocSyncTask) {
                 docFileDirs = moduleConfig.docFileDirs
+                updateDesc = moduleConfig.mavenTypes.release.updateDesc
+
+                File docFile = project.file("doc-${project.name}.md")
+                if (!docFile.exists()) docFile.createNewFile()
             }
         }
         project.ext.fromRepo = { key, value = "" ->

@@ -14,8 +14,12 @@ class UploadTask extends DefaultTask {
     UploadTask() {
         group = Default.taskGroup
     }
-
     @TaskAction
+    void run(){
+        checkVail()
+        uploadFile()
+    }
+
     void checkVail() {
         switch (mavenInfo.name) {
             case "release":
@@ -58,7 +62,6 @@ class UploadTask extends DefaultTask {
         }
     }
 
-    @TaskAction
     void uploadFile() {
         def deployer = project.uploadArchives.repositories.mavenDeployer
         def pom = deployer.pom
