@@ -22,6 +22,7 @@ abstract class BasePlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+        Print.init(project)
         ModuleConfig moduleConfig = new ModuleConfig(project
                 , project.container(RunType)
                 , project.container(MavenType), pluginType())

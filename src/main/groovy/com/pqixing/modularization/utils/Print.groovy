@@ -1,8 +1,11 @@
 package com.pqixing.modularization.utils
 
+import org.gradle.api.Project
+
 class Print {
     static File outputFile;
     static StringBuilder outputData = new StringBuilder()
+    static String silentLog = "N"
 
     static String ln(String str, Closure closure = null) {
         return l(str + "\n", closure)
@@ -11,7 +14,8 @@ class Print {
     static String l(String str, Closure closure = null) {
         closure?.call(str)
         if (!NormalUtils.isEmpty(str)) {
-            print(str)
+            if ("Y" != silentLog) print(str)
+
             def newStr = "${new Date().toLocaleString()} --> $str"
             checkFile(outputFile)
             if (NormalUtils.isEmpty(outputFile)) outputData?.append(newStr)
@@ -20,19 +24,18 @@ class Print {
         return str
     }
 
-    static void checkFile(File f) {
-        if (f != null && !f.exists()) {
+    static void init(Project project) {
+        if (project.hasProperty("silentLog")) silentLog = project.ext.get("silentLog")
+
+        File f = new File(project.rootProject.buildDir, "${project.name}.log")
+        if (f.length() > 1024 * 1024 * 1024) f.delete()
+        if (!f.exists()) {
             f.parentFile.mkdirs()
             f.createNewFile()
         }
-    }
 
-    static void setOutputFile(File out) {
-        if (NormalUtils.isEmpty(out)) return
-        outputFile = out
-        checkFile(outputFile)
-
-        outputFile.append(outputData.toString())
+        outputFile = f
+        if (outputData != null && outputData.size() > 0) outputFile.append(outputData.toString())
         outputData = null
     }
 

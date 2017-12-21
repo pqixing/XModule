@@ -120,7 +120,6 @@ class ModuleConfig extends BaseExtension {
             repoVersions.putAll(p.toSpreadMap())
         }
         repoVersions.putAll(mavenType.repoVersions)
-        Print.outputFile = new File(buildConfig.outDir, "log.txt")
     }
 
     void afterApplyAndroid() {
