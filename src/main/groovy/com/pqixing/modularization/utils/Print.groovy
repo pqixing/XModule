@@ -13,14 +13,12 @@ class Print {
 
     static String l(String str, Closure closure = null) {
         closure?.call(str)
-        if (!NormalUtils.isEmpty(str)) {
-            if ("Y" != silentLog) print(str)
+        if ("Y" != silentLog) print(str)
 
-            def newStr = "${new Date().toLocaleString()} --> $str"
-            checkFile(outputFile)
-            if (NormalUtils.isEmpty(outputFile)) outputData?.append(newStr)
-            else outputFile.append(newStr)
-        }
+        def newStr = "${new Date().toLocaleString()} --> $str"
+        outputData?.append(newStr)
+        outputFile?.parentFile?.mkdirs()
+        outputFile?.append(newStr)
         return str
     }
 
