@@ -25,19 +25,20 @@ class UploadTask extends DefaultTask {
         }
     }
 
-    @TaskAction
-    void refreshUploadProperties() {
-        def deployer = project.uploadArchives.repositories.mavenDeployer
-        def pom = deployer.pom
-        def repository = deployer.repository
-        repository.url = mavenInfo.maven_url
-        repository.authentication.userName = mavenInfo.userName
-        repository.authentication.password = mavenInfo.password
-        pom.groupId = mavenInfo.groupName + ".android"
-        pom.artifactId = mavenInfo.artifactId
-        pom.version = getVersion()
-        pom.name = mavenInfo.updateDesc
-    }
+//    @TaskAction
+//    void refreshUploadProperties() {
+//        def deployer = project.uploadArchives.repositories.mavenDeployer
+//        def pom = deployer.pom
+//        def repository = deployer.repository
+//        repository.url = mavenInfo.maven_url
+//        repository.authentication.userName = mavenInfo.userName
+//        repository.authentication.password = mavenInfo.password
+//        pom.groupId = mavenInfo.groupName + ".android"
+//        pom.artifactId = mavenInfo.artifactId
+//        pom.version = getVersion()
+//        pom.name = mavenInfo.updateDesc
+//        Print.l("pom.name :${pom.name} updateDesc :${mavenInfo.updateDesc} pros :${pom.properties.toSpreadMap()}")
+//    }
 
     String getVersion() {
         switch (mavenInfo.name) {
@@ -68,7 +69,8 @@ class UploadTask extends DefaultTask {
         pom.groupId = mavenInfo.groupName + ".android"
         pom.artifactId = mavenInfo.artifactId
         pom.version = getVersion()
-        Print.ln("url : $repository.url version :$pom.version artifactId : $pom.artifactId")
+        pom.name = mavenInfo.updateDesc
         project.uploadArchives.execute()
+        Print.ln("uploadFile -> url : $repository.url version :$pom.version artifactId : $pom.artifactId name = $pom.name")
     }
 }

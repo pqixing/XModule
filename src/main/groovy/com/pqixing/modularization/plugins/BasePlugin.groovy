@@ -8,6 +8,7 @@ import com.pqixing.modularization.tasks.DocSyncTask
 import com.pqixing.modularization.tasks.UpdateVersionsTask
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.Print
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -47,6 +48,8 @@ abstract class BasePlugin implements Plugin<Project> {
         }
         project.ext.support_v7 = moduleConfig.androidConfig.support_v7
         project.ext.support_v4 = moduleConfig.androidConfig.support_v4
+
+        project.ext.printPros = { pro -> Print.lnPro(pro) }
     }
 
     void createVersionsUpdateTask(Project project, ModuleConfig config) {
