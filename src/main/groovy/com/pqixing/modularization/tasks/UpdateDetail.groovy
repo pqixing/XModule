@@ -33,7 +33,8 @@ public class UpdateDetail extends DefaultTask {
         String metaUrl = NormalUtils.getMetaUrl(urls, compileGroup, moduleName)
         List<String> versions = NormalUtils.parseListXmlByKey(NormalUtils.request(metaUrl), 'version')
         if (NormalUtils.isEmpty(versions)) return
-        versions.sort { it }.each { version ->
+        for (int i = versions.size() - 1; i >= 0; i--) {
+            def version = versions[i]
             String pomUrls = NormalUtils.getPomUrl(urls, compileGroup, moduleName, version)
             String name = NormalUtils.parseXmlByKey(NormalUtils.request(pomUrls), "name")
             sb.append("\n###     ${version}    \n")
