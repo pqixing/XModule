@@ -22,13 +22,6 @@ public class UpdateVersionsTask extends DefaultTask {
         modules += Default.allRepo
         if (project.hasProperty("allRepo")) modules += new GroovyShell().evaluate(project.ext.get("allRepo"))
     }
-
-    String getUrl(String moduleName) {
-        StringBuilder url = new StringBuilder(mavenUrl)
-        if (!mavenUrl.endsWith("/")) url.append("/")
-        return url.append(compileGroup.replace(".", "/"))
-                .append("/android/").append(moduleName).append("/maven-metadata.xml").toString()
-    }
     @TaskAction
     void run(){
         makeUrls()
@@ -40,7 +33,7 @@ public class UpdateVersionsTask extends DefaultTask {
         urls = new HashMap<>()
         modules.each {
             def moduleName = it.replace(":", "")
-            urls.put(moduleName, getUrl(moduleName))
+            urls.put(moduleName, NormalUtils.getMetaUrl(mavenUrl,compileGroup,moduleName))
         }
         println("urls : $urls")
     }

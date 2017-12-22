@@ -88,4 +88,51 @@ class NormalUtils {
         return version
     }
 
+    static String request(String url) {
+        try {
+            return new URL(url).openStream().text
+        } catch (Exception e) {
+            ""
+        }
+    }
+    /**
+     * 获取模块在仓库的meta url
+     * @param envUrl
+     * @param group
+     * @param moduleName
+     * @return
+     */
+    static String getMetaUrl(String envUrl, String group, String moduleName) {
+        StringBuilder url = new StringBuilder(envUrl)
+        if (!envUrl.endsWith("/")) url.append("/")
+        return url.append(group.replace(".", "/"))
+                .append("/android/").append(moduleName).append("/maven-metadata.xml").toString()
+    }
+    /**
+     * 获取模块在仓库的meta url
+     * @param envUrl
+     * @param group
+     * @param moduleName
+     * @return
+     * http://192.168.3.7:9527/nexus/content/repositories/androidtest/com/dachen/android/router/0.1.7/router-0.1.7.pom
+     */
+    static String getPomUrl(String envUrl, String group, String moduleName, String version) {
+        StringBuilder url = new StringBuilder(envUrl)
+        if (!envUrl.endsWith("/")) url.append("/")
+        return url.append(group.replace(".", "/"))
+                .append("/android/").append(moduleName).append("/$version").append("/${moduleName}-${version}.pom").toString()
+    }
+
+    static List<String> parseListXmlByKey(String xmlTxt, String key) {
+        LinkedList<String> result = []
+        xmlTxt.findAll(Pattern.compile("<${key}>(?s).*?</${key}>")).each { r ->
+            result += r.substring(key.length() + 2, r.length() - key.length() - 3)
+        }
+        return result
+    }
+
+    static String parseXmlByKey(String xmlTxt, String key) {
+        String r = xmlTxt.find(Pattern.compile("<${key}>(?s).*?</${key}>"))
+        return r?.substring(key.length() + 2, r.length() - key.length() - 3)
+    }
 }

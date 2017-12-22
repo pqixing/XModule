@@ -14,8 +14,9 @@ class UploadTask extends DefaultTask {
     UploadTask() {
         group = Default.taskGroup
     }
+
     @TaskAction
-    void run(){
+    void run() {
         checkVail()
         uploadFile()
     }
@@ -49,12 +50,8 @@ class UploadTask extends DefaultTask {
             case "debug": return "${mavenInfo.pom_version}.${System.currentTimeMillis()}"
             case "test":
                 int lastVersion = 0
-                StringBuilder url = new StringBuilder(mavenInfo.maven_url)
-                if (!mavenInfo.maven_url.endsWith("/")) url.append("/")
-                url.append(mavenInfo.groupName.replace(".", "/")).append("/android/").append(mavenInfo.artifactId).append("/maven-metadata.xml")
-
                 try {
-                    lastVersion = NormalUtils.parseLastVersion(url.toString()).replace("${mavenInfo.pom_version}.", "").toInteger()
+                    lastVersion = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId)).replace("${mavenInfo.pom_version}.", "").toInteger()
                 } catch (Exception e) {
                 }
                 return "${mavenInfo.pom_version}.${lastVersion + 1}"
@@ -72,7 +69,7 @@ class UploadTask extends DefaultTask {
         pom.groupId = mavenInfo.groupName + ".android"
         pom.artifactId = mavenInfo.artifactId
         pom.version = getVersion()
-        pom.name = mavenInfo.updateDesc
+        pom.name = "${System.currentTimeMillis()}## $mavenInfo.updateDesc"
         project.uploadArchives.execute()
         Print.ln("uploadFile -> url : $repository.url version :$pom.version artifactId : $pom.artifactId name = $pom.name")
     }
