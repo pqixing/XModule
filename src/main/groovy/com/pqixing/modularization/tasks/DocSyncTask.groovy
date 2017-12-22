@@ -54,12 +54,12 @@ public class DocSyncTask extends DefaultTask {
     void copyFile() {
         project.task("${tempTaskName}${tempTaskCount++}", type: Copy) {
             from NormalUtils.isEmpty(docFileDirs) ? "doc-${project.name}.md" : docFileDirs
-            into "$docGitPath/code/$project.name"
+            into "$docGitPath/readme/$project.name"
         }.execute()
     }
 
     void pushFile() {
-        def txt = new StringBuilder().append("cd $docGitPath \n").append("git add ").append("$docGitPath/code/$project.name \n")
+        def txt = new StringBuilder().append("cd $docGitPath \n").append("git add ").append("$docGitPath/readme/$project.name \n")
                 .append("git commit -m '$updateDesc' \n").append("git push \n")
         new File(project.buildDir, "pushGit").write(txt.toString())
         project.task("${tempTaskName}${tempTaskCount++}", type: Exec) {
