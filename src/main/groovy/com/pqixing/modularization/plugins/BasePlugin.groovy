@@ -58,8 +58,9 @@ abstract class BasePlugin implements Plugin<Project> {
     }
 
     void createVersionsUpdateTask(Project project, ModuleConfig config) {
+        def defRepoPath = FileUtils.appendUrls(config.buildConfig.rootPath, ".modularization", config.selectMavenType, ".repoVersions")
         Task t = project.task("updateVersions", type: UpdateVersionsTask) {
-            config.buildConfig.defRepoPath = FileUtils.appendUrls(config.buildConfig.rootPath, ".modularization", config.selectMavenType, ".repoVersions")
+            config.buildConfig.defRepoPath = defRepoPath
             outPath = config.buildConfig.defRepoPath
             mavenUrl = config.mavenType.maven_url
             compileGroup = config.buildConfig.groupName
@@ -72,7 +73,8 @@ abstract class BasePlugin implements Plugin<Project> {
                 new File(config.buildConfig.outDir).deleteDir()
             }
         }
-        if (config.updateBeforeSync) t.execute()
+        //如果设置自动同步，或者之前没有更新过版本号，则先更新版本号
+        if (config.updateBeforeSync||!new File(defRepoPath).exists()) t.execute()
     }
 
     void applySecondConfig(Project project) {
