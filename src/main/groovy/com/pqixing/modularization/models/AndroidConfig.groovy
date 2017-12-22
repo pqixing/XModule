@@ -21,7 +21,7 @@ class AndroidConfig extends BaseExtension {
     String support_v7 = "27.0.1"
     boolean compatAppache = true
 
-    boolean kotlinEnable = false
+    boolean kotlinEnable = true
     String kotlin_version = "1.2.0"
 
     boolean flavorsEnable = false
