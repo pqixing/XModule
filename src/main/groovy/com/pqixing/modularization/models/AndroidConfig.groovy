@@ -61,6 +61,9 @@ repositories {
      maven {
          url '#{maven_url}'
      }
+     maven {
+         url 'http://192.168.3.7:9527/nexus/content/groups/androidgroup/'
+     }
 }
 
 apply plugin: "com.android.#{androidPlugin}"
