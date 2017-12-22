@@ -21,7 +21,7 @@ public class UpdateLog extends DefaultTask {
     }
     @TaskAction
     void run() {
-        modules = findModules()
+        modules = findModules(project.file("readme"))
         envs.each { map -> generatorLogFile(map.key, map.value) }
 
     }
@@ -29,8 +29,16 @@ public class UpdateLog extends DefaultTask {
      * 查找当前存在的模块
      * @return
      */
-    List<String> findModules() {
-        return ["router"]
+   static List<String> findModules(File dir) {
+        def mds =[]
+        if(dir==null||!dir.exists()) return
+        dir.listFiles(new FilenameFilter() {
+            @Override
+            boolean accept(File file, String s) {
+                return file.isDirectory()
+            }
+        }).each {mds+= it.name}
+        return mds
     }
     /**
      * 生成md文件

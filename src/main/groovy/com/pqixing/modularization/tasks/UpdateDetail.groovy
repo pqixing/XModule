@@ -15,13 +15,13 @@ public class UpdateDetail extends DefaultTask {
     Map<String, String> envs
     String compileGroup
 
-    UpdateDetail(){
+    UpdateDetail() {
         group = Default.taskGroup
     }
+
     @TaskAction
     void run() {
         envs.each { map -> generatorLogFile(map.key, map.value) }
-
     }
     /**
      * 生成md文件
@@ -46,8 +46,8 @@ public class UpdateDetail extends DefaultTask {
                 }
                 updateDesc = name.substring(splitIndex + 2, name.length())
             }
+            sb.append("\n\n   依赖方式:implementation 'com.dachen.android:router:$version'　　　　　　[下载](${pomUrls.replace(".pom", ".aar")})    \n---\n")
             sb.append(" > 更新说明:$updateDesc  ")
-            sb.append("\n\n >  依赖方式:implementation 'com.dachen.android:router:$version'　　　　　　[下载](${pomUrls.replace(".pom", ".aar")})    \n---\n)")
         }
 
         FileUtils.write(new File(project.buildDir, "${env}/${moduleName}.md"), sb.toString())
