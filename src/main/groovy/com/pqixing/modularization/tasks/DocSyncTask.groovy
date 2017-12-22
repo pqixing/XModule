@@ -59,7 +59,7 @@ public class DocSyncTask extends DefaultTask {
     }
 
     void pushFile() {
-        def txt = new StringBuilder().append("cd $docGitPath \n").append("git add ").append("$docGitPath/readme/$project.name \n")
+        def txt = new StringBuilder().append("cd $docGitPath \n").append("git add ").append("$docGitPath/readme/$project.name/* \n")
                 .append("git commit -m '$updateDesc' \n").append("git push \n")
         new File(project.buildDir, "pushGit").write(txt.toString())
         project.task("${tempTaskName}${tempTaskCount++}", type: Exec) {
