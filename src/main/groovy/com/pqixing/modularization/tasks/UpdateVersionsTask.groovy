@@ -20,7 +20,7 @@ public class UpdateVersionsTask extends DefaultTask {
         group = Default.taskGroup
         modules = new HashSet<>()
         modules += Default.allRepo
-        if (project.hasProperty("allRepo")) modules += new GroovyShell().evaluate(project.ext.get("defaultImpl"))
+        if (project.hasProperty("allRepo")) modules += new GroovyShell().evaluate(project.ext.get("allRepo"))
     }
 
     String getUrl(String moduleName) {

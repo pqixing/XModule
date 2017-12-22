@@ -38,7 +38,7 @@ class ModuleConfig extends BaseExtension {
     /**
      * 是否在同步前，更新一遍版本号
      */
-    boolean updateBeforeSync = true
+    boolean updateBeforeSync = false
     String selectRunType = ""
     String selectMavenType = "test"
 
