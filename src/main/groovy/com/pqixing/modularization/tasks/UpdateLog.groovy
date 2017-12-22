@@ -1,5 +1,6 @@
 package com.pqixing.modularization.tasks
 
+import com.pqixing.modularization.Default
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import org.gradle.api.DefaultTask
@@ -15,6 +16,9 @@ public class UpdateLog extends DefaultTask {
     Map<String, String> envs
     String compileGroup
 
+    UpdateLog(){
+        group = Default.taskGroup
+    }
     @TaskAction
     void run() {
         modules = findModules()
@@ -42,7 +46,9 @@ public class UpdateLog extends DefaultTask {
             sb.append("###   [$moduleName](${metaUrl})    \n")
                     .append("").append("最新版本:　${NormalUtils.parseXmlByKey(xmlTxt, 'release')}")
                     .append("　　　　　").append("最后更新时间:　").append(new Date(NormalUtils.parseXmlByKey(xmlTxt, "lastUpdated").toLong()).toLocaleString())
-            if (checkHasDetailFile(env, moduleName)) sb.append("　　　　[详细日志](${new File(logPath, "build/${env}/${moduleName}.md)").path})")
+            File detailFile = new File(project.buildDir, "${env}/${moduleName}.md")
+
+            if (detailFile.exists()) sb.append("　　　　[详细日志](${"../build/${env}/${moduleName}.md"})")
             sb.append("   \n")
 
             List<String> versions = NormalUtils.parseListXmlByKey(xmlTxt, "version")
@@ -51,19 +57,10 @@ public class UpdateLog extends DefaultTask {
             for (int i = size - 1; i >= Math.max(0, size - 30); i--) {
                 sb.append("[${versions[i]}](${NormalUtils.getPomUrl(urls, compileGroup, moduleName, versions[i])})").append("　　")
             }
-            sb.append("   \n >  依赖方式:implementation 'com.dachen.android:router:+'")
+            sb.append("\n\n >  依赖方式:implementation 'com.dachen.android:router:+'")
             sb.append("\n  --- \n")
         }
 
-        FileUtils.write(new File(logPath, "${env}_log.md"), sb.toString())
-    }
-    /**
-     * 检测是否存在详细页面
-     * @param env
-     * @param module
-     * @return
-     */
-    boolean checkHasDetailFile(String env, String moduleName) {
-        return new File(logPath, "build/${env}/${moduleName}.md)").exists()
+        FileUtils.write(new File(project.projectDir, "log/${env}_log.md"), sb.toString())
     }
 }

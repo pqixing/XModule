@@ -133,6 +133,7 @@ class NormalUtils {
 
     static String parseXmlByKey(String xmlTxt, String key) {
         String r = xmlTxt.find(Pattern.compile("<${key}>(?s).*?</${key}>"))
-        return r?.substring(key.length() + 2, r.length() - key.length() - 3)
+        if (isEmpty(r)) return ""
+        return r.substring(key.length() + 2, r.length() - key.length() - 3)
     }
 }
