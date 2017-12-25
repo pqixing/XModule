@@ -37,6 +37,8 @@ class ModuleConfig extends BaseExtension {
 
     String pom_version
     boolean uploadEnable
+    //集成默认的依赖库
+    boolean addDefaultImpl = true
 
     ModuleConfig(Project project
                  , NamedDomainObjectContainer<RunType> runTypes
@@ -110,6 +112,7 @@ class ModuleConfig extends BaseExtension {
         dependVersions.endConfig()
 
         dependModules.baseGroup = buildConfig.groupName + ".android"
+        if(addDefaultImpl) Default.defaultImplRepo.each {dependModules.addImpl(it)}
         dependModules.endConfig(dependVersions.versions)
     }
 
