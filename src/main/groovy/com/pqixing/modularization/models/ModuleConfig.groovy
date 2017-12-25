@@ -46,7 +46,7 @@ class ModuleConfig extends BaseExtension {
         buildConfig = new BuildConfig(project)
 
         androidConfig = new AndroidConfig(project)
-        androidConfig.updateMeta(project)
+//        androidConfig.updateMeta(project)
 
         dependModules = new Dependencies(project)
         dependVersions = new RepoVersions(project)
@@ -107,7 +107,7 @@ class ModuleConfig extends BaseExtension {
 
     void onConfigEnd() {
         if (new File(buildConfig.defRepoPath).exists()) dependVersions.configPaths.addFirst(buildConfig.defRepoPath)
-        dependVersions.endConfig(this)
+        dependVersions.endConfig()
 
         dependModules.baseGroup = buildConfig.groupName + ".android"
         dependModules.endConfig(dependVersions.versions)
@@ -134,6 +134,8 @@ class ModuleConfig extends BaseExtension {
      */
     boolean checkUploadAble() {
         if ("library" != compilePluginType) return false
+        if (dependModules.hasLocalCompile()) return false
+        return true
     }
 
     /**

@@ -23,7 +23,6 @@ class RepoVersions extends BaseExtension {
     RepoVersions(Project project) {
         configPaths = new LinkedList<>()
         versions = new HashMap<>()
-        this.dependencies = new LinkedList<>()
         this.project = project
     }
 
@@ -33,8 +32,7 @@ class RepoVersions extends BaseExtension {
         return []
     }
 
-    @Override
-    void endConfig(def outConfig) {
+    void endConfig() {
         def newVersions = new HashMap<String, String>()
         configPaths.each { path ->
             File f = new File(path)

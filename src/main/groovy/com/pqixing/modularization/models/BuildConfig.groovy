@@ -32,7 +32,7 @@ class BuildConfig extends BaseExtension {
 
         project.ext.buildConfig = this
 
-        updateMeta(project)
+//        updateMeta(project)
     }
 
     @Override

@@ -57,7 +57,13 @@ class Dependencies extends BaseExtension {
         return [FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.append("}").toString())];
     }
 
-    @Override
+    boolean hasLocalCompile() {
+        for (Inner i : dependencies) {
+            if (i.local) return true
+        }
+        return false
+    }
+
     void endConfig(Map<String, String> outConfig) {
         versions = outConfig
     }

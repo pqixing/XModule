@@ -58,14 +58,13 @@ abstract class BasePlugin implements Plugin<Project> {
     }
 
     void createVersionsUpdateTask(Project project, ModuleConfig config) {
-        def defRepoPath = FileUtils.appendUrls(config.buildConfig.rootPath, ".modularization", config.selectMavenType, ".repoVersions")
+        def defRepoPath = FileUtils.appendUrls(config.buildConfig.rootPath, ".modularization", config.selectMavenType.name, ".repoVersions")
         Task t = project.task("updateVersions", type: UpdateVersionsTask) {
             config.buildConfig.defRepoPath = defRepoPath
             outPath = config.buildConfig.defRepoPath
             mavenUrl = config.mavenType.maven_url
             compileGroup = config.buildConfig.groupName
-            modules += config.defaultImpl
-            modules += config.defaultApk
+            modules += config.dependVersions.versions.keySet()
         }
         project.task("cleanCache") {
             group = Default.taskGroup
