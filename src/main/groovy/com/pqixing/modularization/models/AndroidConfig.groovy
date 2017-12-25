@@ -81,8 +81,22 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [CHANNEL_NAME: "DACHEN_DOCTOR"]
         if(#{compatAppache}&&#{compileSdkVersion}>=23) useLibrary 'org.apache.http.legacy'
+        
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [ moduleName : project.getName() ]
+            }
+        }
     }
 }
+dependencies {
+    // 替换成最新版本, 需要注意的是api
+    // 要与compiler匹配使用，均使用最新版可以保证兼容
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:#{kotlin_version}"
+    implementation 'com.alibaba:arouter-api:1.3.0'
+    annotationProcessor 'com.alibaba:arouter-compiler:1.1.4'
+ }
+
 '''
     }
 
