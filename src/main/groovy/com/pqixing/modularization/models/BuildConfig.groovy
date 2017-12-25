@@ -19,11 +19,11 @@ class BuildConfig extends BaseExtension {
 
     BuildConfig(Project project) {
         projectName = project.name
-        rootPath = project.rootProject.projectDir.path.replace("\\","\\\\")
+        rootPath = project.projectDir.path.replace("\\","\\\\")
         outDir = FileUtils.appendUrls(rootPath, ".modularization", projectName)
         cacheDir = FileUtils.appendUrls(outDir, ".cache")
         defRepoPath = FileUtils.appendUrls(rootPath, ".modularization", ".repoVersions")
-        File ignoreFile = project.rootProject.file(".gitignore")
+        File ignoreFile = new File(rootPath,".gitignore")
         if (!ignoreFile.exists()) ignoreFile.createNewFile()
         if (!ignoreFile.text.contains(".modularization")) ignoreFile.append("\n.modularization \n")
 
