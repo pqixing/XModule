@@ -27,7 +27,11 @@ abstract class BasePlugin implements Plugin<Project> {
                 , project.container(RunType)
                 , project.container(MavenType), pluginType())
         project.extensions.add("moduleConfig", moduleConfig)
-
+        //允许配置全局使用的配置文件
+        if (project.hasProperty("allProjectConfig")) {
+            String path = project.ext.get("allProjectConfig")
+            if (new File(path).exists()) project.apply from: path
+        }
         project.ext.endConfig = {
             applySecondConfig(project)
             createVersionsUpdateTask(project, moduleConfig)
@@ -73,7 +77,7 @@ abstract class BasePlugin implements Plugin<Project> {
             }
         }
         //如果设置自动同步，或者之前没有更新过版本号，则先更新版本号
-        if (config.updateBeforeSync||!new File(defRepoPath).exists()) t.execute()
+        if (config.updateBeforeSync || !new File(defRepoPath).exists()) t.execute()
     }
 
     void applySecondConfig(Project project) {
