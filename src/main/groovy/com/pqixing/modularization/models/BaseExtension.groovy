@@ -30,4 +30,6 @@ abstract class BaseExtension {
     }
 
     abstract LinkedList<String> generatorFiles()
+
+    void endConfig(def outConfig){}
 }

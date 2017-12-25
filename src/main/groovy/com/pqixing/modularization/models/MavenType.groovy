@@ -20,11 +20,8 @@ class MavenType extends BaseContainerExtension {
     String uploadKey
     String updateDesc
 
-    Map<String, String> repoVersions
-
     MavenType(String name) {
         super(name)
-        repoVersions = new HashMap<>()
     }
 
 //    String getMaven_url() {
@@ -85,7 +82,7 @@ uploadArchives{
 //                ", password='" + password + '\'' +
                 ", groupName='" + groupName + '\'' +
                 ", uploadKey='" + uploadKey + '\'' +
-                ", repoVersions=" + repoVersions +
+//                ", repoVersions=" + repoVersions +
                 '}';
     }
 }

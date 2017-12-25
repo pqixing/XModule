@@ -22,28 +22,21 @@ class ModuleConfig extends BaseExtension {
 
     final String pluginType
 
-    LinkedList<String> repoVersionPaths
-    /**
-     * 默认依赖，编译时可依赖
-     */
-    LinkedList<String> defaultImpl
-    /**
-     * 默认实现，业务组件设置，编译时不可使用
-     */
-    LinkedList<String> defaultApk
-    String docFileDirs
+    Dependencies dependModules
+    RepoVersions dependVersions
 
-    private final HashMap<String, String> repoVersions
+    String docFileDirs
 
     /**
      * 是否在同步前，更新一遍版本号
      */
     boolean updateBeforeSync = false
-    String selectRunType = ""
-    String selectMavenType = "test"
+    RunType selectRunType
+    MavenType selectMavenType
+
 
     String pom_version
-    boolean uploadEnable = false
+    boolean uploadEnable
 
     ModuleConfig(Project project
                  , NamedDomainObjectContainer<RunType> runTypes
@@ -54,17 +47,9 @@ class ModuleConfig extends BaseExtension {
 
         androidConfig = new AndroidConfig(project)
         androidConfig.updateMeta(project)
-        repoVersions = new HashSet<>()
 
-        repoVersionPaths = new LinkedList<>()
-        if (project.hasProperty("repoVersionPaths")) {
-            repoVersionPaths += project.ext.get("repoVersionPaths")
-        }
-
-        defaultImpl = project.hasProperty("defaultImpl") ?
-                new GroovyShell().evaluate(project.ext.get("defaultImpl"))
-                : Default.defaultImplRepo
-        defaultApk = new LinkedHashMap<>()
+        dependModules = new Dependencies(project)
+        dependVersions = new RepoVersions(project)
 
         this.mavenTypes = mavenTypes
         mavenTypes.whenObjectAdded { it.onCreate(project) }
@@ -75,16 +60,16 @@ class ModuleConfig extends BaseExtension {
 
         this.runTypes = runTypes
         runTypes.whenObjectAdded { it.onCreate(project) }
+
+        selectMavenType = mavenTypes.debug
     }
 
     MavenType getMavenType() {
-        if (mavenTypes.hasProperty(selectMavenType)) return mavenTypes.getByName(selectMavenType)
-        return null
+        return selectMavenType
     }
 
     RunType getRunType() {
-        if (runTypes.hasProperty(selectRunType)) return runTypes.getByName(selectRunType)
-        return null
+        return selectRunType
     }
 
     String getCompilePluginType() {
@@ -93,14 +78,23 @@ class ModuleConfig extends BaseExtension {
         return "library"
     }
 
-    void runTypes(String selectItem = this.selectRunType, Closure closure) {
-        this.selectRunType = selectItem
+
+    void runTypes(Closure closure) {
         runTypes.configure(closure)
     }
 
-    void mavenTypes(String selectItem = this.selectMavenType, Closure closure) {
-        this.selectMavenType = selectItem
+
+    void mavenTypes(String pom_version = this.pom_version, Closure closure) {
+        this.pom_version = pom_version
         mavenTypes.configure(closure)
+    }
+
+    void dependModules(Closure closure) {
+        dependModules.configure(closure)
+    }
+
+    void dependVersions(Closure closure) {
+        dependVersions.configure(closure)
     }
 
     void buildConfig(Closure closure) {
@@ -112,27 +106,41 @@ class ModuleConfig extends BaseExtension {
     }
 
     void onConfigEnd() {
-        if (new File(buildConfig.defRepoPath).exists()) repoVersionPaths.addFirst(buildConfig.defRepoPath)
+        if (new File(buildConfig.defRepoPath).exists()) dependVersions.configPaths.addFirst(buildConfig.defRepoPath)
+        dependVersions.endConfig(this)
 
-        repoVersionPaths.each { path ->
-            Properties p = new Properties()
-            p.load(new File(path).newInputStream())
-            repoVersions.putAll(p.toSpreadMap())
-        }
-        repoVersions.putAll(mavenType.repoVersions)
+        dependModules.baseGroup = buildConfig.groupName + ".android"
+        dependModules.endConfig(dependVersions.versions)
     }
 
     void afterApplyAndroid() {
         project.afterEvaluate {
-            if ("library" == pluginType) uploadToMavenTask()
+            uploadToMavenTask()
             Print.ln(toString())
             FileUtils.writeDependency(project, new File(buildConfig.outDir, "dependency.txt"))
         }
     }
-/**
- * 上传数据到maven仓库
- */
+
+    void setSelectRunType(String selectRunType) {
+        this.selectRunType = selectRunType
+    }
+
+    void setSelectMavenType(String selectMavenType) {
+        this.selectMavenType = selectMavenType
+    }
+    /**
+     * 检查是否可以上传
+     * @return
+     */
+    boolean checkUploadAble() {
+        if ("library" != compilePluginType) return false
+    }
+
+    /**
+     * 上传数据到maven仓库
+     */
     private void uploadToMavenTask() {
+        if (!checkUploadAble()) return
         def listTask = []
         //添加上传的任务
         mavenTypes.each { m ->
@@ -151,28 +159,7 @@ class ModuleConfig extends BaseExtension {
                 listTask += project.task(taskName, type: UploadTask) { mavenInfo = m }
             }
         }
-//        project.afterEvaluate {
         listTask.each { it.dependsOn project.assembleRelease }
-//        }
-
-//        project.task("uploadAll") {
-//            group = Default.taskGroup
-//            doFirst { listTask.each { it.execute() } }
-//        }
-    }
-
-/**
- * 获取依赖的字符串
- * @param key
- * @param value
- * @return
- */
-    String getRepoVersionStr(String key, String value = "") {
-        key = key.replace(":", "")
-        if (NormalUtils.isEmpty(value)) value = repoVersions[key]
-        if (NormalUtils.isEmpty(value)) value = "+"
-        BuildConfig buildConfig = project.buildConfig
-        return buildConfig.groupName + ".android:$key:$value"
     }
 
     @Override
@@ -182,35 +169,8 @@ class ModuleConfig extends BaseExtension {
         files += mavenType.generatorFiles()
 
         if (!NormalUtils.isEmpty(runType)) files += runType.generatorFiles()
-//        if (!NormalUtils.isEmpty(defaultImpl)) {
-        StringBuilder sb = new StringBuilder("dependencies { \n")
-        defaultImpl?.each { repoKey ->
-            sb.append("    implementation '${getRepoVersionStr(repoKey)}' \n")
-        }
-        defaultApk?.each { repoKey ->
-            sb.append("    runtimeOnly '${getRepoVersionStr(repoKey)}' \n")
-        }
-        files += FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.append("}").toString())
-//        }
+        files += dependModules.generatorFiles()
+
         return files
-    }
-
-
-    @Override
-    public String toString() {
-        return "ModuleConfig{" +
-                "\nrunTypes=" + runTypes +
-                ",\n mavenTypes=" + mavenTypes +
-                ",\n buildConfig=" + buildConfig +
-                ",\n androidConfig=" + androidConfig +
-                ", pluginType='" + pluginType + '\'' +
-                ",\n repoVersionPaths=" + repoVersionPaths +
-                ",\n defaultImpl=" + defaultImpl +
-                ",\n repoVersions=" + repoVersions +
-                ", selectRunType='" + selectRunType + '\'' +
-                ", selectMavenType='" + selectMavenType + '\'' +
-                ", pom_version='" + pom_version + '\'' +
-                ", uploadEnable=" + uploadEnable +
-                '}';
     }
 }
