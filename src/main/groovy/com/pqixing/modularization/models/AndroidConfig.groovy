@@ -94,6 +94,10 @@ dependencies {
     // 要与compiler匹配使用，均使用最新版可以保证兼容
     implementation 'com.alibaba:arouter-api:1.3.0'
     annotationProcessor 'com.alibaba:arouter-compiler:1.1.4'
+    
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
  }
 
 '''
