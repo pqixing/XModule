@@ -17,6 +17,8 @@ class Dependencies extends BaseExtension {
     //强制使用本地库进行依赖处理，兼容旧版本进行本地化开发使用
     boolean focusLocal
 
+    static final String DEFAULT_GROUP = "default_group"
+
     Dependencies(Project project) {
         this.dependModules = new LinkedList<>()
         this.project = project
@@ -41,6 +43,13 @@ class Dependencies extends BaseExtension {
         return inner
     }
 
+    Inner addExImpl(String moduleName, Closure closure = null) {
+        Inner inner = add(moduleName, closure)
+        inner.compileMode = "implementation"
+        inner.excludeGroup(DEFAULT_GROUP)
+        return inner
+    }
+
     @Override
     LinkedList<String> generatorFiles() {
         StringBuilder sb = new StringBuilder("dependencies { \n")
@@ -57,7 +66,8 @@ class Dependencies extends BaseExtension {
             sb.append(" { \n")
             model.excludes.each {
                 it.each { map ->
-                    sb.append("         exclude $map.key : '$map.value'  \n")
+                    String value = DEFAULT_GROUP == map.value ? baseGroup : map.value
+                    sb.append("         exclude $map.key : '$value'  \n")
                 }
             }
             sb.append("     } \n")
@@ -96,14 +106,14 @@ class Dependencies extends BaseExtension {
         String version
         LinkedList<Map<String, String>> excludes = new LinkedList<>()
 
-        void exludeGroup(String[] groups) {
+        void excludeGroup(String[] groups) {
             Print.ln(" exludeGroup. groups :$groups")
             groups.each {
                 excludes += ["group": it]
             }
         }
 
-        void exludeModule(String[] modules) {
+        void excludeModule(String[] modules) {
             modules.each {
                 excludes += ["module": it]
             }

@@ -113,7 +113,7 @@ class ModuleConfig extends BaseExtension {
 
         dependModules.baseGroup = buildConfig.groupName + ".android"
         if (addDefaultImpl) Default.defaultImplRepo.each {
-            dependModules.addImpl(it) { exludeGroup("$dependModules.baseGroup") }
+            dependModules.addExImpl(it)
         }
         dependModules.endConfig(dependVersions.versions)
     }
