@@ -6,6 +6,8 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
 
+import java.util.regex.Pattern
+
 /**
  * Created by pqixing on 17-12-20.
  */
@@ -31,6 +33,23 @@ public class GitManager implements Plugin<Project> {
             } else {
                 commandLine 'sh', './build/clone.sh'
             }
+        }
+
+        //所有工程的父目录
+        Map<String, String> modulePaths = getModulePaths(rootDir.parentFile, 3)
+        List<String> modules
+        Map<String, String> includePaths = new HashMap<>()
+
+        modules.each {name ->
+            Pattern pattern = Pattern.compile(name)
+            includePaths  modulePaths.findAll { it.key.matches(pattern) }
+        }
+
+        StringBuilder mStr = new StringBuilder()
+        modules.each { moduleName ->
+            def path = modulePaths[moduleName]
+            if (path != null) mStr.append("include ':$moduleName' \nproject(':$moduleName').projectDir = new File('$path') \n")
+            else throw new RuntimeException("can't find $moduleName on local ,please check name or clone project use task cloneAllProjects first !!")
         }
     }
 
@@ -83,12 +102,17 @@ file("clone.bat").write(batStr.toString())
 /********导入工程*******/
 //所有工程的父目录
 Map<String, String> modulePaths = getModulePaths(rootDir.parentFile, 3)
-StringBuilder mStr = new StringBuilder()
-modules.each { moduleName ->
-    def path = modulePaths[moduleName]
-    if (path != null) mStr.append("include ':$moduleName' \\nproject(':$moduleName').projectDir = new File('$path') \\n")
-    else throw new RuntimeException("can't find $moduleName on local ,please check name or clone project use task cloneAllProjects first !!")
+Map<String, String> includePaths = new HashMap<>()
+modules.each {name ->
+    Pattern pattern = Pattern.compile(name)
+    includePaths += modulePaths.findAll { it.key.matches(pattern) }
 }
+
+StringBuilder mStr = new StringBuilder()
+includePaths.each { map ->
+     mStr.append("include ':$map.key' \\n project(':map.key').projectDir = new File('$map.value') \\n")
+}
+
 println("modules = $modules modulePaths = $modulePaths")
 def moduleGradle = file("module.gradle")
 moduleGradle.write(mStr.toString())
