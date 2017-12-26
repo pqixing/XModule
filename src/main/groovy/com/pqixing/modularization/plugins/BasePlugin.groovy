@@ -76,7 +76,7 @@ abstract class BasePlugin implements Plugin<Project> {
             }
         }
         //如果设置自动同步，或者之前没有更新过版本号，则先更新版本号
-        if (config.updateBeforeSync || !new File(defRepoPath).exists()) project.task("updateVersions", type: UpdateVersionsTask) {
+        if (config.updateBeforeSync || !new File(defRepoPath).exists()) project.task("updateVersions1", type: UpdateVersionsTask) {
             group = "other"
             config.buildConfig.defRepoPath = defRepoPath
             outPath = config.buildConfig.defRepoPath
