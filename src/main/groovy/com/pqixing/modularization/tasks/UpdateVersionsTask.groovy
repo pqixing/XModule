@@ -78,7 +78,7 @@ public class UpdateVersionsTask extends DefaultTask {
         pros.load(outFile.newInputStream())
         long diff = System.currentTimeMillis() - (pros.getProperty("lastUpdateTime")?.toLong() ?: 0L)
         //30秒内不重新加载
-        if (diff <= 1000 * 30) return
+        if (diff <= 1000 * 5) return
 
         urls.each { map ->
             String version = NormalUtils.parseLastVersion(map.value)
