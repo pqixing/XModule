@@ -2,9 +2,7 @@ package com.pqixing.modularization.models
 
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
-import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-25.
  */
@@ -77,7 +75,7 @@ class Dependencies extends BaseExtension {
                 }
             }
             sb.append("     } \n")
-            Print.ln(" model.excludes :$model.excludes")
+//            Print.ln(" model.excludes :$model.excludes")
         }
         return [FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.append("}").toString())];
     }
@@ -113,7 +111,7 @@ class Dependencies extends BaseExtension {
         LinkedList<Map<String, String>> excludes = new LinkedList<>()
 
         void excludeGroup(String[] groups) {
-            Print.ln(" exludeGroup. groups :$groups")
+//            Print.ln(" exludeGroup. groups :$groups")
             groups.each {
                 excludes += ["group": it]
             }

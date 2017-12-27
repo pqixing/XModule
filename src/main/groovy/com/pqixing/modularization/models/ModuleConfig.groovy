@@ -31,8 +31,8 @@ class ModuleConfig extends BaseExtension {
      * 是否在同步前，更新一遍版本号
      */
     boolean updateBeforeSync = false
-    RunType selectRunType
-    MavenType selectMavenType
+    RunType runType
+    MavenType mavenType
 
 
     String pom_version
@@ -63,15 +63,7 @@ class ModuleConfig extends BaseExtension {
         this.runTypes = runTypes
         runTypes.whenObjectAdded { it.onCreate(project) }
 
-        selectMavenType = mavenTypes.debug
-    }
-
-    MavenType getMavenType() {
-        return selectMavenType
-    }
-
-    RunType getRunType() {
-        return selectRunType
+        mavenType = mavenTypes.debug
     }
 
     String getCompilePluginType() {
