@@ -17,8 +17,8 @@ class AndroidConfig extends BaseExtension {
     String versionCode = '1'
     String versionName = "1.0"
     String applicationId = ""
-    String support_v4 = "27.0.1"
-    String support_v7 = "27.0.1"
+    String support_v4 = "26.1.0"
+    String support_v7 = "26.1.0"
     boolean compatAppache = true
 
     boolean kotlinEnable = true
@@ -92,11 +92,12 @@ android {
 dependencies {
     // 替换成最新版本, 需要注意的是api
     // 要与compiler匹配使用，均使用最新版可以保证兼容
-    implementation 'com.alibaba:arouter-api:1.3.0'
+    implementation ('com.alibaba:arouter-api:1.3.0')
     annotationProcessor 'com.alibaba:arouter-compiler:1.1.4'
     
+    implementation 'com.android.support:support-annotations:25.4.0'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test:runner:1.0.0'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
  }
 

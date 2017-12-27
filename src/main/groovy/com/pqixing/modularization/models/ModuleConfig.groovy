@@ -143,22 +143,23 @@ class ModuleConfig extends BaseExtension {
         if (!checkUploadAble()) return
         def listTask = []
         //添加上传的任务
-        mavenTypes.each { m ->
-            switch (m.name) {
-                case "release":
-                case "test":
-                case "debug":
-                    m.onCreate(project)
-                    break
-            }
-            if (NormalUtils.isEmpty(m.pom_version)) m.pom_version = pom_version
-            if (NormalUtils.isEmpty(m.uploadEnable)) m.uploadEnable = uploadEnable
-
-            if (m.uploadEnable && ("release" != m.name || Default.uploadKey == m.uploadKey)) {
-                String taskName = "$project.name -upto-$m.name"
-                listTask += project.task(taskName, type: UploadTask) { mavenInfo = m }
-            }
+//        mavenTypes.each { m ->
+        MavenType m = mavenType
+        switch (m.name) {
+            case "release":
+            case "test":
+            case "debug":
+                m.onCreate(project)
+                break
         }
+        if (NormalUtils.isEmpty(m.pom_version)) m.pom_version = pom_version
+        if (NormalUtils.isEmpty(m.uploadEnable)) m.uploadEnable = uploadEnable
+
+        if (m.uploadEnable && ("release" != m.name || Default.uploadKey == m.uploadKey)) {
+            String taskName = "${project.name}Upload($m.name)"
+            listTask += project.task(taskName, type: UploadTask) { mavenInfo = m }
+        }
+//        }
         listTask.each { it.dependsOn project.assembleRelease }
     }
 

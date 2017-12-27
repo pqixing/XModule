@@ -63,7 +63,7 @@ abstract class BasePlugin implements Plugin<Project> {
             outPath = config.buildConfig.defRepoPath
             mavenUrl = config.mavenType.maven_url
             compileGroup = config.buildConfig.groupName
-            modules += config.dependModules.dependModules
+            modules += config.dependModules.moduleNames
         }
         project.task("cleanCache") {
             group = Default.taskGroup
@@ -77,7 +77,7 @@ abstract class BasePlugin implements Plugin<Project> {
             outPath = config.buildConfig.defRepoPath
             mavenUrl = config.mavenType.maven_url
             compileGroup = config.buildConfig.groupName
-            modules += config.dependModules.dependModules
+            modules += config.dependModules.moduleNames
             searchModules = false
         }.execute()
     }

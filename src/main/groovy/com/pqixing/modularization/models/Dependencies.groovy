@@ -50,6 +50,12 @@ class Dependencies extends BaseExtension {
         return inner
     }
 
+    List<String> getModuleNames(){
+        List<String> names = new LinkedList<>()
+        dependModules.each {names+= it.moduleName}
+        return names
+    }
+
     @Override
     LinkedList<String> generatorFiles() {
         StringBuilder sb = new StringBuilder("dependencies { \n")
@@ -67,7 +73,7 @@ class Dependencies extends BaseExtension {
             model.excludes.each {
                 it.each { map ->
                     String value = DEFAULT_GROUP == map.value ? baseGroup : map.value
-                    sb.append("         exclude $map.key : '$value'  \n")
+                    sb.append("         exclude($map.key : '$value')  \n")
                 }
             }
             sb.append("     } \n")
