@@ -52,7 +52,7 @@ public class UpdateLog extends DefaultTask {
             if (NormalUtils.isEmpty(xmlTxt)) return
             sb.append("###   [$moduleName](${metaUrl})    \n")
                     .append("").append("最新版本:　${NormalUtils.parseXmlByKey(xmlTxt, 'release')}")
-                    .append("　　　　　").append("最后更新时间:　").append(new Date(NormalUtils.parseXmlByKey(xmlTxt, "lastUpdated").toLong()).toLocaleString())
+                    .append("　　　　　").append("最后更新时间:　").append(NormalUtils.parseXmlByKey(xmlTxt, "lastUpdated"))
             File detailFile = new File(project.buildDir, "${env}/${moduleName}.md")
 
             if (detailFile.exists()) sb.append("　　　　[详细日志](${"../build/${env}/${moduleName}.md"})")
