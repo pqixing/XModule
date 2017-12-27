@@ -11,7 +11,6 @@ import org.gradle.api.tasks.TaskAction
  */
 
 public class UpdateLog extends DefaultTask {
-    File logPath
     List<String> modules
     Map<String, String> envs
     String compileGroup
@@ -69,6 +68,6 @@ public class UpdateLog extends DefaultTask {
             sb.append("\n  --- \n")
         }
 
-        FileUtils.write(new File(project.projectDir, "log/${env}_log.md"), sb.toString())
+        FileUtils.write(new File(project.projectDir, "updatelog/${env}.md"), sb.toString())
     }
 }
