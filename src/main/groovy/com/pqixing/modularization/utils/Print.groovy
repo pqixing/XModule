@@ -1,10 +1,7 @@
 package com.pqixing.modularization.utils
 
-import org.gradle.api.Project
-
 class Print {
-    static File outputFile;
-    static StringBuilder outputData = new StringBuilder()
+
     static String silentLog = "N"
 
     static String ln(String str, Closure closure = null) {
@@ -14,27 +11,21 @@ class Print {
     static String l(String str, Closure closure = null) {
         closure?.call(str)
         if ("Y" != silentLog) print(str)
-
         def newStr = "${new Date().toLocaleString()} --> $str"
-        outputData?.append(newStr)
-        outputFile?.parentFile?.mkdirs()
-        outputFile?.append(newStr)
+        write(newStr)
         return str
     }
+    static File outputFile
 
-    static void init(Project project) {
-        if (project.hasProperty("silentLog")) silentLog = project.ext.get("silentLog")
-
-        File f = new File(project.rootProject.buildDir, "${project.name}.log")
-        if (f.length() > 1024 * 1024 * 1024) f.delete()
-        if (!f.exists()) {
-            f.parentFile.mkdirs()
-            f.createNewFile()
+    static void write(String str) {
+        if (outputFile == null) outputFile = new File(".modularization/print.log")
+        //如果日志文件大于100M 删除
+        if (outputFile.exists() && outputFile.length() >= 1024 * 1024 * 100) outputFile.delete()
+        if (!outputFile.exists()) {
+            outputFile.parentFile.mkdirs()
+            outputFile.createNewFile()
         }
-
-        outputFile = f
-        if (outputData != null && outputData.size() > 0) outputFile.append(outputData.toString())
-        outputData = null
+        outputFile.append(str)
     }
 
     static String lnPro(Object p) {

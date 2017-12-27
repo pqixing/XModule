@@ -1,13 +1,9 @@
 package com.pqixing.modularization.plugins
 
 import com.pqixing.modularization.Default
-import com.pqixing.modularization.utils.Print
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
-
-
-
 /**
  * Created by pqixing on 17-12-20.
  */
@@ -15,23 +11,26 @@ import org.gradle.api.tasks.Exec
 public class GitManager implements Plugin<Project> {
     @Override
     public void apply(Project project) {
-        Print.init(project)
         project.buildDir.mkdirs()
 
         File ignoreFile = project.file(".gitignore")
         if (!ignoreFile.exists()) ignoreFile.createNewFile()
         if (!ignoreFile.text.contains("config.gradle")) ignoreFile.append("\nconfig.gradle \n")
 
-        def settingFile = new File(project.buildDir, "setting.gradle")
+        def settingFile = new File(project.rootDir, ".modularization/setting.gradle")
         boolean exit = settingFile.exists()
+        if (!exit) {
+            settingFile.parentFile.mkdirs()
+            settingFile.createNewFile()
+        }
         settingFile.write(configGradleTxt + "\n" + settingGradleTxt)
-        if (!exit) throw new RuntimeException("generator setting file, please sync again")
+        if (!exit) throw new RuntimeException("generator setting file, please sync again-- 生成新的setting文件， 重新点击一下同步即可")
         project.task("cloneAllProjects", type: Exec) {
             group = Default.taskGroup
             if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-                commandLine 'cmd', '/c', 'build\\clone.bat'
+                commandLine 'cmd', '/c', '.modularization\\clone.bat'
             } else {
-                commandLine 'sh', './build/clone.sh'
+                commandLine 'sh', './.modularization/clone.sh'
             }
         }
     }
@@ -65,7 +64,8 @@ apply from: "../config.gradle"
 /********生成config.gradle文件*******/
 /********生成批量clone脚本*******/
 def gitUrls = new Properties()
-gitUrls.load(file("../giturl.properties").newInputStream())
+def f = file("../giturl.properties")
+if(f.exists()) gitUrls.load(f.newInputStream())
 StringBuilder batStr = new StringBuilder().append("cd ../ \\n")
 StringBuilder shStr = new StringBuilder().append("cd ../ \\n")
 

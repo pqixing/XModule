@@ -10,6 +10,7 @@ import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -19,7 +20,6 @@ abstract class BasePlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        Print.init(project)
         ModuleConfig moduleConfig = new ModuleConfig(project
                 , project.container(RunType)
                 , project.container(MavenType), pluginType())
@@ -65,10 +65,11 @@ abstract class BasePlugin implements Plugin<Project> {
             compileGroup = config.buildConfig.groupName
             modules += config.dependModules.moduleNames
         }
-        project.task("cleanCache") {
+        project.task("cleanCache",dependsOn: project.clean) {
             group = Default.taskGroup
             doLast {
                 new File(config.buildConfig.outDir).deleteDir()
+                new File(project.rootDir, ".modularization").deleteDir()
             }
         }
         //如果设置自动同步，或者之前没有更新过版本号，则先更新版本号
