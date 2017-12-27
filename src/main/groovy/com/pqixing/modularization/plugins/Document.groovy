@@ -14,12 +14,12 @@ public class Document implements Plugin<Project> {
     public void apply(Project project) {
         def updateDoc = project.task("updateDoc", type: UpdateLog) {
             compileGroup = Default.groupName
-            envs = ["test": Default.maven_url_test, "release": Default.maven_url_release]
+            envs = ["test": Default.maven_url_test, "release": Default.maven_url_release,"debug":Default.maven_url_debug]
         }
         UpdateLog.findModules(project.file("readme")).each {
             project.task("log-$it", type: UpdateDetail) {
                 compileGroup = Default.groupName
-                envs = ["test": Default.maven_url_test, "release": Default.maven_url_release]
+                envs = ["test": Default.maven_url_test, "release": Default.maven_url_release,"debug":Default.maven_url_debug]
                 moduleName = "router"
                 doLast {
                     updateDoc.execute()
