@@ -126,13 +126,6 @@ class ModuleConfig extends BaseExtension {
         }
     }
 
-    void setSelectRunType(String selectRunType) {
-        this.selectRunType = selectRunType
-    }
-
-    void setSelectMavenType(String selectMavenType) {
-        this.selectMavenType = selectMavenType
-    }
     /**
      * 检查是否可以上传
      * @return

@@ -22,20 +22,6 @@ class NormalUtils {
     }
 
     /**
-     * 拼接url
-     * @param urls
-     * @return
-     */
-    static String appendUrls(String[] urls) {
-        StringBuilder newUrl = new StringBuilder()
-        for (String url : urls) {
-            newUrl.append(url).append(File.separator)
-        }
-
-        return newUrl.substring(0, newUrl.size() - 1)
-    }
-
-    /**
      * 替换字符串中的变量
      * @param source
      * @return

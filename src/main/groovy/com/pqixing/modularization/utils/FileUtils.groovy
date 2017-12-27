@@ -16,7 +16,7 @@ class FileUtils {
     static String appendUrls(String[] urls) {
         StringBuilder newUrl = new StringBuilder()
         for (String url : urls) {
-            newUrl.append(url).append(File.separator)
+            newUrl.append(url).append("/")
         }
 
         return newUrl.substring(0, newUrl.size() - 1)
