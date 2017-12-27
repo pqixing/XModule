@@ -41,7 +41,7 @@ abstract class BasePlugin implements Plugin<Project> {
             }
             moduleConfig.afterApplyAndroid()
 
-            project.task("doc-sync", type: DocSyncTask) {
+            project.task("docSync", type: DocSyncTask) {
                 docFileDirs = moduleConfig.docFileDirs
                 updateDesc = moduleConfig.mavenTypes.release.updateDesc
 
@@ -65,9 +65,10 @@ abstract class BasePlugin implements Plugin<Project> {
             compileGroup = config.buildConfig.groupName
             modules += config.dependModules.moduleNames
         }
-        project.task("cleanCache",dependsOn: project.clean) {
+        project.task("cleanCache") {
             group = Default.taskGroup
             doLast {
+                project.clean.execute()
                 new File(config.buildConfig.outDir).deleteDir()
                 new File(project.rootDir, ".modularization").deleteDir()
             }
@@ -89,5 +90,6 @@ abstract class BasePlugin implements Plugin<Project> {
         File ignoreFile = project.file(".gitignore")
         if (!ignoreFile.exists()) ignoreFile.createNewFile()
         if (!ignoreFile.text.contains("second.gradle")) ignoreFile.append("\nsecond.gradle\n")
+        if (!ignoreFile.text.contains("${project.name}.iml")) ignoreFile.append("\n${project.name}.iml\n")
     }
 }
