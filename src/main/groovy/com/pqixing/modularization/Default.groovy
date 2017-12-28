@@ -16,9 +16,9 @@ class Default {
     static final maven_user = "admin"
     static final maven_password = "admin123"
 
-    static final defaultImplRepo = ["dcnet","dccommon","dcuser","router"]
+    static final defaultImplRepo = ["dcnet","dccommon","dcuser","router","mvpbase"]
 
-    static final allRepo = ["dcnet","dccommon","dcuser","router"]
+    static final allRepo = ["dcnet","dccommon","dcuser","router","mvpbase"]
 
     static final docGitName = "Document"
 }
