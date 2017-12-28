@@ -2,6 +2,7 @@ package com.pqixing.modularization.models
 
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
 
 /**
@@ -64,7 +65,8 @@ class RunType extends BaseContainerExtension {
         def inputManifest = new File(FileUtils.appendUrls(project.projectDir.path, "src", "main"), "AndroidManifest.xml").text
         inputManifest = inputManifest.replaceFirst("<manifest(?s).*?>", NormalUtils.parseString(manifestMetaTxt, maps))
                 .replaceFirst("<application(?s).*?>", NormalUtils.parseString(manifestAppTxt, maps))
-        if (!inputManifest.matches("<application(?s).*?>")) inputManifest = inputManifest.replace("</manifest>" ,"") + NormalUtils.parseString(manifestAppTxt, maps) + "\n     </application> \n</manifest>"
+        if (NormalUtils.isEmpty(inputManifest.find("<application(?s).*?>"))) inputManifest = inputManifest.replace("</manifest>" ,"") + NormalUtils.parseString(manifestAppTxt, maps) + "\n     </application> \n</manifest>"
+        Print.ln("hasmatches: ${inputManifest.matches("<application(?s).*?>")} inputManifest : $inputManifest")
         FileUtils.write(new File(buildConfig.cacheDir, "AndroidManifest.xml"), inputManifest)
 
         //输出source的gradle配置

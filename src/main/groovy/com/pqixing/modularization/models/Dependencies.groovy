@@ -65,16 +65,16 @@ class Dependencies extends BaseExtension {
                 if (NormalUtils.isEmpty(version)) {
                     version = versions?.containsKey(model.moduleName) ? versions[model.moduleName] : "+"
                 }
-                sb.append("    $model.compileMode  ('$newGroup:$model.moduleName:$version') ")
-            }
-            sb.append(" { \n")
-            model.excludes.each {
-                it.each { map ->
-                    String value = DEFAULT_GROUP == map.value ? baseGroup : map.value
-                    sb.append("         exclude($map.key : '$value')  \n")
+                sb.append("    $model.compileMode  ('$newGroup:$model.moduleName:$version') { \n ")
+                model.excludes.each {
+                    it.each { map ->
+                        String value = DEFAULT_GROUP == map.value ? baseGroup : map.value
+                        sb.append("         exclude($map.key : '$value')  \n")
+                    }
                 }
+                sb.append("     }")
             }
-            sb.append("     } \n")
+            sb.append("\n ")
 //            Print.ln(" model.excludes :$model.excludes")
         }
         return [FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.append("}").toString())];
