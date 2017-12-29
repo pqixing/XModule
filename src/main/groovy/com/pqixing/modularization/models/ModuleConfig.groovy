@@ -30,7 +30,7 @@ class ModuleConfig extends BaseExtension {
     /**
      * 是否在同步前，更新一遍版本号
      */
-    boolean updateBeforeSync = false
+    boolean updateBeforeSync = true
     RunType runType
     MavenType mavenType
 

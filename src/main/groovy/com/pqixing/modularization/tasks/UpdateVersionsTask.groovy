@@ -6,6 +6,8 @@ import com.pqixing.modularization.utils.Print
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
+import java.text.SimpleDateFormat
+
 /**
  * Created by pqixing on 17-12-18.
  */
@@ -19,10 +21,14 @@ public class UpdateVersionsTask extends DefaultTask {
     //自动搜索模块
     boolean searchModules = true
 
+    private static String updateTimeFormat = "yyyy-MM-dd-HH-mm-ss"
+    SimpleDateFormat format
+
     UpdateVersionsTask() {
         group = Default.taskGroup
         modules = new HashSet<>()
         modules += Default.allRepo
+        format = new SimpleDateFormat(updateTimeFormat)
     }
 
     @TaskAction
@@ -71,22 +77,25 @@ public class UpdateVersionsTask extends DefaultTask {
     void updateVersions() {
         def outFile = new File(outPath)
         outFile.parentFile.mkdirs()
-        if (!outFile.exists()) outFile.createNewFile()
-
-
         def pros = new Properties()
-        pros.load(outFile.newInputStream())
-        long diff = System.currentTimeMillis() - (pros.getProperty("lastUpdateTime")?.toLong() ?: 0L)
-        //30秒内不重新加载
-        if (diff <= 1000 * 5) return
+        if (outFile.exists()) pros.load(outFile.newInputStream())
 
         urls.each { map ->
+            String updateTimeKey = "${map.key}-lastUpdate"
+
+            def lastTimeStr = pros.getProperty(updateTimeKey)
+            long lastUpdateTime = 0l
+            if (!NormalUtils.isEmpty(lastTimeStr)) lastUpdateTime = format.parse(lastTimeStr).time
+            //10秒内,不更新相同的组件版本,避免不停的爬取相同的接口
+            if (System.currentTimeMillis() - lastUpdateTime <= 1000 * 10) return
+
             String version = NormalUtils.parseLastVersion(map.value)
-            if (!NormalUtils.isEmpty(version)) {
+            if (!NormalUtils.isEmpty(version) && version != (pros.getProperty(map.key)?:"")) {
                 pros.put(map.key, version)
+                pros.put(updateTimeKey, format.format(new Date()))
             }
         }
-        pros.put("lastUpdateTime", System.currentTimeMillis().toString())
+//        pros.put("lastUpdateTime", System.currentTimeMillis().toString())
         pros.store(outFile.newOutputStream(), "")
     }
 }
