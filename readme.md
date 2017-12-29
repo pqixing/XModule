@@ -68,27 +68,16 @@ moduleConfig{
                  //更新说明,test和release环境上传必须填写更新说明
                  updateDesc
            }
-           test{
-               //...
-           }
-           debug{
-
-           }
-
-           other{
-           //...
-           }
+           test{     ...   }
+           debug{  }
+           other{    ...   }
     }
-    //注意事项 : 环境配置中的 pom_version 默认只配两位 如1.0; 实际上传版本号为 release : 1.0; test 1.0.(自动递增) debug 1.0.(时间戳)
+    mavenType = mavenTypes.test
 
-
-    dependModules{
-        addExImpl ("mvpbase")/*{
-//            local = true
-//        }*/
-    }
     uploadEnable = true
     pom_version = "0.1"
+    //注意事项 : 环境配置中的 pom_version 默认只配两位 如1.0; 实际上传版本号为 release : 1.0; test 1.0.(自动递增) debug 1.0.(时间戳)
+
 
     //此配置只针对library插件生效
     runTypes{
@@ -99,10 +88,39 @@ moduleConfig{
             launchActivity ="com.dachen.mdclogin.LoginActivity"
              //启动运行的Applike -> 理解为组件的Application
             applicationLike ="com.dachen.mdclogin.Applike"
-
+            app_name = project.name
+            app_icon
+            app_theme
         }
+        other{ ... }
     }
     runType =runTypes.test
+
+    //内部工程依赖方式
+    dependModules{
+            //独立组件依赖,实际上是runtime时依赖,无法直接引用依赖库的内容
+            add "mdclogin"
+            //常规依赖,可以正常使用该依赖库中的内容
+            addImpl "router"
+            //常规依赖,同时自动去除该依赖包中对包含默认分组的依赖
+            addExImpl "mvpbase"
+
+            //以上三种依赖方式都可以进阶配置
+            addXXX ("module"){
+                //使用本地工程,而非仓库版本
+                local = true
+                //该module默认的group,默认无须配置
+                group = ""
+                //指定该依赖的版本号,默认无须配置,自动获取最新版本号
+                version = ""
+                //内部依赖 按照分组去除
+                excludeGroup ("com.dachen.android","xxx.xxx.xx")
+
+                //内部依赖 按照模块名去除
+                excludeModule ("module1","module2")
+            }
+        }
+
 }
 
 //配置结束标记　　必须要配置，否则插件不会生效
