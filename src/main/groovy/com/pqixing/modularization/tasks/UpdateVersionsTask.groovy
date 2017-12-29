@@ -81,18 +81,20 @@ public class UpdateVersionsTask extends DefaultTask {
         if (outFile.exists()) pros.load(outFile.newInputStream())
 
         urls.each { map ->
-            String updateTimeKey = "${map.key}-lastUpdate"
+            String timeStr = "${map.key}-stamp"
+            String timeStamp = "${map.key}-last"
 
-            def lastTimeStr = pros.getProperty(updateTimeKey)
-            long lastUpdateTime = 0l
-            if (!NormalUtils.isEmpty(lastTimeStr)) lastUpdateTime = format.parse(lastTimeStr).time
             //10秒内,不更新相同的组件版本,避免不停的爬取相同的接口
-            if (System.currentTimeMillis() - lastUpdateTime <= 1000 * 10) return
+            if (System.currentTimeMillis() - (pros.getProperty(timeStamp)?.toLong() ?: 0L) <= 1000 * 10) return
 
             String version = NormalUtils.parseLastVersion(map.value)
-            if (!NormalUtils.isEmpty(version) && version != (pros.getProperty(map.key)?:"")) {
+            if (!NormalUtils.isEmpty(version)) {
+                if (version != (pros.getProperty(map.key) ?: ""))
+                    pros.put(timeStr, format.format(new Date()))
+
                 pros.put(map.key, version)
-                pros.put(updateTimeKey, format.format(new Date()))
+                pros.put(timeStamp, System.currentTimeMillis().toString())
+
             }
         }
 //        pros.put("lastUpdateTime", System.currentTimeMillis().toString())
