@@ -81,14 +81,15 @@ shStr.append("echo chone end ${gitUrls.toSpreadMap()}")
 file("clone.sh").write("#！/BIN/BASH \\n" + shStr.toString())
 file("clone.bat").write(batStr.toString())
 /********生成批量clone脚本*******/
-
+ext.endSetting = {
 /********导入工程*******/
 //所有工程的父目录
 Map<String, String> modulePaths = getModulePaths(rootDir.parentFile, 3)
+file("allModulePath.log").write(modulePaths.toString())
 modulePaths.remove(rootDir.name)
 Map<String, String> includePaths = new HashMap<>()
 modules.each {name ->
-    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(name)
+    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(name.replace(":",""))
     includePaths += modulePaths.findAll { it.key.matches(pattern) }
 }
 
@@ -102,7 +103,7 @@ def moduleGradle = file("module.gradle")
 moduleGradle.write(mStr.toString())
 apply from: moduleGradle.path
 /********导入工程*******/
-
+}
 /**
  * @param dir
  * @param deep 层级，如果小于0 停止获取

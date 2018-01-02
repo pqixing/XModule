@@ -64,6 +64,7 @@ class ModuleConfig extends BaseExtension {
         runTypes.whenObjectAdded { it.onCreate(project) }
 
         mavenType = mavenTypes.debug
+        if(project.hasProperty("addDefaultImpl")) addDefaultImpl = "Y" == project.ext.get("addDefaultImpl")
     }
 
     String getCompilePluginType() {

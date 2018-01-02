@@ -37,13 +37,13 @@ class Dependencies extends BaseExtension {
 
     Inner addImpl(String moduleName, Closure closure = null) {
         Inner inner = add(moduleName, closure)
-        inner.compileMode = "implementation"
+        inner.compileMode = "compile"
         return inner
     }
 
     Inner addExImpl(String moduleName, Closure closure = null) {
         Inner inner = add(moduleName, closure)
-        inner.compileMode = "implementation"
+        inner.compileMode = "compile"
         inner.excludeGroup(DEFAULT_GROUP)
         return inner
     }
