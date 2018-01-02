@@ -1,11 +1,10 @@
 ##  Gradle组件化gradle插件 -- modularization
 >  为解决项目中工程依赖关系复杂，编译构建时间过长，模块无版本管理导致功能开发相互影响等问题，开发次开发，目的是解开工程间依赖，实现模块的版本化管理，快速进行模块调试构建
-
 ###  Android插件说明
 > com.android.library 　　  ->  　　  com.module.library  　　　 依赖库插件
 > com.android.application　　->　com.module.application 　      主工程插件
 
-完整配置模型　
+#### 完整配置模型　
 > **note** 以下模板中的配置属性值，均为插件中设置的属性值，大部分实际使用中可以不进行配置，使用默认值即可
 
 ```
@@ -127,3 +126,73 @@ moduleConfig{
 endConfig()
 
 ```
+
+#### 进阶配置项
+> 以上配置均为modularization插件配置项,如不满足要求或需要更多配置时,可基于原始配置,进行再配置
+
+#### 1. 增加全局配置,作为每个module的基础配置
+>  在工程的根目录的gradle.properties中,使用allProjectConfig属性配置全局配置文件的路径, 例如 : allProjectConfig = /home/user/allProjectConfig.gradle
+```
+/home/user/allProjectConfig.gradle
+moduleConfig{//配置选项参照 完整配置模型　
+
+}
+```
+
+>  **Note** 全局配置中,一定不要不要不要添加 **endConfig()** 结束标记,否则......................会报错的
+
+#### 2. 增加特殊配置(默认自动化构建使用) ,作为指定module的本地配置使用
+>  在module工程目录下,新建 second.gradle 文件进行配置,配置选项参照 全局配置
+> **Note** 三种配置优先级  second.gradle > build.gradle > allProjectConfig.gradle   　　　其中second.gradle文件会被插件默认添加到.gitignore文件中，只当做本地配置文件使用
+
+
+
+#### 3. 第三方插件补充配置　　
+> 在modularization　配置项之外，如果需要对额外的选项进行配置　（如buildType 等）　可以　endConfig()之后，进行其他配置
+```
+apply plugin :'com.module.library'　　　　
+//apply plugin :'com.module.application'
+//此插件属性配置区域
+moduleConfig{
+    ....
+}
+endConfig()
+
+//Android配置，配置方式参考Andriod官方,此出配置会默认覆盖moduleConfig中相同的Android属性
+android{
+    ....
+}
+//非内部依赖库,按照常规进行配置
+dependencies {
+    implementation "com.android.support:support-v4:$support-v4"
+}
+
+ //其他
+ ...
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

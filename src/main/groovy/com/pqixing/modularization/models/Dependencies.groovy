@@ -58,7 +58,7 @@ class Dependencies extends BaseExtension {
     LinkedList<String> generatorFiles() {
         StringBuilder sb = new StringBuilder("dependencies { \n")
         dependModules.each { model ->
-            if (model.local) sb.append("    $model.compileMode  project(':$model.moduleName') ")
+            if (model.local||focusLocal) sb.append("    $model.compileMode  project(':$model.moduleName') ")
             else {
                 String newGroup = NormalUtils.isEmpty(model.group) ? baseGroup : model.group
                 String version = model.version
