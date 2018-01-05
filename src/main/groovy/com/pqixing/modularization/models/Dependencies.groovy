@@ -3,6 +3,7 @@ package com.pqixing.modularization.models
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-12-25.
  */
@@ -13,14 +14,28 @@ class Dependencies extends BaseExtension {
     Project project
     Map<String, String> versions
     //强制使用本地库进行依赖处理，兼容旧版本进行本地化开发使用
-    boolean focusLocal
+    Boolean focusLocal
 
     static final String DEFAULT_GROUP = "default_group"
+    Inner allInner
+
 
     Dependencies(Project project) {
         this.dependModules = new LinkedList<>()
         this.project = project
-        focusLocal = project.hasProperty("focusLocal") && "Y" == project.ext.get("focusLocal")
+        if (project.hasProperty("focusLocal"))
+            focusLocal = "Y" == project.ext.get("focusLocal")
+    }
+    /**
+     * 配置通用的配置
+     * @param closure
+     */
+    void defaultConfig(Closure closure) {
+        if (NormalUtils.isEmpty(closure)) return
+        if (NormalUtils.isEmpty(allInner)) allInner = new Inner()
+        closure.delegate = allInner
+        closure.setResolveStrategy(Closure.DELEGATE_ONLY)
+        closure.call()
     }
 
     Inner add(String moduleName, Closure closure = null) {
@@ -48,36 +63,50 @@ class Dependencies extends BaseExtension {
         return inner
     }
 
-    List<String> getModuleNames(){
+    List<String> getModuleNames() {
         List<String> names = new LinkedList<>()
-        dependModules.each {names+= it.moduleName}
+        dependModules.each { names += it.moduleName }
         return names
     }
 
+    private boolean isLocal(Boolean local) {
+        if (!NormalUtils.isEmpty(local)) return local
+        else if (!NormalUtils.isEmpty(allInner?.local)) return allInner?.local
+        else if (!NormalUtils.isEmpty(focusLocal)) return focusLocal
+        else return false
+    }
+
+    String excludeString(Map<String,String> maps){
+        StringBuilder sb = new StringBuilder()
+        maps.each { map ->
+            sb.append("$map.key : '${DEFAULT_GROUP == map.value ? baseGroup : map.value}',")
+        }
+        return sb.substring(0,sb.length()-1)
+    }
     @Override
     LinkedList<String> generatorFiles() {
         StringBuilder sb = new StringBuilder("dependencies { \n")
         dependModules.each { model ->
-            if (model.local||focusLocal) sb.append("    $model.compileMode  project(':$model.moduleName') ")
+            if (isLocal(model.local)) sb.append("    $model.compileMode ( project(':$model.moduleName')) ")
             else {
                 String newGroup = NormalUtils.isEmpty(model.group) ? baseGroup : model.group
                 String version = model.version
                 if (NormalUtils.isEmpty(version)) {
                     version = versions?.containsKey(model.moduleName) ? versions[model.moduleName] : "+"
                 }
-                sb.append("    $model.compileMode  ('$newGroup:$model.moduleName:$version') { \n ")
-                model.excludes.each {
-                    it.each { map ->
-                        String value = DEFAULT_GROUP == map.value ? baseGroup : map.value
-                        sb.append("         exclude($map.key : '$value')  \n")
-                    }
-                }
-                sb.append("     }")
+                sb.append("    $model.compileMode  ('$newGroup:$model.moduleName:$version')  ")
             }
-            sb.append("\n ")
-//            Print.ln(" model.excludes :$model.excludes")
+            sb.append("{ \n")
+            model.excludes.each { sb.append("         exclude(${excludeString(it)})  \n") }
+            sb.append("     } \n ")
         }
-        return [FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.append("}").toString())];
+        sb.append("} \n")
+
+        sb.append("\nconfigurations { \n")
+        allInner?.excludes?.each { sb.append("    all*.exclude(${excludeString(it)})  \n") }
+        sb.append(" }")
+
+        return [FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.toString())];
     }
 
     boolean hasLocalCompile() {
@@ -97,7 +126,7 @@ class Dependencies extends BaseExtension {
         /**
          * 是否依赖本地工程，more依赖仓库工程
          */
-        boolean local = false
+        Boolean local
         /**
          * 依赖模式
          * runtimeOnly
@@ -123,5 +152,10 @@ class Dependencies extends BaseExtension {
             }
         }
 
+        void exclude(Map<String, String> exclude) {
+            excludes += exclude
+        }
+
     }
+
 }
