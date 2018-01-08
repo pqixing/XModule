@@ -87,6 +87,7 @@ class RunType extends BaseContainerExtension {
         return '''
 <application
         android:allowBackup="true"
+        tools:replace="android:allowBackup,android:theme,android:label"
         android:name="#{packageName}.DefaultAppCation"
         android:icon="#1{app_icon}"
         android:label="#{app_name}"
