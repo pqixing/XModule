@@ -37,7 +37,7 @@ abstract class BasePlugin implements Plugin<Project> {
 
             createVersionsUpdateTask(project, moduleConfig)
 
-            createCache(project)
+            createCache(project,moduleConfig)
             moduleConfig.onConfigEnd()
             moduleConfig.generatorFiles()?.findAll {
                 !NormalUtils.isEmpty(it)
@@ -76,7 +76,7 @@ abstract class BasePlugin implements Plugin<Project> {
         }.execute()
     }
 
-    void createCache(Project project){
+    void createCache(Project project, ModuleConfig config){
         project.task("cleanCache") {
             group = Default.taskGroup
             doLast {
