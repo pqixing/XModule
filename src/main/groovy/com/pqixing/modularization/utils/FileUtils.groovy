@@ -1,8 +1,7 @@
 package com.pqixing.modularization.utils
 
-import com.pqixing.modularization.Default
+import com.pqixing.modularization.models.MavenType
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-11-30.
  */
@@ -42,22 +41,53 @@ class FileUtils {
      * @param project
      * @return
      */
-    static void writeDependency(Project project, File outFile) {
-        project.task("dependency", type: org.gradle.api.tasks.diagnostics.DependencyReportTask) {
-            group = Default.taskGroup
-            outputFile = outFile
-            doLast {
-                def strList = new LinkedList<String>()
-                outputFile.eachLine {
-                    if (it.startsWith("No dependencies")) {
-                        strList.removeLast()
-                        strList.removeLast()
-                    } else {
-                        strList.add(it + "\n")
-                    }
-                }
-                FileUtils.write(outputFile, strList.toString())
+    static void writeDependency(Project project, File outputFile) {
+        def strList = new LinkedList<String>()
+        outputFile.eachLine {
+            if (it.startsWith("No dependencies")) {
+                strList.removeLast()
+                strList.removeLast()
+            } else {
+                strList.add(it + "\n")
             }
-        }.execute()
+        }
+
+        HashMap<String, Integer> moduleLevels = new HashMap<>()
+        dependencyByLevel(project, moduleLevels, 1)
+        def maps = moduleLevels.toSpreadMap().sort { it.value }
+        StringBuilder mapSb = new StringBuilder("本地工程依赖层级关系: \n 0 -> $project.name")
+        int curLevel = 0
+        maps.each { map ->
+            if (map.value > curLevel) mapSb.append("\n $map.value -> ")
+            mapSb.append("$map.key  ")
+            curLevel = map.value
+        }
+        mapSb.append("\n")
+
+        FileUtils.write(outputFile,mapSb.toString())
+        outputFile.append( strList.toString())
+
+        writePatchUpload(maps,outputFile.parentFile,project.moduleConfig.mavenType,project.rootDir)
     }
+    /**
+     * 生成批量上传的脚本
+     * @param maps
+     * @param outDir
+     * @param m
+     */
+    static void writePatchUpload(Map<String,Integer> maps, File outDir, MavenType m,File rootDir){
+
+    }
+
+    static void dependencyByLevel(Project project, HashMap<String, Integer> moduleLevels, int curLevel) {
+        if (project == null || !project.hasProperty("moduleConfig")) return
+        List<String> modulesName = project.moduleConfig.dependModules.moduleNames
+        modulesName.each { moduleLevels.put(it, curLevel) }
+        modulesName.each { name ->
+            dependencyByLevel(project.rootProject.allprojects.find {
+                it.name == name
+            }, moduleLevels, curLevel + 1)
+        }
+    }
+
 }

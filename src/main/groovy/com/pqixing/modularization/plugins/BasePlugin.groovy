@@ -6,6 +6,7 @@ import com.pqixing.modularization.models.ModuleConfig
 import com.pqixing.modularization.models.RunType
 import com.pqixing.modularization.tasks.DocSyncTask
 import com.pqixing.modularization.tasks.UpdateVersionsTask
+import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.Plugin
@@ -39,8 +40,10 @@ abstract class BasePlugin implements Plugin<Project> {
             }?.each {
                 project.apply from: it
             }
-            moduleConfig.afterApplyAndroid()
-
+            project.afterEvaluate {
+                moduleConfig.afterApplyAndroid()
+                createDependencyTask(project, new File(project.buildConfig.outDir, "dependency.txt"))
+            }
             project.task("docSync", type: DocSyncTask) {
                 docFileDirs = moduleConfig.docFileDirs
                 updateDesc = moduleConfig.mavenTypes.release.updateDesc
@@ -54,8 +57,19 @@ abstract class BasePlugin implements Plugin<Project> {
         }
         project.ext.support_v7 = moduleConfig.androidConfig.support_v7
         project.ext.support_v4 = moduleConfig.androidConfig.support_v4
-
         project.ext.printPros = { pro -> Print.lnPro(pro) }
+
+
+    }
+
+    void createDependencyTask(Project project, File outFile) {
+        project.task("dependency", type: org.gradle.api.tasks.diagnostics.DependencyReportTask) {
+            group = Default.taskGroup
+            outputFile = outFile
+            doLast {
+                FileUtils.writeDependency(project, outFile)
+            }
+        }.execute()
     }
 
     void createVersionsUpdateTask(Project project, ModuleConfig config) {

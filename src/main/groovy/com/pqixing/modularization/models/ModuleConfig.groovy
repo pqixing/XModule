@@ -2,12 +2,10 @@ package com.pqixing.modularization.models
 
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.tasks.UploadTask
-import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
-import org.gradle.api.NamedDomainObjectContainer
 import com.pqixing.modularization.utils.Print
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -112,11 +110,10 @@ class ModuleConfig extends BaseExtension {
     }
 
     void afterApplyAndroid() {
-        project.afterEvaluate {
+//        project.afterEvaluate {
             uploadToMavenTask()
             Print.ln(toString())
-            FileUtils.writeDependency(project, new File(buildConfig.outDir, "dependency.txt"))
-        }
+//        }
     }
 
     /**
