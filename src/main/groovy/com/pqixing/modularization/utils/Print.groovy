@@ -2,7 +2,7 @@ package com.pqixing.modularization.utils
 
 class Print {
 
-    static String silentLog = "N"
+    static String silentLog = "Y"
 
     static String ln(String str, Closure closure = null) {
         return l(str + "\n", closure)
@@ -10,7 +10,8 @@ class Print {
 
     static String l(String str, Closure closure = null) {
         closure?.call(str)
-        if ("Y" != silentLog) print(str)
+        if ("Y" == silentLog) return
+        print(str)
         def newStr = "${new Date().toLocaleString()} --> $str"
         write(newStr)
         return str

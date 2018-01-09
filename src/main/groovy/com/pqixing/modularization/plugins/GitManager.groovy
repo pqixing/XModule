@@ -98,7 +98,7 @@ includePaths.each { map ->
      mStr.append("include ':$map.key' \\n project(':$map.key').projectDir = new File('$map.value') \\n")
 }
 
-println("modules = $modules modulePaths = $modulePaths")
+//println("modules = $modules modulePaths = $modulePaths")
 def moduleGradle = file("module.gradle")
 moduleGradle.write(mStr.toString())
 apply from: moduleGradle.path

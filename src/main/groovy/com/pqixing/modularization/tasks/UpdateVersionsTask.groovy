@@ -71,7 +71,7 @@ public class UpdateVersionsTask extends DefaultTask {
             def moduleName = it.replace(":", "")
             urls.put(moduleName, NormalUtils.getMetaUrl(mavenUrl, compileGroup, moduleName))
         }
-        println("urls : $urls")
+        Print.ln("urls : $urls")
     }
 
     void updateVersions() {

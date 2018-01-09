@@ -2,6 +2,7 @@ package com.pqixing.modularization.models
 
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
 
 /**
@@ -51,7 +52,7 @@ class AndroidConfig extends BaseExtension {
         if (flavorsEnable && "library" == moduleConfig.pluginType)
             list += FileUtils.write(new File(buildConfig.cacheDir, "flavors.gradle"), NormalUtils.parseString(flavorsTxt, maps))
 
-        println("android Config generatorFiles $list")
+        Print.ln("android Config generatorFiles $list")
         return list
     }
 
@@ -92,13 +93,13 @@ android {
 dependencies {
     // 替换成最新版本, 需要注意的是api
     // 要与compiler匹配使用，均使用最新版可以保证兼容
-    compile ('com.alibaba:arouter-api:1.3.0')
+    implementation ('com.alibaba:arouter-api:1.3.0')
     annotationProcessor 'com.alibaba:arouter-compiler:1.1.4'
     
-    compile 'com.android.support:support-annotations:25.4.0'
-    testCompile 'junit:junit:4.12'
-    androidTestCompile 'com.android.support.test:runner:1.0.0'
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:3.0.1'
+    implementation 'com.android.support:support-annotations:25.4.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.0'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
  }
 
 '''
@@ -107,9 +108,18 @@ dependencies {
 
     String getKotlinTxt() {
         '''
+apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+kapt {
+    arguments {
+        arg("moduleName", project.getName())
+        arg("modulePath",  project.projectDir.absolutePath)
+        arg("rootPath",  project.rootDir.absolutePath)
+    }
+}
 dependencies {
+         kapt 'com.alibaba:arouter-compiler:1.1.4'
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:#{kotlin_version}"
  }
 '''
