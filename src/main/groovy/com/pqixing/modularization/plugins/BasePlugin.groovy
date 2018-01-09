@@ -112,5 +112,11 @@ abstract class BasePlugin implements Plugin<Project> {
         if (!ignoreFile.exists()) ignoreFile.createNewFile()
         if (!ignoreFile.text.contains("second.gradle")) ignoreFile.append("\nsecond.gradle\n")
         if (!ignoreFile.text.contains("${project.name}.iml")) ignoreFile.append("\n${project.name}.iml\n")
+
+        //允许配置全局使用的配置文件
+        if (project.hasProperty("hiddenConfig")) {
+            String path = project.ext.get("hiddenConfig")
+            if (new File(path).exists()) project.apply from: path
+        }
     }
 }

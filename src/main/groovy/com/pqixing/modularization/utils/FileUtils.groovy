@@ -67,7 +67,7 @@ class FileUtils {
         FileUtils.write(outputFile,mapSb.toString())
         outputFile.append( strList.toString())
 
-        writePatchUpload(maps,outputFile.parentFile,project.moduleConfig.mavenType,project.rootDir)
+        writePatchUpload(maps,outputFile.parentFile,project.moduleConfig.mavenType)
     }
     /**
      * 生成批量上传的脚本
@@ -75,8 +75,17 @@ class FileUtils {
      * @param outDir
      * @param m
      */
-    static void writePatchUpload(Map<String,Integer> maps, File outDir, MavenType m,File rootDir){
+    static void writePatchUpload(Map<String,Integer> maps, File outDir, MavenType m){
+        List<String> moduleNames = new LinkedList<>()
+        maps.each { moduleNames.add(0,it.key)}
 
+        StringBuilder sb = new StringBuilder("#!/usr/bin/env bash \n")
+        moduleNames.each {name ->
+            String taskName = "${name}Upload-$m.name"
+            sb.append("gradle :$name:$taskName  \n")
+            sb.append("sleep 10s  \n")
+        }
+        write(new File(outDir,"upload${m.name}.txt"),sb.toString())
     }
 
     static void dependencyByLevel(Project project, HashMap<String, Integer> moduleLevels, int curLevel) {
