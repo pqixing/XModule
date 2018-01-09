@@ -1,7 +1,7 @@
 package com.pqixing.modularization.utils
 
-import com.pqixing.modularization.models.MavenType
 import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-11-30.
  */
@@ -64,10 +64,11 @@ class FileUtils {
         }
         mapSb.append("\n")
 
-        FileUtils.write(outputFile,mapSb.toString())
-        outputFile.append( strList.toString())
+        FileUtils.write(outputFile, mapSb.toString())
+        outputFile.append(strList.toString())
+        if (project.hasProperty("hiddenConfig"))
+            ["debug", "test", "release"].each { writePatchUpload(maps, project.buildDir, it) }
 
-        writePatchUpload(maps,outputFile.parentFile,project.moduleConfig.mavenType)
     }
     /**
      * 生成批量上传的脚本
@@ -75,17 +76,17 @@ class FileUtils {
      * @param outDir
      * @param m
      */
-    static void writePatchUpload(Map<String,Integer> maps, File outDir, MavenType m){
+    static void writePatchUpload(Map<String, Integer> maps, File outDir, String envName) {
         List<String> moduleNames = new LinkedList<>()
-        maps.each { moduleNames.add(0,it.key)}
+        maps.each { moduleNames.add(0, it.key) }
 
         StringBuilder sb = new StringBuilder("#!/usr/bin/env bash \n")
-        moduleNames.each {name ->
-            String taskName = "${name}Upload-$m.name"
+        moduleNames.each { name ->
+            String taskName = "${name}Upload-$envName"
             sb.append("gradle :$name:$taskName  \n")
             sb.append("sleep 10s  \n")
         }
-        write(new File(outDir,"upload${m.name}.txt"),sb.toString())
+        write(new File(outDir, "upload${envName}.txt"), sb.toString())
     }
 
     static void dependencyByLevel(Project project, HashMap<String, Integer> moduleLevels, int curLevel) {
