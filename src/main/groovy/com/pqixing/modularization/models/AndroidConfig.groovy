@@ -83,9 +83,11 @@ android {
         manifestPlaceholders = [CHANNEL_NAME: "DACHEN_DOCTOR"]
         if(#{compatAppache}&&#{compileSdkVersion}>=23) useLibrary 'org.apache.http.legacy'
         
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments = [ moduleName : project.getName(), modulePath : project.projectDir.absolutePath,rootPath:project.rootDir.absolutePath]
+        if(!#{kotlinEnable}){
+            javaCompileOptions {
+                annotationProcessorOptions {
+                    arguments = [ moduleName : project.getName(), modulePath : project.projectDir.absolutePath,rootPath:project.rootDir.absolutePath]
+                }
             }
         }
     }
@@ -94,7 +96,10 @@ dependencies {
     // 替换成最新版本, 需要注意的是api
     // 要与compiler匹配使用，均使用最新版可以保证兼容
     implementation ('com.alibaba:arouter-api:1.3.0')
-    annotationProcessor 'com.alibaba:arouter-compiler:1.1.4'
+    if(!#{kotlinEnable}) annotationProcessor 'com.alibaba:arouter-compiler:1.1.4'
+    
+    compile 'com.dachen.android:dcannotation:2.0'
+   if(!#{kotlinEnable}) annotationProcessor 'com.dachen.android:dccompiler:2.0'
     
     implementation 'com.android.support:support-annotations:25.4.0'
     testImplementation 'junit:junit:4.12'
@@ -108,9 +113,9 @@ dependencies {
 
     String getKotlinTxt() {
         '''
-apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 kapt {
     arguments {
         arg("moduleName", project.getName())
@@ -119,7 +124,8 @@ kapt {
     }
 }
 dependencies {
-         kapt 'com.alibaba:arouter-compiler:1.1.4'
+        kapt 'com.alibaba:arouter-compiler:1.1.4'
+        kapt 'com.dachen.android:dccompiler:2.0'
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:#{kotlin_version}"
  }
 '''
