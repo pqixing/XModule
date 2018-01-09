@@ -92,13 +92,13 @@ android {
 dependencies {
     // 替换成最新版本, 需要注意的是api
     // 要与compiler匹配使用，均使用最新版可以保证兼容
-    implementation ('com.alibaba:arouter-api:1.3.0')
+    compile ('com.alibaba:arouter-api:1.3.0')
     annotationProcessor 'com.alibaba:arouter-compiler:1.1.4'
     
-    implementation 'com.android.support:support-annotations:25.4.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.0'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    compile 'com.android.support:support-annotations:25.4.0'
+    testCompile 'junit:junit:4.12'
+    androidTestCompile 'com.android.support.test:runner:1.0.0'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:3.0.1'
  }
 
 '''
