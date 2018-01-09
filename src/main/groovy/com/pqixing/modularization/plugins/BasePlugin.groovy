@@ -21,6 +21,7 @@ abstract class BasePlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+
         ModuleConfig moduleConfig = new ModuleConfig(project
                 , project.container(RunType)
                 , project.container(MavenType), pluginType())
@@ -32,8 +33,11 @@ abstract class BasePlugin implements Plugin<Project> {
         }
         project.ext.endConfig = {
             applySecondConfig(project)
-            createVersionsUpdateTask(project, moduleConfig)
             if (it instanceof Closure) it.call(moduleConfig)
+
+            createVersionsUpdateTask(project, moduleConfig)
+
+            createCache(project)
             moduleConfig.onConfigEnd()
             moduleConfig.generatorFiles()?.findAll {
                 !NormalUtils.isEmpty(it)
@@ -72,13 +76,7 @@ abstract class BasePlugin implements Plugin<Project> {
         }.execute()
     }
 
-    void createVersionsUpdateTask(Project project, ModuleConfig config) {
-        project.task("updateVersions", type: UpdateVersionsTask) {
-            outPath = config.buildConfig.defRepoPath
-            mavenUrl = config.mavenType.maven_url
-            compileGroup = config.buildConfig.groupName
-            modules += config.dependModules.moduleNames
-        }
+    void createCache(Project project){
         project.task("cleanCache") {
             group = Default.taskGroup
             doLast {
@@ -87,6 +85,15 @@ abstract class BasePlugin implements Plugin<Project> {
                 new File(project.rootDir, ".modularization").deleteDir()
             }
         }
+    }
+    void createVersionsUpdateTask(Project project, ModuleConfig config) {
+        project.task("updateVersions", type: UpdateVersionsTask) {
+            outPath = config.buildConfig.defRepoPath
+            mavenUrl = config.mavenType.maven_url
+            compileGroup = config.buildConfig.groupName
+            modules += config.dependModules.moduleNames
+        }
+
         //如果设置自动同步，或者之前没有更新过版本号，则先更新版本号
         if (config.updateBeforeSync || !new File(config.buildConfig.defRepoPath).exists()) project.task("updateVersions1", type: UpdateVersionsTask) {
             group = "other"

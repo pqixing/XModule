@@ -63,6 +63,7 @@ class ModuleConfig extends BaseExtension {
 
         mavenType = mavenTypes.debug
         if(project.hasProperty("addDefaultImpl")) addDefaultImpl = "Y" == project.ext.get("addDefaultImpl")
+        if(project.hasProperty("offline")) updateBeforeSync = "Y"!=project.offline
     }
 
     String getCompilePluginType() {
