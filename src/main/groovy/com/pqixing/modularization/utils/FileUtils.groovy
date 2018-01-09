@@ -83,7 +83,7 @@ class FileUtils {
         StringBuilder sb = new StringBuilder("#!/usr/bin/env bash \n")
         moduleNames.each { name ->
             String taskName = "${name}Upload-$envName"
-            sb.append('''echo "modules+='#{s1}'" > config2.gradle  \n'''.replace("#{s1}",name))
+            sb.append('''echo "modules+=':#{s1}'" > config2.gradle  \n'''.replace("#{s1}",name))
             sb.append("gradle :$name:$taskName  \n")
             sb.append("sleep 10s  \n")
         }
