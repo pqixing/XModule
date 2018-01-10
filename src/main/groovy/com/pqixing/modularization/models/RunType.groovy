@@ -120,19 +120,22 @@ android{
         return '''
 package #{packageName};
 
-import android.app.Application;
-import android.util.Log;
+import com.dachen.router.dcrouter.services.IApplicationLike;
 /**
  * Created by pqixing on 17-11-24.
  */
 
-public class DefaultAppCation extends Application {
+public class DefaultAppCation extends com.dachen.router.sampleImpl.DefaultAppImpl {
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.d("DefaultAppCation", "onCreate: app name = "+getPackageName());
-        final #1{applicationLike} like =  new #1{applicationLike}(); like.onCreateOnUI(this); like.onVirtualCreate(this); new Thread(){ public void run(){like.onCreateOnThread(DefaultAppCation.this); }}.start();
+     protected void afterAppLikeInit(){
+        for (IApplicationLike like : modules.values()) {
+            like.onVirtualCreate(this);
+        }
+    }
+      @Override
+    public String getModuleName() {
+        return "Virtual";
     }
 }'''
     }

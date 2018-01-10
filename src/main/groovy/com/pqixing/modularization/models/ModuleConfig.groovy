@@ -104,9 +104,9 @@ class ModuleConfig extends BaseExtension {
         dependVersions.endConfig()
 
         dependModules.baseGroup = buildConfig.groupName + ".android"
-        if (addDefaultImpl) Default.defaultImplRepo.each {
+        if (addDefaultImpl&&!Default.defaultImplRepo.contains(project.name)) Default.defaultImplRepo.each {
             dependModules.addExImpl(it)
-        }
+        }else dependModules.addImpl("router")
         dependModules.endConfig(dependVersions.versions)
     }
 

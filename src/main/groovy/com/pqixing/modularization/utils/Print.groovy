@@ -5,12 +5,15 @@ class Print {
     static String silentLog = "Y"
 
     static String ln(String str, Closure closure = null) {
-        return l(str + "\n", closure)
+        return l(str + "\n",false, closure)
+    }
+    static String lnf(String str, Closure closure = null) {
+        return l(str + "\n",true, closure)
     }
 
-    static String l(String str, Closure closure = null) {
+    static String l(String str,boolean focusLog = false, Closure closure = null) {
         closure?.call(str)
-        if ("Y" == silentLog) return
+        if ("Y" == silentLog&&!focusLog) return
         print(str)
         def newStr = "${new Date().toLocaleString()} --> $str"
         write(newStr)

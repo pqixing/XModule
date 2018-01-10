@@ -91,6 +91,10 @@ android {
             }
         }
     }
+    
+    lintOptions {
+          abortOnError false
+      }
 }
 dependencies {
     // 替换成最新版本, 需要注意的是api
@@ -98,8 +102,8 @@ dependencies {
     implementation ('com.alibaba:arouter-api:1.3.0')
     if(!#{kotlinEnable}) annotationProcessor 'com.alibaba:arouter-compiler:1.1.4'
     
-    compile 'com.dachen.android:dcannotation:2.0'
-   if(!#{kotlinEnable}) annotationProcessor 'com.dachen.android:dccompiler:2.0'
+    compile 'com.dachen.android:dcannotation:2.6'
+   if(!#{kotlinEnable}) annotationProcessor 'com.dachen.android:dccompiler:2.6.1'
     
     implementation 'com.android.support:support-annotations:25.4.0'
     testImplementation 'junit:junit:4.12'
@@ -125,7 +129,7 @@ kapt {
 }
 dependencies {
         kapt 'com.alibaba:arouter-compiler:1.1.4'
-        kapt 'com.dachen.android:dccompiler:2.0'
+        kapt 'com.dachen.android:dccompiler:2.6.1'
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:#{kotlin_version}"
  }
 '''

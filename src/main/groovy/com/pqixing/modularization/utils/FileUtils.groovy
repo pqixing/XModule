@@ -91,7 +91,7 @@ class FileUtils {
     }
 
     static void dependencyByLevel(Project project, HashMap<String, Integer> moduleLevels, int curLevel) {
-        if (project == null || !project.hasProperty("moduleConfig")) return
+        if (curLevel>10||project == null || !project.hasProperty("moduleConfig")) return
         List<String> modulesName = project.moduleConfig.dependModules.moduleNames
         modulesName.each { moduleLevels.put(it, curLevel) }
         modulesName.each { name ->

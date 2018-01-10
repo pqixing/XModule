@@ -71,6 +71,6 @@ class UploadTask extends DefaultTask {
         pom.version = getVersion()
         pom.name = "${System.currentTimeMillis()}## $mavenInfo.updateDesc"
         project.uploadArchives.execute()
-        Print.ln("uploadFile -> url : $repository.url version :$pom.version artifactId : $pom.artifactId name = $pom.name")
+        Print.lnf("uploadFile -> url : $repository.url version :$pom.version artifactId : $pom.artifactId name = $pom.name")
     }
 }
