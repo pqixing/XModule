@@ -87,6 +87,7 @@ abstract class BasePlugin implements Plugin<Project> {
         }
     }
     void createVersionsUpdateTask(Project project, ModuleConfig config) {
+        config.buildConfig.defRepoPath = FileUtils.appendUrls(project.rootDir.absolutePath, ".modularization", "module_${config.mavenType.name}.version")
         project.task("updateVersions", type: UpdateVersionsTask) {
             outPath = config.buildConfig.defRepoPath
             mavenUrl = config.mavenType.maven_url

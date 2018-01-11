@@ -1,10 +1,10 @@
 ##  Gradle组件化gradle插件 -- modularization
 >  为解决项目中工程依赖关系复杂，编译构建时间过长，模块无版本管理导致功能开发相互影响等问题，开发次开发，目的是解开工程间依赖，实现模块的版本化管理，快速进行模块调试构建
-###  Android插件说明
+###  一. Android插件说明
 > com.android.library 　　  ->  　　  com.module.library  　　　 依赖库插件
 > com.android.application　　->　com.module.application 　      主工程插件
 
-#### 完整配置模型　
+#### 1. 完整配置模型　
 > **note** 以下模板中的配置属性值，均为插件中设置的属性值，大部分实际使用中可以不进行配置，使用默认值即可
 
 ```
@@ -85,11 +85,11 @@ moduleConfig{
             asApp = true
             //启动运行的页面
             launchActivity ="com.dachen.mdclogin.LoginActivity"
-             //启动运行的Applike -> 理解为组件的Application
-            applicationLike ="com.dachen.mdclogin.Applike"
             app_name = project.name
             app_icon
             app_theme
+            //是否在登录以后才跳转页面
+            afterLogin = true
         }
         other{ ... }
     }
@@ -127,10 +127,10 @@ endConfig()
 
 ```
 
-#### 进阶配置项
+#### 2. 进阶配置项
 > 以上配置均为modularization插件配置项,如不满足要求或需要更多配置时,可基于原始配置,进行再配置
 
-#### 1. 增加全局配置,作为每个module的基础配置
+####  2.1 增加全局配置,作为每个module的基础配置
 >  在工程的根目录的gradle.properties中,使用allProjectConfig属性配置全局配置文件的路径, 例如 : allProjectConfig = /home/user/allProjectConfig.gradle
 ```
 /home/user/allProjectConfig.gradle
@@ -141,13 +141,13 @@ moduleConfig{//配置选项参照 完整配置模型　
 
 >  **Note** 全局配置中,一定不要不要不要添加 **endConfig()** 结束标记,否则......................会报错的
 
-#### 2. 增加特殊配置(默认自动化构建使用) ,作为指定module的本地配置使用
+#### 2.2 增加特殊配置(默认自动化构建使用) ,作为指定module的本地配置使用
 >  在module工程目录下,新建 second.gradle 文件进行配置,配置选项参照 全局配置
 > **Note** 三种配置优先级  second.gradle > build.gradle > allProjectConfig.gradle   　　　其中second.gradle文件会被插件默认添加到.gitignore文件中，只当做本地配置文件使用
 
 
 
-#### 3. 第三方插件补充配置　　
+#### 2.3 第三方插件补充配置　　
 > 在modularization　配置项之外，如果需要对额外的选项进行配置　（如buildType 等）　可以　endConfig()之后，进行其他配置
 ```
 apply plugin :'com.module.library'　　　　
@@ -171,6 +171,45 @@ dependencies {
  ...
 
 ```
+
+#### 2.4 高级配置项
+>  在工程目录中的gradle.properties 中,还可以进行少量隐藏配置
+```
+//强制只用本地工程,Y : 对配置的工程使用project方式依赖, 否则默认依赖仓库版本 (注意,依赖本地工程时,需要把工程目录导入Studio中)
+focusLocal = Y
+//是否添加默认实现 Y  默认给每个工程添加 router , dcnet,dcuser,mvpbase,dccommon 五个基础工程(这五个工程本身除外)  否则不自动添加(router工程始终添加)
+addDefaultImpl = N
+//隐藏配置,优先级最高,配置方式跟进阶配置一样,若配置此属性,同时触发生成批量上传工程的脚本
+hiddenConfig = configPath
+```
+
+
+#### 3. 文件输出介绍
+>  插件在使用过程中,会输出一些文件,默认保存在模块下.modularization 目录下
+
+针对library或者Application模块,会包含以下文件
+>
+>  dependency.txt　　　 该模块的依赖关系输出
+>  .cache 　　缓存文件输出目录
+>  |-- java　　   组件单独运行时，自动生成的Java代码目录
+>  |-- android.gradle    自动生成的gradle配置文件
+>  |-- AndroidManifest.xml    自动生成组件单独运行时,需要的清单文件
+>  |-- dependencies.gradle   通过moduleConfig进行依赖配置后,自动生成的配置文件
+>  |-- kotlin.gradle      kotlin 支持文件
+>  |-- sourceSets.gradle  组件运行的sourceSet配置
+
+针对root工程,会生成以下文件
+>
+>  allModulePath.log　　　 自动生成当前所有工程以及对应的绝对地址映射文件
+>  clone.bat/clone.sh 　　批量clone所有git的脚本
+>  module.gradle　　      所有导入的模块列表
+>  module_{env}.version        所有导入的模块列表在仓库中的版本号显示
+>  plugin.version    当前使用modularization插件的版本号
+>  print.log   打印的日志记录
+>  setting.gradle     这个才是真正实现自动导入模块的配置文件
+
+
+#### 4. Gradle命令介绍
 
 
 
