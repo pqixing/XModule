@@ -16,6 +16,7 @@ class RunType extends BaseContainerExtension {
     String app_icon
     String app_name
     String app_theme
+    boolean afterLogin = true
 
 
     RunType(String name) {
@@ -50,7 +51,7 @@ class RunType extends BaseContainerExtension {
         maps.putAll(buildConfig.properties)
         maps.put("versionCode", NormalUtils.isEmpty(androidConfig.versionCode) ? "1" : androidConfig.versionCode)
         maps.put("versionName", NormalUtils.isEmpty(androidConfig.versionName) ? "1.0" : androidConfig.versionName)
-
+        if(afterLogin) maps+= ["hideRouterCode":"N"]
         //输出Application类
         def applicationFile = new File(FileUtils.appendUrls(buildConfig.cacheDir, "java"
                 , buildConfig.packageName.replace('.', File.separator), "DefaultAppCation.java"))
@@ -60,6 +61,11 @@ class RunType extends BaseContainerExtension {
         def activityFile = new File(FileUtils.appendUrls(buildConfig.cacheDir, "java"
                 , buildConfig.packageName.replace('.', File.separator), "DefaultActivity.java"))
         FileUtils.write(activityFile, NormalUtils.parseString(activityTxt, maps))
+
+        //输出Activity类
+        def callBackFile = new File(FileUtils.appendUrls(buildConfig.cacheDir, "java"
+                , buildConfig.packageName.replace('.', File.separator), "LoginCallBack.java"))
+        FileUtils.write(callBackFile, NormalUtils.parseString(loginCallBackTxt, maps))
 
         //输出临时清单文件
         def inputManifest = new File(FileUtils.appendUrls(project.projectDir.path, "src", "main"), "AndroidManifest.xml").text
@@ -71,6 +77,46 @@ class RunType extends BaseContainerExtension {
 
         //输出source的gradle配置
         return [FileUtils.write(new File(buildConfig.cacheDir, "sourceSets.gradle"), NormalUtils.parseString(sourceSetTxt, ["cacheDir": buildConfig.cacheDir]))]
+    }
+
+    String getLoginCallBackTxt(){
+        return '''
+package #{packageName};
+
+import android.content.Context;
+import android.content.Intent;
+import android.widget.Toast;
+
+
+/**
+ * Created by pqixing on 18-1-11.
+ */
+@com.alibaba.android.arouter.facade.annotation.Route(path = com.dachen.router.dcrouter.proxy.RoutePaths.ROUTER_LOGIN_SERVICE.THIS) //#1{hideRouterCode}
+public  class LoginCallBack
+        implements com.dachen.router.dcrouter.services.RouterMainLoginService //#1{hideRouterCode}
+{
+    @Override
+    public void routerLoginSuccess(String jsonStr) {
+        DefaultActivity.toActivity(false);
+    }
+
+    @Override
+    public void routerLoginFail() {
+        Toast.makeText( DefaultActivity.activity,"登录失败",Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void logout() {
+
+    }
+
+    @Override
+    public void init(Context context) {
+
+    }
+}
+
+'''
     }
 
     String getManifestMetaTxt() {
@@ -149,12 +195,28 @@ import android.content.Intent;
 import android.os.Bundle;
 
 public class DefaultActivity extends Activity {
-
+ static Activity activity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        startActivity(new Intent(this,#1{launchActivity}.class));finish();
+        activity = this;
+        toActivity(#{afterLogin});
     }
+    
+    public static final void toActivity(boolean afterLogin){
+        if(afterLogin){
+            try {  com.dachen.router.mdclogin.proxy.MdcLoginPaths.ROUTER_TO_LOGIN.create().start(activity); }catch (Exception e){   toActivity(false);  } //#1{hideRouterCode}
+        }else{
+            activity.startActivity(new Intent(activity,#1{launchActivity}.class));activity.finish();
+        }
+    }
+    
+      @Override
+    protected void onDestroy() {
+        activity = null;
+        super.onDestroy();
+    }
+    
 }
 '''
     }
