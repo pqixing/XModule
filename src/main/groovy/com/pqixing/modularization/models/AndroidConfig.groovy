@@ -103,7 +103,7 @@ dependencies {
     if(!#{kotlinEnable}) annotationProcessor 'com.alibaba:arouter-compiler:1.1.4'
     
     compile 'com.dachen.android:dcannotation:2.6'
-   if(!#{kotlinEnable}) annotationProcessor 'com.dachen.android:dccompiler:2.6.1'
+   if(!#{kotlinEnable}) annotationProcessor 'com.dachen.android:dccompiler:2.6.2'
     
     implementation 'com.android.support:support-annotations:25.4.0'
     testImplementation 'junit:junit:4.12'
@@ -129,7 +129,7 @@ kapt {
 }
 dependencies {
         kapt 'com.alibaba:arouter-compiler:1.1.4'
-        kapt 'com.dachen.android:dccompiler:2.6.1'
+        kapt 'com.dachen.android:dccompiler:2.6.2'
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:#{kotlin_version}"
  }
 '''
