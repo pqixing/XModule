@@ -46,17 +46,17 @@ class UploadTask extends DefaultTask {
 //    }
 
     String getVersion() {
-        switch (mavenInfo.name) {
-            case "debug": return "${mavenInfo.pom_version}.${System.currentTimeMillis()}"
-            case "test":
+//        switch (mavenInfo.name) {
+//            case "debug": return "${mavenInfo.pom_version}.${System.currentTimeMillis()}"
+//            case "test":
                 int lastVersion = 0
                 try {
                     lastVersion = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId)).replace("${mavenInfo.pom_version}.", "").toInteger()
                 } catch (Exception e) {
                 }
                 return "${mavenInfo.pom_version}.${lastVersion + 1}"
-            default: return mavenInfo.pom_version
-        }
+//            default: return mavenInfo.pom_version
+//        }
     }
 
     void uploadFile() {
