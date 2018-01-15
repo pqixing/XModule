@@ -142,8 +142,8 @@ moduleConfig{//配置选项参照 完整配置模型　
 >  **Note** 全局配置中,一定不要不要不要添加 **endConfig()** 结束标记,否则......................会报错的
 
 #### 2.2 增加特殊配置(默认自动化构建使用) ,作为指定module的本地配置使用
->  在module工程目录下,新建 second.gradle 文件进行配置,配置选项参照 全局配置
-> **Note** 三种配置优先级  second.gradle > build.gradle > allProjectConfig.gradle   　　　其中second.gradle文件会被插件默认添加到.gitignore文件中，只当做本地配置文件使用
+>  在module工程目录下,新建 local.gradle 文件进行配置,配置选项参照 全局配置
+> **Note** 三种配置级别重要性  local.gradle > build.gradle > allProjectConfig.gradle   　　　其中second.gradle文件会被插件默认添加到.gitignore文件中，只当做本地配置文件使用
 
 
 
