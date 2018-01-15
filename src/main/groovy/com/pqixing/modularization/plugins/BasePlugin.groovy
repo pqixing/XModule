@@ -118,7 +118,7 @@ moduleConfig{
         
         
         
-        }''')
+}''')
         }
         File ignoreFile = project.file(".gitignore")
         if (!ignoreFile.exists()) ignoreFile.createNewFile()
