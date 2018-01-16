@@ -72,7 +72,7 @@ class UploadTask extends DefaultTask {
         pom.groupId = mavenInfo.groupName + ".android"
         pom.artifactId = uploadArtifactId
         pom.version = getVersion()
-        pom.name = "${System.currentTimeMillis()}##$project.lastCommit ##$mavenInfo.updateDesc"
+        pom.name = "${System.currentTimeMillis()}##${mavenInfo.updateDesc} \n 最后更新:$project.lastCommit"
         project.uploadArchives.execute()
         Print.lnf("uploadFile -> version :$pom.version artifactId : $pom.artifactId name = $pom.name url : $repository.url ")
     }
