@@ -9,14 +9,15 @@ import org.gradle.api.tasks.Exec
  */
 
 class GitManager extends BasePlugin {
+
+    @Override
+    Set<String> getIgnoreFields() {
+        return ["config.gradle","giturl.properties"]
+    }
     @Override
     void apply(Project project) {
         super.apply(project)
         project.buildDir.mkdirs()
-
-        File ignoreFile = project.file(".gitignore")
-        if (!ignoreFile.exists()) ignoreFile.createNewFile()
-        if (!ignoreFile.text.contains("config.gradle")) ignoreFile.append("\nconfig.gradle \n")
 
         def settingFile = new File(project.rootDir, ".modularization/setting.gradle")
         boolean exit = settingFile.exists()
@@ -35,6 +36,8 @@ class GitManager extends BasePlugin {
             }
         }
     }
+
+
 
     String getConfigGradleTxt() {
         return '''

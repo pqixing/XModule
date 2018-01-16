@@ -31,4 +31,9 @@ class Document extends BasePlugin {
             }
         }
     }
+
+    @Override
+    Set<String> getIgnoreFields() {
+        return ["updatelog"]
+    }
 }

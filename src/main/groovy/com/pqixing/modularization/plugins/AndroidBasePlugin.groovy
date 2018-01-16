@@ -95,27 +95,17 @@ abstract class AndroidBasePlugin extends BasePlugin {
         }.execute()
     }
 
+    Set<String> getIgnoreFields(){
+        return ["local.gradle","second.gradle"]
+    }
+
     void applySecondConfig(Project project) {
         File localConfig = project.file("local.gradle")
         if (localConfig.exists()) {
             project.apply from: localConfig.path
         }else {
-            localConfig.write('''//local config file  , do not commit
-moduleConfig{
-        
-        
-        
-        
-        
-}''')
+            localConfig.write("//local config file\n moduleConfig{\n\n\n\n\n\n\n\n\n\n\n\n\n\n}")
         }
-        File ignoreFile = project.file(".gitignore")
-        if (!ignoreFile.exists()) ignoreFile.createNewFile()
-        if (!ignoreFile.text.contains("second.gradle")) ignoreFile.append("\nsecond.gradle\n")
-        if (!ignoreFile.text.contains("local.gradle")) ignoreFile.append("\nlocal.gradle\n")
-        if (!ignoreFile.text.contains("build")) ignoreFile.append("\nbuild/\n")
-        if (!ignoreFile.text.contains("${project.name}.iml")) ignoreFile.append("\n${project.name}.iml\n")
-
         //允许配置全局使用的配置文件
         if (project.hasProperty("hiddenConfig")) {
             String path = project.ext.get("hiddenConfig")
