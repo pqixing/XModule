@@ -19,8 +19,11 @@ class UploadTask extends DefaultTask {
     void run() {
         checkVail()
         uploadFile()
+        resetRepoVersionTime()
     }
+    void resetRepoVersionTime(){
 
+    }
     void checkVail() {
         switch (mavenInfo.name) {
             case "release":
@@ -59,21 +62,31 @@ class UploadTask extends DefaultTask {
 //        }
     }
     String getUploadArtifactId(){
-        return project.branchName == "master"?mavenInfo.artifactId:"${mavenInfo.artifactId}-$project.branchName"
+        return NormalUtils.getNameForBranch(project,project.name)
     }
 
     void uploadFile() {
         def deployer = project.uploadArchives.repositories.mavenDeployer
         def pom = deployer.pom
         def repository = deployer.repository
+        def version = getVersion()
         repository.url = mavenInfo.maven_url
         repository.authentication.userName = mavenInfo.userName
         repository.authentication.password = mavenInfo.password
         pom.groupId = mavenInfo.groupName + ".android"
         pom.artifactId = uploadArtifactId
-        pom.version = getVersion()
-        pom.name = "${System.currentTimeMillis()}##${mavenInfo.updateDesc} \n 最后更新:$project.lastCommit"
+        pom.version = version
+        pom.name = "${System.currentTimeMillis()}##${mavenInfo.updateDesc} \n --- Git记录:$project.lastCommit"
         project.uploadArchives.execute()
         Print.lnf("uploadFile -> version :$pom.version artifactId : $pom.artifactId name = $pom.name url : $repository.url ")
+
+        //上传完成以后,更新本地仓库中的版本
+        File repoFile =new File(project.moduleConfig.buildConfig.defRepoPath)
+        def pros = new Properties()
+        if (repoFile.exists()) pros.load(repoFile.newInputStream())
+        pros.put(uploadArtifactId, version)
+        String timeStr = "${uploadArtifactId}-stamp"
+        pros.put(timeStr, System.currentTimeMillis().toString())
+        pros.store(repoFile.newOutputStream(), "")
     }
 }

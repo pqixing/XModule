@@ -1,5 +1,7 @@
 package com.pqixing.modularization.utils
 
+import com.pqixing.modularization.Default
+import com.pqixing.modularization.models.MavenType
 import org.gradle.api.Project
 
 /**
@@ -7,6 +9,19 @@ import org.gradle.api.Project
  */
 
 class FileUtils {
+    /**
+     * 读取缓存的pom依赖信息
+     * @param maven
+     * @param model
+     * @return
+     */
+    static String readCachePom(MavenType maven, String name, String version) {
+        File pomFile = new File(maven.project.rootDir, ".modularization/poms_$maven.name/${name}-${version}.pom")
+        if (pomFile.exists()) return pomFile.text
+        String pomStr = NormalUtils.request(NormalUtils.getPomUrl(maven.maven_url, Default.groupName, name, version))
+        if (!NormalUtils.isEmpty(pomStr)) write(pomFile, pomStr)
+    }
+
     /**
      * 拼接url
      * @param urls

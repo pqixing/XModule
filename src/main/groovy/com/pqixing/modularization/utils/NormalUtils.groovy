@@ -73,6 +73,17 @@ class NormalUtils {
         Print.ln("parseLastVersion : version ${version} url :$url")
         return version
     }
+    /**
+     * 集合转字符串
+     * @param collection
+     * @return
+     */
+    static String collection2Str(Collection collection){
+        if(isEmpty(collection)) return ""
+        StringBuilder sb = new StringBuilder()
+        collection.each { sb.append(it).append(",")}
+        return sb.substring(0,sb.length()-1)
+    }
 
     static String request(String url) {
         try {
@@ -141,5 +152,10 @@ class NormalUtils {
             if(line.startsWith("*")) curBrach = line
         }
         return curBrach
+    }
+
+    static String getNameForBranch(Project project,String sourceName){
+        if(project.branchName == "master") return sourceName
+        return "$sourceName-b-${project.branchName}"
     }
 }

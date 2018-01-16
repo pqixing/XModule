@@ -70,6 +70,8 @@ public class UpdateVersionsTask extends DefaultTask {
         modules.each {
             def moduleName = it.replace(":", "")
             urls.put(moduleName, NormalUtils.getMetaUrl(mavenUrl, compileGroup, moduleName))
+            if ("master" != project.branchName)
+                urls.put(NormalUtils.getNameForBranch(project,moduleName), NormalUtils.getMetaUrl(mavenUrl, compileGroup, NormalUtils.getNameForBranch(project,moduleName)))
         }
         Print.ln("urls : $urls")
     }
@@ -85,7 +87,7 @@ public class UpdateVersionsTask extends DefaultTask {
             String timeStamp = "${map.key}-last"
 
             //10秒内,不更新相同的组件版本,避免不停的爬取相同的接口
-            if (System.currentTimeMillis() - (pros.getProperty(timeStamp)?.toLong() ?: 0L) <= 1000 * 10) return
+            if (System.currentTimeMillis() - (pros.getProperty(timeStamp)?.toLong() ?: 0L) <= 1000 * 20) return
 
             String version = NormalUtils.parseLastVersion(map.value)
             if (!NormalUtils.isEmpty(version)) {
