@@ -10,7 +10,7 @@ import org.gradle.api.Project
  */
 
 class RunType extends BaseContainerExtension {
-    boolean asApp = false
+    boolean asApp = true
     String applicationLike
     String launchActivity
     String app_icon

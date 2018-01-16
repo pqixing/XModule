@@ -55,13 +55,13 @@ class ModuleConfig extends BaseExtension {
         mavenTypes.whenObjectAdded { it.onCreate(project) }
 
         mavenTypes.add(new MavenType("release"))
-        mavenTypes.add(new MavenType("debug"))
+//        mavenTypes.add(new MavenType("debug"))
         mavenTypes.add(new MavenType("test"))
 
         this.runTypes = runTypes
         runTypes.whenObjectAdded { it.onCreate(project) }
 
-        mavenType = mavenTypes.debug
+        mavenType = mavenTypes.test
         if(project.hasProperty("addDefaultImpl")) addDefaultImpl = "Y" == project.ext.get("addDefaultImpl")
         if(project.hasProperty("offline")) updateBeforeSync = "Y"!=project.offline
     }
