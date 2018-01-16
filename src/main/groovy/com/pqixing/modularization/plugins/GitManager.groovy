@@ -1,16 +1,17 @@
 package com.pqixing.modularization.plugins
 
 import com.pqixing.modularization.Default
-import org.gradle.api.Plugin
+import com.pqixing.modularization.base.BasePlugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
 /**
  * Created by pqixing on 17-12-20.
  */
 
-public class GitManager implements Plugin<Project> {
+class GitManager extends BasePlugin {
     @Override
-    public void apply(Project project) {
+    void apply(Project project) {
+        super.apply(project)
         project.buildDir.mkdirs()
 
         File ignoreFile = project.file(".gitignore")

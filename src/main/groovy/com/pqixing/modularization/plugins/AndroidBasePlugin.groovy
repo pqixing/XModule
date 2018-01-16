@@ -1,6 +1,7 @@
 package com.pqixing.modularization.plugins
 
 import com.pqixing.modularization.Default
+import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.models.MavenType
 import com.pqixing.modularization.models.ModuleConfig
 import com.pqixing.modularization.models.RunType
@@ -9,19 +10,17 @@ import com.pqixing.modularization.tasks.UpdateVersionsTask
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
-import org.gradle.api.Plugin
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-7.
  */
 
-abstract class BasePlugin implements Plugin<Project> {
+abstract class AndroidBasePlugin extends BasePlugin {
     abstract String pluginType()
 
     @Override
     void apply(Project project) {
-
+        super.apply(project)
         ModuleConfig moduleConfig = new ModuleConfig(project
                 , project.container(RunType)
                 , project.container(MavenType), pluginType())
@@ -37,7 +36,6 @@ abstract class BasePlugin implements Plugin<Project> {
 
             createVersionsUpdateTask(project, moduleConfig)
 
-            createCache(project,moduleConfig)
             moduleConfig.onConfigEnd()
             moduleConfig.generatorFiles()?.findAll {
                 !NormalUtils.isEmpty(it)
@@ -76,16 +74,7 @@ abstract class BasePlugin implements Plugin<Project> {
         }.execute()
     }
 
-    void createCache(Project project, ModuleConfig config){
-        project.task("cleanCache") {
-            group = Default.taskGroup
-            doLast {
-                project.clean.execute()
-                new File(config.buildConfig.outDir).deleteDir()
-                new File(project.rootDir, ".modularization").deleteDir()
-            }
-        }
-    }
+
     void createVersionsUpdateTask(Project project, ModuleConfig config) {
         config.buildConfig.defRepoPath = FileUtils.appendUrls(project.rootDir.absolutePath, ".modularization", "module_${config.mavenType.name}.version")
         project.task("updateVersions", type: UpdateVersionsTask) {

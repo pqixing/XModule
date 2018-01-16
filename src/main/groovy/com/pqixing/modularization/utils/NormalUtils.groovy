@@ -1,9 +1,9 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Default
+import org.gradle.api.Project
 
 import java.util.regex.Pattern
-
 /**
  * Created by pqixing on 17-12-8.
  */
@@ -121,5 +121,25 @@ class NormalUtils {
         String r = xmlTxt.find(Pattern.compile("<${key}>(?s).*?</${key}>"))
         if (isEmpty(r)) return ""
         return r.substring(key.length() + 2, r.length() - key.length() - 3)
+    }
+    /**
+     * 获取当前分支名称
+     * @param project
+     * @return
+     */
+    static String getBranchName(Project project){
+       return  "git rev-parse --abbrev-ref HEAD".execute(null,project.projectDir).text.trim()
+    }
+    /**
+     * 获取最后提交记录
+     * @param project
+     * @return
+     */
+    static String getLastCommit(Project project){
+        String curBrach = ""
+        " git branch -v".execute(null,project.projectDir).text.eachLine {line->
+            if(line.startsWith("*")) curBrach = line
+        }
+        return curBrach
     }
 }
