@@ -51,12 +51,15 @@ class UploadTask extends DefaultTask {
 //            case "test":
                 int lastVersion = 0
                 try {
-                    lastVersion = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId)).replace("${mavenInfo.pom_version}.", "").toInteger()
+                    lastVersion = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(mavenInfo.maven_url, mavenInfo.groupName, uploadArtifactId)).replace("${mavenInfo.pom_version}.", "").toInteger()
                 } catch (Exception e) {
                 }
                 return "${mavenInfo.pom_version}.${lastVersion + 1}"
 //            default: return mavenInfo.pom_version
 //        }
+    }
+    String getUploadArtifactId(){
+        return project.branchName == "master"?mavenInfo.artifactId:"${mavenInfo.artifactId}-$project.branchName"
     }
 
     void uploadFile() {
@@ -67,10 +70,10 @@ class UploadTask extends DefaultTask {
         repository.authentication.userName = mavenInfo.userName
         repository.authentication.password = mavenInfo.password
         pom.groupId = mavenInfo.groupName + ".android"
-        pom.artifactId = mavenInfo.artifactId
+        pom.artifactId = uploadArtifactId
         pom.version = getVersion()
-        pom.name = "${System.currentTimeMillis()}## $mavenInfo.updateDesc"
+        pom.name = "${System.currentTimeMillis()}##$project.lastCommit ##$mavenInfo.updateDesc"
         project.uploadArchives.execute()
-        Print.lnf("uploadFile -> url : $repository.url version :$pom.version artifactId : $pom.artifactId name = $pom.name")
+        Print.lnf("uploadFile -> version :$pom.version artifactId : $pom.artifactId name = $pom.name url : $repository.url ")
     }
 }

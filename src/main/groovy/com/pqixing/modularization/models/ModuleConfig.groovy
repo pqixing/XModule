@@ -34,7 +34,7 @@ class ModuleConfig extends BaseExtension {
 
 
     String pom_version
-    boolean uploadEnable
+    boolean uploadEnable = true
     //集成默认的依赖库
     boolean addDefaultImpl = true
 
@@ -147,7 +147,7 @@ class ModuleConfig extends BaseExtension {
         if (NormalUtils.isEmpty(m.uploadEnable)) m.uploadEnable = uploadEnable
 
         if (m.uploadEnable && ("release" != m.name || Default.uploadKey == m.uploadKey)) {
-            String taskName = "${project.name}Upload-$m.name"
+            String taskName = "${project.name}Upload"
             listTask += project.task(taskName, type: UploadTask) { mavenInfo = m }
         }
 //        }
