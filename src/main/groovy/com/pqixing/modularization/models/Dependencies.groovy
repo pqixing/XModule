@@ -10,21 +10,21 @@ import org.gradle.api.Project
 
 class Dependencies extends BaseExtension {
     String baseGroup
-    LinkedList<Inner> dependModules
+    LinkedList<DpItem> dependModules
     Project project
     Map<String, String> versions
     //强制使用本地库进行依赖处理，兼容旧版本进行本地化开发使用
     Boolean focusLocal
 
     static final String DEFAULT_GROUP = "default_group"
-    Inner allInner
+    DpItem allInner
 
 
     Dependencies(Project project) {
         this.dependModules = new LinkedList<>()
         this.project = project
         versions = new HashMap<>()
-        allInner = new Inner()
+        allInner = new DpItem()
         if (project.hasProperty("focusLocal"))
             focusLocal = "Y" == project.ext.get("focusLocal")
     }
@@ -34,14 +34,14 @@ class Dependencies extends BaseExtension {
      */
     void defaultConfig(Closure closure) {
         if (NormalUtils.isEmpty(closure)) return
-        if (NormalUtils.isEmpty(allInner)) allInner = new Inner()
+        if (NormalUtils.isEmpty(allInner)) allInner = new DpItem()
         closure.delegate = allInner
         closure.setResolveStrategy(Closure.DELEGATE_ONLY)
         closure.call()
     }
 
-    Inner add(String moduleName, Closure closure = null) {
-        def inner = new Inner()
+    DpItem add(String moduleName, Closure closure = null) {
+        def inner = new DpItem()
         inner.moduleName = moduleName
         if (closure != null) {
             closure.delegate = inner
@@ -52,14 +52,14 @@ class Dependencies extends BaseExtension {
         return inner
     }
 
-    Inner addImpl(String moduleName, Closure closure = null) {
-        Inner inner = add(moduleName, closure)
+    DpItem addImpl(String moduleName, Closure closure = null) {
+        DpItem inner = add(moduleName, closure)
         inner.compileMode = "compile"
         return inner
     }
 
-    Inner addExImpl(String moduleName, Closure closure = null) {
-        Inner inner = add(moduleName, closure)
+    DpItem addExImpl(String moduleName, Closure closure = null) {
+        DpItem inner = add(moduleName, closure)
         inner.compileMode = "compile"
         inner.excludeGroup(DEFAULT_GROUP)
         return inner
@@ -111,6 +111,10 @@ class Dependencies extends BaseExtension {
                     masterExclude.add(model.moduleName)
                     addMasterExclude(masterExclude, moduleName, version)
                 }
+                //更新bean里面的信息
+                model.moduleName = moduleName
+                model.version = version
+                model.version = version
             }
             sb.append("{ \n")
             model.excludes.each { sb.append("         exclude(${excludeString(it)})  \n") }
@@ -143,7 +147,7 @@ class Dependencies extends BaseExtension {
 
     boolean hasLocalCompile() {
         if (focusLocal) return true
-        for (Inner i : dependModules) {
+        for (DpItem i : dependModules) {
             if (i.local) return true
         }
         return false
@@ -153,7 +157,7 @@ class Dependencies extends BaseExtension {
         versions = outConfig
     }
 
-    static class Inner {
+    static class DpItem {
         String moduleName
         /**
          * 是否依赖本地工程，more依赖仓库工程
@@ -170,9 +174,12 @@ class Dependencies extends BaseExtension {
         String group
         String version
         LinkedList<Map<String, String>> excludes = new LinkedList<>()
+        /**
+         * 依赖中的依赖树
+         */
+        Set<DpItem> dpItems = new HashSet<>()
 
         void excludeGroup(String[] groups) {
-//            Print.ln(" exludeGroup. groups :$groups")
             groups.each {
                 excludes += ["group": it]
             }
@@ -188,6 +195,19 @@ class Dependencies extends BaseExtension {
             excludes += exclude
         }
 
+
+        @Override
+        String toString() {
+            return "DpItem{" +
+                    "moduleName='" + moduleName + '\'' +
+                    ", local=" + local +
+                    ", compileMode='" + compileMode + '\'' +
+                    ", group='" + group + '\'' +
+                    ", version='" + version + '\'' +
+                    ", excludes=" + excludes +
+                    ", dpItems=" + dpItems +
+                    '}';
+        }
     }
 
 }
