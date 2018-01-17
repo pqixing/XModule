@@ -77,7 +77,7 @@ class FileUtils {
             }
         }
         StringBuilder mapSb = new StringBuilder("-\n")
-        if (project.hasProperty("focusLocal") && "Y" == project.ext.get("focusLocal")) {
+        if (project.localMode) {
             HashMap<String, Integer> moduleLevels = new HashMap<>()
             dependencyByLevel(project, moduleLevels, 1)
             def maps = moduleLevels.toSpreadMap().sort { it.value }

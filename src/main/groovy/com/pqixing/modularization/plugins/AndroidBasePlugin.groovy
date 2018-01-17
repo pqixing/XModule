@@ -70,8 +70,9 @@ abstract class AndroidBasePlugin extends BasePlugin {
                 FileUtils.writeDependency(project, outFile)
             }
         }.execute()
+        if(project.localMode) return
         if("master" !=project.branchName){
-            project.task("listBranchProduct",type:BranchCheckTask)
+            project.task("diffForBranch",type:BranchCheckTask)
         }else {
             project.task("diffForRelease",type:MasterCheckTask)
         }

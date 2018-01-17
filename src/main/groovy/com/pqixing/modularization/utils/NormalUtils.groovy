@@ -141,6 +141,13 @@ class NormalUtils {
     static String getBranchName(Project project){
        return  "git rev-parse --abbrev-ref HEAD".execute(null,project.projectDir).text.trim()
     }
+    static String getProperties(Project project,String key){
+        try {
+            return project.ext.get(key)
+        }catch (Exception e){
+            return ""
+        }
+    }
     /**
      * 获取最后提交记录
      * @param project

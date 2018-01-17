@@ -11,16 +11,19 @@ import org.gradle.api.Project
 
 abstract class BasePlugin implements Plugin<Project> {
     Project project
+
     @Override
     void apply(Project project) {
         this.project = project
         addIgnoreFile()
-        project.ext.branchName = NormalUtils.getBranchName(project)
+        project.ext.branchName = "Y" == NormalUtils.getProperties(project, "focusMaster") ? "master"
+                : NormalUtils.getBranchName(project)
         project.ext.lastCommit = NormalUtils.getLastCommit(project)
-        project.task("updateGit"){
+        project.ext.localMode = project.hasProperty("focusLocal") && "Y" == project.ext.get("focusLocal")
+        project.task("updateGit") {
             group = Default.taskGroup
             doFirst {
-                "git pull".execute(null,project.projectDir)
+                "git pull".execute(null, project.projectDir)
             }
         }
         project.afterEvaluate {
@@ -32,7 +35,7 @@ abstract class BasePlugin implements Plugin<Project> {
         File ignoreFile = project.file(".gitignore")
         if (!ignoreFile.exists()) ignoreFile.createNewFile()
         StringBuilder sb = new StringBuilder(ignoreFile.text)
-       Set<String> defSets = ["build","*.iml","cache/"]+ignoreFields
+        Set<String> defSets = ["build", "*.iml", "cache/"] + ignoreFields
         defSets.each { if (!sb.contains(it)) sb.append("\n$it\n") }
         ignoreFile.write(sb.toString())
     }

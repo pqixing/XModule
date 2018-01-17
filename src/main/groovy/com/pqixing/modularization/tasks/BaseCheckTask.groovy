@@ -1,5 +1,6 @@
 package com.pqixing.modularization.tasks
 
+import com.alibaba.fastjson.JSON
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.models.Dependencies
 import com.pqixing.modularization.models.MavenType
@@ -14,6 +15,7 @@ import org.gradle.api.DefaultTask
  */
 
 class BaseCheckTask extends DefaultTask {
+    boolean listExclude
     MavenType maven
     int runtime = 0
     BaseCheckTask() {
@@ -30,6 +32,8 @@ class BaseCheckTask extends DefaultTask {
         dpItems.each { item ->
             loadDependencyItems(item)
         }
+        ModuleConfig m = project.moduleConfig
+        FileUtils.write(new File(m.buildConfig.outDir,"innerDependency.txt"),JSON.toJSONString(dpItems,true))
         Print.ln("loadDependencyItems runtime  = $runtime")
         return dpItems
     }
@@ -55,7 +59,7 @@ class BaseCheckTask extends DefaultTask {
             inner.version = NormalUtils.parseXmlByKey(dep, "version")
             inner.compileMode = NormalUtils.parseXmlByKey(dep, "scope")
             inner.moduleName = NormalUtils.parseXmlByKey(dep, "artifactId")
-            NormalUtils.parseListXmlByKey(dep, "exclusion").each { exc ->
+            if(listExclude)NormalUtils.parseListXmlByKey(dep, "exclusion").each { exc ->
                 inner.exclude(["group" : NormalUtils.parseListXmlByKey(exc, "groupId"),
                                "module": NormalUtils.parseListXmlByKey(exc, "artifactId")])
             }
