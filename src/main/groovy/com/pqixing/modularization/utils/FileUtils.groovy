@@ -79,7 +79,7 @@ class FileUtils {
                 curLevel = map.value
             }
             mapSb.append("\n")
-            ["test", "release"].each { writePatchUpload(project,maps, project.buildDir, it) }
+            ["test", "release"].each { writePatchUpload(maps, new File(project.buildConfig.outDir), it) }
         }
         FileUtils.write(outputFile, mapSb.toString())
         outputFile.append(strList.toString())
@@ -92,7 +92,7 @@ class FileUtils {
      * @param outDir
      * @param m
      */
-    static void writePatchUpload(Project project,Map<String, Integer> maps, File outDir, String envName) {
+    static void writePatchUpload(Map<String, Integer> maps, File outDir, String envName) {
         List<String> moduleNames = new LinkedList<>()
         maps.each { moduleNames.add(0, it.key) }
 
