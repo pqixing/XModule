@@ -80,7 +80,7 @@ class FileUtils {
             }
             mapSb.append("\n")
             if (project.hasProperty("hiddenConfig"))
-                ["debug", "test", "release"].each { writePatchUpload(maps, project.buildDir, it) }
+                ["test", "release"].each { writePatchUpload(maps, project.buildDir, it) }
         }
         FileUtils.write(outputFile, mapSb.toString())
         outputFile.append(strList.toString())
