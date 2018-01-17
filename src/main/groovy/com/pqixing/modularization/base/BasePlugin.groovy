@@ -17,6 +17,12 @@ abstract class BasePlugin implements Plugin<Project> {
         addIgnoreFile()
         project.ext.branchName = NormalUtils.getBranchName(project)
         project.ext.lastCommit = NormalUtils.getLastCommit(project)
+        project.task("updateGit"){
+            group = Default.taskGroup
+            doFirst {
+                "git pull".execute(null,project.projectDir)
+            }
+        }
         project.afterEvaluate {
             createCache()
         }

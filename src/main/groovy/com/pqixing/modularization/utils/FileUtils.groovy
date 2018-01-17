@@ -67,7 +67,7 @@ class FileUtils {
             }
         }
         StringBuilder mapSb = new StringBuilder("-\n")
-        if(project.hasProperty("focusLocal")&&"Y" == project.ext.get("focusLocal")) {
+        if (project.hasProperty("focusLocal") && "Y" == project.ext.get("focusLocal")) {
             HashMap<String, Integer> moduleLevels = new HashMap<>()
             dependencyByLevel(project, moduleLevels, 1)
             def maps = moduleLevels.toSpreadMap().sort { it.value }
@@ -79,8 +79,7 @@ class FileUtils {
                 curLevel = map.value
             }
             mapSb.append("\n")
-            if (project.hasProperty("hiddenConfig"))
-                ["test", "release"].each { writePatchUpload(maps, project.buildDir, it) }
+            ["test", "release"].each { writePatchUpload(project,maps, project.buildDir, it) }
         }
         FileUtils.write(outputFile, mapSb.toString())
         outputFile.append(strList.toString())
@@ -93,17 +92,18 @@ class FileUtils {
      * @param outDir
      * @param m
      */
-    static void writePatchUpload(Map<String, Integer> maps, File outDir, String envName) {
+    static void writePatchUpload(Project project,Map<String, Integer> maps, File outDir, String envName) {
         List<String> moduleNames = new LinkedList<>()
         maps.each { moduleNames.add(0, it.key) }
 
         StringBuilder sb = new StringBuilder("#!/usr/bin/env bash \n")
         moduleNames.each { name ->
-            String taskName = "${name}Upload-$envName"
+            String taskName = "${name}Upload"
             sb.append('''echo "modules+=':#{s1}'" > config2.gradle  \n'''.replace("#{s1}", name))
             sb.append("gradle :$name:clean  \n")
+            sb.append("gradle :$name:updateGit  \n")
             sb.append("gradle :$name:$taskName  \n")
-            sb.append("sleep 10s  \n")
+            sb.append("sleep 2s  \n")
         }
         write(new File(outDir, "upload${envName}.txt"), sb.toString())
     }
@@ -113,9 +113,7 @@ class FileUtils {
         List<String> modulesName = project.moduleConfig.dependModules.moduleNames
         modulesName.each { moduleLevels.put(it, Math.max(moduleLevels.get(it) ?: 0, curLevel)) }
         modulesName.each { name ->
-            dependencyByLevel(project.rootProject.allprojects.find {
-                it.name == name
-            }, moduleLevels, curLevel + 1)
+            dependencyByLevel(project.rootProject.findProject(name), moduleLevels, curLevel + 1)
         }
     }
 

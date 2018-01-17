@@ -61,8 +61,6 @@ abstract class AndroidBasePlugin extends BasePlugin {
         project.ext.support_v7 = moduleConfig.androidConfig.support_v7
         project.ext.support_v4 = moduleConfig.androidConfig.support_v4
         project.ext.printPros = { pro -> Print.lnPro(pro) }
-
-
     }
 
     void createDependencyTask(Project project, File outFile) {
