@@ -66,19 +66,20 @@ class FileUtils {
                 strList.add(it + "\n")
             }
         }
-
-        HashMap<String, Integer> moduleLevels = new HashMap<>()
-        dependencyByLevel(project, moduleLevels, 1)
-        def maps = moduleLevels.toSpreadMap().sort { it.value }
-        StringBuilder mapSb = new StringBuilder("本地工程依赖层级关系: \n 0 -> $project.name")
-        int curLevel = 0
-        maps.each { map ->
-            if (map.value > curLevel) mapSb.append("\n $map.value -> ")
-            mapSb.append("$map.key  ")
-            curLevel = map.value
+        StringBuilder mapSb = new StringBuilder("-\n")
+        if(project.hasProperty("focusLocal")&&"Y" == project.ext.get("focusLocal")) {
+            HashMap<String, Integer> moduleLevels = new HashMap<>()
+            dependencyByLevel(project, moduleLevels, 1)
+            def maps = moduleLevels.toSpreadMap().sort { it.value }
+            mapSb.append("本地工程依赖层级关系: \n 0 -> $project.name")
+            int curLevel = 0
+            maps.each { map ->
+                if (map.value > curLevel) mapSb.append("\n $map.value -> ")
+                mapSb.append("$map.key  ")
+                curLevel = map.value
+            }
+            mapSb.append("\n")
         }
-        mapSb.append("\n")
-
         FileUtils.write(outputFile, mapSb.toString())
         outputFile.append(strList.toString())
         if (project.hasProperty("hiddenConfig"))

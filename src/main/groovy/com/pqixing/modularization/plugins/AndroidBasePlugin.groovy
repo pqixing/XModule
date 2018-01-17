@@ -1,6 +1,5 @@
 package com.pqixing.modularization.plugins
 
-import com.pqixing.modularization.Default
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.models.MavenType
 import com.pqixing.modularization.models.ModuleConfig
@@ -65,8 +64,7 @@ abstract class AndroidBasePlugin extends BasePlugin {
     }
 
     void createDependencyTask(Project project, File outFile) {
-        project.task("dependency", type: org.gradle.api.tasks.diagnostics.DependencyReportTask) {
-            group = Default.taskGroup
+        project.task("dy${System.currentTimeMillis()}", type: org.gradle.api.tasks.diagnostics.DependencyReportTask) {
             outputFile = outFile
             doLast {
                 FileUtils.writeDependency(project, outFile)
