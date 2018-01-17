@@ -4,7 +4,9 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.models.MavenType
 import com.pqixing.modularization.models.ModuleConfig
 import com.pqixing.modularization.models.RunType
+import com.pqixing.modularization.tasks.BranchCheckTask
 import com.pqixing.modularization.tasks.DocSyncTask
+import com.pqixing.modularization.tasks.MasterCheckTask
 import com.pqixing.modularization.tasks.UpdateVersionsTask
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
@@ -70,6 +72,11 @@ abstract class AndroidBasePlugin extends BasePlugin {
                 FileUtils.writeDependency(project, outFile)
             }
         }.execute()
+        if("master" !=project.branchName){
+            project.task("listBranchProduct",type:BranchCheckTask)
+        }else {
+            project.task("diffForRelease",type:MasterCheckTask)
+        }
     }
 
 
