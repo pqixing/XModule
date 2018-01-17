@@ -35,8 +35,8 @@ public class UpdateDetail extends DefaultTask {
         if (NormalUtils.isEmpty(versions)) return
         for (int i = versions.size() - 1; i >= 0; i--) {
             def version = versions[i]
-            String pomUrls = NormalUtils.getPomUrl(urls, compileGroup, moduleName, version)
-            String name = NormalUtils.parseXmlByKey(NormalUtils.request(pomUrls), "name")
+           String pomStr = FileUtils.readCachePom(project,urls,env,Default.groupName,moduleName,version)
+            String name = NormalUtils.parseXmlByKey(pomStr, "name")
             sb.append("\n###     ${version}    \n")
             int splitIndex = name.indexOf("##")
             String updateDesc = name

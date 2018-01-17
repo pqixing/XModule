@@ -16,10 +16,20 @@ class FileUtils {
      * @return
      */
     static String readCachePom(MavenType maven, String name, String version) {
-        File pomFile = new File(maven.project.rootDir, ".modularization/poms_$maven.name/${name}-${version}.pom")
+        return readCachePom(maven.project,maven.maven_url,maven.name,name,version)
+    }
+    /**
+     * 读取缓存的pom依赖信息
+     * @param maven
+     * @param model
+     * @return
+     */
+    static String readCachePom(Project project,String mavenUrl,String mavenName, String name, String version) {
+        File pomFile = new File(project.rootDir, ".modularization/poms_$mavenName/${name}-${version}.pom")
         if (pomFile.exists()) return pomFile.text
-        String pomStr = NormalUtils.request(NormalUtils.getPomUrl(maven.maven_url, Default.groupName, name, version))
+        String pomStr = NormalUtils.request(NormalUtils.getPomUrl(mavenUrl, Default.groupName, name, version))
         if (!NormalUtils.isEmpty(pomStr)) write(pomFile, pomStr)
+        return pomStr
     }
 
     /**

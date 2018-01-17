@@ -1,5 +1,6 @@
 package com.pqixing.modularization.models
 
+import com.pqixing.modularization.Default
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import org.gradle.api.Project
@@ -113,8 +114,10 @@ class Dependencies extends BaseExtension {
                 }
                 //更新bean里面的信息
                 model.moduleName = moduleName
+                model.group = newGroup
                 model.version = version
-                model.version = version
+                String lastUpdateKey = "${moduleName}-stamp"
+                model.lastUpdate = versions[lastUpdateKey]
             }
             sb.append("{ \n")
             model.excludes.each { sb.append("         exclude(${excludeString(it)})  \n") }
@@ -136,12 +139,11 @@ class Dependencies extends BaseExtension {
      */
     void addMasterExclude(Set<String> masterExclude, String name,String version) {
         MavenType maven = project.moduleConfig.mavenType
-        String lastLine
-        FileUtils.readCachePom(maven, name,version).eachLine { line ->
-            if (line.contains("com.dachen.master")) {
-                masterExclude += lastLine.substring(lastLine.indexOf(">") + 1, lastLine.lastIndexOf("<")).split(",")
-            }
-            lastLine = line
+        String targetGroup = "${Default.groupName}.master"
+        def pomStr = FileUtils.readCachePom(maven, name, version)
+        NormalUtils.parseListXmlByKey(pomStr, "dependency").each { dep ->
+            if(targetGroup!= NormalUtils.parseXmlByKey(dep,"groupId")) return
+            masterExclude += NormalUtils.parseXmlByKey(dep,"artifactId").split(",")
         }
     }
 
@@ -173,6 +175,7 @@ class Dependencies extends BaseExtension {
 
         String group
         String version
+        String lastUpdate
         LinkedList<Map<String, String>> excludes = new LinkedList<>()
         /**
          * 依赖中的依赖树
@@ -195,15 +198,15 @@ class Dependencies extends BaseExtension {
             excludes += exclude
         }
 
-
         @Override
-        String toString() {
+        public String toString() {
             return "DpItem{" +
                     "moduleName='" + moduleName + '\'' +
                     ", local=" + local +
                     ", compileMode='" + compileMode + '\'' +
                     ", group='" + group + '\'' +
                     ", version='" + version + '\'' +
+                    ", lastUpdate='" + lastUpdate + '\'' +
                     ", excludes=" + excludes +
                     ", dpItems=" + dpItems +
                     '}';
