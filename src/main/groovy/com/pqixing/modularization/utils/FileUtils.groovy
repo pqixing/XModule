@@ -79,11 +79,12 @@ class FileUtils {
                 curLevel = map.value
             }
             mapSb.append("\n")
+            if (project.hasProperty("hiddenConfig"))
+                ["debug", "test", "release"].each { writePatchUpload(maps, project.buildDir, it) }
         }
         FileUtils.write(outputFile, mapSb.toString())
         outputFile.append(strList.toString())
-        if (project.hasProperty("hiddenConfig"))
-            ["debug", "test", "release"].each { writePatchUpload(maps, project.buildDir, it) }
+
 
     }
     /**
