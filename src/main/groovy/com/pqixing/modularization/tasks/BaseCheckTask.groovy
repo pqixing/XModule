@@ -9,6 +9,7 @@ import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.DefaultTask
+
 /**
  * Created by pqixing on 17-12-20.
  * 基础的检测任务
@@ -26,12 +27,13 @@ abstract class BaseCheckTask extends DefaultTask {
         group = Default.taskGroup
     }
 
-    void init(){
+    void init() {
         config = project.moduleConfig
         initSortMaps()
         generatorLevelInfo()
     }
-    void generatorCompareFile(StringBuilder sb,MavenType compareType) {
+
+    void generatorCompareFile(StringBuilder sb, MavenType compareType) {
         List<String> waitUpdate = []
         itemListByLevels.each { item ->
             String compareStr = compareLastDiff(item.item, compareType, item.level)
@@ -42,6 +44,7 @@ abstract class BaseCheckTask extends DefaultTask {
         sb.append("\n 待更新模块列表,请按照从左到右的顺序更新,否则依赖关系换乱可能导致编译出错 \n ")
         sb.append("\n ${waitUpdate.toString()} \n ")
         FileUtils.write(new File(config.buildConfig.outDir, "${project.branchName}Compare.txt"), sb.toString())
+        outUpdateListToRoot(waitUpdate)
     }
 
     void generatorLevelInfo() {
@@ -55,15 +58,24 @@ abstract class BaseCheckTask extends DefaultTask {
                     .append(space).append(new Date(levelItem.item.lastUpdate.toLong()).toLocaleString())
                     .append(space).append(levelItem.item.updateDesc).append("\n\n")
         }
-        FileUtils.write(new File(config.buildConfig.outDir, "simpleDependency.txt"),sb.toString())
+        FileUtils.write(new File(config.buildConfig.outDir, "simpleDependency.txt"), sb.toString())
     }
+
+    /**
+     * 把待更新列表,输出到跟目录
+     * @param waitUpdate
+     */
+    void outUpdateListToRoot(List<String> waitUpdate) {
+        FileUtils.write(new File(project.rootDir,".modularization/waitupload.txt"),waitUpdate.toString())
+
+    }
+
     void initSortMaps() {
         itemListByLevels = new LinkedList<>()
         HashMap<String, LevelItem> tempMaps = new HashMap<String, LevelItem>()
         sortByLevel(lastDependencies, 1, tempMaps)
         itemListByLevels += tempMaps.toSpreadMap().sort { it.value.level }.values()
     }
-
 
     /**
      * 获取当前工程所有的依赖的最后版本
@@ -77,7 +89,7 @@ abstract class BaseCheckTask extends DefaultTask {
             loadDependencyItems(item)
         }
         ModuleConfig m = project.moduleConfig
-        FileUtils.write(new File(m.buildConfig.outDir,"completeDependency.txt"),JSON.toJSONString(dpItems,true))
+        FileUtils.write(new File(m.buildConfig.outDir, "completeDependency.txt"), JSON.toJSONString(dpItems, true))
         Print.ln("loadDependencyItems runtime  = $runtime")
         return dpItems
     }
@@ -87,7 +99,7 @@ abstract class BaseCheckTask extends DefaultTask {
      */
     void loadDependencyItems(Dependencies.DpItem item) {
         runtime++
-        if(item ==null ) return
+        if (item == null) return
         if (item.version == "+" || item.version.contains("last"))
             item.version = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(maven.maven_url, Default.groupName, item.moduleName))
 
@@ -126,10 +138,10 @@ abstract class BaseCheckTask extends DefaultTask {
     /**
      * 依赖保存
      */
-    static class LevelItem{
+    static class LevelItem {
         String name
         Dependencies.DpItem item
-        int level =0
+        int level = 0
     }
 
     /**
@@ -146,14 +158,14 @@ abstract class BaseCheckTask extends DefaultTask {
                 level = new LevelItem()
                 level.name = moduleName
                 level.item = item
-                container.put(moduleName,level)
+                container.put(moduleName, level)
             }
-            if(item.moduleName.contains("-b-")) {
+            if (item.moduleName.contains("-b-")) {
                 level.name = item.moduleName
                 level.item = item
             }
             level.level = Math.max(curLevel, level.level)
-            sortByLevel(item.dpItems,curLevel+1,container)
+            sortByLevel(item.dpItems, curLevel + 1, container)
         }
     }
     /**
@@ -167,7 +179,7 @@ abstract class BaseCheckTask extends DefaultTask {
      * @return
      */
     String compareLastDiff(Dependencies.DpItem item, MavenType compareMaven, int dpLevel) {
-        if(compareMaven==null) compareMaven = maven
+        if (compareMaven == null) compareMaven = maven
         Dependencies.DpItem compareItem = new Dependencies.DpItem()
         compareItem.moduleName = item.moduleName.split("-b-")[0]
         compareItem.version = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(compareMaven.maven_url, Default.groupName, compareItem.moduleName))
@@ -175,5 +187,6 @@ abstract class BaseCheckTask extends DefaultTask {
         String checkStr = isCheck(item, compareItem) ? "√" : " "
         return "$checkStr     $dpLevel      $compareItem.version/${compareItem.lastUpdateTimeStr}    $item.version/${item.lastUpdateTimeStr}         $item.moduleName    \n"
     }
-    abstract boolean isCheck(Dependencies.DpItem item,Dependencies.DpItem compareItem);
+
+    abstract boolean isCheck(Dependencies.DpItem item, Dependencies.DpItem compareItem);
 }
