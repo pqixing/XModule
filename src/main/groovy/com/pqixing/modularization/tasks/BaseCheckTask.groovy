@@ -14,13 +14,57 @@ import org.gradle.api.DefaultTask
  * 基础的检测任务
  */
 
-class BaseCheckTask extends DefaultTask {
+abstract class BaseCheckTask extends DefaultTask {
     boolean listExclude
     MavenType maven
     int runtime = 0
+    List<LevelItem> itemListByLevels
+    ModuleConfig config
+
+
     BaseCheckTask() {
         group = Default.taskGroup
     }
+
+    void init(){
+        config = project.moduleConfig
+        initSortMaps()
+        generatorLevelInfo()
+    }
+    void generatorCompareFile(StringBuilder sb,MavenType compareType) {
+        List<String> waitUpdate = []
+        itemListByLevels.each { item ->
+            String compareStr = compareLastDiff(item.item, compareType, item.level)
+            sb.append(compareStr).append("\n")
+            if (compareStr.startsWith("√")) waitUpdate.add(0, item.name.split("-b-")[0])
+        }
+        sb.append("\n--------------------------------------------------------------\n")
+        sb.append("\n 待更新模块列表,请按照从左到右的顺序更新,否则依赖关系换乱可能导致编译出错 \n ")
+        sb.append("\n ${waitUpdate.toString()} \n ")
+        FileUtils.write(new File(config.buildConfig.outDir, "${project.branchName}Compare.txt"), sb.toString())
+    }
+
+    void generatorLevelInfo() {
+        StringBuilder sb = new StringBuilder("$project.name 模块依赖分析图   \n")
+        String space = "   "
+        sb.append("依赖层级").append(space).append("模块名称").append(space).append("最后版本")
+                .append(space).append("最后更新时间")
+                .append(space).append("更新说明").append("\n").append("git提交记录").append("\n")
+        itemListByLevels.each { levelItem ->
+            sb.append(levelItem.level).append(space).append(levelItem.name).append(space).append(levelItem.item.version)
+                    .append(space).append(new Date(levelItem.item.lastUpdate.toLong()).toLocaleString())
+                    .append(space).append(levelItem.item.updateDesc).append("\n\n")
+        }
+        FileUtils.write(new File(config.buildConfig.outDir, "simpleDependency.txt"),sb.toString())
+    }
+    void initSortMaps() {
+        itemListByLevels = new LinkedList<>()
+        HashMap<String, LevelItem> tempMaps = new HashMap<String, LevelItem>()
+        sortByLevel(lastDependencies, 1, tempMaps)
+        itemListByLevels += tempMaps.toSpreadMap().sort { it.value.level }.values()
+    }
+
+
     /**
      * 获取当前工程所有的依赖的最后版本
      */
@@ -33,7 +77,7 @@ class BaseCheckTask extends DefaultTask {
             loadDependencyItems(item)
         }
         ModuleConfig m = project.moduleConfig
-        FileUtils.write(new File(m.buildConfig.outDir,"innerDependency.txt"),JSON.toJSONString(dpItems,true))
+        FileUtils.write(new File(m.buildConfig.outDir,"completeDependency.txt"),JSON.toJSONString(dpItems,true))
         Print.ln("loadDependencyItems runtime  = $runtime")
         return dpItems
     }
@@ -122,13 +166,14 @@ class BaseCheckTask extends DefaultTask {
      * @param isCheck
      * @return
      */
-    String compareLastDiff(Dependencies.DpItem item, MavenType compareMaven, int dpLevel, Closure<Boolean> isCheck) {
+    String compareLastDiff(Dependencies.DpItem item, MavenType compareMaven, int dpLevel) {
+        if(compareMaven==null) compareMaven = maven
         Dependencies.DpItem compareItem = new Dependencies.DpItem()
         compareItem.moduleName = item.moduleName.split("-b-")[0]
         compareItem.version = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(compareMaven.maven_url, Default.groupName, compareItem.moduleName))
         loadItemInfo(FileUtils.readCachePom(compareMaven, compareItem.moduleName, compareItem.version), compareItem)
-        String checkStr = isCheck.call(item, compareItem) ? "√" : " "
-        return "$checkStr     $dpLevel      $compareItem.version/${new Date(compareItem.lastUpdate).toString()}    " +
-                " $item.version/${new Date(item.lastUpdate).toString()}         $compareItem.moduleName   \n"
+        String checkStr = isCheck(item, compareItem) ? "√" : " "
+        return "$checkStr     $dpLevel      $compareItem.version/${compareItem.lastUpdateTimeStr}    $item.version/${item.lastUpdateTimeStr}         $item.moduleName    \n"
     }
+    abstract boolean isCheck(Dependencies.DpItem item,Dependencies.DpItem compareItem);
 }

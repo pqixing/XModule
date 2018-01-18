@@ -199,6 +199,11 @@ class Dependencies extends BaseExtension {
             excludes += exclude
         }
 
+        String getLastUpdateTimeStr(){
+            if(NormalUtils.isEmpty(lastUpdate)||"0" == lastUpdate) return "----------"
+            return new Date(lastUpdate.toLong()).toLocaleString()
+        }
+
         @Override
         public String toString() {
             return "DpItem{" +

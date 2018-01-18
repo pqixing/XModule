@@ -45,7 +45,7 @@ abstract class AndroidBasePlugin extends BasePlugin {
             }
             project.afterEvaluate {
                 moduleConfig.afterApplyAndroid()
-                createDependencyTask(project, new File(project.buildConfig.outDir, "dependency.txt"))
+                createDependencyTask(project, new File(project.buildConfig.outDir, "AndroidDependency.txt"))
             }
             project.task("docSync", type: DocSyncTask) {
                 docFileDirs = moduleConfig.docFileDirs

@@ -1,6 +1,6 @@
 package com.pqixing.modularization.tasks
 
-import com.pqixing.modularization.utils.Print
+import com.pqixing.modularization.models.Dependencies
 import org.gradle.api.tasks.TaskAction
 /**
  * Created by pqixing on 17-12-20.
@@ -8,13 +8,18 @@ import org.gradle.api.tasks.TaskAction
  */
 
 class BranchCheckTask extends BaseCheckTask {
+
+
     @TaskAction
     void run() {
-        HashMap<String, LevelItem> sortMaps = new HashMap<String, LevelItem>()
-        sortByLevel(lastDependencies,0,sortMaps)
-        sortMaps.toSpreadMap().sort{it.value.level}.each {
-        Print.ln("$it.key : $it.value.level realNma $it.value.name")
-        }
+        init()
+        StringBuilder sb = new StringBuilder("$project.name 模块 master 与$project.branchName 分支依赖关系对比对比 \n")
+                .append("待更新  ").append("层级   ").append("    master版本        ").append("         分支版本        ").append("             依赖模块名称\n")
+        generatorCompareFile(sb,config.mavenTypes.test)
     }
 
+    @Override
+    boolean isCheck(Dependencies.DpItem item, Dependencies.DpItem compareItem) {
+        return item.moduleName.contains("-b-")
+    }
 }
