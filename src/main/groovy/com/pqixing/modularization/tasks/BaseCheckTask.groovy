@@ -46,28 +46,89 @@ class BaseCheckTask extends DefaultTask {
         if(item ==null ) return
         if (item.version == "+" || item.version.contains("last"))
             item.version = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(maven.maven_url, Default.groupName, item.moduleName))
+
         String pomStr = FileUtils.readCachePom(maven, item.moduleName, item.version)
         String groupName = "${Default.groupName}.android"
-        String name =NormalUtils.parseXmlByKey(pomStr,"name").trim()
-        int index = name.indexOf("##")
-        item.lastUpdate = index<0? "0":name.substring(0,index)
+        loadItemInfo(pomStr, item)
         //解析pom 文件
         NormalUtils.parseListXmlByKey(pomStr, "dependency").each { dep ->
             if (groupName != NormalUtils.parseXmlByKey(dep, "groupId")) return
             Dependencies.DpItem inner = new Dependencies.DpItem()
-            inner.group = groupName
-            inner.version = NormalUtils.parseXmlByKey(dep, "version")
-            inner.compileMode = NormalUtils.parseXmlByKey(dep, "scope")
-            inner.moduleName = NormalUtils.parseXmlByKey(dep, "artifactId")
-            if(listExclude)NormalUtils.parseListXmlByKey(dep, "exclusion").each { exc ->
-                inner.exclude(["group" : NormalUtils.parseListXmlByKey(exc, "groupId"),
-                               "module": NormalUtils.parseListXmlByKey(exc, "artifactId")])
-            }
-            item.dpItems += inner
 
+            loadDependencyInfo(inner, dep)
+            item.dpItems += inner
             //继续解析子item
             loadDependencyItems(inner)
         }
     }
 
+    void loadDependencyInfo(Dependencies.DpItem inner, String dep) {
+        inner.group = NormalUtils.parseXmlByKey(dep, "groupId")
+        inner.version = NormalUtils.parseXmlByKey(dep, "version")
+        inner.compileMode = NormalUtils.parseXmlByKey(dep, "scope")
+        inner.moduleName = NormalUtils.parseXmlByKey(dep, "artifactId")
+        if (listExclude) NormalUtils.parseListXmlByKey(dep, "exclusion").each { exc ->
+            inner.exclude(["group" : NormalUtils.parseListXmlByKey(exc, "groupId"),
+                           "module": NormalUtils.parseListXmlByKey(exc, "artifactId")])
+        }
+    }
+
+    String loadItemInfo(String pomStr, Dependencies.DpItem item) {
+        String name = NormalUtils.parseXmlByKey(pomStr, "name").trim()
+        int index = name.indexOf("##")
+        item.lastUpdate = index < 0 ? "0" : name.substring(0, index)
+        item.updateDesc = index < 0 ? name : name.substring(index + 2, name.length())
+    }
+    /**
+     * 依赖保存
+     */
+    static class LevelItem{
+        String name
+        Dependencies.DpItem item
+        int level =0
+    }
+
+    /**
+     * 按照层级关系对依赖进行排序
+     * @param dpItems
+     * @param curLevel
+     * @param container
+     */
+    void sortByLevel(Collection<Dependencies.DpItem> dpItems, int curLevel, Map<String, LevelItem> container) {
+        dpItems.each { item ->
+            String moduleName = item.moduleName.split("-b-")[0]
+            LevelItem level = container.get(moduleName)
+            if (level == null) {
+                level = new LevelItem()
+                level.name = moduleName
+                level.item = item
+                container.put(moduleName,level)
+            }
+            if(item.moduleName.contains("-b-")) {
+                level.name = item.moduleName
+                level.item = item
+            }
+            level.level = Math.max(curLevel, level.level)
+            sortByLevel(item.dpItems,curLevel+1,container)
+        }
+    }
+    /**
+     * 模块 xxx 依赖更新关系图
+     * 需要更新   依赖层级    Master Moduriaztion        依赖库(-b-*为分支名后缀)
+     *                    1.0/2018-12-11      1.0/2018-12-11      dcnet
+     * 对比当前item和指定仓库的区别
+     * @param item
+     * @param compareMavenUrl
+     * @param isCheck
+     * @return
+     */
+    String compareLastDiff(Dependencies.DpItem item, MavenType compareMaven, int dpLevel, Closure<Boolean> isCheck) {
+        Dependencies.DpItem compareItem = new Dependencies.DpItem()
+        compareItem.moduleName = item.moduleName.split("-b-")[0]
+        compareItem.version = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(compareMaven.maven_url, Default.groupName, compareItem.moduleName))
+        loadItemInfo(FileUtils.readCachePom(compareMaven, compareItem.moduleName, compareItem.version), compareItem)
+        String checkStr = isCheck.call(item, compareItem) ? "√" : " "
+        return "$checkStr     $dpLevel      $compareItem.version/${new Date(compareItem.lastUpdate).toString()}    " +
+                " $item.version/${new Date(item.lastUpdate).toString()}         $compareItem.moduleName   \n"
+    }
 }

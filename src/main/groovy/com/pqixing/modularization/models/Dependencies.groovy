@@ -176,6 +176,7 @@ class Dependencies extends BaseExtension {
         String group
         String version
         String lastUpdate
+        String updateDesc
         LinkedList<Map<String, String>> excludes = new LinkedList<>()
         /**
          * 依赖中的依赖树

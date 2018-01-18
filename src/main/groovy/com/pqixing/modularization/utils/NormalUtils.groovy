@@ -4,6 +4,7 @@ import com.pqixing.modularization.Default
 import org.gradle.api.Project
 
 import java.util.regex.Pattern
+
 /**
  * Created by pqixing on 17-12-8.
  */
@@ -61,28 +62,18 @@ class NormalUtils {
      * @return
      */
     static String parseLastVersion(String url) {
-        String version;
-        try {
-            String targetStr = new URL(url).openStream().text.find(Pattern.compile("<release>(?s).*?</release>"))
-            if (!isEmpty(targetStr)) {
-                version = targetStr.substring(9, targetStr.lastIndexOf("</release>"))
-            }
-        } catch (Exception e) {
-            Print.ln("${e.toString()}")
-        }
-        Print.ln("parseLastVersion : version ${version} url :$url")
-        return version
+        return parseXmlByKey(request(url), "release")
     }
     /**
      * 集合转字符串
      * @param collection
      * @return
      */
-    static String collection2Str(Collection collection){
-        if(isEmpty(collection)) return ""
+    static String collection2Str(Collection collection) {
+        if (isEmpty(collection)) return ""
         StringBuilder sb = new StringBuilder()
-        collection.each { sb.append(it).append(",")}
-        return sb.substring(0,sb.length()-1)
+        collection.each { sb.append(it).append(",") }
+        return sb.substring(0, sb.length() - 1)
     }
 
     static String request(String url) {
@@ -138,13 +129,14 @@ class NormalUtils {
      * @param project
      * @return
      */
-    static String getBranchName(Project project){
-       return  "git rev-parse --abbrev-ref HEAD".execute(null,project.projectDir).text.trim()
+    static String getBranchName(Project project) {
+        return "git rev-parse --abbrev-ref HEAD".execute(null, project.projectDir).text.trim()
     }
-    static String getProperties(Project project,String key){
+
+    static String getProperties(Project project, String key) {
         try {
             return project.ext.get(key)
-        }catch (Exception e){
+        } catch (Exception e) {
             return ""
         }
     }
@@ -153,16 +145,16 @@ class NormalUtils {
      * @param project
      * @return
      */
-    static String getLastCommit(Project project){
+    static String getLastCommit(Project project) {
         String curBrach = ""
-        " git branch -v".execute(null,project.projectDir).text.eachLine {line->
-            if(line.startsWith("*")) curBrach = line
+        " git branch -v".execute(null, project.projectDir).text.eachLine { line ->
+            if (line.startsWith("*")) curBrach = line
         }
         return curBrach
     }
 
-    static String getNameForBranch(Project project,String sourceName){
-        if(project.branchName == "master") return sourceName
+    static String getNameForBranch(Project project, String sourceName) {
+        if (project.branchName == "master") return sourceName
         return "$sourceName-b-${project.branchName}"
     }
 }
