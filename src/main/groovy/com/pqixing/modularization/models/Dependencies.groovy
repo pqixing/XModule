@@ -27,7 +27,7 @@ class Dependencies extends BaseExtension {
         versions = new HashMap<>()
         allInner = new DpItem()
         if (project.hasProperty("focusLocal"))
-            focusLocal = "Y" == project.localModel
+            focusLocal = project.localMode
     }
     /**
      * 配置通用的配置
