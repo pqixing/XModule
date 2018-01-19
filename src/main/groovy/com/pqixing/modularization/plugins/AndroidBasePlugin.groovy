@@ -115,5 +115,7 @@ abstract class AndroidBasePlugin extends BasePlugin {
             String path = project.ext.get("hiddenConfig")
             if (new File(path).exists()) project.apply from: path
         }
+        File allLocalGradle = new File(project.rootDir,"local.gradle")
+        if(allLocalGradle.exists())  project.apply from: allLocalGradle.absolutePath
     }
 }

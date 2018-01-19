@@ -28,6 +28,7 @@ class UploadTask extends DefaultTask {
         switch (mavenInfo.name) {
             case "release":
             case "test":
+                if (NormalUtils.isEmpty(mavenInfo.pom_version)) throw new RuntimeException("lose pom_version ,please config updateDesc")
                 if (NormalUtils.isEmpty(mavenInfo.updateDesc)) throw new RuntimeException("lose update log ,please config updateDesc")
                 break
         }

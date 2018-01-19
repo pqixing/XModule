@@ -43,7 +43,8 @@ abstract class BaseCheckTask extends DefaultTask {
         sb.append("\n--------------------------------------------------------------\n")
         sb.append("\n 待更新模块列表,请按照从左到右的顺序更新,否则依赖关系换乱可能导致编译出错 \n ")
         sb.append("\n ${waitUpdate.toString()} \n ")
-        FileUtils.write(new File(config.buildConfig.outDir, "${project.branchName}Compare.txt"), sb.toString())
+        FileUtils.write(new File(config.buildConfig.outDir, "dependencyCompare.txt"), sb.toString())
+        FileUtils.write(new File(project.rootDir, "/.modularization/lastCompare.txt"), sb.toString())
         outUpdateListToRoot(waitUpdate)
     }
 
@@ -66,7 +67,7 @@ abstract class BaseCheckTask extends DefaultTask {
      * @param waitUpdate
      */
     void outUpdateListToRoot(List<String> waitUpdate) {
-        FileUtils.write(new File(project.rootDir,".modularization/waitupload.txt"),waitUpdate.toString())
+        FileUtils.write(new File(project.rootDir,".modularization/waitupload.txt"),waitUpdate.toString().replace("[","").replace("]",""))
 
     }
 

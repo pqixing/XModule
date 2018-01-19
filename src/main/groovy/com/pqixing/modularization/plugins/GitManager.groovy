@@ -51,8 +51,12 @@ class GitManager extends BasePlugin {
         gitProject.each { map ->
             String cloneUrl = "git clone http://${gitUserName}:${gitPassWord}@${map.value}"
             if (map.value.toString().isEmpty()) cloneUrl = "git clone http://${gitUserName}:${gitPassWord}@192.168.3.200/android/${map.key}.git"
+            shStr.append("echo ------ $map.key \n")
             shStr.append("if [ ! -d ${map.key} ]; then ").append("$cloneUrl ;").append("fi;\n")
             batStr.append("if not exist ${map.key} (  ").append("$cloneUrl").append(" ) \n")
+            String pullStr = "cd $map.key \n git pull \n cd ../ \n"
+            shStr.append(pullStr)
+            batStr.append(batStr)
         }
         FileUtils.write(new File(project.projectDir, ".modularization/clone.sh"), "#！/BIN/BASH \n" + shStr.toString())
         FileUtils.write(new File(project.projectDir, ".modularization/clone.bat"), batStr.toString())
@@ -93,6 +97,7 @@ class GitManager extends BasePlugin {
                 "Document"            : "",
                 "AnnotationProject"   : "",
                 "mdclogin"            : "",
+                "DcRouter"            : "",
         ]
     }
     /**
