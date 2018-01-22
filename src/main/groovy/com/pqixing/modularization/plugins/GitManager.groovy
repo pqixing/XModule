@@ -15,7 +15,7 @@ class GitManager extends BasePlugin {
 
     @Override
     Set<String> getIgnoreFields() {
-        return ["config.gradle", "giturl.properties","config.gradle"]
+        return ["config.gradle","local.gradle", "giturl.properties","config.gradle"]
     }
 
     @Override

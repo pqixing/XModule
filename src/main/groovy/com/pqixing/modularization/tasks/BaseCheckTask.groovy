@@ -34,17 +34,21 @@ abstract class BaseCheckTask extends DefaultTask {
     }
 
     void generatorCompareFile(StringBuilder sb, MavenType compareType) {
-        List<String> waitUpdate = []
+        List<Dependencies.DpItem> waitUpdate = []
+        List<String> waitUpdateStr = []
         itemListByLevels.each { item ->
             String compareStr = compareLastDiff(item.item, compareType, item.level)
             sb.append(compareStr).append("\n")
-            if (compareStr.startsWith("√")) waitUpdate.add(0, item.name.split("-b-")[0])
+            if (compareStr.startsWith("√")) {
+                waitUpdate.add(0, item.item)
+                waitUpdateStr.add(0, item.name.split("-b-")[0])
+            }
         }
         sb.append("\n--------------------------------------------------------------\n")
         sb.append("\n 待更新模块列表,请按照从左到右的顺序更新,否则依赖关系换乱可能导致编译出错 \n ")
-        sb.append("\n ${waitUpdate.toString()} \n ")
+        sb.append("\n ${waitUpdateStr.toString()} \n ")
         FileUtils.write(new File(config.buildConfig.outDir, "dependencyCompare.txt"), sb.toString())
-        FileUtils.write(new File(project.rootDir, "/.modularization/lastCompare.txt"), sb.toString())
+        FileUtils.write(new File(project.rootDir, "/.modularization/${project.name}LastCompare.txt"), sb.toString())
         outUpdateListToRoot(waitUpdate)
     }
 
@@ -66,9 +70,16 @@ abstract class BaseCheckTask extends DefaultTask {
      * 把待更新列表,输出到跟目录
      * @param waitUpdate
      */
-    void outUpdateListToRoot(List<String> waitUpdate) {
-        FileUtils.write(new File(project.rootDir,".modularization/waitupload.txt"),waitUpdate.toString().replace("[","").replace("]",""))
-
+    void outUpdateListToRoot(List<Dependencies.DpItem> waitUpdate) {
+        StringBuilder sb = new StringBuilder()
+        waitUpdate.each { item ->
+            String moduleName = item.moduleName.split("-b-")[0]
+            sb.append("uploads ").append(" '$moduleName'")
+                    .append(" '${item.version.substring(0, item.version.lastIndexOf("."))}'")
+                    .append(" '${item.updateDesc.split('---')[0].trim()}'")
+                    .append("\n")
+        }
+        FileUtils.write(new File(project.rootDir, ".modularization/${project.name}BatchUpload.sh"), sb.toString())
     }
 
     void initSortMaps() {
