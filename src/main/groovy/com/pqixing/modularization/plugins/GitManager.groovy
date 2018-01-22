@@ -112,16 +112,19 @@ def f = file(".modularization/settings.gradle")
 if (f.exists()) apply from: f.path
 ''')
     }
+
     /**
      * 添加设置gradle
      */
     boolean addSettingGradle() {
         File settings = new File(project.projectDir, ".modularization/settings.gradle")
         boolean exists = settings.exists()
+
         FileUtils.write(settings, '''
 ext.gitUserName = ""
 ext.gitPassWord = ""
-ext.modules = []
+ext.modules = new HashSet<String>()
+modules += getLocalModules()
 apply from: "../config.gradle"
 gradle.ext.gitUserName = gitUserName
 gradle.ext.gitPassWord = gitPassWord
@@ -145,7 +148,16 @@ moduleGradle.write(mStr.toString())
 apply from: moduleGradle.path
 /********导入工程*******/
 
-
+/**
+*获取本地工程
+**/
+Set<String> getLocalModules(){
+    def set = new HashSet<String>()
+    if(hasProperty("focusLocal")&& "Y" == focusLocal && hasProperty("localModules")){
+        localModules.toString().split(",").each {set+=it}
+    }
+    return set
+}
 /**
  * @param dir
  * @param deep 层级，如果小于0 停止获取
