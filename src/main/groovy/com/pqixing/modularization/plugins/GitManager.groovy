@@ -15,7 +15,7 @@ class GitManager extends BasePlugin {
 
     @Override
     Set<String> getIgnoreFields() {
-        return ["config.gradle", "giturl.properties"]
+        return ["config.gradle", "giturl.properties","config.gradle"]
     }
 
     @Override
@@ -124,8 +124,12 @@ if (f.exists()) apply from: f.path
 ext.gitUserName = ""
 ext.gitPassWord = ""
 ext.modules = new HashSet<String>()
-modules += getLocalModules()
+modules += getLocalModule()
 apply from: "../config.gradle"
+
+def cf2 = file("../config2.gradle")
+if (cf2.exists()) apply from: cf2.path
+
 gradle.ext.gitUserName = gitUserName
 gradle.ext.gitPassWord = gitPassWord
 
@@ -151,7 +155,7 @@ apply from: moduleGradle.path
 /**
 *获取本地工程
 **/
-Set<String> getLocalModules(){
+Set<String> getLocalModule(){
     def set = new HashSet<String>()
     if(hasProperty("focusLocal")&& "Y" == focusLocal && hasProperty("localModules")){
         localModules.toString().split(",").each {set+=it}

@@ -89,7 +89,7 @@ class FileUtils {
                 curLevel = map.value
             }
             mapSb.append("\n")
-            ["test", "release"].each { writePatchUpload(maps, new File(project.buildConfig.outDir), it) }
+            ["test", "release"].each { writePatchUpload(project,maps, new File(project.buildConfig.outDir), it) }
         }
         FileUtils.write(outputFile, mapSb.toString())
         outputFile.append(strList.toString())
@@ -102,11 +102,12 @@ class FileUtils {
      * @param outDir
      * @param m
      */
-    static void writePatchUpload(Map<String, Integer> maps, File outDir, String envName) {
+    static void writePatchUpload(Project project,Map<String, Integer> maps, File outDir, String envName) {
         List<String> moduleNames = new LinkedList<>()
         maps.each { moduleNames.add(0, it.key) }
 
         StringBuilder sb = new StringBuilder("#!/usr/bin/env bash \n")
+        sb.append("cd $project.rootDir.absolutePath \n")
         moduleNames.each { name ->
             String taskName = "${name}Upload"
             sb.append('''echo "modules+=':#{s1}'" > config2.gradle  \n'''.replace("#{s1}", name))
@@ -115,7 +116,7 @@ class FileUtils {
             sb.append("gradle :$name:$taskName  \n")
             sb.append("sleep 2s  \n")
         }
-        write(new File(outDir, "upload${envName}.txt"), sb.toString())
+        write(new File(outDir, "upload${envName}.bat"), sb.toString())
     }
 
     static void dependencyByLevel(Project project, HashMap<String, Integer> moduleLevels, int curLevel) {
