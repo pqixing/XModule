@@ -125,7 +125,8 @@ ext.gitUserName = ""
 ext.gitPassWord = ""
 ext.modules = new HashSet<String>()
 modules += getLocalModule()
-apply from: "../config.gradle"
+def cf1 = file("../config.gradle")
+if (cf1.exists()) apply from: cf1.path
 
 def cf2 = file("../config2.gradle")
 if (cf2.exists()) apply from: cf2.path
