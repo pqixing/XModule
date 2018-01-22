@@ -105,7 +105,7 @@ dependencies {
     compile 'com.dachen.android:dcannotation:2.6'
    if(!#{kotlinEnable}) annotationProcessor 'com.dachen.android:dccompiler:2.6.3'
     
-    implementation 'com.android.support:support-annotations:25.4.0'
+    implementation "com.android.support:support-annotations:$support_v4"
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.0'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'

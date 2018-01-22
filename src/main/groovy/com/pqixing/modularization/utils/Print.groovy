@@ -2,7 +2,7 @@ package com.pqixing.modularization.utils
 
 class Print {
 
-    static String silentLog = "N"
+    static String silentLog = "Y"
 
     static String ln(String str, Closure closure = null) {
         return l(str + "\n",false, closure)
