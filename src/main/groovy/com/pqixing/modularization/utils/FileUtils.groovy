@@ -114,7 +114,7 @@ class FileUtils {
             sb.append("gradle :$name:clean  \n")
             sb.append("gradle :$name:updateGit  \n")
             sb.append("gradle :$name:$taskName  \n")
-            sb.append("sleep 2s  \n")
+//            sb.append("sleep 1s  \n")
         }
         write(new File(outDir, "upload${envName}.bat"), sb.toString())
     }
