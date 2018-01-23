@@ -45,6 +45,8 @@ class RunType extends BaseContainerExtension {
         if (NormalUtils.isEmpty(app_name)) app_name = defType.app_name
         if (NormalUtils.isEmpty(app_theme)) app_theme = defType.app_theme
         if (NormalUtils.isEmpty(packageName)) app_theme = defType.packageName
+        if(afterLogin) afterLogin = defType.afterLogin
+        if(asApp) asApp = defType.asApp
     }
     @Override
     LinkedList<String> generatorFiles() {
@@ -104,22 +106,18 @@ import android.app.Application;
 public  class LoginCallBack
         implements com.dachen.router.dcrouter.services.RouterMainLoginService //#1{hideRouterCode}
 {
-    @Override
     public void routerLoginSuccess(String jsonStr, String phone, String password) {
         DefaultActivity.activity.startActivity(new Intent(DefaultActivity.activity,DefaultActivity.class));
     }
 
-    @Override
     public void routerLoginFail() {
         Toast.makeText( DefaultActivity.activity,"登录失败",Toast.LENGTH_LONG).show();
     }
 
-    @Override
     public void logout() {
 
     }
 
-    @Override
     public void init(Context context) {
 
     }
