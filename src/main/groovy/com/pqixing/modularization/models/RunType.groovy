@@ -55,9 +55,11 @@ class RunType extends BaseContainerExtension {
         AndroidConfig androidConfig = project.moduleConfig.androidConfig
         def maps = properties
         maps.putAll(buildConfig.properties)
-        if(!NormalUtils.isEmpty(packageName)) maps.put("packageName",packageName)
+        if(!NormalUtils.isEmpty(packageName)) maps.put("res_packageName",packageName)
+        else maps.put("res_packageName",buildConfig.packageName)
         maps.put("versionCode", NormalUtils.isEmpty(androidConfig.versionCode) ? "1" : androidConfig.versionCode)
         maps.put("versionName", NormalUtils.isEmpty(androidConfig.versionName) ? "1.0" : androidConfig.versionName)
+
         if(afterLogin) maps+= ["hideRouterCode":"N"]
         //输出Application类
         def applicationFile = new File(FileUtils.appendUrls(buildConfig.cacheDir, "java"
@@ -104,7 +106,7 @@ public  class LoginCallBack
 {
     @Override
     public void routerLoginSuccess(String jsonStr, String phone, String password) {
-        DefaultActivity.toActivity(false);
+        DefaultActivity.activity.startActivity(new Intent(DefaultActivity.activity,DefaultActivity.class));
     }
 
     @Override
@@ -129,7 +131,7 @@ public  class LoginCallBack
     String getManifestMetaTxt() {
         return '''<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="#{packageName}"
+    package="#{res_packageName}"
     android:versionCode="#{versionCode}"
     android:versionName="#{versionName}"
     >
@@ -146,7 +148,9 @@ public  class LoginCallBack
         android:label="#{app_name}"
         android:theme="#1{app_theme}"
         >
-        <activity android:name="#{packageName}.DefaultActivity">
+        <activity android:name="#{packageName}.DefaultActivity"
+           android:launchMode="singleTask"
+           >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -226,21 +230,29 @@ package #{packageName};
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
+import android.widget.ListView;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DefaultActivity extends Activity {
- static Activity activity;
+public static Activity activity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = this;
+        initView();
         toActivity(#{afterLogin});
     }
     
     public static final void toActivity(boolean afterLogin){
         if(afterLogin){
-            try {  com.dachen.router.mdclogin.proxy.MdcLoginPaths.LoginActivity.create().start(activity); }catch (Exception e){   toActivity(false);  } //#1{hideRouterCode}
-        }else{
-            activity.startActivity(new Intent(activity,#1{launchActivity}.class));activity.finish();
+            try {  com.dachen.router.mdclogin.proxy.MdcLoginPaths.LoginActivity.create().start(activity); }catch (Exception e){  } //#1{hideRouterCode}
         }
     }
     
@@ -248,6 +260,32 @@ public class DefaultActivity extends Activity {
     protected void onDestroy() {
         activity = null;
         super.onDestroy();
+    }
+    
+    void initView(){
+    
+     FrameLayout contentView = new FrameLayout(this);
+        ListView listView = new ListView(this);
+        contentView.addView(listView,new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,FrameLayout.LayoutParams.MATCH_PARENT));
+        setContentView(contentView);
+
+        final List<String> names = new ArrayList<>();
+        final List<Class> values = new ArrayList<>();
+        try {
+            for (Field f : Class.forName("#{packageName}.#{projectName}").getDeclaredFields()){
+                values.add(Class.forName(String.valueOf(f.get(null))));
+                names.add(f.getName());
+            }
+        } catch (Exception e) {
+        }
+        listView.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_list_item_1,names));
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                startActivity(new Intent(getApplicationContext(),values.get(position)));
+            }
+        });
+    
     }
     
 }
