@@ -32,9 +32,6 @@ class ModuleConfig extends BaseExtension {
     RunType runType
     MavenType mavenType
 
-
-    String pom_version
-    boolean uploadEnable = true
     //集成默认的依赖库
     boolean addDefaultImpl = true
 
@@ -55,11 +52,14 @@ class ModuleConfig extends BaseExtension {
         mavenTypes.whenObjectAdded { it.onCreate(project) }
 
         mavenTypes.add(new MavenType("release"))
-//        mavenTypes.add(new MavenType("debug"))
+        mavenTypes.add(new MavenType("DEFAULT"))
         mavenTypes.add(new MavenType("test"))
+        mavenTypes.DEFAULT.onCreate(project)
+        mavenTypes.DEFAULT.uploadEnable = true
 
         this.runTypes = runTypes
         runTypes.whenObjectAdded { it.onCreate(project) }
+        runTypes.add(new RunType("DEFAULT"))
 
         mavenType = mavenTypes.test
         if(project.hasProperty("addDefaultImpl")) addDefaultImpl = "Y" == project.ext.get("addDefaultImpl")
@@ -143,8 +143,12 @@ class ModuleConfig extends BaseExtension {
                 m.onCreate(project)
                 break
         }
-        if (NormalUtils.isEmpty(m.pom_version)) m.pom_version = pom_version
-        if (NormalUtils.isEmpty(m.uploadEnable)) m.uploadEnable = uploadEnable
+
+        MavenType defType = mavenTypes.DEFAULT
+        if (NormalUtils.isEmpty(m.pom_version)) m.pom_version = defType.pom_version
+        if (NormalUtils.isEmpty(m.uploadEnable)) m.uploadEnable = defType.uploadEnable
+        if (NormalUtils.isEmpty(m.updateDesc)) m.updateDesc = defType.updateDesc
+        if (NormalUtils.isEmpty(m.uploadKey)) m.uploadKey = defType.uploadKey
 
         if (m.uploadEnable && ("release" != m.name || Default.uploadKey == m.uploadKey)) {
             String taskName = "${project.name}Upload"

@@ -11,7 +11,6 @@ import org.gradle.api.Project
 
 class RunType extends BaseContainerExtension {
     boolean asApp = true
-    String applicationLike
     String launchActivity
     String app_icon
     String app_name
@@ -40,9 +39,15 @@ class RunType extends BaseContainerExtension {
                 ", app_theme='" + app_theme + '\'' +
                 '}';
     }
-
+    void updateType(){
+        RunType defType = project.moduleConfig.mavenTypes."DEFAULT"
+        if (NormalUtils.isEmpty(app_icon)) app_icon = defType.app_icon
+        if (NormalUtils.isEmpty(app_name)) app_name = defType.app_name
+        if (NormalUtils.isEmpty(app_theme)) app_theme = defType.app_theme
+    }
     @Override
     LinkedList<String> generatorFiles() {
+
         if ("application" == project.moduleConfig.pluginType || !asApp) return []//不独立运行，不生产缓存类文件
 
         BuildConfig buildConfig = project.buildConfig
