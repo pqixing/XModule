@@ -47,7 +47,7 @@ class RunType extends BaseContainerExtension {
     }
     @Override
     LinkedList<String> generatorFiles() {
-
+        updateType()
         if ("application" == project.moduleConfig.pluginType || !asApp) return []//不独立运行，不生产缓存类文件
 
         BuildConfig buildConfig = project.buildConfig
