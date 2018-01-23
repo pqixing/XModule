@@ -187,7 +187,7 @@ Map<String, String> getModulePaths(File dir, int deep) {
 
     void addConfigGradle() {
         File config = new File(project.projectDir, "config.gradle")
-        if (config != null) return
+        if (config.exists()) return
         FileUtils.write(config, '''
 gitUserName = ""
 //set git password
