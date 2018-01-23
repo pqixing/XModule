@@ -56,7 +56,7 @@ class GitManager extends BasePlugin {
             batStr.append("if not exist ${map.key} (  ").append("$cloneUrl").append(" ) \n")
             String pullStr = "cd $map.key \n git pull \n cd ../ \n"
             shStr.append(pullStr)
-            batStr.append(batStr)
+            batStr.append(pullStr)
         }
         FileUtils.write(new File(project.projectDir, ".modularization/clone.sh"), "#！/BIN/BASH \n" + shStr.toString())
         FileUtils.write(new File(project.projectDir, ".modularization/clone.bat"), batStr.toString())
