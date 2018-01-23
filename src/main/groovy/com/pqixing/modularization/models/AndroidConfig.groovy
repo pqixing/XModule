@@ -75,7 +75,7 @@ android {
         applicationId '#1{applicationId}'
         minSdkVersion #{minSdkVersion}
         targetSdkVersion #{targetSdkVersion}
-
+        multiDexEnabled true
         versionName "#1{versionName}"
         versionCode #1{versionCode}
 

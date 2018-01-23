@@ -15,6 +15,7 @@ class RunType extends BaseContainerExtension {
     String app_icon
     String app_name
     String app_theme
+    String packageName
     boolean afterLogin = true
 
 
@@ -32,7 +33,6 @@ class RunType extends BaseContainerExtension {
     public String toString() {
         return "RunType{" +
                 "asApp=" + asApp +
-                ", applicationLike='" + applicationLike + '\'' +
                 ", launchActivity='" + launchActivity + '\'' +
                 ", app_icon='" + app_icon + '\'' +
                 ", app_name='" + app_name + '\'' +
@@ -40,10 +40,11 @@ class RunType extends BaseContainerExtension {
                 '}';
     }
     void updateType(){
-        RunType defType = project.moduleConfig.mavenTypes."DEFAULT"
+        RunType defType = project.moduleConfig.runTypes."DEFAULT"
         if (NormalUtils.isEmpty(app_icon)) app_icon = defType.app_icon
         if (NormalUtils.isEmpty(app_name)) app_name = defType.app_name
         if (NormalUtils.isEmpty(app_theme)) app_theme = defType.app_theme
+        if (NormalUtils.isEmpty(packageName)) app_theme = defType.packageName
     }
     @Override
     LinkedList<String> generatorFiles() {
@@ -54,6 +55,7 @@ class RunType extends BaseContainerExtension {
         AndroidConfig androidConfig = project.moduleConfig.androidConfig
         def maps = properties
         maps.putAll(buildConfig.properties)
+        if(!NormalUtils.isEmpty(packageName)) maps.put("packageName",packageName)
         maps.put("versionCode", NormalUtils.isEmpty(androidConfig.versionCode) ? "1" : androidConfig.versionCode)
         maps.put("versionName", NormalUtils.isEmpty(androidConfig.versionName) ? "1.0" : androidConfig.versionName)
         if(afterLogin) maps+= ["hideRouterCode":"N"]
@@ -91,17 +93,17 @@ package #{packageName};
 import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
-
+import android.app.Application;
 
 /**
  * Created by pqixing on 18-1-11.
  */
-@com.alibaba.android.arouter.facade.annotation.Route(path = com.dachen.router.dcrouter.proxy.RoutePaths.ROUTER_LOGIN_SERVICE.THIS) //#1{hideRouterCode}
+@com.alibaba.android.arouter.facade.annotation.Route(path = com.dachen.router.dcrouter.proxy.RoutePaths.LoginRouterModel.THIS) //#1{hideRouterCode}
 public  class LoginCallBack
         implements com.dachen.router.dcrouter.services.RouterMainLoginService //#1{hideRouterCode}
 {
     @Override
-    public void routerLoginSuccess(String jsonStr) {
+    public void routerLoginSuccess(String jsonStr, String phone, String password) {
         DefaultActivity.toActivity(false);
     }
 
@@ -170,20 +172,46 @@ android{
     String getApplicationTxt() {
         return '''
 package #{packageName};
-
+import android.app.Application;
 import com.dachen.router.dcrouter.services.IApplicationLike;
 /**
  * Created by pqixing on 17-11-24.
  */
 
-public class DefaultAppCation extends com.dachen.router.sampleImpl.DefaultAppImpl {
+public class DefaultAppCation extends com.dachen.router.DcApplication {
 
     @Override
      protected void afterAppLikeInit(){
-        for (IApplicationLike like : modules.values()) {
+      com.dachen.router.DcRouter.openDebug();
+        for (IApplicationLike like : getModules().values()) {
             like.onVirtualCreate(this);
         }
     }
+    
+    @Override
+    public void onVirtualCreate(Application application) {
+        
+    }
+
+    @Override
+    public void onCreateOnUI(Application application) {
+
+    }
+
+    @Override
+    public void onCreateOnThread(Application application) {
+
+    }
+
+    @Override
+    public boolean onUrlDispath(String s) {
+        return false;
+    }
+       @Override
+    public boolean onEventDispath(Object o) {
+        return false;
+    }
+
       @Override
     public String getModuleName() {
         return "Virtual";
@@ -210,7 +238,7 @@ public class DefaultActivity extends Activity {
     
     public static final void toActivity(boolean afterLogin){
         if(afterLogin){
-            try {  com.dachen.router.mdclogin.proxy.MdcLoginPaths.ROUTER_TO_LOGIN.create().start(activity); }catch (Exception e){   toActivity(false);  } //#1{hideRouterCode}
+            try {  com.dachen.router.mdclogin.proxy.MdcLoginPaths.LoginActivity.create().start(activity); }catch (Exception e){   toActivity(false);  } //#1{hideRouterCode}
         }else{
             activity.startActivity(new Intent(activity,#1{launchActivity}.class));activity.finish();
         }

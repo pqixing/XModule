@@ -82,7 +82,7 @@ uploadArchives{
 //                ", password='" + password + '\'' +
                 ", groupName='" + groupName + '\'' +
                 ", uploadKey='" + uploadKey + '\'' +
-//                ", repoVersions=" + repoVersions +
+                ", updateDesc=" + updateDesc +
                 '}';
     }
 }

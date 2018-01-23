@@ -78,8 +78,7 @@ class ModuleConfig extends BaseExtension {
     }
 
 
-    void mavenTypes(String pom_version = this.pom_version, Closure closure) {
-        this.pom_version = pom_version
+    void mavenTypes(Closure closure) {
         mavenTypes.configure(closure)
     }
 
