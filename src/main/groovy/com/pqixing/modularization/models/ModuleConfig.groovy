@@ -22,6 +22,7 @@ class ModuleConfig extends BaseExtension {
 
     Dependencies dependModules
     RepoVersions dependVersions
+    PreWriteConfig writeConfig
 
     String docFileDirs
 
@@ -47,6 +48,7 @@ class ModuleConfig extends BaseExtension {
 
         dependModules = new Dependencies(project)
         dependVersions = new RepoVersions(project)
+        writeConfig = new PreWriteConfig(project)
 
         this.mavenTypes = mavenTypes
         mavenTypes.whenObjectAdded { it.onCreate(project) }
@@ -84,6 +86,10 @@ class ModuleConfig extends BaseExtension {
 
     void dependModules(Closure closure) {
         dependModules.configure(closure)
+    }
+
+    void writeConfig(Closure closure) {
+        writeConfig.configure(closure)
     }
 
     void dependVersions(Closure closure) {
@@ -162,6 +168,7 @@ class ModuleConfig extends BaseExtension {
         LinkedList<String> files = []
         files += androidConfig.generatorFiles()
         files += mavenType.generatorFiles()
+        files += writeConfig.generatorFiles()
 
         if (!NormalUtils.isEmpty(runType)) files += runType.generatorFiles()
         files += dependModules.generatorFiles()

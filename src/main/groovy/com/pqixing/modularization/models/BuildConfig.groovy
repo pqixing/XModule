@@ -11,6 +11,7 @@ import org.gradle.api.Project
 class BuildConfig extends BaseExtension {
     String cacheDir
     String outDir
+    String javaDir
     String groupName = "com.dachen"
     final String projectName
     String packageName
@@ -22,6 +23,8 @@ class BuildConfig extends BaseExtension {
         rootPath = project.projectDir.path.replace("\\","/")
         outDir = FileUtils.appendUrls(rootPath, ".modularization")
         cacheDir = FileUtils.appendUrls(outDir, ".cache")
+        javaDir = FileUtils.appendUrls(outDir, "java")
+
         defRepoPath = FileUtils.appendUrls(project.rootDir.absolutePath, ".modularization", "module.version")
         File ignoreFile = new File(rootPath,".gitignore")
         if (!ignoreFile.exists()) ignoreFile.createNewFile()
