@@ -19,7 +19,7 @@ class BuildConfig extends BaseExtension {
     String rootPath
 
     BuildConfig(Project project) {
-        projectName = project.name
+        projectName = project.name.replace("-","").replace("-","")//去掉下划线
         rootPath = project.projectDir.path.replace("\\","/")
         outDir = FileUtils.appendUrls(rootPath, ".modularization")
         cacheDir = FileUtils.appendUrls(outDir, ".cache")

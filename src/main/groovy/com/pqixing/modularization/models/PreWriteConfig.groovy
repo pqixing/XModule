@@ -26,12 +26,12 @@ class PreWriteConfig extends BaseExtension {
 
         BuildConfig buildConfig = project.buildConfig
 
-        String appLikeValue = "/applike/$project.name"
-        appLikeValue = "/${appLikeValue.hashCode()}$appLikeValue".replace("-", "_")
-        addConfig(["NAME": project.name, "PATH_APPLIE": appLikeValue,"BUILD_TIME":System.currentTimeMillis().toString()])
+        String appLikeValue = "/applike/$buildConfig.projectName"
+        appLikeValue = "/${appLikeValue.hashCode()}$appLikeValue"
+        addConfig(["NAME": buildConfig.projectName, "PATH_APPLIE": appLikeValue,"BUILD_TIME":System.currentTimeMillis().toString()])
 
 
-        String className = "${project.name}Config".replace("-","_")
+        String className = "${buildConfig.projectName}Config".replace("-","_")
         className = className.substring(0,1).toUpperCase()+className.substring(1)
         def clsString = new StringBuilder("package #{packageName};\n")
         clsString.append("public final class $className { \n")
