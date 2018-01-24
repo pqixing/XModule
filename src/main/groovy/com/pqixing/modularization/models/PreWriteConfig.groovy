@@ -32,6 +32,7 @@ class PreWriteConfig extends BaseExtension {
 
 
         String className = "${project.name}Config"
+        className = className.substring(0,1).toUpperCase()+className.substring(1)
         def clsString = new StringBuilder("package #{packageName};\n")
         clsString.append("public final class $className { \n")
         writeConfigs.each { map ->
