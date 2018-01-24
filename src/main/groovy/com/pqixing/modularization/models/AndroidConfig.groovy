@@ -15,8 +15,8 @@ class AndroidConfig extends BaseExtension {
     String compileSdkVersion = '26'
     String minSdkVersion = '16'
     String targetSdkVersion = '21'
-    String versionCode = '1'
-    String versionName = "1.0"
+    String versionCode
+    String versionName
     String applicationId = ""
     String support_v4 = "26.1.0"
     String support_v7 = "26.1.0"
