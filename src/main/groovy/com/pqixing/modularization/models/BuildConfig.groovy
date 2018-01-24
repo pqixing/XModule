@@ -19,7 +19,7 @@ class BuildConfig extends BaseExtension {
     String rootPath
 
     BuildConfig(Project project) {
-        projectName = project.name.replace("-","").replace("-","")//去掉下划线
+        projectName = project.name.replace("_","").replace("-","")//去掉下划线
         rootPath = project.projectDir.path.replace("\\","/")
         outDir = FileUtils.appendUrls(rootPath, ".modularization")
         cacheDir = FileUtils.appendUrls(outDir, ".cache")
@@ -32,7 +32,7 @@ class BuildConfig extends BaseExtension {
 
         groupName = Default.groupName
         packageName = groupName + '.' + projectName
-
+        packageName = packageName.replace("-","").replace("_","")
         project.ext.buildConfig = this
 
 //        updateMeta(project)
