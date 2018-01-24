@@ -27,7 +27,7 @@ class PreWriteConfig extends BaseExtension {
         BuildConfig buildConfig = project.buildConfig
 
         String appLikeValue = "/applike/$buildConfig.projectName"
-        appLikeValue = "/${appLikeValue.hashCode()}$appLikeValue"
+        appLikeValue = "/${appLikeValue.hashCode()}$appLikeValue".replace("-","_")
         addConfig(["NAME": buildConfig.projectName, "PATH_APPLIE": appLikeValue,"BUILD_TIME":System.currentTimeMillis().toString()])
 
 
