@@ -28,7 +28,7 @@ class PreWriteConfig extends BaseExtension {
 
         String appLikeValue = "/applike/$project.name"
         appLikeValue = "/${appLikeValue.hashCode()}$appLikeValue".replace("-", "_")
-        addConfig(["name": project.name, "PATH_APPLIE": appLikeValue])
+        addConfig(["NAME": project.name, "PATH_APPLIE": appLikeValue])
 
 
         String className = "${project.name}Config"
