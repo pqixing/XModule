@@ -89,7 +89,7 @@ class FileUtils {
                 curLevel = map.value
             }
             mapSb.append("\n")
-            ["test", "release"].each { writePatchUpload(project,maps, new File(project.buildConfig.outDir), it) }
+            ["batch"].each { writePatchUpload(project,maps, new File(project.buildConfig.outDir), it) }
         }
         FileUtils.write(outputFile, mapSb.toString())
         outputFile.append(strList.toString())
@@ -111,8 +111,8 @@ class FileUtils {
         moduleNames.each { name ->
             String taskName = "${name}Upload"
             sb.append('''echo "modules+=':#{s1}'" > config2.gradle  \n'''.replace("#{s1}", name))
-            sb.append("gradle :$name:clean  \n")
             sb.append("gradle :$name:updateGit  \n")
+            sb.append("gradle :$name:clean  \n")
             sb.append("gradle :$name:$taskName  \n")
             sb.append("sleep 1s  \n")
         }

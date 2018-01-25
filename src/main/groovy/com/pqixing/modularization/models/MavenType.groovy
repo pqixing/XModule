@@ -19,6 +19,7 @@ class MavenType extends BaseContainerExtension {
     String groupName
     String uploadKey
     String updateDesc
+    boolean focusUpload = false
 
     MavenType(String name) {
         super(name)

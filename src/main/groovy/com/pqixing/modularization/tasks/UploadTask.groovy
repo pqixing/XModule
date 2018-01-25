@@ -22,15 +22,24 @@ class UploadTask extends DefaultTask {
         uploadFile()
         resetRepoVersionTime()
     }
-    void resetRepoVersionTime(){
+
+    void resetRepoVersionTime() {
 
     }
+
     void checkVail() {
+        String lastBaseVersion = NormalUtils.parseLastBaseVersion(project)
+        if (mavenInfo.focusUpload) {
+            if(NormalUtils.isEmpty(mavenInfo.pom_version)||mavenInfo.pom_version < lastBaseVersion) mavenInfo.pom_version = lastBaseVersion
+            if(NormalUtils.isEmpty(mavenInfo.updateDesc)) mavenInfo.updateDesc = "upload for batch"
+            return
+        }
         switch (mavenInfo.name) {
             case "release":
             case "test":
-                if (NormalUtils.isEmpty(mavenInfo.pom_version)) throw new RuntimeException("lose pom_version ,please config pom_version")
-                if (NormalUtils.isEmpty(mavenInfo.updateDesc)) throw new RuntimeException("lose update log ,please config updateDesc")
+                if (NormalUtils.isEmpty(mavenInfo.pom_version)) throw new RuntimeException("pom_version 为空,请填写版本号")
+                if(mavenInfo.pom_version < lastBaseVersion) throw new RuntimeException("pom_version 不能小于仓库版本 $lastBaseVersion ,请重新配置,或强制上传")
+                if (NormalUtils.isEmpty(mavenInfo.updateDesc)) throw new RuntimeException("updateDesc 不能为空,请填写更新说明")
                 break
         }
     }
@@ -54,17 +63,18 @@ class UploadTask extends DefaultTask {
 //        switch (mavenInfo.name) {
 //            case "debug": return "${mavenInfo.pom_version}.${System.currentTimeMillis()}"
 //            case "test":
-                int lastVersion = 0
-                try {
-                    lastVersion = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(mavenInfo.maven_url, mavenInfo.groupName, uploadArtifactId)).replace("${mavenInfo.pom_version}.", "").toInteger()
-                } catch (Exception e) {
-                }
-                return "${mavenInfo.pom_version}.${lastVersion + 1}"
+        int lastVersion = 0
+        try {
+            lastVersion = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(mavenInfo.maven_url, mavenInfo.groupName, uploadArtifactId)).replace("${mavenInfo.pom_version}.", "").toInteger()
+        } catch (Exception e) {
+        }
+        return "${mavenInfo.pom_version}.${lastVersion + 1}"
 //            default: return mavenInfo.pom_version
 //        }
     }
-    String getUploadArtifactId(){
-        return NormalUtils.getNameForBranch(project,project.name)
+
+    String getUploadArtifactId() {
+        return NormalUtils.getNameForBranch(project, project.name)
     }
 
     void uploadFile() {
@@ -83,7 +93,7 @@ class UploadTask extends DefaultTask {
         Print.lnf("uploadFile -> version :$pom.version artifactId : $pom.artifactId name = $pom.name url : $repository.url ")
 
         //上传完成以后,更新本地仓库中的版本
-        File repoFile =new File(project.moduleConfig.buildConfig.defRepoPath)
+        File repoFile = new File(project.moduleConfig.buildConfig.defRepoPath)
         def pros = new Properties()
         if (repoFile.exists()) pros.load(repoFile.newInputStream())
         pros.put(uploadArtifactId, version)
