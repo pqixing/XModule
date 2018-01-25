@@ -49,7 +49,7 @@ class AndroidConfig extends BaseExtension {
         if (kotlinEnable)
             list += FileUtils.write(new File(buildConfig.cacheDir, "kotlin.gradle"), NormalUtils.parseString(kotlinTxt, maps))
 
-        if (flavorsEnable && "library" == moduleConfig.pluginType)
+        if (flavorsEnable && "library" != moduleConfig.pluginType)
             list += FileUtils.write(new File(buildConfig.cacheDir, "flavors.gradle"), NormalUtils.parseString(flavorsTxt, maps))
 
         Print.ln("android Config generatorFiles $list")
@@ -80,7 +80,6 @@ android {
         versionCode #1{versionCode}
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        manifestPlaceholders = [CHANNEL_NAME: "DACHEN_DOCTOR"]
         if(#{compatAppache}&&#{compileSdkVersion}>=23) useLibrary 'org.apache.http.legacy'
         
         if(!#{kotlinEnable}){
@@ -142,44 +141,44 @@ android{
     flavorDimensions "dachen"
     productFlavors {
         dachen {
-            manifestPlaceholders = [CHANNEL_NAME: "DACHEN_DOCTOR"]
+            manifestPlaceholders += [CHANNEL_NAME: "DACHEN_DOCTOR"]
              dimension "dachen"
         }
         //channelStart----
         yyb {
-            manifestPlaceholders = [CHANNEL_NAME: "YINGYONGBAO_DOCTOR"]
+            manifestPlaceholders += [CHANNEL_NAME: "YINGYONGBAO_DOCTOR"]
             dimension "dachen"
         }
         baidu {
-            manifestPlaceholders = [CHANNEL_NAME: "BAIDU_DOCTOR"]
+            manifestPlaceholders += [CHANNEL_NAME: "BAIDU_DOCTOR"]
             dimension "dachen"
         }
         wdj {
-            manifestPlaceholders = [CHANNEL_NAME: "WANDOUJIA_DOCTOR"]
+            manifestPlaceholders += [CHANNEL_NAME: "WANDOUJIA_DOCTOR"]
             dimension "dachen"
         }
         shichang_360 {
-            manifestPlaceholders = [CHANNEL_NAME: "360_DOCTOR"]
+            manifestPlaceholders += [CHANNEL_NAME: "360_DOCTOR"]
             dimension "dachen"
         }
         hiapk {
-            manifestPlaceholders = [CHANNEL_NAME: "ANZHUO_DOCTOR"]
+            manifestPlaceholders += [CHANNEL_NAME: "ANZHUO_DOCTOR"]
             dimension "dachen"
         }
         anzhi {
-            manifestPlaceholders = [CHANNEL_NAME: "ANZHI_DOCTOR"]
+            manifestPlaceholders += [CHANNEL_NAME: "ANZHI_DOCTOR"]
            dimension "dachen"
         }
         mi {
-            manifestPlaceholders = [CHANNEL_NAME: "XIAOMI_DOCTOR"]
+            manifestPlaceholders += [CHANNEL_NAME: "XIAOMI_DOCTOR"]
            dimension "dachen"
         }
         HW {
-            manifestPlaceholders = [CHANNEL_NAME: "HUAWEI_DOCTOR"]
+            manifestPlaceholders += [CHANNEL_NAME: "HUAWEI_DOCTOR"]
           dimension "dachen"
         }
         mz {
-            manifestPlaceholders = [CHANNEL_NAME: "MEIZU_DOCTOR"]
+            manifestPlaceholders += [CHANNEL_NAME: "MEIZU_DOCTOR"]
             dimension "dachen"
         }
         //channelEnd----
