@@ -21,9 +21,9 @@ uploadArchives {
 //            repository(url:  uri("/home/pqixing/.repo")) {
                 authentication(userName: "admin", password: "admin123")
             }
-            pom.groupId = "$maven_group" // 组名
-            pom.artifactId = "$maven_artifactId" // 插件名
-            pom.version = "$maven_version" // 版本号
+            pom.groupId = "com.dachen.android" // 组名
+            pom.artifactId = "modularization" // 插件名
+            pom.version = "2.40" // 版本号
         }
     }
 }
