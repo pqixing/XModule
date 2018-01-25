@@ -165,6 +165,7 @@ class NormalUtils {
     static String parseLastBaseVersion(Project project){
         String url = NormalUtils.getMetaUrl(project.moduleConfig.mavenType.maven_url, Default.groupName, NormalUtils.getNameForBranch(project,project.name))
         String lastVersion = NormalUtils.parseLastVersion(url)
+        if(NormalUtils.isEmpty(lastVersion)) return ""
         return lastVersion.substring(0,lastVersion.lastIndexOf("."))
     }
 }
