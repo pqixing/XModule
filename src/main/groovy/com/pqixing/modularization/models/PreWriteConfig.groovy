@@ -33,14 +33,14 @@ class PreWriteConfig extends BaseExtension {
 
         String className = "${buildConfig.projectName}Config".replace("-","_")
         className = className.substring(0,1).toUpperCase()+className.substring(1)
-        def clsString = new StringBuilder("package #{packageName};\n")
+        def clsString = new StringBuilder("package auto.#{packageName};\n")
         clsString.append("public final class $className { \n")
         writeConfigs.each { map ->
             clsString.append("public static final String $map.key = \"$map.value\"; \n")
         }
         clsString.append("} \n")
-        String fileName = FileUtils.appendUrls(buildConfig.javaDir, buildConfig.packageName.replace('.', File.separator), "${className}.java")
-        FileUtils.write(new File(fileName), NormalUtils.parseString(clsString.toString(), ["packageName": buildConfig.packageName]))
+        String fileName = FileUtils.appendUrls(buildConfig.javaDir, "auto",buildConfig.packageName.replace('.', File.separator), "${className}.java")
+        FileUtils.write(new File(fileName), NormalUtils.parseString(clsString.toString(), ["packageName": $buildConfig.packageName]))
         return [FileUtils.write(new File(buildConfig.cacheDir, "java.gradle"), NormalUtils.parseString(sourceSetTxt, ["javaDir": buildConfig.javaDir]))]
     }
 

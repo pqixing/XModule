@@ -270,7 +270,7 @@ public static Activity activity;
         final List<String> names = new ArrayList<>();
         final List<Class> values = new ArrayList<>();
         try {
-            for (Field f : Class.forName("#{packageName}.#{projectName}launch").getDeclaredFields()){
+            for (Field f : Class.forName("auto.#{packageName}.#{projectName}Launch").getDeclaredFields()){
                 values.add(Class.forName(String.valueOf(f.get(null))));
                 names.add(f.getName());
             }
