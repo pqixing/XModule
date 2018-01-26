@@ -154,6 +154,7 @@ class ModuleConfig extends BaseExtension {
         if (NormalUtils.isEmpty(m.uploadEnable)) m.uploadEnable = defType.uploadEnable
         if (NormalUtils.isEmpty(m.updateDesc)) m.updateDesc = defType.updateDesc
         if (NormalUtils.isEmpty(m.uploadKey)) m.uploadKey = defType.uploadKey
+        if(!m.focusUpload) m.focusUpload = defType.focusUpload
 
         if (m.uploadEnable && ("release" != m.name || Default.uploadKey == m.uploadKey)) {
             String taskName = "${project.name}Upload"
