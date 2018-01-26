@@ -32,7 +32,7 @@ class BuildConfig extends BaseExtension {
 
         groupName = Default.groupName
         packageName = groupName + '.' + projectName
-        packageName = packageName.replace("-","").replace("_","")
+        packageName = packageName.replace("-","").replace("_","").toLowerCase()
         project.ext.buildConfig = this
 
 //        updateMeta(project)
