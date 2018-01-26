@@ -65,17 +65,17 @@ class RunType extends BaseContainerExtension {
         if(afterLogin) maps+= ["hideRouterCode":"N"]
         //输出Application类
         def applicationFile = new File(FileUtils.appendUrls(buildConfig.cacheDir, "java"
-                , buildConfig.packageName.replace('.', File.separator), "DefaultAppCation.java"))
+                , "auto",buildConfig.packageName.replace('.', File.separator), "DefaultAppCation.java"))
         FileUtils.write(applicationFile, NormalUtils.parseString(applicationTxt, maps))
 
         //输出Activity类
         def activityFile = new File(FileUtils.appendUrls(buildConfig.cacheDir, "java"
-                , buildConfig.packageName.replace('.', File.separator), "DefaultActivity.java"))
+                , "auto",buildConfig.packageName.replace('.', File.separator), "DefaultActivity.java"))
         FileUtils.write(activityFile, NormalUtils.parseString(activityTxt, maps))
 
         //输出Activity类
         def callBackFile = new File(FileUtils.appendUrls(buildConfig.cacheDir, "java"
-                , buildConfig.packageName.replace('.', File.separator), "LoginCallBack.java"))
+                , "auto",buildConfig.packageName.replace('.', File.separator), "LoginCallBack.java"))
         FileUtils.write(callBackFile, NormalUtils.parseString(loginCallBackTxt, maps))
 
         //输出临时清单文件
@@ -92,7 +92,7 @@ class RunType extends BaseContainerExtension {
 
     String getLoginCallBackTxt(){
         return '''
-package #{packageName};
+package auto.#{packageName};
 
 import android.content.Context;
 import android.content.Intent;
@@ -141,12 +141,12 @@ public  class LoginCallBack
 <application
         android:allowBackup="true"
         tools:replace="android:label"
-        android:name="#{packageName}.DefaultAppCation"
+        android:name="auto.#{packageName}.DefaultAppCation"
         android:icon="#1{app_icon}"
         android:label="#{app_name}"
         android:theme="#1{app_theme}"
         >
-        <activity android:name="#{packageName}.DefaultActivity"
+        <activity android:name="auto.#{packageName}.DefaultActivity"
            android:launchMode="singleTask"
            >
             <intent-filter>
@@ -173,7 +173,7 @@ android{
 
     String getApplicationTxt() {
         return '''
-package #{packageName};
+package auto.#{packageName};
 import android.app.Application;
 import com.dachen.router.dcrouter.services.IApplicationLike;
 /**
@@ -223,7 +223,7 @@ public class DefaultAppCation extends com.dachen.router.DcApplication {
 
     String getActivityTxt() {
         return '''
-package #{packageName};
+package auto.#{packageName};
 
 import android.app.Activity;
 import android.content.Intent;
@@ -271,8 +271,10 @@ public static Activity activity;
         final List<Class> values = new ArrayList<>();
         try {
             for (Field f : Class.forName("auto.#{packageName}.#{projectName}Launch").getDeclaredFields()){
-                values.add(Class.forName(String.valueOf(f.get(null))));
-                names.add(f.getName());
+                  try {
+                    values.add(Class.forName(String.valueOf(f.get(null))));
+                    names.add(f.getName());
+                }catch (Exception e){}
             }
         } catch (Exception e) {
         }

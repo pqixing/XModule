@@ -40,7 +40,7 @@ class PreWriteConfig extends BaseExtension {
         }
         clsString.append("} \n")
         String fileName = FileUtils.appendUrls(buildConfig.javaDir, "auto",buildConfig.packageName.replace('.', File.separator), "${className}.java")
-        FileUtils.write(new File(fileName), NormalUtils.parseString(clsString.toString(), ["packageName": $buildConfig.packageName]))
+        FileUtils.write(new File(fileName), NormalUtils.parseString(clsString.toString(), ["packageName": buildConfig.packageName]))
         return [FileUtils.write(new File(buildConfig.cacheDir, "java.gradle"), NormalUtils.parseString(sourceSetTxt, ["javaDir": buildConfig.javaDir]))]
     }
 
