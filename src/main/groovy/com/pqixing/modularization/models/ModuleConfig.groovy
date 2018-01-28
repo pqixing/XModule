@@ -169,10 +169,10 @@ class ModuleConfig extends BaseExtension {
         LinkedList<String> files = []
         files += androidConfig.generatorFiles()
         files += mavenType.generatorFiles()
-        files += writeConfig.generatorFiles()
-
         if (!NormalUtils.isEmpty(runType)) files += runType.generatorFiles()
         files += dependModules.generatorFiles()
+
+        files += writeConfig.generatorFiles()
 
         return files
     }

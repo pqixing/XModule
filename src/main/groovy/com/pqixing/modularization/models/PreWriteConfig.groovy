@@ -1,9 +1,9 @@
 package com.pqixing.modularization.models
 
+import com.alibaba.fastjson.JSON
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -20,15 +20,16 @@ class PreWriteConfig extends BaseExtension {
     void addConfig(Map<String, String> configs) {
         writeConfigs += configs
     }
-
     @Override
     LinkedList<String> generatorFiles() {
 
         BuildConfig buildConfig = project.buildConfig
+        ModuleConfig moduleConfig = project.moduleConfig
 
         String appLikeValue = "/applike/$buildConfig.projectName"
         appLikeValue = "/${appLikeValue.hashCode()}$appLikeValue".replace("-","_")
-        addConfig(["NAME": buildConfig.projectName, "PATH_APPLIE": appLikeValue,"BUILD_TIME":System.currentTimeMillis().toString()])
+        addConfig(["NAME": buildConfig.projectName, "PATH_APPLIE": appLikeValue,"BUILD_TIME":System.currentTimeMillis().toString(),"BUILD_TIME_STR":new Date().toLocaleString()])
+        addConfig(["GIT_COMMIT": project.lastCommit,"DEPENDENCIES": JSON.toJSONString(moduleConfig.dependModules.dependModules).replace("\"","")])
 
 
         String className = "${buildConfig.projectName}Config".replace("-","_")

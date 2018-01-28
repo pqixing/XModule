@@ -194,6 +194,11 @@ public class DefaultAppCation extends com.dachen.router.DcApplication {
     public void onVirtualCreate(Application application) {
         
     }
+    
+        @Override
+    public boolean isDebug() {
+        return true;
+    }
 
     @Override
     public void onCreateOnUI(Application application) {
