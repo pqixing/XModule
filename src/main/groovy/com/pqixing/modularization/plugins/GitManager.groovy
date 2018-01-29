@@ -93,11 +93,13 @@ class GitManager extends BasePlugin {
                 "microschool"         : "",
 //                "drugSDK":"",
 //                "drug":"",
-//                "androidEDA":"",
+                "androidEDA"          :"",
                 "Document"            : "",
                 "AnnotationProject"   : "",
                 "mdclogin"            : "",
                 "DcRouter"            : "",
+                "promotionsdk"        : "",
+                "wwhappy"             : "",
         ]
     }
     /**
