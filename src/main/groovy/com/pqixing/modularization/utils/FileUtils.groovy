@@ -54,8 +54,8 @@ class FileUtils {
     static String write(File file, String data) {
         if (file.exists()) file.delete()
         file.parentFile.mkdirs()
-        BufferedOutputStream out = file.newOutputStream()
-        out.write(data.getBytes())
+        Writer out = file.newWriter("utf-8")
+        out.write(data)
         out.flush()
         out.close()
         return file.path
