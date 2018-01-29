@@ -23,7 +23,7 @@ uploadArchives {
             }
             pom.groupId = "com.dachen.android" // 组名
             pom.artifactId = "modularization" // 插件名
-            pom.version = "2.61" // 版本号
+            pom.version = "2.62" // 版本号
         }
     }
 }

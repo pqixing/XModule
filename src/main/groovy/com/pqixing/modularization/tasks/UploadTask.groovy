@@ -97,8 +97,8 @@ class UploadTask extends DefaultTask {
         def pros = new Properties()
         if (repoFile.exists()) pros.load(repoFile.newInputStream())
         pros.put(uploadArtifactId, version)
-        String timeStr = "${uploadArtifactId}-stamp"
-        pros.put(timeStr, System.currentTimeMillis().toString())
+        String timeStamp = "${uploadArtifactId}-stamp"
+        pros.put(timeStamp, System.currentTimeMillis().toString())
         pros.store(repoFile.newOutputStream(), "")
     }
 }

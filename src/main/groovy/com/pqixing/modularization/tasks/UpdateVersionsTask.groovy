@@ -83,8 +83,8 @@ public class UpdateVersionsTask extends DefaultTask {
         if (outFile.exists()) pros.load(outFile.newInputStream())
 
         urls.each { map ->
-            String timeStr = "${map.key}-stamp"
-            String timeStamp = "${map.key}-last"
+            String timeStr = "${map.key}-last"
+            String timeStamp = "${map.key}-stamp"
 
             //10秒内,不更新相同的组件版本,避免不停的爬取相同的接口
             if (System.currentTimeMillis() - (pros.getProperty(timeStamp)?.toLong() ?: 0L) <= 1000 * 20) return
