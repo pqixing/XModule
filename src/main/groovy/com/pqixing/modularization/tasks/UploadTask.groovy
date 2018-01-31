@@ -39,7 +39,7 @@ class UploadTask extends DefaultTask {
             case "test":
                 if (NormalUtils.isEmpty(mavenInfo.pom_version)) throw new RuntimeException("pom_version 为空,请填写版本号")
                 if(mavenInfo.pom_version < lastBaseVersion) throw new RuntimeException("pom_version 不能小于仓库版本 $lastBaseVersion ,请重新配置,或强制上传")
-                if (NormalUtils.isEmpty(mavenInfo.updateDesc)) throw new RuntimeException("updateDesc 不能为空,请填写更新说明")
+//                if (NormalUtils.isEmpty(mavenInfo.updateDesc)) throw new RuntimeException("updateDesc 不能为空,请填写更新说明")
                 break
         }
     }
