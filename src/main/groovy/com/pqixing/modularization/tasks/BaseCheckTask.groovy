@@ -9,7 +9,6 @@ import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.DefaultTask
-
 /**
  * Created by pqixing on 17-12-20.
  * 基础的检测任务
@@ -110,6 +109,7 @@ abstract class BaseCheckTask extends DefaultTask {
      * @param item
      */
     void loadDependencyItems(Dependencies.DpItem item) {
+
         runtime++
         if (item == null) return
         if (item.version == "+" || item.version.contains("last"))

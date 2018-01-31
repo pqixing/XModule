@@ -1,5 +1,6 @@
 package com.pqixing.modularization.models
 
+import com.pqixing.modularization.base.BaseExtension
 import org.gradle.api.Project;
 
 /**

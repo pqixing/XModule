@@ -10,10 +10,12 @@ import org.gradle.api.Project
  */
 
 abstract class BasePlugin implements Plugin<Project> {
+    public static Project rootProject
     Project project
 
     @Override
     void apply(Project project) {
+        this.rootProject = project.rootProject
         this.project = project
         addIgnoreFile()
         project.ext.branchName = "Y" == NormalUtils.getProperties(project, "focusMaster") ? "master"
@@ -36,6 +38,7 @@ abstract class BasePlugin implements Plugin<Project> {
         if (!ignoreFile.exists()) ignoreFile.createNewFile()
         StringBuilder sb = new StringBuilder(ignoreFile.text)
         Set<String> defSets = ["build", ".modularization","*.iml", "cache/"] + ignoreFields
+
         defSets.each { if (!sb.contains(it)) sb.append("\n$it\n") }
         ignoreFile.write(sb.toString())
     }

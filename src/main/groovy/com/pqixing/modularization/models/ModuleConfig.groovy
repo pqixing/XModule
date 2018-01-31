@@ -1,6 +1,8 @@
 package com.pqixing.modularization.models
 
 import com.pqixing.modularization.Default
+import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.tasks.UploadTask
 import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print

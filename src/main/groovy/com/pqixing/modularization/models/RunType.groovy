@@ -64,22 +64,22 @@ class RunType extends BaseContainerExtension {
 
         if(afterLogin) maps+= ["hideRouterCode":"N"]
         //输出Application类
-        def applicationFile = new File(FileUtils.appendUrls(buildConfig.cacheDir, "java"
+        def applicationFile = new File(FileUtils.urls(buildConfig.cacheDir, "java"
                 , "auto",buildConfig.packageName.replace('.', File.separator), "DefaultAppCation.java"))
         FileUtils.write(applicationFile, NormalUtils.parseString(applicationTxt, maps))
 
         //输出Activity类
-        def activityFile = new File(FileUtils.appendUrls(buildConfig.cacheDir, "java"
+        def activityFile = new File(FileUtils.urls(buildConfig.cacheDir, "java"
                 , "auto",buildConfig.packageName.replace('.', File.separator), "DefaultActivity.java"))
         FileUtils.write(activityFile, NormalUtils.parseString(activityTxt, maps))
 
         //输出Activity类
-        def callBackFile = new File(FileUtils.appendUrls(buildConfig.cacheDir, "java"
+        def callBackFile = new File(FileUtils.urls(buildConfig.cacheDir, "java"
                 , "auto",buildConfig.packageName.replace('.', File.separator), "LoginCallBack.java"))
         FileUtils.write(callBackFile, NormalUtils.parseString(loginCallBackTxt, maps))
 
         //输出临时清单文件
-        def inputManifest = new File(FileUtils.appendUrls(project.projectDir.path, "src", "main"), "AndroidManifest.xml").text
+        def inputManifest = new File(FileUtils.urls(project.projectDir.path, "src", "main"), "AndroidManifest.xml").text
         inputManifest = inputManifest.replaceFirst("<manifest(?s).*?>", NormalUtils.parseString(manifestMetaTxt, maps))
                 .replaceFirst("<application(?s).*?>", NormalUtils.parseString(manifestAppTxt, maps))
         if (NormalUtils.isEmpty(inputManifest.find("<application(?s).*?>"))) inputManifest = inputManifest.replace("</manifest>" ,"") + NormalUtils.parseString(manifestAppTxt, maps) + "\n     </application> \n</manifest>"

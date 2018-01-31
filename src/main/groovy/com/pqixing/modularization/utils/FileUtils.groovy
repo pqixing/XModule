@@ -1,6 +1,7 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Default
+import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.models.MavenType
 import org.gradle.api.Project
 
@@ -9,6 +10,16 @@ import org.gradle.api.Project
  */
 
 class FileUtils {
+
+    static String readCache(String url){
+        File fileName = new File(BuildConfig.netCacheDir,TextUtils.numOrLetter(url))
+        if (fileName.exists()) return fileName.text
+    }
+    static void saveCache(String url,String cache){
+        File fileName = new File(BuildConfig.netCacheDir,TextUtils.numOrLetter(url))
+        write(fileName,cache)
+    }
+
     /**
      * 读取缓存的pom依赖信息
      * @param maven
@@ -37,7 +48,7 @@ class FileUtils {
      * @param urls
      * @return
      */
-    static String appendUrls(String[] urls) {
+    static String urls(String[] urls) {
         StringBuilder newUrl = new StringBuilder()
         for (String url : urls) {
             newUrl.append(url).append("/")

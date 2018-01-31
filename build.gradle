@@ -1,7 +1,39 @@
 // 应用插件
 apply plugin: "groovy"
 apply plugin: "maven"
+ext.autoDir = new File(buildDir,"src/main/java/auto")
+autoDir.mkdirs()
+sourceSets {
+    main.java.srcDirs += autoDir.parent // 指定源码目录
+}
+task("init"){ group = "build" }
 
+writeMoulds(new File(projectDir,"src/main/resources/moulds"))
+void writeMoulds(File dir){
+    if(!dir.isDirectory()) return
+    String clsName = forGet(dir.name).substring(3)
+
+    StringBuilder cls =new StringBuilder("package auto \n")
+            .append("import com.pqixing.modularization.base.* \n")
+            .append("public class ").append(clsName).append(" extends BaseString{\n")
+            .append("public static $clsName with( Map<String, Object> params ) {\n")
+    .append("   def instance = new $clsName () \n").append("   instance.params = params \n")
+    .append("   return instance \n}\n")
+
+    dir.listFiles().each {f->
+        if(f.isFile()) {
+            cls.append("public String ").append(forGet(f.name) ).append("() { return get('''").append(f.text).append("''')}\n")
+        }else if(f.isDirectory()){
+            writeMoulds(f)
+        }
+    }
+    cls.append("} \n")
+    new File(autoDir,"${clsName}.groovy").write(cls.toString())
+}
+
+String forGet(String name){
+    return "get${name.substring(0,1).toUpperCase()}${name.substring(1)}"
+}
 // 添加依赖
 dependencies {
     compile gradleApi()
@@ -13,27 +45,34 @@ dependencies {
 repositories {
     jcenter()
 }
+ext.localFile = file("local.properties")
 // 上传到本地代码库
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url:  "http://192.168.3.7:9527/nexus/content/repositories/releases/") {
-//            repository(url:  uri("/home/pqixing/.repo")) {
-                authentication(userName: "admin", password: "admin123")
+//            repository(url:  "http://192.168.3.7:9527/nexus/content/repositories/releases/") {
+            repository(url:  uri("/home/pqixing/.repo")) {
+                authentication(userName: mavenUserName, password: mavenUserPsw)
             }
-            pom.groupId = "com.dachen.android" // 组名
-            pom.artifactId = "modularization" // 插件名
-            pom.version = "2.66" // 版本号
+            pom.groupId = groupId // 组名
+            pom.artifactId = artifactId // 插件名
+            pom.version = getLastVersion(repository.url) // 版本号
         }
     }
 }
-uploadArchives.doLast {
-    def configFile = file("gradle.properties")
+Properties loadProperties(File file){
     def configs = new Properties()
-    configs.load(configFile.newInputStream())
-    String[] mvs = configs.getProperty("maven_version").split("\\.")
-
-    configs.setProperty("maven_version", "${mvs[0]}.${mvs[1].toInteger() + 1}")
-
-    configs.store(configFile.newOutputStream(), "")
+    configs.load(file.newInputStream())
+    return configs
+}
+String getLastVersion(def url){
+    return loadProperties(localFile).getProperty(url.hashCode().toString())?.toString()?:"1.0"
+}
+uploadArchives.doLast {
+    //自动更新版本号
+    String key = repositories.mavenDeployer.repository.url.hashCode().toString()
+    float newVersion = getLastVersion(key).toFloat()+0.1f
+    def localConfig = loadProperties(localFile)
+    localConfig.put(key,newVersion.toString())
+    localConfig.store(localFile.newDataOutputStream(),null)
 }

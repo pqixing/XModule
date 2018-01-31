@@ -1,0 +1,51 @@
+package auto.#{packageName};
+import android.app.Application;
+import com.dachen.router.dcrouter.services.IApplicationLike;
+/**
+ * Created by pqixing on 17-11-24.
+ */
+
+public class ModularizationApp extends com.dachen.router.DcApplication {
+
+    @Override
+     protected void afterAppLikeInit(){
+      com.dachen.router.DcRouter.openDebug();
+        for (IApplicationLike like : getModules().values()) {
+            like.onVirtualCreate(this);
+        }
+    }
+
+    @Override
+    public void onVirtualCreate(Application application) {
+
+    }
+
+        @Override
+    public boolean isDebug() {
+        return true;
+    }
+
+    @Override
+    public void onCreateOnUI(Application application) {
+
+    }
+
+    @Override
+    public void onCreateOnThread(Application application) {
+
+    }
+
+    @Override
+    public boolean onUrlDispath(String s) {
+        return false;
+    }
+    @Override
+    public boolean onEventDispath(Object o) {
+        return false;
+    }
+
+    @Override
+    public String getModuleName() {
+        return "Virtual";
+    }
+}

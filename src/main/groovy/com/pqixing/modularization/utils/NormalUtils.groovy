@@ -4,7 +4,6 @@ import com.pqixing.modularization.Default
 import org.gradle.api.Project
 
 import java.util.regex.Pattern
-
 /**
  * Created by pqixing on 17-12-8.
  */
