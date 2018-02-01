@@ -104,6 +104,23 @@ class Dependencies extends BaseExtension {
         versionMaps.clear()
     }
 
+    /**
+     * 进行本地依赖
+     * @param module
+     * @return
+     */
+    boolean onLocal(StringBuilder sb, Module module) {
+
+    }
+    /**
+     * 进行本地依赖
+     * @param module
+     * @return
+     */
+    boolean onMaven(StringBuilder sb, Module module) {
+
+    }
+
     @Override
     LinkedList<String> getOutFiles() {
         initVersionMap()
@@ -112,18 +129,21 @@ class Dependencies extends BaseExtension {
         modules.each { model ->
             if (model.moduleName == project.name) return
             switch (GlobalConfig.dependenModel) {
-            //优先依赖本地工程
-                case localFirst:
 
-                    break
             //只依赖本地工程
-                case localOnly:
+                case "localOnly":
+                    onLocal(model)
                     break
+            //优先依赖本地工程
+                case "localFirst":
+                    if (onLocal(model)) break
+                    break
+
             //优先仓库版本
-                case mavenFirst:
+                case "mavenFirst":
                     break
             //只依赖仓库版本
-                case mavenOnly:
+                case "mavenOnly":
                 default:
                     break
             }
