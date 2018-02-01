@@ -11,7 +11,7 @@ class Print {
         return l(str + "\n",true, closure)
     }
 
-    static String lne(String str =null,Exception e){
+    static String lne(String str ="",Exception e){
         lnf("$str Exception -> ${e.toString()}")
     }
 
@@ -41,10 +41,10 @@ class Print {
     }
 
     static String getProStr(Object p, int deep = 2) {
-        if (deep <= 0 || p instanceof String || NormalUtils.isEmpty(p?.properties)) return p?.toString()
+        if (deep <= 0 || p instanceof String || XmlUtils.isEmpty(p?.properties)) return p?.toString()
         StringBuilder sb = new StringBuilder().append("{ ")
         p.properties.toSpreadMap().each { map ->
-            String proStr = NormalUtils.isEmpty(map?.value?.properties) ? map.value : getProStr(map.value, deep - 1)
+            String proStr = XmlUtils.isEmpty(map?.value?.properties) ? map.value : getProStr(map.value, deep - 1)
             sb.append("$map.key :$proStr  ,")
         }
         return sb.append(" }").toString()

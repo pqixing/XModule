@@ -3,7 +3,7 @@ package com.pqixing.modularization.models
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.XmlUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
 
@@ -47,13 +47,13 @@ class AndroidConfig extends BaseExtension {
         maps.putAll(properties)
         maps.put("maven_url", mavenType?.maven_url)
         //输出android.gradle
-        list += FileUtils.write(new File(buildConfig.cacheDir, "android.gradle"), NormalUtils.parseString(androidTxt, maps))
+        list += FileUtils.write(new File(buildConfig.cacheDir, "android.gradle"), XmlUtils.parseString(androidTxt, maps))
 
         if (kotlinEnable)
-            list += FileUtils.write(new File(buildConfig.cacheDir, "kotlin.gradle"), NormalUtils.parseString(kotlinTxt, maps))
+            list += FileUtils.write(new File(buildConfig.cacheDir, "kotlin.gradle"), XmlUtils.parseString(kotlinTxt, maps))
 
         if (flavorsEnable && "library" != moduleConfig.pluginType)
-            list += FileUtils.write(new File(buildConfig.cacheDir, "flavors.gradle"), NormalUtils.parseString(flavorsTxt, maps))
+            list += FileUtils.write(new File(buildConfig.cacheDir, "flavors.gradle"), XmlUtils.parseString(flavorsTxt, maps))
 
         Print.ln("android Config getOutFiles $list")
         return list

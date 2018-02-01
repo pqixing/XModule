@@ -1,9 +1,9 @@
 package com.pqixing.modularization.dependent
 
+import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.utils.Print
-import org.gradle.api.tasks.TaskAction
 /**
  * Created by pqixing on 17-12-18.
  */
@@ -11,21 +11,10 @@ import org.gradle.api.tasks.TaskAction
 public class VersionsUpdateTask extends BaseTask
 {
 
-    VersionsUpdateTask() {
-        group = Default.taskGroup
-    }
-
-
-    @TaskAction
-    void run() {
-        searchModulesByPath()
-        makeUrls()
-        updateVersions()
-    }
-
+    File outFile
     @Override
     void start() {
-
+       outFile = new File(BuildConfig.versionDir,Keys.FILE_VERSION)
     }
 
     @Override
@@ -100,6 +89,8 @@ public class VersionsUpdateTask extends BaseTask
             }
         }
 //        pros.put("lastUpdateTime", System.currentTimeMillis().toString())
+
         pros.store(outFile.newOutputStream(), "")
+
     }
 }

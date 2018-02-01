@@ -7,7 +7,7 @@ import com.pqixing.modularization.dependent.RepoVersions
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.maven.ToMavenTask
 import com.pqixing.modularization.runtype.RunType
-import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.XmlUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
@@ -135,10 +135,10 @@ class ModuleConfig extends BaseExtension {
         }
 
         MavenType defType = mavenTypes.DEFAULT
-        if (NormalUtils.isEmpty(m.pom_version)) m.pom_version = defType.pom_version
-        if (NormalUtils.isEmpty(m.uploadEnable)) m.uploadEnable = defType.uploadEnable
-        if (NormalUtils.isEmpty(m.updateDesc)) m.updateDesc = defType.updateDesc
-        if (NormalUtils.isEmpty(m.uploadKey)) m.uploadKey = defType.uploadKey
+        if (XmlUtils.isEmpty(m.pom_version)) m.pom_version = defType.pom_version
+        if (XmlUtils.isEmpty(m.uploadEnable)) m.uploadEnable = defType.uploadEnable
+        if (XmlUtils.isEmpty(m.updateDesc)) m.updateDesc = defType.updateDesc
+        if (XmlUtils.isEmpty(m.uploadKey)) m.uploadKey = defType.uploadKey
         if(!m.focusUpload) m.focusUpload = defType.focusUpload
 
         if (m.uploadEnable && ("release" != m.name || Default.uploadKey == m.uploadKey)) {
@@ -154,7 +154,7 @@ class ModuleConfig extends BaseExtension {
         LinkedList<String> files = []
         files += androidConfig.getOutFiles()
         files += mavenType.getOutFiles()
-        if (!NormalUtils.isEmpty(runType)) files += runType.getOutFiles()
+        if (!XmlUtils.isEmpty(runType)) files += runType.getOutFiles()
         files += dependModules.getOutFiles()
 
         files += writeConfig.getOutFiles()

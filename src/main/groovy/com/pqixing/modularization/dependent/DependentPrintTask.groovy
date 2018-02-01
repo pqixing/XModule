@@ -6,8 +6,6 @@ import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.utils.TextUtils
-import org.gradle.api.tasks.TaskAction
-
 /**
  * Created by pqixing on 17-12-18.
  * 输出打印依赖
@@ -24,14 +22,6 @@ public class DependentPrintTask extends BaseTask {
             outputFile = new File(outDir, Keys.FILE_ANDROID_DP)
         }
     }
-
-    @TaskAction
-    void run() {
-        searchModulesByPath()
-        makeUrls()
-        updateVersions()
-    }
-
     @Override
     void start() {
 

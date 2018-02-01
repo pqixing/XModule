@@ -8,11 +8,10 @@ import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.models.MavenType
 import com.pqixing.modularization.models.ModuleConfig
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.XmlUtils
 import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.wrapper.ProjectWrapper
 import org.gradle.api.DefaultTask
-import org.gradle.api.Project
 
 /**
  * Created by pqixing on 17-12-20.
@@ -122,14 +121,14 @@ abstract class DpendentAnalysisTask extends DefaultTask {
         runtime++
         if (item == null) return
         if (item.version == "+" || item.version.contains("last"))
-            item.version = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(maven.maven_url, Default.groupName, item.moduleName))
+            item.version = XmlUtils.parseLastVersion(XmlUtils.getMetaUrl(maven.maven_url, Default.groupName, item.moduleName))
 
         String pomStr = FileUtils.readCachePom(maven, item.moduleName, item.version)
         String groupName = "${Default.groupName}.android"
         loadItemInfo(pomStr, item)
         //解析pom 文件
-        NormalUtils.parseListXmlByKey(pomStr, "dependency").each { dep ->
-            if (groupName != NormalUtils.parseXmlByKey(dep, "groupId")) return
+        XmlUtils.parseListXmlByKey(pomStr, "dependency").each { dep ->
+            if (groupName != XmlUtils.parseXmlByKey(dep, "groupId")) return
             Dependencies.DpItem inner = new Dependencies.DpItem()
 
             loadDependencyInfo(inner, dep)
@@ -140,18 +139,18 @@ abstract class DpendentAnalysisTask extends DefaultTask {
     }
 
     void loadDependencyInfo(Dependencies.DpItem inner, String dep) {
-        inner.group = NormalUtils.parseXmlByKey(dep, "groupId")
-        inner.version = NormalUtils.parseXmlByKey(dep, "version")
-        inner.compileMode = NormalUtils.parseXmlByKey(dep, "scope")
-        inner.moduleName = NormalUtils.parseXmlByKey(dep, "artifactId")
-        if (listExclude) NormalUtils.parseListXmlByKey(dep, "exclusion").each { exc ->
-            inner.exclude(["group" : NormalUtils.parseListXmlByKey(exc, "groupId"),
-                           "module": NormalUtils.parseListXmlByKey(exc, "artifactId")])
+        inner.group = XmlUtils.parseXmlByKey(dep, "groupId")
+        inner.version = XmlUtils.parseXmlByKey(dep, "version")
+        inner.compileMode = XmlUtils.parseXmlByKey(dep, "scope")
+        inner.moduleName = XmlUtils.parseXmlByKey(dep, "artifactId")
+        if (listExclude) XmlUtils.parseListXmlByKey(dep, "exclusion").each { exc ->
+            inner.exclude(["group" : XmlUtils.parseListXmlByKey(exc, "groupId"),
+                           "module": XmlUtils.parseListXmlByKey(exc, "artifactId")])
         }
     }
 
     String loadItemInfo(String pomStr, Dependencies.DpItem item) {
-        String name = NormalUtils.parseXmlByKey(pomStr, "name").trim()
+        String name = XmlUtils.parseXmlByKey(pomStr, "name").trim()
         int index = name.indexOf("##")
         item.lastUpdate = index < 0 ? "0" : name.substring(0, index)
         item.updateDesc = index < 0 ? name : name.substring(index + 2, name.length())
@@ -203,7 +202,7 @@ abstract class DpendentAnalysisTask extends DefaultTask {
         if (compareMaven == null) compareMaven = maven
         Dependencies.DpItem compareItem = new Dependencies.DpItem()
         compareItem.moduleName = item.moduleName.split("-b-")[0]
-        compareItem.version = NormalUtils.parseLastVersion(NormalUtils.getMetaUrl(compareMaven.maven_url, Default.groupName, compareItem.moduleName))
+        compareItem.version = XmlUtils.parseLastVersion(XmlUtils.getMetaUrl(compareMaven.maven_url, Default.groupName, compareItem.moduleName))
         loadItemInfo(FileUtils.readCachePom(compareMaven, compareItem.moduleName, compareItem.version), compareItem)
         String checkStr = isCheck(item, compareItem) ? "√" : " "
         return "$checkStr     $dpLevel      $compareItem.version/${compareItem.lastUpdateTimeStr}    $item.version/${item.lastUpdateTimeStr}         $item.moduleName    \n"

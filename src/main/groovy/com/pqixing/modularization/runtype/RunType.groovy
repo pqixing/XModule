@@ -1,10 +1,11 @@
 package com.pqixing.modularization.runtype
 
-import com.pqixing.modularization.models.AndroidConfig
 import com.pqixing.modularization.base.BaseContainer
+import com.pqixing.modularization.configs.BuildConfig
+import com.pqixing.modularization.models.AndroidConfig
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
+import com.pqixing.modularization.utils.XmlUtils
 import org.gradle.api.Project
 
 /**
@@ -43,10 +44,10 @@ class RunType extends BaseContainer {
     }
     void updateType(){
         RunType defType = project.moduleConfig.runTypes."DEFAULT"
-        if (NormalUtils.isEmpty(app_icon)) app_icon = defType.app_icon
-        if (NormalUtils.isEmpty(app_name)) app_name = defType.app_name
-        if (NormalUtils.isEmpty(app_theme)) app_theme = defType.app_theme
-        if (NormalUtils.isEmpty(packageName)) app_theme = defType.packageName
+        if (XmlUtils.isEmpty(app_icon)) app_icon = defType.app_icon
+        if (XmlUtils.isEmpty(app_name)) app_name = defType.app_name
+        if (XmlUtils.isEmpty(app_theme)) app_theme = defType.app_theme
+        if (XmlUtils.isEmpty(packageName)) app_theme = defType.packageName
         if(afterLogin) afterLogin = defType.afterLogin
         if(asApp) asApp = defType.asApp
     }
@@ -59,37 +60,37 @@ class RunType extends BaseContainer {
         AndroidConfig androidConfig = project.moduleConfig.androidConfig
         def maps = properties
         maps.putAll(buildConfig.properties)
-        if(!NormalUtils.isEmpty(packageName)) maps.put("res_packageName",packageName)
+        if(!XmlUtils.isEmpty(packageName)) maps.put("res_packageName",packageName)
         else maps.put("res_packageName",buildConfig.packageName)
-        maps.put("versionCode", NormalUtils.isEmpty(androidConfig.versionCode) ? "1" : androidConfig.versionCode)
-        maps.put("versionName", NormalUtils.isEmpty(androidConfig.versionName) ? "1.0" : androidConfig.versionName)
+        maps.put("versionCode", XmlUtils.isEmpty(androidConfig.versionCode) ? "1" : androidConfig.versionCode)
+        maps.put("versionName", XmlUtils.isEmpty(androidConfig.versionName) ? "1.0" : androidConfig.versionName)
 
         if(afterLogin) maps+= ["hideRouterCode":"N"]
         //输出Application类
         def applicationFile = new File(FileUtils.urls(buildConfig.cacheDir, "java"
                 , "auto",buildConfig.packageName.replace('.', File.separator), "DefaultAppCation.java"))
-        FileUtils.write(applicationFile, NormalUtils.parseString(applicationTxt, maps))
+        FileUtils.write(applicationFile, XmlUtils.parseString(applicationTxt, maps))
 
         //输出Activity类
         def activityFile = new File(FileUtils.urls(buildConfig.cacheDir, "java"
                 , "auto",buildConfig.packageName.replace('.', File.separator), "DefaultActivity.java"))
-        FileUtils.write(activityFile, NormalUtils.parseString(activityTxt, maps))
+        FileUtils.write(activityFile, XmlUtils.parseString(activityTxt, maps))
 
         //输出Activity类
         def callBackFile = new File(FileUtils.urls(buildConfig.cacheDir, "java"
                 , "auto",buildConfig.packageName.replace('.', File.separator), "LoginCallBack.java"))
-        FileUtils.write(callBackFile, NormalUtils.parseString(loginCallBackTxt, maps))
+        FileUtils.write(callBackFile, XmlUtils.parseString(loginCallBackTxt, maps))
 
         //输出临时清单文件
         def inputManifest = new File(FileUtils.urls(project.projectDir.path, "src", "main"), "AndroidManifest.xml").text
-        inputManifest = inputManifest.replaceFirst("<manifest(?s).*?>", NormalUtils.parseString(manifestMetaTxt, maps))
-                .replaceFirst("<application(?s).*?>", NormalUtils.parseString(manifestAppTxt, maps))
-        if (NormalUtils.isEmpty(inputManifest.find("<application(?s).*?>"))) inputManifest = inputManifest.replace("</manifest>" ,"") + NormalUtils.parseString(manifestAppTxt, maps) + "\n     </application> \n</manifest>"
+        inputManifest = inputManifest.replaceFirst("<manifest(?s).*?>", XmlUtils.parseString(manifestMetaTxt, maps))
+                .replaceFirst("<application(?s).*?>", XmlUtils.parseString(manifestAppTxt, maps))
+        if (XmlUtils.isEmpty(inputManifest.find("<application(?s).*?>"))) inputManifest = inputManifest.replace("</manifest>" ,"") + XmlUtils.parseString(manifestAppTxt, maps) + "\n     </application> \n</manifest>"
         Print.ln("hasmatches: ${inputManifest.matches("<application(?s).*?>")} inputManifest : $inputManifest")
         FileUtils.write(new File(buildConfig.cacheDir, "AndroidManifest.xml"), inputManifest)
 
         //输出source的gradle配置
-        return [FileUtils.write(new File(buildConfig.cacheDir, "sourceSets.gradle"), NormalUtils.parseString(sourceSetTxt, ["cacheDir": buildConfig.cacheDir]))]
+        return [FileUtils.write(new File(buildConfig.cacheDir, "sourceSets.gradle"), XmlUtils.parseString(sourceSetTxt, ["cacheDir": buildConfig.cacheDir]))]
     }
 
     String getLoginCallBackTxt(){

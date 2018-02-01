@@ -1,7 +1,7 @@
 package com.pqixing.modularization.tasks
 
 import com.pqixing.modularization.Default
-import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.XmlUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -69,9 +69,9 @@ public class UpdateVersionsTask extends DefaultTask {
         urls = new HashMap<>()
         modules.each {
             def moduleName = it.replace(":", "")
-            urls.put(moduleName, NormalUtils.getMetaUrl(mavenUrl, compileGroup, moduleName))
+            urls.put(moduleName, XmlUtils.getMetaUrl(mavenUrl, compileGroup, moduleName))
             if ("master" != project.branchName)
-                urls.put(NormalUtils.getNameForBranch(project,moduleName), NormalUtils.getMetaUrl(mavenUrl, compileGroup, NormalUtils.getNameForBranch(project,moduleName)))
+                urls.put(XmlUtils.getNameForBranch(project,moduleName), XmlUtils.getMetaUrl(mavenUrl, compileGroup, XmlUtils.getNameForBranch(project,moduleName)))
         }
         Print.ln("urls : $urls")
     }
@@ -89,8 +89,8 @@ public class UpdateVersionsTask extends DefaultTask {
             //10秒内,不更新相同的组件版本,避免不停的爬取相同的接口
             if (System.currentTimeMillis() - (pros.getProperty(timeStamp)?.toLong() ?: 0L) <= 1000 * 20) return
 
-            String version = NormalUtils.parseLastVersion(map.value)
-            if (!NormalUtils.isEmpty(version)) {
+            String version = XmlUtils.parseLastVersion(map.value)
+            if (!XmlUtils.isEmpty(version)) {
                 if (version != (pros.getProperty(map.key) ?: ""))
                     pros.put(timeStr, format.format(new Date()))
 

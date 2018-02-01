@@ -1,9 +1,8 @@
 package com.pqixing.modularization.maven
 
-import com.pqixing.modularization.configs.GlobalConfig
 import com.pqixing.modularization.base.BaseContainer
+import com.pqixing.modularization.configs.GlobalConfig
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -28,7 +27,7 @@ class MavenType extends BaseContainer {
     @Override
     void onCreate(Project project) {
         super.onCreate(project)
-        artifactId = project.name
+        artifactId = wrapper.artifactId
         userName = GlobalConfig.mavenUser
         password = GlobalConfig.mavenPassword
         groupName = GlobalConfig.groupName

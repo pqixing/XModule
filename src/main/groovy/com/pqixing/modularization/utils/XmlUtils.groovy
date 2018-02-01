@@ -1,6 +1,5 @@
 package com.pqixing.modularization.utils
 
-import com.pqixing.modularization.Default
 import org.gradle.api.Project
 
 import java.util.regex.Pattern
@@ -8,7 +7,7 @@ import java.util.regex.Pattern
  * Created by pqixing on 17-12-8.
  */
 
-class NormalUtils {
+class XmlUtils {
 
     /**
      * 判空处理
@@ -30,7 +29,7 @@ class NormalUtils {
         properties = properties.findAll { map -> !map.key.endsWith("Txt") }
         def builder = new StringBuilder()
         source.eachLine { str ->
-            if (NormalUtils.isEmpty(str)) return
+            if (XmlUtils.isEmpty(str)) return
 
             boolean ignore = false
             Default.keyPattern.matcher(str).findAll()?.each { key ->
@@ -162,9 +161,9 @@ class NormalUtils {
      * @return
      */
     static String parseLastBaseVersion(Project project){
-        String url = NormalUtils.getMetaUrl(project.moduleConfig.mavenType.maven_url, Default.groupName, NormalUtils.getNameForBranch(project,project.name))
-        String lastVersion = NormalUtils.parseLastVersion(url)
-        if(NormalUtils.isEmpty(lastVersion)) return ""
+        String url = XmlUtils.getMetaUrl(project.moduleConfig.mavenType.maven_url, Default.groupName, XmlUtils.getNameForBranch(project,project.name))
+        String lastVersion = XmlUtils.parseLastVersion(url)
+        if(XmlUtils.isEmpty(lastVersion)) return ""
         return lastVersion.substring(0,lastVersion.lastIndexOf("."))
     }
 }

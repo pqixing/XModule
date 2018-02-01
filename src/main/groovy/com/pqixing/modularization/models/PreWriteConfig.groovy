@@ -3,7 +3,7 @@ package com.pqixing.modularization.models
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.XmlUtils
 import org.gradle.api.Project
 /**
  * Created by pqixing on 17-12-7.
@@ -43,8 +43,8 @@ class PreWriteConfig extends BaseExtension {
         }
         clsString.append("} \n")
         String fileName = FileUtils.urls(buildConfig.javaDir, "auto",buildConfig.packageName.replace('.', File.separator), "${className}.java")
-        FileUtils.write(new File(fileName), NormalUtils.parseString(clsString.toString(), ["packageName": buildConfig.packageName]))
-        return [FileUtils.write(new File(buildConfig.cacheDir, "java.gradle"), NormalUtils.parseString(sourceSetTxt, ["javaDir": buildConfig.javaDir]))]
+        FileUtils.write(new File(fileName), XmlUtils.parseString(clsString.toString(), ["packageName": buildConfig.packageName]))
+        return [FileUtils.write(new File(buildConfig.cacheDir, "java.gradle"), XmlUtils.parseString(sourceSetTxt, ["javaDir": buildConfig.javaDir]))]
     }
 
     String getSourceSetTxt() {

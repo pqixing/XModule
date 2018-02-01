@@ -1,6 +1,7 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Default
+import com.pqixing.modularization.Keys
 import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.models.MavenType
 import org.gradle.api.Project
@@ -40,8 +41,8 @@ class FileUtils {
     static String readCachePom(Project project, String mavenUrl, String mavenName, String name, String version) {
         File pomFile = new File(project.rootDir, ".modularization/poms_$mavenName/${name}-${version}.pom")
         if (pomFile.exists()) return pomFile.text
-        String pomStr = NormalUtils.request(NormalUtils.getPomUrl(mavenUrl, Default.groupName, name, version))
-        if (!NormalUtils.isEmpty(pomStr)) write(pomFile, pomStr)
+        String pomStr = XmlUtils.request(XmlUtils.getPomUrl(mavenUrl, Default.groupName, name, version))
+        if (!XmlUtils.isEmpty(pomStr)) write(pomFile, pomStr)
         return pomStr
     }
 
@@ -59,6 +60,11 @@ class FileUtils {
         return newUrl.substring(0, newUrl.size() - 1)
     }
 
+    static Properties readMaps(File file){
+        Properties p =new Properties()
+        if(file.exists()) p.load(file.newInputStream())
+        return p
+    }
     static String read(String file) {
         return read(new File(file))
     }
@@ -81,7 +87,7 @@ class FileUtils {
 
         if (file.exists()) file.delete()
         file.parentFile.mkdirs()
-        Writer out = file.newWriter("utf-8")
+        Writer out = file.newWriter(Keys.CHARSET)
         out.write(data)
         out.flush()
         out.close()

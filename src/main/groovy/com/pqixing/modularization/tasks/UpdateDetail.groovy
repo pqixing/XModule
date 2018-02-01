@@ -1,7 +1,7 @@
 package com.pqixing.modularization.tasks
 
 import com.pqixing.modularization.Default
-import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.XmlUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import com.pqixing.modularization.utils.FileUtils
@@ -30,13 +30,13 @@ public class UpdateDetail extends DefaultTask {
      */
     void generatorLogFile(String env, String urls) {
         StringBuilder sb = new StringBuilder("##  ${moduleName}组件更新日志   \n")
-        String metaUrl = NormalUtils.getMetaUrl(urls, compileGroup, moduleName)
-        List<String> versions = NormalUtils.parseListXmlByKey(NormalUtils.request(metaUrl), 'version')
-        if (NormalUtils.isEmpty(versions)) return
+        String metaUrl = XmlUtils.getMetaUrl(urls, compileGroup, moduleName)
+        List<String> versions = XmlUtils.parseListXmlByKey(XmlUtils.request(metaUrl), 'version')
+        if (XmlUtils.isEmpty(versions)) return
         for (int i = versions.size() - 1; i >= 0; i--) {
             def version = versions[i]
            String pomStr = FileUtils.readCachePom(project,urls,env,Default.groupName,moduleName,version)
-            String name = NormalUtils.parseXmlByKey(pomStr, "name")
+            String name = XmlUtils.parseXmlByKey(pomStr, "name")
             sb.append("\n###     ${version}    \n")
             int splitIndex = name.indexOf("##")
             String updateDesc = name

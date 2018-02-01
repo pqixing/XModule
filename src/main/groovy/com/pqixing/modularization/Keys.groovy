@@ -2,6 +2,14 @@ package com.pqixing.modularization
 
 class Keys {
     /**
+     * 代码分割线
+     */
+    public static final String CHARSET= "UTF-8"
+    /**
+     * 代码分割线
+     */
+    public static final String SEPERATOR= "###"
+    /**
      * 任务分组
      */
     public static final String GROUP_TASK = "modularization"
@@ -50,4 +58,13 @@ class Keys {
      * Android依赖路径
      */
     public static final String FILE_ANDROID_DP = "android.dp"
+    /**
+     * 依赖版本号名称
+     */
+    public static final String FILE_VERSION = "versions.properties"
+
+    /**
+     * 主线版本依赖去除是
+     */
+    public static final String GROUP_MASTER = "com.modularization.master"
 }

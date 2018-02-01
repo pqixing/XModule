@@ -3,7 +3,7 @@ package com.pqixing.modularization.plugins
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.XmlUtils
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
 /**
@@ -66,7 +66,7 @@ class GitManager extends BasePlugin {
     void createCloneTask() {
         project.task("cloneAllProjects", type: Exec) {
             doFirst {
-                if (NormalUtils.isEmpty(project.gitUserName) || NormalUtils.isEmpty(project.gitPassWord)) {
+                if (XmlUtils.isEmpty(project.gitUserName) || XmlUtils.isEmpty(project.gitPassWord)) {
                     throw new RuntimeException("git gitUserName or gitPassWord can not be null, please config in config.gradle")
                 }
             }

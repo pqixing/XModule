@@ -14,4 +14,5 @@ class TextUtils {
     static String getOnlyName() {
         return "${System.currentTimeMillis()}${count++}"
     }
+
 }

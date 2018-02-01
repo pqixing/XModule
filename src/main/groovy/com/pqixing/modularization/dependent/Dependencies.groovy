@@ -1,9 +1,16 @@
 package com.pqixing.modularization.dependent
 
 import com.pqixing.modularization.Default
+import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.configs.BuildConfig
+import com.pqixing.modularization.configs.GlobalConfig
+import com.pqixing.modularization.maven.MavenType
+import com.pqixing.modularization.models.ModuleConfig
+import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.XmlUtils
+import com.pqixing.modularization.wrapper.MetadataWrapper
 import org.gradle.api.Project
 
 /**
@@ -11,101 +18,126 @@ import org.gradle.api.Project
  */
 
 class Dependencies extends BaseExtension {
-    String baseGroup
-    LinkedList<DpItem> dependModules
-    Project project
-    Map<String, String> versions
-    //强制使用本地库进行依赖处理，兼容旧版本进行本地化开发使用
-    Boolean focusLocal
+    boolean hasLocalModule = false
+    LinkedList<Map<String, String>> allExcludes
+    LinkedList<Module> modules
 
-    static final String DEFAULT_GROUP = "default_group"
-    DpItem allInner
-
+    File versionFile
+    Properties versionMaps
+    MavenType mavenType
+    /**
+     * 给全部依赖库添加
+     * @param exclude
+     */
+    void allExclude(Map<String, String> exclude) {
+        allExcludes += exclude
+    }
 
     Dependencies(Project project) {
         super(project)
-        this.dependModules = new LinkedList<>()
-        this.project = project
-        versions = new HashMap<>()
-        allInner = new DpItem()
-        if (project.hasProperty("focusLocal"))
-            focusLocal = project.localMode
-    }
-    /**
-     * 配置通用的配置
-     * @param closure
-     */
-    void defaultConfig(Closure closure) {
-        if (NormalUtils.isEmpty(closure)) return
-        if (NormalUtils.isEmpty(allInner)) allInner = new DpItem()
-        closure.delegate = allInner
-        closure.setResolveStrategy(Closure.DELEGATE_ONLY)
-        closure.call()
+        modules = new LinkedList<>()
+        allExcludes = new LinkedList<>()
     }
 
-    DpItem add(String moduleName, Closure closure = null) {
-        def inner = new DpItem()
+
+    Module add(String moduleName, Closure closure = null) {
+        def inner = new Module()
         inner.moduleName = moduleName
         if (closure != null) {
             closure.delegate = inner
             closure.setResolveStrategy(Closure.DELEGATE_ONLY)
             closure.call()
         }
-        dependModules.add(inner)
+        modules += inner
         return inner
     }
 
-    DpItem addImpl(String moduleName, Closure closure = null) {
-        DpItem inner = add(moduleName, closure)
-        inner.compileMode = "compile"
-        return inner
-    }
-
-    DpItem addExImpl(String moduleName, Closure closure = null) {
-        DpItem inner = add(moduleName, closure)
-        inner.compileMode = "compile"
-        inner.excludeGroup(DEFAULT_GROUP)
+    Module addImpl(String moduleName, Closure closure = null) {
+        Module inner = add(moduleName, closure)
+        inner.compileMode = "implementation"
         return inner
     }
 
     List<String> getModuleNames() {
         List<String> names = new LinkedList<>()
-        dependModules.each { names += it.moduleName }
+        modules.each { names += it.moduleName }
         return names
-    }
-
-    private boolean isLocal(Boolean local) {
-        if (!NormalUtils.isEmpty(local)) return local
-        else if (!NormalUtils.isEmpty(allInner?.local)) return allInner?.local
-        else if (!NormalUtils.isEmpty(focusLocal)) return focusLocal
-        else return false
     }
 
     String excludeString(Map<String, String> maps) {
         StringBuilder sb = new StringBuilder()
         maps.each { map ->
-            sb.append("$map.key : '${DEFAULT_GROUP == map.value ? baseGroup : map.value}',")
+            sb.append("$map.key : '$map.value',")
         }
         return sb.substring(0, sb.length() - 1)
     }
 
+    /**
+     * 获取该aar在仓库的最后一个一个版本
+     * @param artifactId
+     * @return
+     */
+    String getLastVersion(String group, String artifactId) {
+        String timeStamp = "$artifactId-stamp"
+        String version = versionMaps.getProperty(artifactId)
+        //一分钟秒内,不更新相同的组件版本,避免不停的爬取相同的接口
+        if (System.currentTimeMillis() - (versionMaps.getProperty(timeStamp)?.toLong() ?: 0L) >= 1000 * 60) {
+            String release = MetadataWrapper.create(mavenType.maven_url, group, artifactId).release
+            if (!CheckUtils.isEmpty(release)) {
+                version = release
+                versionMaps.put(timeStamp, System.currentTimeMillis().toString())
+            }
+        }
+        return CheckUtils.isEmpty(version) ? "+" : version
+
+
+    }
+
+    void initVersionMap() {
+        mavenType = wrapper.getExtends(ModuleConfig.class).mavenType
+        versionFile = new File(BuildConfig.versionDir, "$mavenType.name/$Keys.FILE_VERSION")
+        versionMaps = FileUtils.readMaps(versionFile)
+    }
+
+    void saveVersionMap() {
+        versionMaps.store(versionFile.newOutputStream(), Keys.CHARSET)
+        versionMaps.clear()
+    }
+
     @Override
     LinkedList<String> getOutFiles() {
+        initVersionMap()
+
         StringBuilder sb = new StringBuilder("dependencies { \n")
-        //需要exclude的主线的包
-        Set<String> masterExclude = new HashSet<>()
-        dependModules.each { model ->
+        modules.each { model ->
             if (model.moduleName == project.name) return
+            switch (GlobalConfig.dependenModel) {
+            //优先依赖本地工程
+                case localFirst:
+
+                    break
+            //只依赖本地工程
+                case localOnly:
+                    break
+            //优先仓库版本
+                case mavenFirst:
+                    break
+            //只依赖仓库版本
+                case mavenOnly:
+                default:
+                    break
+            }
+
             if (isLocal(model.local)) sb.append("    $model.compileMode ( project(':$model.moduleName')) ")
             else {
-                String newGroup = NormalUtils.isEmpty(model.group) ? baseGroup : model.group
+                String newGroup = XmlUtils.isEmpty(model.group) ? baseGroup : model.group
                 //获取当前模块在该分支的名称
-                String moduleName = NormalUtils.getNameForBranch(project, model.moduleName)
+                String moduleName = XmlUtils.getNameForBranch(project, model.moduleName)
                 //如果该分支上,没有对应的版本号,则使用主线上的依赖包
                 if (!versions.containsKey(moduleName)) moduleName = model.moduleName
 
                 String version = model.version
-                if (NormalUtils.isEmpty(version)) {
+                if (XmlUtils.isEmpty(version)) {
                     version = versions.containsKey(moduleName) ? versions[moduleName] : "+"
                 }
                 sb.append("    $model.compileMode  ('$newGroup:$moduleName:$version')  ")
@@ -126,12 +158,13 @@ class Dependencies extends BaseExtension {
             sb.append("     } \n ")
         }
         sb.append("} \n")
-        masterExclude.each {allInner.excludeModule(it)}
+        masterExclude.each { allInner.excludeModule(it) }
         sb.append("\nconfigurations { \n")
-        allInner.excludes.each { sb.append("    all*.exclude(${excludeString(it)})  \n") }
-        sb.append("    all*.exclude(group : 'com.dachen.master',module : '${NormalUtils.collection2Str(masterExclude)},test') \n")
+        allInner.allExcludes.each { sb.append("    all*.exclude(${excludeString(it)})  \n") }
+        sb.append("    all*.exclude(group : 'com.dachen.master',module : '${XmlUtils.collection2Str(masterExclude)},test') \n")
         sb.append(" }")
 
+        saveVersionMap()
         return [FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.toString())];
     }
     /**
@@ -139,85 +172,13 @@ class Dependencies extends BaseExtension {
      * @param masterExclude
      * @param model
      */
-    void addMasterExclude(Set<String> masterExclude, String name,String version) {
+    void addMasterExclude(Set<String> masterExclude, String name, String version) {
         MavenType maven = project.moduleConfig.mavenType
         String targetGroup = "${Default.groupName}.master"
         def pomStr = FileUtils.readCachePom(maven, name, version)
-        NormalUtils.parseListXmlByKey(pomStr, "dependency").each { dep ->
-            if(targetGroup!= NormalUtils.parseXmlByKey(dep,"groupId")) return
-            masterExclude += NormalUtils.parseXmlByKey(dep,"artifactId").split(",")
-        }
-    }
-
-    boolean hasLocalCompile() {
-        if (focusLocal) return true
-        for (DpItem i : dependModules) {
-            if (i.local) return true
-        }
-        return false
-    }
-
-    void endConfig(Map<String, String> outConfig) {
-        versions = outConfig
-    }
-
-    static class DpItem {
-        String moduleName
-        /**
-         * 是否依赖本地工程，more依赖仓库工程
-         */
-        Boolean local
-        /**
-         * 依赖模式
-         * runtimeOnly
-         * compileOnly
-         * implementation
-         */
-        String compileMode = "runtimeOnly"
-
-        String group
-        String version
-        String lastUpdate
-        String updateDesc
-        LinkedList<Map<String, String>> excludes = new LinkedList<>()
-        /**
-         * 依赖中的依赖树
-         */
-        Set<DpItem> dpItems = new HashSet<>()
-
-        void excludeGroup(String[] groups) {
-            groups.each {
-                excludes += ["group": it]
-            }
-        }
-
-        void excludeModule(String[] modules) {
-            modules.each {
-                excludes += ["module": it]
-            }
-        }
-
-        void exclude(Map<String, String> exclude) {
-            excludes += exclude
-        }
-
-        String getLastUpdateTimeStr(){
-            if(NormalUtils.isEmpty(lastUpdate)||"0" == lastUpdate) return "----------"
-            return new Date(lastUpdate.toLong()).toLocaleString()
-        }
-
-        @Override
-        public String toString() {
-            return "DpItem{" +
-                    "moduleName='" + moduleName + '\'' +
-                    ", local=" + local +
-                    ", compileMode='" + compileMode + '\'' +
-                    ", group='" + group + '\'' +
-                    ", version='" + version + '\'' +
-                    ", lastUpdate='" + lastUpdate + '\'' +
-                    ", excludes=" + excludes +
-                    ", dpItems=" + dpItems +
-                    '}';
+        XmlUtils.parseListXmlByKey(pomStr, "dependency").each { dep ->
+            if (targetGroup != XmlUtils.parseXmlByKey(dep, "groupId")) return
+            masterExclude += XmlUtils.parseXmlByKey(dep, "artifactId").split(",")
         }
     }
 

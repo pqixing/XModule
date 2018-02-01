@@ -1,5 +1,6 @@
 package com.pqixing.modularization.wrapper
 
+import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
 
@@ -37,11 +38,15 @@ class ProjectWrapper {
         try {
             project.apply(map)
         } catch (Exception e) {
-            Print.lnf("ProjectWrapper apply -> ${e.toString()}")
+            Print.lne("ProjectWrapper apply",e)
         }
     }
 
-    public String branchName(){
+    boolean isMaster() {
+        return getExtends(GitConfig.class).branchName == "master"
+    }
 
+    String getArtifactId() {
+        return master ? project.name : "$project.name-b-${getExtends(GitConfig.class).branchName}"
     }
 }

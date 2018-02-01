@@ -4,7 +4,7 @@ import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.configs.GlobalConfig
 import com.pqixing.modularization.models.MavenType
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.NormalUtils
+import com.pqixing.modularization.utils.XmlUtils
 import com.pqixing.modularization.utils.Print
 
 class Net {
@@ -20,12 +20,13 @@ class Net {
      */
     static String get(String url,boolean useCache) {
         String netResult = ""
-        if(GlobalConfig.offlineMode) netResult = FileUtils.readCache(url)
-        if(NormalUtils.isEmpty(netResult)) throw new RuntimeException("offlineMode invail there is no cache for url :$url")
-        else return netResult
+        if(GlobalConfig.offlineMode) {
+            netResult = FileUtils.readCache(url)
+            if (XmlUtils.isEmpty(netResult)) throw new RuntimeException("offlineMode invail there is no cache for url :$url")
+            return netResult
+        }
         if(useCache) netResult = FileUtils.readCache(url)
-        if(!NormalUtils.isEmpty(netResult)) return netResult
-
+        if(!XmlUtils.isEmpty(netResult)) return netResult
         netResult = requestNet(url)
         FileUtils.saveCache(url,netResult)
         return netResult

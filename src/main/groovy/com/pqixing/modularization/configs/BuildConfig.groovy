@@ -14,7 +14,7 @@ class BuildConfig extends BaseExtension {
     public static final String dirName = ".modularization"
     //网络进行10秒钟缓存
     public static final long netCacheTime = 1000*20
-    public static final long timOut = 1000*4
+    public static final long timOut = 5
     public static final String rootOutDir = FileUtils.urls(BasePlugin.rootProject.rootDir.absolutePath,dirName)
     public static final String versionDir = FileUtils.urls(rootOutDir,"versions")
     public static final String netCacheDir = FileUtils.urls(rootOutDir,"netCache")
