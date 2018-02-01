@@ -44,7 +44,7 @@ class BuildConfig extends BaseExtension {
     }
 
     @Override
-    LinkedList<String> generatorFiles() {
+    LinkedList<String> getOutFiles() {
         return null
     }
 }

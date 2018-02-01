@@ -1,5 +1,7 @@
-package com.pqixing.modularization.models
+package com.pqixing.modularization.runtype
 
+import com.pqixing.modularization.models.AndroidConfig
+import com.pqixing.modularization.base.BaseContainer
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
@@ -9,7 +11,7 @@ import org.gradle.api.Project
  * Created by pqixing on 17-12-7.
  */
 
-class RunType extends BaseContainerExtension {
+class RunType extends BaseContainer {
     boolean asApp = true
     String launchActivity
     String app_icon
@@ -49,7 +51,7 @@ class RunType extends BaseContainerExtension {
         if(asApp) asApp = defType.asApp
     }
     @Override
-    LinkedList<String> generatorFiles() {
+    LinkedList<String> getOutFiles() {
         updateType()
         if ("application" == project.moduleConfig.pluginType || !asApp) return []//不独立运行，不生产缓存类文件
 

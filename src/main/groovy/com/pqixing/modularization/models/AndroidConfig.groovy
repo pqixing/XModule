@@ -1,6 +1,7 @@
 package com.pqixing.modularization.models
 
 import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
@@ -31,11 +32,12 @@ class AndroidConfig extends BaseExtension {
     final Project project
 
     AndroidConfig(Project project) {
+
         this.project = project
     }
 
     @Override
-    LinkedList<String> generatorFiles() {
+    LinkedList<String> getOutFiles() {
         def list = []
         ModuleConfig moduleConfig = project.moduleConfig
         BuildConfig buildConfig = project.buildConfig
@@ -53,7 +55,7 @@ class AndroidConfig extends BaseExtension {
         if (flavorsEnable && "library" != moduleConfig.pluginType)
             list += FileUtils.write(new File(buildConfig.cacheDir, "flavors.gradle"), NormalUtils.parseString(flavorsTxt, maps))
 
-        Print.ln("android Config generatorFiles $list")
+        Print.ln("android Config getOutFiles $list")
         return list
     }
 

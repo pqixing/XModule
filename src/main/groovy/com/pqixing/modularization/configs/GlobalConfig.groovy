@@ -1,6 +1,11 @@
 package com.pqixing.modularization.configs
 
+import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
+import com.pqixing.modularization.net.Net
+import com.pqixing.modularization.utils.CheckUtils
+import com.pqixing.modularization.utils.FileUtils
+import com.pqixing.modularization.wrapper.ProjectWrapper
 
 /**
  * Created by pqixing on 17-12-7.
@@ -36,13 +41,40 @@ class GlobalConfig {
     /**
      * 预设仓库地址
      */
-    public static Map<String, String> preMavenUrl = ["release": "http://192.168.3.7:9527/nexus/content/repositories/android", "test": "http://192.168.3.7:9527/nexus/content/repositories/androidtest"]
+    public
+    static Map<String, String> preMavenUrl = ["release": "http://192.168.3.7:9527/nexus/content/repositories/android", "test": "http://192.168.3.7:9527/nexus/content/repositories/androidtest"]
     /**
      * 文档仓库管理,可以设置多个，方便同时管理，只能支持git
      */
     static final Map<String, String> docGits = ["Document", ""]
 
-    static {
-        BasePlugin.rootProject
+    private static boolean init = false
+
+    /**
+     * 初始化配置
+     * @return
+     */
+    public static void init() {
+        if (init) return
+        init = true
+        ProjectWrapper wrapper = ProjectWrapper.with(BasePlugin.rootProject)
+        String remote = wrapper.get(Keys.REMOTE_CONFIG)
+        if (!CheckUtils.isEmpty(remote)) {//有远程配置，优先使用
+            if (remote.startsWith(Keys.PREFIX_NET)) updateConfig(Net.get(remote, true))
+            else updateConfig(FileUtils.read(remote))
+        }
+        updateConfig(new File(wrapper.project.rootDir, Keys.GLOBAL_CONFIG_NAME))
+    }
+
+    private static void updateConfig(String configStr) {
+        Properties config = new Properties()
+        config.load(new DataInputStream(configStr.getBytes()))
+        GlobalConfig.properties.each { p ->
+            updateKey(p.key, config)
+        }
+    }
+
+    private static void updateKey(String key, Properties config) {
+        if (config.containsKey(key)) GlobalConfig."$key" = new GroovyShell().evaluate(config.getProperty(key))
     }
 }

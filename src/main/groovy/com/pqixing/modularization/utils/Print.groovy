@@ -11,6 +11,10 @@ class Print {
         return l(str + "\n",true, closure)
     }
 
+    static String lne(String str =null,Exception e){
+        lnf("$str Exception -> ${e.toString()}")
+    }
+
     static String l(String str,boolean focusLog = false, Closure closure = null) {
         closure?.call(str)
         if ("Y" == silentLog&&!focusLog) return

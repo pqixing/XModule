@@ -11,13 +11,15 @@ import org.gradle.api.Project
 
 class FileUtils {
 
-    static String readCache(String url){
-        File fileName = new File(BuildConfig.netCacheDir,TextUtils.numOrLetter(url))
+
+    static String readCache(String url) {
+        File fileName = new File(BuildConfig.netCacheDir, TextUtils.numOrLetter(url))
         if (fileName.exists()) return fileName.text
     }
-    static void saveCache(String url,String cache){
-        File fileName = new File(BuildConfig.netCacheDir,TextUtils.numOrLetter(url))
-        write(fileName,cache)
+
+    static void saveCache(String url, String cache) {
+        File fileName = new File(BuildConfig.netCacheDir, TextUtils.numOrLetter(url))
+        write(fileName, cache)
     }
 
     /**
@@ -27,7 +29,7 @@ class FileUtils {
      * @return
      */
     static String readCachePom(MavenType maven, String name, String version) {
-        return readCachePom(maven.project,maven.maven_url,maven.name,name,version)
+        return readCachePom(maven.project, maven.maven_url, maven.name, name, version)
     }
     /**
      * 读取缓存的pom依赖信息
@@ -35,7 +37,7 @@ class FileUtils {
      * @param model
      * @return
      */
-    static String readCachePom(Project project,String mavenUrl,String mavenName, String name, String version) {
+    static String readCachePom(Project project, String mavenUrl, String mavenName, String name, String version) {
         File pomFile = new File(project.rootDir, ".modularization/poms_$mavenName/${name}-${version}.pom")
         if (pomFile.exists()) return pomFile.text
         String pomStr = NormalUtils.request(NormalUtils.getPomUrl(mavenUrl, Default.groupName, name, version))
@@ -57,12 +59,26 @@ class FileUtils {
         return newUrl.substring(0, newUrl.size() - 1)
     }
 
+    static String read(String file) {
+        return read(new File(file))
+    }
+    /**
+     * 读取文件
+     * @param file
+     * @return
+     */
+    static String read(File file) {
+        if (file.exists() && file.isFile()) return file.text
+        return ""
+    }
     /**
      * 输出文件
      * @param file
      * @param data
      */
     static String write(File file, String data) {
+        if (file.exists() && file.text == data) return file.path
+
         if (file.exists()) file.delete()
         file.parentFile.mkdirs()
         Writer out = file.newWriter("utf-8")
@@ -100,7 +116,9 @@ class FileUtils {
                 curLevel = map.value
             }
             mapSb.append("\n")
-            ["batch"].each { writePatchUpload(project,maps, new File(project.buildConfig.outDir), it) }
+            ["batch"].each {
+                writePatchUpload(project, maps, new File(project.buildConfig.outDir), it)
+            }
         }
         FileUtils.write(outputFile, mapSb.toString())
         outputFile.append(strList.toString())
@@ -113,7 +131,7 @@ class FileUtils {
      * @param outDir
      * @param m
      */
-    static void writePatchUpload(Project project,Map<String, Integer> maps, File outDir, String envName) {
+    static void writePatchUpload(Project project, Map<String, Integer> maps, File outDir, String envName) {
         List<String> moduleNames = new LinkedList<>()
         maps.each { moduleNames.add(0, it.key) }
 

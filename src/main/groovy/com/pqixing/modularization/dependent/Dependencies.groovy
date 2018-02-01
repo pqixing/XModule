@@ -1,4 +1,4 @@
-package com.pqixing.modularization.models
+package com.pqixing.modularization.dependent
 
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.base.BaseExtension
@@ -23,6 +23,7 @@ class Dependencies extends BaseExtension {
 
 
     Dependencies(Project project) {
+        super(project)
         this.dependModules = new LinkedList<>()
         this.project = project
         versions = new HashMap<>()
@@ -89,7 +90,7 @@ class Dependencies extends BaseExtension {
     }
 
     @Override
-    LinkedList<String> generatorFiles() {
+    LinkedList<String> getOutFiles() {
         StringBuilder sb = new StringBuilder("dependencies { \n")
         //需要exclude的主线的包
         Set<String> masterExclude = new HashSet<>()

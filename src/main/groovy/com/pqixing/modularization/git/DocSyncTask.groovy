@@ -1,18 +1,17 @@
-package com.pqixing.modularization.tasks
+package com.pqixing.modularization.git
 
 import com.pqixing.modularization.Default
+import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.utils.NormalUtils
-import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.TaskAction
-
 /**
  * Created by pqixing on 17-12-20.
  * 同步文档的任务
  */
 
-public class DocSyncTask extends DefaultTask {
+public class DocSyncTask extends BaseTask {
     String docGitPath;
     String docFileDirs
     String defaultDoc
@@ -33,6 +32,21 @@ public class DocSyncTask extends DefaultTask {
         updateDocGit()
         copyFile()
         pushFile()
+    }
+
+    @Override
+    void start() {
+
+    }
+
+    @Override
+    void runTask() {
+
+    }
+
+    @Override
+    void end() {
+
     }
 
     void updateDocGitPath() {

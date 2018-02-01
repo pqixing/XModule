@@ -1,6 +1,7 @@
 package com.pqixing.modularization.models
 
 import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import org.gradle.api.Project
@@ -13,6 +14,7 @@ class PreWriteConfig extends BaseExtension {
     HashMap<String, String> writeConfigs
 
     PreWriteConfig(Project project) {
+        super(project)
         this.project = project
         writeConfigs = new HashMap<>()
     }
@@ -21,7 +23,7 @@ class PreWriteConfig extends BaseExtension {
         writeConfigs += configs
     }
     @Override
-    LinkedList<String> generatorFiles() {
+    LinkedList<String> getOutFiles() {
 
         BuildConfig buildConfig = project.buildConfig
         ModuleConfig moduleConfig = project.moduleConfig

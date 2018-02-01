@@ -1,4 +1,4 @@
-package com.pqixing.modularization.tasks
+package com.pqixing.modularization.maven
 
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.models.MavenType
@@ -7,11 +7,11 @@ import com.pqixing.modularization.utils.Print
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
-class UploadTask extends DefaultTask {
+class ToMavenTask extends DefaultTask {
 
     MavenType mavenInfo
 
-    UploadTask() {
+    ToMavenTask() {
         group = Default.taskGroup
 
     }

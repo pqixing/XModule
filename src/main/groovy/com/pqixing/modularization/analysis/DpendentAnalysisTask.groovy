@@ -1,28 +1,37 @@
-package com.pqixing.modularization.tasks
+package com.pqixing.modularization.analysis
 
 import com.alibaba.fastjson.JSON
 import com.pqixing.modularization.Default
-import com.pqixing.modularization.models.Dependencies
+import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.dependent.Dependencies
+import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.models.MavenType
 import com.pqixing.modularization.models.ModuleConfig
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
+import com.pqixing.modularization.wrapper.ProjectWrapper
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-12-20.
  * 基础的检测任务
  */
 
-abstract class BaseCheckTask extends DefaultTask {
+abstract class DpendentAnalysisTask extends DefaultTask {
     boolean listExclude
     MavenType maven
     int runtime = 0
     List<LevelItem> itemListByLevels
     ModuleConfig config
 
+    public static void analysisTask(ProjectWrapper wrapper) {
+        String branchName = wrapper.getExtends(GitConfig.class).branchName
+        BaseTask.task(wrapper.project, branchName == "master" ? MavenMergerTask.class : BranchMergerTask.class)
+    }
 
-    BaseCheckTask() {
+    DpendentAnalysisTask() {
         group = Default.taskGroup
     }
 

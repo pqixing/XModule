@@ -2,8 +2,11 @@ package com.pqixing.modularization.models
 
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.base.BaseExtension
-import com.pqixing.modularization.configs.BuildConfig
-import com.pqixing.modularization.tasks.UploadTask
+import com.pqixing.modularization.dependent.Dependencies
+import com.pqixing.modularization.dependent.RepoVersions
+import com.pqixing.modularization.maven.MavenType
+import com.pqixing.modularization.maven.ToMavenTask
+import com.pqixing.modularization.runtype.RunType
 import com.pqixing.modularization.utils.NormalUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.NamedDomainObjectContainer
@@ -13,41 +16,21 @@ import org.gradle.api.Project
  */
 
 class ModuleConfig extends BaseExtension {
-    protected final Project project
-
     final NamedDomainObjectContainer<RunType> runTypes
     final NamedDomainObjectContainer<MavenType> mavenTypes
-    final BuildConfig buildConfig
     final AndroidConfig androidConfig
-
-    final String pluginType
-
     Dependencies dependModules
     RepoVersions dependVersions
     PreWriteConfig writeConfig
 
-    String docFileDirs
-
-    /**
-     * 是否在同步前，更新一遍版本号
-     */
-    boolean updateBeforeSync = true
     RunType runType
     MavenType mavenType
 
-    //集成默认的依赖库
-    boolean addDefaultImpl = true
-
-    ModuleConfig(Project project
-                 , NamedDomainObjectContainer<RunType> runTypes
-                 , NamedDomainObjectContainer<MavenType> mavenTypes, String pluginType) {
-        this.pluginType = pluginType
-        this.project = project
-        buildConfig = new BuildConfig(project)
+    ModuleConfig(Project project,NamedDomainObjectContainer<RunType> runTypes
+                 , NamedDomainObjectContainer<MavenType> mavenTypes) {
+        super(project)
 
         androidConfig = new AndroidConfig(project)
-//        androidConfig.updateMeta(project)
-
         dependModules = new Dependencies(project)
         dependVersions = new RepoVersions(project)
         writeConfig = new PreWriteConfig(project)
@@ -56,8 +39,8 @@ class ModuleConfig extends BaseExtension {
         mavenTypes.whenObjectAdded { it.onCreate(project) }
 
         mavenTypes.add(new MavenType("release"))
-        mavenTypes.add(new MavenType("DEFAULT"))
         mavenTypes.add(new MavenType("test"))
+        mavenTypes.add(new MavenType("DEFAULT"))
         mavenTypes.DEFAULT.onCreate(project)
         mavenTypes.DEFAULT.uploadEnable = true
 
@@ -160,21 +143,21 @@ class ModuleConfig extends BaseExtension {
 
         if (m.uploadEnable && ("release" != m.name || Default.uploadKey == m.uploadKey)) {
             String taskName = "${project.name}Upload"
-            listTask += project.task(taskName, type: UploadTask) { mavenInfo = m }
+            listTask += project.task(taskName, type: ToMavenTask) { mavenInfo = m }
         }
 //        }
         listTask.each { it.dependsOn project.assembleRelease }
     }
 
     @Override
-    LinkedList<String> generatorFiles() {
+    LinkedList<String> getOutFiles() {
         LinkedList<String> files = []
-        files += androidConfig.generatorFiles()
-        files += mavenType.generatorFiles()
-        if (!NormalUtils.isEmpty(runType)) files += runType.generatorFiles()
-        files += dependModules.generatorFiles()
+        files += androidConfig.getOutFiles()
+        files += mavenType.getOutFiles()
+        if (!NormalUtils.isEmpty(runType)) files += runType.getOutFiles()
+        files += dependModules.getOutFiles()
 
-        files += writeConfig.generatorFiles()
+        files += writeConfig.getOutFiles()
 
         return files
     }

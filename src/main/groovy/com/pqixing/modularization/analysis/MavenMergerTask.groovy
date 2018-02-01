@@ -1,13 +1,13 @@
-package com.pqixing.modularization.tasks
+package com.pqixing.modularization.analysis
 
-import com.pqixing.modularization.models.Dependencies
+import com.pqixing.modularization.dependent.Dependencies
 import org.gradle.api.tasks.TaskAction
 /**
  * Created by pqixing on 17-12-20.
- * 检测该功能中release仓库和test仓库的依赖的版本差异,生成快速提交代码到release环境的功能
+ * 对比不同仓库中的依赖，生成快速合并提交到仓库的脚本
  */
 
-public class MasterCheckTask extends BaseCheckTask {
+public class MavenMergerTask extends DpendentAnalysisTask {
 
     @TaskAction
     void run() {

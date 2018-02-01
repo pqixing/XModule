@@ -1,4 +1,4 @@
-package com.pqixing.modularization.models
+package com.pqixing.modularization.dependent
 
 import com.pqixing.modularization.base.BaseExtension
 import org.gradle.api.Project
@@ -22,6 +22,7 @@ class RepoVersions extends BaseExtension {
     }
 
     RepoVersions(Project project) {
+        super(project)
         configPaths = new LinkedList<>()
         versions = new HashMap<>()
         this.project = project
@@ -29,7 +30,7 @@ class RepoVersions extends BaseExtension {
 
 
     @Override
-    public LinkedList<String> generatorFiles() {
+    public LinkedList<String> getOutFiles() {
         return []
     }
 

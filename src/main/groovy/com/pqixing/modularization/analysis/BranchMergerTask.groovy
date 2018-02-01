@@ -1,13 +1,13 @@
-package com.pqixing.modularization.tasks
+package com.pqixing.modularization.analysis
 
-import com.pqixing.modularization.models.Dependencies
+import com.pqixing.modularization.dependent.Dependencies
 import org.gradle.api.tasks.TaskAction
 /**
  * Created by pqixing on 17-12-20.
  * 检查分支上提交的过的依赖包,生成快速提交到主线的功能
  */
 
-class BranchCheckTask extends BaseCheckTask {
+class BranchMergerTask extends DpendentAnalysisTask {
 
 
     @TaskAction
