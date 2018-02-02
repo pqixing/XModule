@@ -79,7 +79,7 @@ class Dependencies extends BaseExtension {
      * @return
      */
     String getLastVersion(String group, String artifactId) {
-        String timeStamp = "$artifactId-stamp"
+        String timeStamp = "$artifactId$Keys.SUFFIX_STAMP"
         String version = versionMaps.getProperty(artifactId)
         //一分钟秒内,不更新相同的组件版本,避免不停的爬取相同的接口
         if (System.currentTimeMillis() - (versionMaps.getProperty(timeStamp)?.toLong() ?: 0L) >= 1000 * 60) {

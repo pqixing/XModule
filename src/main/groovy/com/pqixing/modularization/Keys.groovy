@@ -95,4 +95,12 @@ class Keys {
      * 分支分割标记
      */
     public static final String BRANCH_TAG = "-b-"
+    /**
+     * 默认初始版本号
+     */
+    public static final String VERSION_DEFAULT = "1.0"
+    /**
+     * 时间后缀
+     */
+    public static final String SUFFIX_STAMP = "-stamp"
 }
