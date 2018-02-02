@@ -11,6 +11,11 @@ import org.gradle.api.Project
  */
 
 class Module extends BaseExtension {
+    public static final String SCOP_COMPILE = "compile"
+    public static final String SCOP_RUNTIME = "runtimeOnly"
+    public static final String scop_compileonly = "compileOnly"
+    public static final String SCOP_IMPL = "implementation"
+
     Boolean onLocalCompile
     String moduleName
     String artifactId
@@ -18,7 +23,7 @@ class Module extends BaseExtension {
      * 依赖模式
      * @see runtimeOnly , compileOnly , implementation , compile
      */
-    String scope = "runtimeOnly"
+    String scope = scop_runtime
 
     String groupId = GlobalConfig.groupName
     String version

@@ -5,13 +5,14 @@ import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.configs.GlobalConfig
 import com.pqixing.modularization.maven.MavenType
-import com.pqixing.modularization.models.ModuleConfig
+import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.TextUtils
 import com.pqixing.modularization.wrapper.MetadataWrapper
 import com.pqixing.modularization.wrapper.PomWrapper
 import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-12-25.
  */
@@ -20,7 +21,7 @@ class Dependencies extends BaseExtension {
 
     //对应all*.exclude
     LinkedList<Map<String, String>> allExcludes
-    LinkedList<Module> modules
+    HashSet<Module> modules
     //传递下来的master分支的exclude
     Set<String> masterExclude = new HashSet<>()
     Set<Module> dependentLose = new HashSet<>()
@@ -31,6 +32,8 @@ class Dependencies extends BaseExtension {
     File versionFile
     Properties versionMaps
     MavenType mavenType
+
+    boolean autoImpl = true
     /**
      * 给全部依赖库添加
      * @param exclude
@@ -41,7 +44,7 @@ class Dependencies extends BaseExtension {
 
     Dependencies(Project project) {
         super(project)
-        modules = new LinkedList<>()
+        modules = new HashSet<>()
         allExcludes = new LinkedList<>()
     }
 
@@ -60,7 +63,7 @@ class Dependencies extends BaseExtension {
 
     Module addImpl(String moduleName, Closure closure = null) {
         Module inner = add(moduleName, closure)
-        inner.scope = "implementation"
+        inner.scope = Module.SCOP_IMPL
         return inner
     }
 
@@ -81,14 +84,13 @@ class Dependencies extends BaseExtension {
         //一分钟秒内,不更新相同的组件版本,避免不停的爬取相同的接口
         if (System.currentTimeMillis() - (versionMaps.getProperty(timeStamp)?.toLong() ?: 0L) >= 1000 * 60) {
             String release = MetadataWrapper.create(mavenType.maven_url, group, artifactId).release
-            if (!CheckUtils.isEmpty(release)) {
+            if (!CheckUtils.isVersionCode(release)) {
                 version = release
                 versionMaps.put(timeStamp, System.currentTimeMillis().toString())
+                versionMaps.put(artifactId, release)
             }
         }
         return CheckUtils.isEmpty(version) ? "+" : version
-
-
     }
 
     void initVersionMap() {
@@ -97,6 +99,10 @@ class Dependencies extends BaseExtension {
         versionMaps = FileUtils.readMaps(versionFile)
         localImportModules = new HashSet<>()
         project.rootProject.allprojects.each { localImportModules += it.name }
+
+        if (autoImpl && !GlobalConfig.autoImpl.contains(project.name)) {//如果当前不是需要自动导入的工程之一，则自动导入依赖
+            GlobalConfig.autoImpl.each { addImpl(it) }
+        }
     }
 
     void saveVersionMap() {
@@ -113,9 +119,7 @@ class Dependencies extends BaseExtension {
         StringBuilder sb = new StringBuilder()
         excludes.each { item ->
             sb.append("         $prefix (  ")
-            item.each { map ->
-                sb.append("$map.key : '$map.value',")
-            }
+            item.each { map -> sb.append("$map.key : '$map.value',") }
             sb.deleteCharAt(sb.length() - 1)
             sb.append("  ) \n")
         }

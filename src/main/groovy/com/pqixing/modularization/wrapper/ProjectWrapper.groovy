@@ -1,5 +1,6 @@
 package com.pqixing.modularization.wrapper
 
+import com.pqixing.modularization.Keys
 import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.utils.TextUtils
@@ -49,6 +50,10 @@ class ProjectWrapper {
 
     String getArtifactId() {
         return TextUtils.getBranchArtifactId(project.name, this)
+    }
+
+    String getPluginName() {
+        return get(Keys.NAME_PUGLIN)
     }
 
 }

@@ -2,13 +2,37 @@ package com.pqixing.modularization
 
 class Keys {
     /**
-     * 代码分割线
+     * 默认
      */
-    public static final String CHARSET= "UTF-8"
+    public static final String DEFAULT = "DEFAULT"
+    /**
+     * 文档管理插件名称
+     */
+    public static final String NAME_DOC = "docment"
+    /**
+     * App插件名称
+     */
+    public static final String NAME_APP = "application"
+    /**
+     * library插件名称
+     */
+    public static final String NAME_LIBRARY = "library"
+    /**
+     * git插件名称
+     */
+    public static final String NAME_GIT = "git"
+    /**
+     * 插件名称获取
+     */
+    public static final String NAME_PUGLIN = "plugin_name"
     /**
      * 代码分割线
      */
-    public static final String SEPERATOR= "###"
+    public static final String CHARSET = "UTF-8"
+    /**
+     * 代码分割线
+     */
+    public static final String SEPERATOR = "###"
     /**
      * 任务分组
      */

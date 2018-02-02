@@ -3,15 +3,13 @@ package com.pqixing.modularization.dependent
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.configs.BuildConfig
-import com.pqixing.modularization.utils.NormalUtils
-import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.utils.TextUtils
 /**
  * Created by pqixing on 17-12-18.
  * 输出打印依赖
  */
 
-public class DependentPrintTask extends BaseTask {
+class DependentPrintTask extends BaseTask {
     File outDir
     BuildConfig buildConfig
 
@@ -36,69 +34,73 @@ public class DependentPrintTask extends BaseTask {
     void end() {
 
     }
-
-    void searchModulesByPath() {
-        if (!searchModules) return
-        modules += getModuleNames(project.rootDir.parentFile, 3)
-        Print.ln("searchModules all modules :$modules")
-    }
-
-    /**
-     * @param dir
-     * @param deep 层级，如果小于0 停止获取
-     * @return
-     */
-    HashSet<String> getModuleNames(File dir, int deep) {
-        if (deep < 0) return []
-        def set = []
-        if (new File(dir, "build.gradle").exists() && new File(dir, "src").exists()) set += dir.name
-        else {
-            dir.listFiles(new FilenameFilter() {
-                @Override
-                boolean accept(File file, String s) {
-                    return file.isDirectory()
-                }
-            }).each { childDir -> set += getModuleNames(childDir, deep - 1) }
-        }
-        return set
-    }
-
-
-    void makeUrls() {
-        urls = new HashMap<>()
-        modules.each {
-            def moduleName = it.replace(":", "")
-            urls.put(moduleName, NormalUtils.getMetaUrl(mavenUrl, compileGroup, moduleName))
-            if ("master" != project.branchName)
-                urls.put(NormalUtils.getNameForBranch(project, moduleName), NormalUtils.getMetaUrl(mavenUrl, compileGroup, NormalUtils.getNameForBranch(project, moduleName)))
-        }
-        Print.ln("urls : $urls")
-    }
-
-    void updateVersions() {
-        def outFile = new File(outPath)
-        outFile.parentFile.mkdirs()
-        def pros = new Properties()
-        if (outFile.exists()) pros.load(outFile.newInputStream())
-
-        urls.each { map ->
-            String timeStr = "${map.key}-last"
-            String timeStamp = "${map.key}-stamp"
-
-            //10秒内,不更新相同的组件版本,避免不停的爬取相同的接口
-            if (System.currentTimeMillis() - (pros.getProperty(timeStamp)?.toLong() ?: 0L) <= 1000 * 20) return
-
-            String version = NormalUtils.parseLastVersion(map.value)
-            if (!NormalUtils.isEmpty(version)) {
-                if (version != (pros.getProperty(map.key) ?: ""))
-                    pros.put(timeStr, format.format(new Date()))
-
-                pros.put(map.key, version)
-                pros.put(timeStamp, System.currentTimeMillis().toString())
-
-            }
-        }
-//        pros.put("lastUpdateTime", System.currentTimeMillis().toString())
-        pros.store(outFile.newOutputStream(), "")
-    }
+//    /**
+//     * 输出依赖关系
+//     * @param project
+//     * @return
+//     */
+//    static void writeDependency(Project project, File outputFile) {
+//        def strList = new LinkedList<String>()
+//        outputFile.eachLine {
+//            if (it.startsWith("No dependencies")) {
+//                strList.removeLast()
+//                strList.removeLast()
+//            } else {
+//                strList.add(it + "\\n")
+//            }
+//        }
+//        StringBuilder mapSb = new StringBuilder("-\\n")
+//        if (project.localMode) {
+//            HashMap<String, Integer> moduleLevels = new HashMap<>()
+//            dependencyByLevel(project, moduleLevels, 1)
+//            def maps = moduleLevels.toSpreadMap().sort { it.value }
+//            mapSb.append("本地工程依赖层级关系: \\n 0 -> $project.name")
+//            int curLevel = 0
+//            maps.each { map ->
+//                if (map.value > curLevel) mapSb.append("\\n $map.value -> ")
+//                mapSb.append("$map.key  ")
+//                curLevel = map.value
+//            }
+//            mapSb.append("\\n")
+//            ["batch"].each {
+//                writePatchUpload(project, maps, new File(project.buildConfig.outDir), it)
+//            }
+//        }
+//        FileUtils.write(outputFile, mapSb.toString())
+//        outputFile.append(strList.toString())
+//
+//
+//    }
+//    /**
+//     * 生成批量上传的脚本
+//     * @param maps
+//     * @param outDir
+//     * @param m
+//     */
+//    static void writePatchUpload(Project project, Map<String, Integer> maps, File outDir, String envName) {
+//        List<String> moduleNames = new LinkedList<>()
+//        maps.each { moduleNames.add(0, it.key) }
+//
+//        StringBuilder sb = new StringBuilder("#!/usr/bin/env bash \\n")
+//        sb.append("cd $project.rootDir.absolutePath \\n")
+//        moduleNames.each { name ->
+//            String taskName = "${name}Upload"
+//            sb.append(''' echo "modules+=':#{s1}'"
+//    > config2.gradle \ \ n '''.replace("#{s1}", name))
+//            sb.append("gradle :$name:updateGit  \\n")
+//            sb.append("gradle :$name:clean  \\n")
+//            sb.append("gradle :$name:$taskName  \\n")
+//            sb.append("sleep 1s  \\n")
+//        }
+//        write(new File(outDir, "upload${envName}.bat"), sb.toString())
+//    }
+//
+//    static void dependencyByLevel(Project project, HashMap<String, Integer> moduleLevels, int curLevel) {
+//        if (curLevel > 10 || project == null || !project.hasProperty("moduleConfig")) return
+//        List<String> modulesName = project.moduleConfig.dependModules.moduleNames
+//        modulesName.each { moduleLevels.put(it, Math.max(moduleLevels.get(it) ?: 0, curLevel)) }
+//        modulesName.each { name ->
+//            dependencyByLevel(project.rootProject.findProject(name), moduleLevels, curLevel + 1)
+//        }
+//    }
 }

@@ -1,9 +1,9 @@
-package com.pqixing.modularization.models
+package com.pqixing.modularization.android
 
+import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.XmlUtils
 import org.gradle.api.Project
 /**
  * Created by pqixing on 17-12-7.

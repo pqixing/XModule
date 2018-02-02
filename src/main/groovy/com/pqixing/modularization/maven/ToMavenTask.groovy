@@ -1,18 +1,17 @@
 package com.pqixing.modularization.maven
 
-import com.pqixing.modularization.Default
-import com.pqixing.modularization.utils.XmlUtils
+import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.utils.Print
-import org.gradle.api.DefaultTask
+import com.pqixing.modularization.utils.TextUtils
+import com.pqixing.modularization.wrapper.MetadataWrapper
 import org.gradle.api.tasks.TaskAction
 
-class ToMavenTask extends DefaultTask {
+class ToMavenTask extends BaseTask {
 
     MavenType mavenInfo
 
     ToMavenTask() {
-        group = Default.taskGroup
-
+        project.afterEvaluate {}
     }
 
     @TaskAction
@@ -22,25 +21,41 @@ class ToMavenTask extends DefaultTask {
         resetRepoVersionTime()
     }
 
-    void resetRepoVersionTime() {
-
-    }
-
-    void checkVail() {
+    @Override
+    void start() {
+       String lastVersion =  MetadataWrapper.create(mavenInfo.maven_url,mavenInfo.groupName,wrapper.artifactId).release
         String lastBaseVersion = XmlUtils.parseLastBaseVersion(project)
         if (mavenInfo.focusUpload) {
-            if(XmlUtils.isEmpty(mavenInfo.pom_version)||mavenInfo.pom_version < lastBaseVersion) mavenInfo.pom_version = lastBaseVersion
-            if(XmlUtils.isEmpty(mavenInfo.updateDesc)) mavenInfo.updateDesc = "upload for batch"
+            if(TextUtils.isEmpty(mavenInfo.pom_version)||mavenInfo.pom_version < lastBaseVersion) mavenInfo.pom_version = lastBaseVersion
+            if(TextUtils.isEmpty(mavenInfo.updateDesc)) mavenInfo.updateDesc = "upload for batch"
             return
         }
         switch (mavenInfo.name) {
             case "release":
             case "test":
-                if (XmlUtils.isEmpty(mavenInfo.pom_version)) throw new RuntimeException("pom_version 为空,请填写版本号")
+                if (TextUtils.isEmpty(mavenInfo.pom_version)) throw new RuntimeException("pom_version 为空,请填写版本号")
                 if(mavenInfo.pom_version < lastBaseVersion) throw new RuntimeException("pom_version 不能小于仓库版本 $lastBaseVersion ,请重新配置,或强制上传")
 //                if (NormalUtils.isEmpty(mavenInfo.updateDesc)) throw new RuntimeException("updateDesc 不能为空,请填写更新说明")
                 break
         }
+    }
+
+    @Override
+    void runTask() {
+
+    }
+
+    @Override
+    void end() {
+
+    }
+
+    void resetRepoVersionTime() {
+
+    }
+
+    void checkVail() {
+
     }
 
 //    @TaskAction

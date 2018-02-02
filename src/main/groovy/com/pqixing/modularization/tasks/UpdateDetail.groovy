@@ -1,7 +1,7 @@
 package com.pqixing.modularization.tasks
 
 import com.pqixing.modularization.Default
-import com.pqixing.modularization.utils.XmlUtils
+import com.pqixing.modularization.utils.TextUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import com.pqixing.modularization.utils.FileUtils
@@ -32,7 +32,7 @@ public class UpdateDetail extends DefaultTask {
         StringBuilder sb = new StringBuilder("##  ${moduleName}组件更新日志   \n")
         String metaUrl = XmlUtils.getMetaUrl(urls, compileGroup, moduleName)
         List<String> versions = XmlUtils.parseListXmlByKey(XmlUtils.request(metaUrl), 'version')
-        if (XmlUtils.isEmpty(versions)) return
+        if (TextUtils.isEmpty(versions)) return
         for (int i = versions.size() - 1; i >= 0; i--) {
             def version = versions[i]
            String pomStr = FileUtils.readCachePom(project,urls,env,Default.groupName,moduleName,version)

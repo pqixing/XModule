@@ -1,14 +1,12 @@
 package com.pqixing.modularization.analysis
 
 import com.alibaba.fastjson.JSON
-import com.pqixing.modularization.Default
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.dependent.Dependencies
 import com.pqixing.modularization.git.GitConfig
-import com.pqixing.modularization.models.MavenType
-import com.pqixing.modularization.models.ModuleConfig
+import com.pqixing.modularization.maven.MavenType
+import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.XmlUtils
 import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.wrapper.ProjectWrapper
 import org.gradle.api.DefaultTask

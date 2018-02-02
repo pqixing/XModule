@@ -2,7 +2,6 @@ package com.pqixing.modularization.git
 
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.utils.XmlUtils
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.TaskAction
@@ -50,8 +49,8 @@ public class DocSyncTask extends BaseTask {
     }
 
     void updateDocGitPath() {
-        if (XmlUtils.isEmpty(docGitPath)) docGitPath = getModulePaths()
-        if (XmlUtils.isEmpty(updateDesc)) updateDesc = "update doc"
+        if (TextUtils.isEmpty(docGitPath)) docGitPath = getModulePaths()
+        if (TextUtils.isEmpty(updateDesc)) updateDesc = "update doc"
     }
 
     void updateDocGit() {
@@ -67,7 +66,7 @@ public class DocSyncTask extends BaseTask {
 
     void copyFile() {
         project.task("${tempTaskName}${tempTaskCount++}", type: Copy) {
-            from XmlUtils.isEmpty(docFileDirs) ? "doc-${project.name}.md" : docFileDirs
+            from TextUtils.isEmpty(docFileDirs) ? "doc-${project.name}.md" : docFileDirs
             into "$docGitPath/readme/$project.name"
         }.execute()
     }

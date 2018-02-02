@@ -1,8 +1,13 @@
 package com.pqixing.modularization.maven
 
+import com.pqixing.modularization.Keys
+import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseContainer
+import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.configs.GlobalConfig
+import com.pqixing.modularization.utils.TextUtils
 import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -36,8 +41,19 @@ class MavenType extends BaseContainer {
         focusUpload = false
     }
 
+    private void mergerData() {
+        MavenType defType = wrapper.getExtends(ModuleConfig).mavenTypes.getByName(Keys.DEFAULT)
+        if (TextUtils.isEmpty(pom_version)) m.pom_version = defType.pom_version
+        if (TextUtils.isEmpty(uploadEnable)) m.uploadEnable = defType.uploadEnable
+        if (TextUtils.isEmpty(updateDesc)) m.updateDesc = defType.updateDesc
+        if (TextUtils.isEmpty(uploadKey)) m.uploadKey = defType.uploadKey
+        focusUpload |= defType.focusUpload
+    }
+
     @Override
     LinkedList<String> getOutFiles() {
-        return null
+        mergerData()
+        BaseTask.task(project, ToMavenTask.class).mavenInfo = this
+        return []
     }
 }

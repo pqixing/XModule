@@ -10,23 +10,23 @@ import com.pqixing.modularization.dependent.DependentPrintTask
 import com.pqixing.modularization.dependent.VersionsUpdateTask
 import com.pqixing.modularization.git.DocSyncTask
 import com.pqixing.modularization.git.GitConfig
-import com.pqixing.modularization.models.ModuleConfig
+import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.runtype.RunType
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-12-7.
  */
 
 abstract class AndroidPlugin extends BasePlugin {
-    abstract String pluginType()
 
     @Override
     void apply(Project project) {
         super.apply(project)
         ModuleConfig moduleConfig = new ModuleConfig(project, project.container(RunType)
-                , project.container(MavenType), pluginType())
+                , project.container(MavenType))
         project.extensions.add(Keys.CONFIG_MODULE, moduleConfig)
 
         loadRemoteGradle()
@@ -45,8 +45,8 @@ abstract class AndroidPlugin extends BasePlugin {
             //配置结束
             moduleConfig.onConfigEnd()
             moduleConfig.outFiles.findAll { it != null }.each { wrapper.apply from: it }
-            project.afterEvaluate {
-                moduleConfig.afterApplyAndroid()
+            project.afterEvaluate {//添加上传前依赖
+                project.toMaven.dependsOn project.assembleRelease
             }
             //添加打印依赖的task
             BaseTask.task(project, DependentPrintTask.class)

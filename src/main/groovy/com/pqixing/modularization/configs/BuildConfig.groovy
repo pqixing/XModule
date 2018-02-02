@@ -26,10 +26,6 @@ class BuildConfig extends BaseExtension {
     final String cacheDir
     final String javaDir
 
-    /**
-     * 默认的内网镜像依赖组
-     */
-    String MavenGroupUrl = "http://192.168.3.7:9527/nexus/content/groups/androidgroup/"
 
     String packageName
     String groupName

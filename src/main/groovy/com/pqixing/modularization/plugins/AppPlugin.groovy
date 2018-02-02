@@ -1,4 +1,6 @@
-package com.pqixing.modularization.plugins;
+package com.pqixing.modularization.plugins
+
+import com.pqixing.modularization.Keys;
 
 /**
  * Created by pqixing on 17-12-7.
@@ -6,7 +8,7 @@ package com.pqixing.modularization.plugins;
 
 class AppPlugin extends AndroidPlugin {
     @Override
-    String pluginType() {
-        return "application"
+    String getPluginName() {
+        return Keys.NAME_APP
     }
 }

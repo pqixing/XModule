@@ -2,10 +2,10 @@ package com.pqixing.modularization.runtype
 
 import com.pqixing.modularization.base.BaseContainer
 import com.pqixing.modularization.configs.BuildConfig
-import com.pqixing.modularization.models.AndroidConfig
+import com.pqixing.modularization.android.AndroidConfig
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print
-import com.pqixing.modularization.utils.XmlUtils
+import com.pqixing.modularization.utils.TextUtils
 import org.gradle.api.Project
 
 /**
@@ -44,10 +44,10 @@ class RunType extends BaseContainer {
     }
     void updateType(){
         RunType defType = project.moduleConfig.runTypes."DEFAULT"
-        if (XmlUtils.isEmpty(app_icon)) app_icon = defType.app_icon
-        if (XmlUtils.isEmpty(app_name)) app_name = defType.app_name
-        if (XmlUtils.isEmpty(app_theme)) app_theme = defType.app_theme
-        if (XmlUtils.isEmpty(packageName)) app_theme = defType.packageName
+        if (TextUtils.isEmpty(app_icon)) app_icon = defType.app_icon
+        if (TextUtils.isEmpty(app_name)) app_name = defType.app_name
+        if (TextUtils.isEmpty(app_theme)) app_theme = defType.app_theme
+        if (TextUtils.isEmpty(packageName)) app_theme = defType.packageName
         if(afterLogin) afterLogin = defType.afterLogin
         if(asApp) asApp = defType.asApp
     }
@@ -60,10 +60,10 @@ class RunType extends BaseContainer {
         AndroidConfig androidConfig = project.moduleConfig.androidConfig
         def maps = properties
         maps.putAll(buildConfig.properties)
-        if(!XmlUtils.isEmpty(packageName)) maps.put("res_packageName",packageName)
+        if(!TextUtils.isEmpty(packageName)) maps.put("res_packageName",packageName)
         else maps.put("res_packageName",buildConfig.packageName)
-        maps.put("versionCode", XmlUtils.isEmpty(androidConfig.versionCode) ? "1" : androidConfig.versionCode)
-        maps.put("versionName", XmlUtils.isEmpty(androidConfig.versionName) ? "1.0" : androidConfig.versionName)
+        maps.put("versionCode", TextUtils.isEmpty(androidConfig.versionCode) ? "1" : androidConfig.versionCode)
+        maps.put("versionName", TextUtils.isEmpty(androidConfig.versionName) ? "1.0" : androidConfig.versionName)
 
         if(afterLogin) maps+= ["hideRouterCode":"N"]
         //输出Application类
@@ -85,7 +85,7 @@ class RunType extends BaseContainer {
         def inputManifest = new File(FileUtils.urls(project.projectDir.path, "src", "main"), "AndroidManifest.xml").text
         inputManifest = inputManifest.replaceFirst("<manifest(?s).*?>", XmlUtils.parseString(manifestMetaTxt, maps))
                 .replaceFirst("<application(?s).*?>", XmlUtils.parseString(manifestAppTxt, maps))
-        if (XmlUtils.isEmpty(inputManifest.find("<application(?s).*?>"))) inputManifest = inputManifest.replace("</manifest>" ,"") + XmlUtils.parseString(manifestAppTxt, maps) + "\n     </application> \n</manifest>"
+        if (TextUtils.isEmpty(inputManifest.find("<application(?s).*?>"))) inputManifest = inputManifest.replace("</manifest>" ,"") + XmlUtils.parseString(manifestAppTxt, maps) + "\n     </application> \n</manifest>"
         Print.ln("hasmatches: ${inputManifest.matches("<application(?s).*?>")} inputManifest : $inputManifest")
         FileUtils.write(new File(buildConfig.cacheDir, "AndroidManifest.xml"), inputManifest)
 

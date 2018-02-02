@@ -1,10 +1,10 @@
 
 repositories {
      maven {   url '#{maven_url}'  }
-     maven {  url '#1{MavenGroupUrl}'  }
+     maven {  url '#1{mavenGroupUrl}'  }
 }
 
-apply plugin: "com.android.#{androidPlugin}"
+apply plugin: "com.android.#{pluginName}"
 android {
     buildToolsVersion '#{buildToolsVersion}'
     compileSdkVersion #{compileSdkVersion}

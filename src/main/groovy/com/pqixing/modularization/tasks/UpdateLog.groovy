@@ -2,7 +2,7 @@ package com.pqixing.modularization.tasks
 
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.XmlUtils
+import com.pqixing.modularization.utils.TextUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -49,7 +49,7 @@ public class UpdateLog extends DefaultTask {
         modules.each { moduleName ->
             String metaUrl = XmlUtils.getMetaUrl(urls, compileGroup, moduleName)
             String xmlTxt = XmlUtils.request(metaUrl)
-            if (XmlUtils.isEmpty(xmlTxt)) return
+            if (TextUtils.isEmpty(xmlTxt)) return
             sb.append("###   [$moduleName](${metaUrl})    \n")
                     .append("").append("最新版本:　${XmlUtils.parseXmlByKey(xmlTxt, 'release')}")
                     .append("　　　　　").append("最后更新时间:　").append(XmlUtils.parseXmlByKey(xmlTxt, "lastUpdated"))

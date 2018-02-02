@@ -1,9 +1,10 @@
 package com.pqixing.modularization.plugins
 
 import com.pqixing.modularization.Default
+import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.XmlUtils
+import com.pqixing.modularization.utils.TextUtils
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
 /**
@@ -37,6 +38,11 @@ class GitManager extends BasePlugin {
         }
     }
 
+    @Override
+    String getPluginName() {
+        return Keys.NAME_GIT
+    }
+
     void initGitConfig() {
         boolean hasInit = project.gradle.hasProperty("gitUserName")
         project.ext.gitUserName = hasInit ? project.gradle.gitUserName : ""
@@ -66,7 +72,7 @@ class GitManager extends BasePlugin {
     void createCloneTask() {
         project.task("cloneAllProjects", type: Exec) {
             doFirst {
-                if (XmlUtils.isEmpty(project.gitUserName) || XmlUtils.isEmpty(project.gitPassWord)) {
+                if (TextUtils.isEmpty(project.gitUserName) || TextUtils.isEmpty(project.gitPassWord)) {
                     throw new RuntimeException("git gitUserName or gitPassWord can not be null, please config in config.gradle")
                 }
             }

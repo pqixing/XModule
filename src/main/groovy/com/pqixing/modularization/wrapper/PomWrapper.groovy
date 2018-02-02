@@ -29,7 +29,7 @@ class PomWrapper extends XmlWrapper {
     }
 
     public static PomWrapper create(String url) {
-        return new PomWrapper(Net.get(url,true))
+        return new PomWrapper(Net.get(url, true))
     }
 
     public PomWrapper(String xmlString) {
@@ -63,7 +63,8 @@ class PomWrapper extends XmlWrapper {
 
     public String getGitLog() {
         try {
-            return node.name.text().split(Keys.SEPERATOR)[1]
+            String name = node.name.text()
+            return name.substring(name.indexOf(Keys.SEPERATOR) + Keys.SEPERATOR.length())
         } catch (Exception e) {
             Print.lne(e)
         }

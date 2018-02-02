@@ -1,6 +1,7 @@
 package com.pqixing.modularization.plugins
 
 import com.pqixing.modularization.Default
+import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.tasks.UpdateDetail
 import com.pqixing.modularization.tasks.UpdateLog
@@ -29,6 +30,11 @@ class Document extends BasePlugin {
                 }
             }
         }
+    }
+
+    @Override
+    String getPluginName() {
+        return Keys.NAME_APP
     }
 
     @Override

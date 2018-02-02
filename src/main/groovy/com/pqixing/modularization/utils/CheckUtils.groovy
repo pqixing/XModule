@@ -15,6 +15,6 @@ class CheckUtils {
     }
 
     static boolean isVersionCode(String str){
-        return str.matches(Pattern.compile("\\d*[.\\d]+"))
+        return str?.matches(Pattern.compile("\\d*[.\\d]+"))
     }
 }
