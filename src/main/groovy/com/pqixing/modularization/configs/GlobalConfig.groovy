@@ -39,6 +39,10 @@ class GlobalConfig {
     public static String mavenUser = "admin"
     public static String mavenPassword = "admin123"
     /**
+     * 当依赖缺失时，是否拦截报错，默认为true
+     */
+    public static boolean abortDependenLose = true
+    /**
      * 预设仓库地址
      */
     public

@@ -67,4 +67,8 @@ class Keys {
      * 主线版本依赖去除是
      */
     public static final String GROUP_MASTER = "com.modularization.master"
+    /**
+     * 分支分割标记
+     */
+    public static final String BRANCH_TAG = "-b-"
 }

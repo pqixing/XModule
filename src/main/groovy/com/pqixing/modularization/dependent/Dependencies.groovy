@@ -1,6 +1,5 @@
 package com.pqixing.modularization.dependent
 
-import com.pqixing.modularization.Default
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.configs.BuildConfig
@@ -9,18 +8,25 @@ import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.models.ModuleConfig
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.XmlUtils
+import com.pqixing.modularization.utils.TextUtils
 import com.pqixing.modularization.wrapper.MetadataWrapper
+import com.pqixing.modularization.wrapper.PomWrapper
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-25.
  */
 
 class Dependencies extends BaseExtension {
-    boolean hasLocalModule = false
+
+    //对应all*.exclude
     LinkedList<Map<String, String>> allExcludes
     LinkedList<Module> modules
+    //传递下来的master分支的exclude
+    Set<String> masterExclude = new HashSet<>()
+    Set<Module> dependentLose = new HashSet<>()
+
+    boolean hasLocalModule = false
+    Set<String> localImportModules
 
     File versionFile
     Properties versionMaps
@@ -54,7 +60,7 @@ class Dependencies extends BaseExtension {
 
     Module addImpl(String moduleName, Closure closure = null) {
         Module inner = add(moduleName, closure)
-        inner.compileMode = "implementation"
+        inner.scope = "implementation"
         return inner
     }
 
@@ -62,14 +68,6 @@ class Dependencies extends BaseExtension {
         List<String> names = new LinkedList<>()
         modules.each { names += it.moduleName }
         return names
-    }
-
-    String excludeString(Map<String, String> maps) {
-        StringBuilder sb = new StringBuilder()
-        maps.each { map ->
-            sb.append("$map.key : '$map.value',")
-        }
-        return sb.substring(0, sb.length() - 1)
     }
 
     /**
@@ -97,28 +95,82 @@ class Dependencies extends BaseExtension {
         mavenType = wrapper.getExtends(ModuleConfig.class).mavenType
         versionFile = new File(BuildConfig.versionDir, "$mavenType.name/$Keys.FILE_VERSION")
         versionMaps = FileUtils.readMaps(versionFile)
+        localImportModules = new HashSet<>()
+        project.rootProject.allprojects.each { localImportModules += it.name }
     }
 
     void saveVersionMap() {
-        versionMaps.store(versionFile.newOutputStream(), Keys.CHARSET)
-        versionMaps.clear()
+        versionMaps?.store(versionFile.newOutputStream(), Keys.CHARSET)
+        versionMaps?.clear()
+        versionMaps = null
     }
-
+    /**
+     * 添加依赖去除
+     * @param sb
+     * @param module
+     */
+    String excludeStr(String prefix, List<Map<String, String>> excludes) {
+        StringBuilder sb = new StringBuilder()
+        excludes.each { item ->
+            sb.append("         $prefix (  ")
+            item.each { map ->
+                sb.append("$map.key : '$map.value',")
+            }
+            sb.deleteCharAt(sb.length() - 1)
+            sb.append("  ) \n")
+        }
+        return sb.toString()
+    }
     /**
      * 进行本地依赖
      * @param module
      * @return
      */
-    boolean onLocal(StringBuilder sb, Module module) {
+    boolean onLocalCompile(StringBuilder sb, Module module) {
+        //如果该依赖没有本地导入，不进行本地依赖
+        if (!localImportModules.contains(module.moduleName)) return false
+        sb.append("    $module.scope ( project(':$model.moduleName')) \n {")
+        sb.append("${excludeStr("exclude", module.excludes)}\n}\n")
 
+        //如果有本地依赖工程，则移除相同的仓库依赖
+        hasLocalModule = true
+        allExclude(module: module.moduleName)
+        allExclude(module: TextUtils.getBranchArtifactId(module.groupId, module.moduleName))
     }
     /**
-     * 进行本地依赖
+     * 进行仓库依赖
      * @param module
      * @return
      */
-    boolean onMaven(StringBuilder sb, Module module) {
+    boolean onMavenCompile(StringBuilder sb, Module module) {
+        String lastVersion = getLastVersion(module.groupId, TextUtils.getBranchArtifactId(module.moduleName, wrapper))
+        if (!CheckUtils.isVersionCode(lastVersion)) {
+            lastVersion = getLastVersion(module.groupId, module.moduleName)
+        } else module.artifactId = TextUtils.getBranchArtifactId(module.moduleName, wrapper)
 
+        if (!CheckUtils.isVersionCode(lastVersion)) return false//如果分支和master都没有依赖，则仓库依赖失败
+
+        //如果配置中没有配置指定版本号，用最新版本好，否则，强制使用配置中的版本号
+        String focusVersion = ""
+        if (!CheckUtils.isVersionCode(module.version)) {//
+            focusVersion = " \n force = true \n"
+            module.version = lastVersion
+        }
+        sb.append("    $module.scope  ('$module.groupId:$module.artifactId:$module.version') \n { $focusVersion")
+        sb.append("${excludeStr("exclude", module.excludes)}\n}\n")
+
+        //如果依赖的是分支，获取该依赖中传递的master仓库依赖去除
+        if (module.artifactId.contains(Keys.BRANCH_TAG)) {
+            masterExclude + PomWrapper.create(mavenType.maven_url, module.groupId, module.artifactId).masterExclude
+        }
+    }
+    /**
+     * 抛出依赖缺失异常
+     * @param module
+     */
+    void throwCompileLose(Module module) {
+        if (GlobalConfig.abortDependenLose) throw new RuntimeException("Lose dependent $module.artifactId , please chack config!!!!!!!")
+        dependentLose += module
     }
 
     @Override
@@ -129,77 +181,33 @@ class Dependencies extends BaseExtension {
         modules.each { model ->
             if (model.moduleName == project.name) return
             switch (GlobalConfig.dependenModel) {
-
             //只依赖本地工程
                 case "localOnly":
-                    onLocal(model)
+                    if (onLocalCompile(model)) return
                     break
             //优先依赖本地工程
                 case "localFirst":
-                    if (onLocal(model)) break
+                    if (onLocalCompile(model) || onMavenCompile()) return
                     break
-
             //优先仓库版本
                 case "mavenFirst":
+                    if (onMavenCompile() || onLocalCompile(model)) return
                     break
             //只依赖仓库版本
                 case "mavenOnly":
                 default:
+                    if (onMavenCompile()) return
                     break
             }
-
-            if (isLocal(model.local)) sb.append("    $model.compileMode ( project(':$model.moduleName')) ")
-            else {
-                String newGroup = XmlUtils.isEmpty(model.group) ? baseGroup : model.group
-                //获取当前模块在该分支的名称
-                String moduleName = XmlUtils.getNameForBranch(project, model.moduleName)
-                //如果该分支上,没有对应的版本号,则使用主线上的依赖包
-                if (!versions.containsKey(moduleName)) moduleName = model.moduleName
-
-                String version = model.version
-                if (XmlUtils.isEmpty(version)) {
-                    version = versions.containsKey(moduleName) ? versions[moduleName] : "+"
-                }
-                sb.append("    $model.compileMode  ('$newGroup:$moduleName:$version')  ")
-                //如果当前依赖是分支,则,解析该依赖中是否还包含了别的分支依赖,并且把当前模块的主线依赖添加exclude
-                if (moduleName.contains("-b-")) {
-                    masterExclude.add(model.moduleName)
-                    addMasterExclude(masterExclude, moduleName, version)
-                }
-                //更新bean里面的信息
-                model.moduleName = moduleName
-                model.group = newGroup
-                model.version = version
-                String lastUpdateKey = "${moduleName}-stamp"
-                model.lastUpdate = versions[lastUpdateKey]
-            }
-            sb.append("{ \n")
-            model.excludes.each { sb.append("         exclude(${excludeString(it)})  \n") }
-            sb.append("     } \n ")
+            throwCompileLose(model)
         }
-        sb.append("} \n")
-        masterExclude.each { allInner.excludeModule(it) }
-        sb.append("\nconfigurations { \n")
-        allInner.allExcludes.each { sb.append("    all*.exclude(${excludeString(it)})  \n") }
-        sb.append("    all*.exclude(group : 'com.dachen.master',module : '${XmlUtils.collection2Str(masterExclude)},test') \n")
-        sb.append(" }")
-
+        sb.append("} \nconfigurations { \\n\"")
+        masterExclude.each { name ->
+            allExclude(group: GlobalConfig.groupName, module: name)
+        }
+        allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)},test")
+        sb.append("${excludeStr("all*.exclude", allExcludes)}\n } \n")
         saveVersionMap()
         return [FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.toString())];
     }
-    /**
-     * 添加对应的主线依赖到exclue中
-     * @param masterExclude
-     * @param model
-     */
-    void addMasterExclude(Set<String> masterExclude, String name, String version) {
-        MavenType maven = project.moduleConfig.mavenType
-        String targetGroup = "${Default.groupName}.master"
-        def pomStr = FileUtils.readCachePom(maven, name, version)
-        XmlUtils.parseListXmlByKey(pomStr, "dependency").each { dep ->
-            if (targetGroup != XmlUtils.parseXmlByKey(dep, "groupId")) return
-            masterExclude += XmlUtils.parseXmlByKey(dep, "artifactId").split(",")
-        }
-    }
-
 }
