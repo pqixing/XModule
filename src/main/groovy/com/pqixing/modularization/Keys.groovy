@@ -107,6 +107,11 @@ class Keys {
      * 包名前缀
      */
     public static final String PREFIX_PKG = "auto."
+
+    /**
+     * 自动添加的代码tag
+     */
+    public static final String TAG_AUTO_ADD = "Auto Add By Modularization"
     /**
      * 清单文件名
      */

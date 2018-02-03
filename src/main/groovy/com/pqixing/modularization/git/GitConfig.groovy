@@ -29,7 +29,7 @@ class GitConfig extends BaseExtension {
     /**
      * 全部的git工程
      */
-    List<GitProject> allGitProjects
+    List<GitProject> allGitProjects = []
 
     GitConfig(Project project) {
         super(project)
@@ -52,10 +52,5 @@ class GitConfig extends BaseExtension {
         }
         logs += item.toString()
         return logs
-    }
-
-    @Override
-    LinkedList<String> getOutFiles() {
-        return null
     }
 }

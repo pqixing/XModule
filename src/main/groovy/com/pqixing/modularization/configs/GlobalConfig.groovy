@@ -52,15 +52,15 @@ class GlobalConfig {
     /**
      * 默认的内网镜像依赖组
      */
-    String mavenGroupUrl = "http://192.168.3.7:9527/nexus/content/groups/androidgroup/"
+    static String mavenGroupUrl = "http://192.168.3.7:9527/nexus/content/groups/androidgroup/"
     /**
      * 文档仓库管理,可以设置多个，方便同时管理，只能支持git
      */
-    static final List<String> docGits = ["Document"]
+    static List<String> docGits = ["Document"]
     /**
      * 文档存放目录
      */
-    static final String docDirName = "docDir"
+    static String docDirName = "docDir"
 
     private static boolean init = false
 

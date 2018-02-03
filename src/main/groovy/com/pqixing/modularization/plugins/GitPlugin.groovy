@@ -1,18 +1,24 @@
 package com.pqixing.modularization.plugins
 
+import auto.Moulds
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.git.GitConfig
+import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.utils.FileUtils
 import org.gradle.api.Project
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.tasks.Exec
-
 /**
  * Created by pqixing on 17-12-20.
  */
 
 class GitPlugin extends BasePlugin {
+    public static final String mouldVersion = "//1.0"
+    /**
+     * 设置页面文件
+     */
+    public static final String SETTING_FILE = "moulds.gradle"
     private HashMap<String, String> gitProject
 
     @Override
@@ -23,23 +29,40 @@ class GitPlugin extends BasePlugin {
     @Override
     void apply(Project project) {
         super.apply(project)
-        //添加git配置
-        project.extensions.add(GitConfig.name, wrapper.getExtends(GitConfig))
-
-        initGitConfig()
-        addConfigGradle()
-        modifySourceSetting()
-        if (!addSettingGradle()) {
+        addMouldGradle()
+        if (writeMouldGradle()) {
             throw new RuntimeException("init setting file, please sync again -- 初始化设置，请重新同步")
         }
-        initGitProject()
-        project.ext.addGitProject = { key, value = "" ->
-            gitProject.put(key, value)
+        readGitProject(project.gradle)
+    }
+    /**
+     * 从Gradle中获取git工程的信息
+     * @param gradle
+     */
+    void readGitProject(Gradle gradle) {
+
+    }
+    /**
+     * 修改原来的setting文件
+     */
+    void addMouldGradle() {
+        File setting = new File(project.rootDir, "settings.gradle").with {
+            if (!exists()) createNewFile()
         }
-        project.afterEvaluate {
-            addPatchFile()
-            createCloneTask()
-        }
+        if (!setting.text.contains(Keys.TAG_AUTO_ADD))
+            setting.append("file('$BuildConfig.dirName/$SETTING_FILE').with {  if(exists()) apply from: path}")
+    }
+    /**
+     * 输出模板设置文件
+     */
+    boolean writeMouldGradle() {
+        File mouldFile = new File(BuildConfig.rootOutDir, SETTING_FILE)
+        //如果模板已经存在，并且版本号不小于当前，则不需要重写
+        if (mouldFile.exists() && mouldFile.readLines()[0].trim() >= mouldVersion) return false
+        Moulds moulds = Moulds.with()
+        moulds.params += ["AutoInclude", moulds.autoInclude]
+        FileUtils.write(mouldFile, "$mouldVersion\n$moulds.settingGradle")
+        return true
     }
 
     @Override
