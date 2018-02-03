@@ -3,25 +3,29 @@ package com.pqixing.modularization.plugins
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
+import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.TextUtils
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
+
 /**
  * Created by pqixing on 17-12-20.
  */
 
-class GitManager extends BasePlugin {
+class GitPlugin extends BasePlugin {
     private HashMap<String, String> gitProject
 
     @Override
     Set<String> getIgnoreFields() {
-        return ["config.gradle","local.gradle", "giturl.properties","config.gradle"]
+        return ["config.gradle", "local.gradle", "giturl.properties", "config.gradle"]
     }
 
     @Override
     void apply(Project project) {
         super.apply(project)
+        //添加git配置
+        project.extensions.add(GitConfig.name, wrapper.getExtends(GitConfig))
+
         initGitConfig()
         addConfigGradle()
         modifySourceSetting()
@@ -99,7 +103,7 @@ class GitManager extends BasePlugin {
                 "microschool"         : "",
 //                "drugSDK":"",
 //                "drug":"",
-                "androidEDA"          :"",
+                "androidEDA"          : "",
                 "Document"            : "",
                 "AnnotationProject"   : "",
                 "mdclogin"            : "",

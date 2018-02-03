@@ -13,6 +13,23 @@ class GitConfig extends BaseExtension {
     final String revisionNum
     final String lastLog
 
+    /**
+     * git用户名
+     */
+    String userName
+    /**
+     * git密码
+     */
+    String password
+    /**
+     * git email信息
+     */
+    String emal
+
+    /**
+     * 全部的git工程
+     */
+    List<GitProject> allGitProjects
 
     GitConfig(Project project) {
         super(project)

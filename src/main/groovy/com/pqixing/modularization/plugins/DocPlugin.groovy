@@ -10,7 +10,7 @@ import org.gradle.api.Project
  * Created by pqixing on 17-12-20.
  */
 
-class Document extends BasePlugin {
+class DocPlugin extends BasePlugin {
     @Override
     void apply(Project project) {
         super.apply(project)

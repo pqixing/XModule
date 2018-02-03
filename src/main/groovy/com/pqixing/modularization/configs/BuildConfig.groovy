@@ -35,11 +35,17 @@ class BuildConfig extends BaseExtension {
     //java包名
     String javaPackage
     String groupName
+    /**
+     * 输出文档路径
+     */
+    String docDir
 
     BuildConfig(Project project) {
         super(project)
         projectName = TextUtils.numOrLetter(project.name).toLowerCase()
-        outDir = FileUtils.urls(project.projectDir.absolutePath, dirName)
+        outDir = FileUtils.urls(project.path.absolutePath, dirName)
+        docDir = FileUtils.urls(project.path, GlobalConfig.docDirName)
+
         cacheDir = FileUtils.urls(outDir, ".cache")
         javaDir = FileUtils.urls(outDir, "java")
         cacheJavaDir = FileUtils.urls(cacheDir, "java")

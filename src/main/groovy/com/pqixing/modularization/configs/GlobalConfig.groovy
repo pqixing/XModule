@@ -47,7 +47,7 @@ class GlobalConfig {
      */
     public static Map<String, String> preMavenUrl = [
             "release": "http://192.168.3.7:9527/nexus/content/repositories/android",
-            "snap": "http://192.168.3.7:9527/nexus/content/repositories/androidsnap",
+            "snap"   : "http://192.168.3.7:9527/nexus/content/repositories/androidsnap",
             "test"   : "http://192.168.3.7:9527/nexus/content/repositories/androidtest"]
     /**
      * 默认的内网镜像依赖组
@@ -56,7 +56,11 @@ class GlobalConfig {
     /**
      * 文档仓库管理,可以设置多个，方便同时管理，只能支持git
      */
-    static final Map<String, String> docGits = ["Document", ""]
+    static final List<String> docGits = ["Document"]
+    /**
+     * 文档存放目录
+     */
+    static final String docDirName = "docDir"
 
     private static boolean init = false
 

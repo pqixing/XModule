@@ -2,40 +2,35 @@ package com.pqixing.modularization.git
 
 import com.pqixing.modularization.Default
 import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.configs.BuildConfig
+import com.pqixing.modularization.configs.GlobalConfig
+import com.pqixing.modularization.utils.CheckUtils
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
-import org.gradle.api.tasks.TaskAction
+
 /**
  * Created by pqixing on 17-12-20.
  * 同步文档的任务
  */
 
 public class DocSyncTask extends BaseTask {
-    String docGitPath;
-    String docFileDirs
-    String defaultDoc
-    boolean winOs
-    int tempTaskCount = 0
-    String tempTaskName
-    String updateDesc
 
-    DocSyncTask() {
-        group = Default.taskGroup
-        defaultDoc = "doc-${project.name}.md"
-        winOs = System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')
-    }
-
-    @TaskAction
-    void run() {
-        updateDocGitPath()
-        updateDocGit()
-        copyFile()
-        pushFile()
-    }
+    /**
+     * 文档路径
+     */
+    String docDir
+    /**
+     * readme文件名称
+     */
+    String readme
 
     @Override
     void start() {
+        GlobalConfig.docGits.each { map ->
 
+        }
+        if (!CheckUtils.isGit(GlobalConfig.docGits)) throw new RuntimeException("$docDir ")
+        docDir = wrapper.getExtends(BuildConfig.class).docDir
     }
 
     @Override
