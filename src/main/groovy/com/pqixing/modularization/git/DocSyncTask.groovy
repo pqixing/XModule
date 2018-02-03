@@ -1,6 +1,5 @@
 package com.pqixing.modularization.git
 
-import com.pqixing.modularization.Default
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.configs.GlobalConfig

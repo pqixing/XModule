@@ -9,13 +9,21 @@ import com.pqixing.modularization.base.BasePlugin
 
 class GitProject extends BaseExtension {
     /**
+     * git工程名称,指目录名称
+     */
+    String name
+    /**
+     * 介绍
+     */
+    String introduce
+    /**
      * git地址
      */
     String gitUrl
     /**
-     * 包含的子项目
+     * 包含的子项目,默认格式  name###introduce
      */
-    List<Map<String,String>> childs = []
+    List<String> submodules = []
 
 
     GitProject() {

@@ -24,12 +24,13 @@ class GitConfig extends BaseExtension {
     /**
      * git email信息
      */
-    String emal
-
+    String email
+    String baseGitUrl
     /**
      * 全部的git工程
      */
     List<GitProject> allGitProjects = []
+    Map<String,String> localProject
 
     GitConfig(Project project) {
         super(project)

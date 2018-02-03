@@ -1,21 +1,16 @@
 package com.pqixing.modularization.plugins
 
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.analysis.BranchMergerTask
-import com.pqixing.modularization.analysis.MavenMergerTask
+import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.dependent.DependentPrintTask
-import com.pqixing.modularization.dependent.VersionsUpdateTask
 import com.pqixing.modularization.git.DocSyncTask
-import com.pqixing.modularization.git.GitConfig
-import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.runtype.RunType
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -39,8 +34,6 @@ abstract class AndroidPlugin extends BasePlugin {
         project.ext.endConfig = {
             loadLocalGradle()
             if (it instanceof Closure) it.call(moduleConfig)
-            //更新依赖的版本信息
-            BaseTask.task(project, VersionsUpdateTask.class).execute()
 
             //配置结束
             moduleConfig.onConfigEnd()
@@ -52,8 +45,8 @@ abstract class AndroidPlugin extends BasePlugin {
             BaseTask.task(project, DependentPrintTask.class)
             BaseTask.task(project, DocSyncTask.class)
             //添加分析的任务
-            BaseTask.task(wrapper.project, wrapper.getExtends(GitConfig.class)
-                    .branchName == "master" ? MavenMergerTask.class : BranchMergerTask.class)
+//            BaseTask.task(wrapper.project, wrapper.getExtends(GitConfig.class)
+//                    .branchName == "master" ? MavenMergerTask.class : BranchMergerTask.class)
         }
     }
 

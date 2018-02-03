@@ -1,8 +1,10 @@
 package com.pqixing.modularization.utils
 
+import com.pqixing.modularization.configs.BuildConfig
+
 class Print {
 
-    static String silentLog = "Y"
+    static String silentLog = "N"
 
     static String ln(String str, Closure closure = null) {
         return l(str + "\n",false, closure)
@@ -26,9 +28,9 @@ class Print {
     static File outputFile
 
     static void write(String str) {
-        if (outputFile == null) outputFile = new File(".modularization/print.log")
-        //如果日志文件大于100M 删除
-        if (outputFile.exists() && outputFile.length() >= 1024 * 1024 * 100) outputFile.delete()
+        if (outputFile == null) outputFile = new File("$BuildConfig.dirName/print.log")
+        //如果日志文件大于10M 删除
+        if (outputFile.exists() && outputFile.length() >= 1024 * 1024 * 10) outputFile.delete()
         if (!outputFile.exists()) {
             outputFile.parentFile.mkdirs()
             outputFile.createNewFile()

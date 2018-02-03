@@ -25,7 +25,7 @@ class FileUtils {
      * @return
      */
     static File getFileForClass(String dir, String fullName) {
-        return new File(dir, "${pkgName.replace(".", "/")}.java")
+        return new File(dir, "${fullName.replace(".", "/")}.java")
     }
 
     static String readCache(String url) {
