@@ -1,10 +1,10 @@
 File rootDir = settings.rootDir
 File outIncludeFile = new File(rootDir,".modularization/include.gradle")
-try{
+//try{
     new AutoInclude(gradle,rootDir,outIncludeFile).save()
     apply from: outIncludeFile.path
-}catch (Exception e){//if fail delete self
-    file("moulds.gradle").deleteOnExit()
-}
+//}catch (Exception e){//if fail delete self
+//    file("moulds.gradle").deleteOnExit()
+//}
 
 #1{AutoInclude}

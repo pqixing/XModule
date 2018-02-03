@@ -1,8 +1,5 @@
 import org.gradle.api.invocation.Gradle
 
-import javax.xml.soap.Node
-
-
 /**
  * Created by pqixing on 18-2-3.
  */
@@ -21,7 +18,7 @@ public class AutoInclude {
      * 所有project的Url地址
      */
     HashMap<String, String> projectUrls
-    HashMap<String, String> localProject
+    HashMap<String, String> localProject = [:]
     Set<String> includes
     private String baseGitUrl
     private String username
@@ -41,13 +38,13 @@ public class AutoInclude {
         File includeFile = new File(rootDir, AutoConfig.TXT_INCLUDE)
         if (!includeFile.exists()) includeFile.write(AutoConfig.mould_include)
         includes = []
-        readInclude(includes, includeFile)
+        readInclude(includeFile)
         gradle.ext.gitUserName = username
         gradle.ext.gitPassword = password
         gradle.ext.gitEmail = email
     }
 
-    void readInclude(Set<String> includes, File f) {
+    void readInclude(File f) {
         if (!f.exists()) return
         f.eachLine { line ->
             def map = line.split("=")
@@ -59,12 +56,12 @@ public class AutoInclude {
                     break
                 case "password": password = value
                     break
-                case "email": password = value
+                case "email": email = value
                     break
                 case "targetInclude": readInclude(new File(rootDir, value))
                     break
                 case "include":
-                    value.split(",").each { includes += it.trim() }
+                    value?.split(",")?.each { includes += it.trim() }
                     break
             }
         }
@@ -76,8 +73,8 @@ public class AutoInclude {
         File defaultXml = new File(rootDir, AutoConfig.XML_GITPROJECT)
         if (!defaultXml.exists()) defaultXml.write(AutoConfig.mould_gitproject)
         Node gitNode = new XmlParser().parse(defaultXml)
-        submodules = []
-        projectUrls = []
+        submodules = [:]
+        projectUrls = [:]
         baseGitUrl = gitNode.@baseUrl
         gitNode.project.each { Node p ->
             String name = p.@name
@@ -87,22 +84,32 @@ public class AutoInclude {
 
             projectUrls.put(name, "$url$AutoConfig.SEPERATOR$introduce")
             List<String> subLists = []
-            submodules += [name: subLists]
-
             p.submodule.each { Node s ->
-                subLists += "${s.@name}$AutoConfig.SEPERATOR${s.@introduce}"
+                String s_name = s.@name
+                String s_introduce = s.@introduce
+                subLists += "${s_name}$AutoConfig.SEPERATOR${s_introduce}"
             }
+            if (!subLists.isEmpty()) submodules.put(name, subLists)
         }
         gradle.ext.submodules = submodules
         gradle.ext.projectUrls = projectUrls
         gradle.ext.baseGitUrl = baseGitUrl
     }
 
+    void saveToFile(Map<String, String> realInclude) {
+        StringBuilder sb = new StringBuilder("//Auto Add By Modularization")
+        realInclude.each { map ->
+            sb.append("\\ninclude (':$map.key') \\n")
+                    .append("project(':$map.key').projectDir = new File('$map.value')")
+        }
+        outIncludeFile.write(sb.toString())
+    }
+
     void save() {
         formatXml()
         formatInclude()
         formatLocalPath(localProject, rootDir.parentFile, 3)
-        Map<String, String> realInclude = []
+        Map<String, String> realInclude = [:]
 
         includes.each { key ->
             //如果本地存在工程目录，直接导入,否则尝试从网络导入
@@ -110,7 +117,7 @@ public class AutoInclude {
                 realInclude += [key: localProject[key]]
             } else fromGit(realInclude, key)
         }
-
+        saveToFile(realInclude)
         gradle.ext.localProject = localProject
         //让save不显示灰色
         if (false) save()
@@ -120,24 +127,29 @@ public class AutoInclude {
      */
     void fromGit(Map<String, String> realInclude, String moduleName) {
         boolean find = false
-        submodules.each { map ->
+        projectUrls.each { map ->
             if (find) return
-            String gitUrl = projectUrls[map.key].split(AutoConfig.SEPERATOR)[0]
-            StringBuilder localPath = new StringBuilder(rootDir.path)
+            String gitUrl = map.value.split(AutoConfig.SEPERATOR)[0]
+            StringBuilder localPath = new StringBuilder(rootDir.parentFile.path)
             if (map.key == moduleName) {//当前工程就是目标
                 localPath.append("/$moduleName")
                 //子工程包含目标模块
-            } else if (map.value.find { it.startsWith("$map.key$AutoConfig.SEPERATOR") } != null) {
+            } else if (submodules[map.key]?.find {
+                it.startsWith("$map.key$AutoConfig.SEPERATOR")
+            } != null) {
                 localPath.append("/$map.key/$moduleName")
             } else return
-            if (username == null || password == null) throw new RuntimeException("you must config git username and password before clone code from git!!!!!")
+            if (username?.isEmpty()|| password?.isEmpty()) throw new RuntimeException("you must config git username and password before clone code from git!!!!!")
             //如果本地不存在该目录
-            File localDir = new File(localPath)
+            File localDir = new File(localPath.toString())
+            String urlWitUser = gitUrl.replace("//", "//$username:$password@")
+
+            String error = ""
             if (!localDir.exists()) {
-                "git clone ${gitUrl.replace("//", "//$username:$password")}".execute(null, localDir.parentFile)
+                error = "git clone ${urlWitUser}".execute(null, rootDir.parentFile)?.text
             }
-            if (!localDir.exists()) throw new RuntimeException("clone faile please check url$gitUrl ")
-            realInclude += [moduleName, localDir.path]
+            if (!localDir.exists()) throw new RuntimeException("clone faile please check url: $urlWitUser error : $error")
+            realInclude.put(moduleName,localDir.path)
             //如果重新clone，则重新加载本地工程目录数据
             formatLocalPath(localProject, rootDir.parentFile, 3)
             find = true
@@ -154,7 +166,7 @@ public class AutoInclude {
         new File(dir, "build.gradle").with {
             if (exists()) locals += [name: path.replace("\\\\", "/")]
         }
-        dir.eachDir { locals += formatLocalPath(locals, it, deep - 1) }
+        dir.eachDir { formatLocalPath(locals, it, deep - 1) }
     }
 }
 
@@ -181,5 +193,6 @@ class AutoConfig {
             "    </project>\\n" +
             "</git>"
 
-    static final String mould_include = "username = \\npassword = \\nemail= \\ninclude = \\ntargetInclude =\\n"
+    static
+    final String mould_include = "username = \\npassword = \\nemail= \\ninclude = \\ntargetInclude =\\n"
 }
