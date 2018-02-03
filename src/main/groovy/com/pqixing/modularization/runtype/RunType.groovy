@@ -31,10 +31,8 @@ class RunType extends BaseContainer {
     String applicationId
     boolean afterLogin
 
-
     RunType(String name) {
         super(name)
-
     }
 
     @Override

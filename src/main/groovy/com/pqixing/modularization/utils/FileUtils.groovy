@@ -10,6 +10,15 @@ import com.pqixing.modularization.configs.BuildConfig
 class FileUtils {
 
     /**
+     * 如果某个
+     * @param str
+     * @return
+     */
+    static File appendIfNotExists(String str){
+        return null
+    }
+
+    /**
      * 根据包名获取路径
      * @param dir
      * @param pkgName
