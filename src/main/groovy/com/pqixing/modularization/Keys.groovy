@@ -28,7 +28,7 @@ class Keys {
     /**
      * 代码分割线
      */
-    public static final String CHARSET = "UTF-8"
+    public static final String CHARSET = "utf-8"
     /**
      * 代码分割线
      */

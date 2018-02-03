@@ -12,7 +12,7 @@ class TextUtils {
      * @return
      */
     static String numOrLetter(String str) {
-        return str?.trim().replaceAll("[^0-9a-zA-Z]", "")
+        return str?.trim()?.replaceAll("[^0-9a-zA-Z]", "")
     }
 
     static String getOnlyName() {

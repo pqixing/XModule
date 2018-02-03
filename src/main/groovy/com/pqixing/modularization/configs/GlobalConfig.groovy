@@ -77,7 +77,9 @@ class GlobalConfig {
             if (remote.startsWith(Keys.PREFIX_NET)) updateConfig(Net.get(remote, true))
             else updateConfig(FileUtils.read(remote))
         }
-        updateConfig(new File(wrapper.project.rootDir, Keys.GLOBAL_CONFIG_NAME))
+        File configFile = new File(wrapper.project.rootDir, Keys.GLOBAL_CONFIG_NAME)
+        if (configFile.exists())
+            updateConfig(configFile.text)
     }
 
     private static void updateConfig(String configStr) {

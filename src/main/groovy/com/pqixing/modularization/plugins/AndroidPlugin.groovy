@@ -7,6 +7,7 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.dependent.DependentPrintTask
 import com.pqixing.modularization.git.DocSyncTask
+import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.runtype.RunType
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print

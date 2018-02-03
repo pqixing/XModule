@@ -38,7 +38,7 @@ public class AutoInclude {
      * 解析本地需要导入的工程
      */
     void formatInclude() {
-        File includeFile = new File(rootDir, AutoConfig.txt_include)
+        File includeFile = new File(rootDir, AutoConfig.TXT_INCLUDE)
         if (!includeFile.exists()) includeFile.write(AutoConfig.mould_include)
         includes = []
         readInclude(includes, includeFile)
@@ -59,7 +59,7 @@ public class AutoInclude {
                     break
                 case "password": password = value
                     break
-                case "email": email = value
+                case "email": password = value
                     break
                 case "targetInclude": readInclude(new File(rootDir, value))
                     break
@@ -127,7 +127,7 @@ public class AutoInclude {
             if (map.key == moduleName) {//当前工程就是目标
                 localPath.append("/$moduleName")
                 //子工程包含目标模块
-            } else if (map.value?.find { it.startsWith("$map.key$AutoConfig.SEPERATOR") } != null) {
+            } else if (map.value.find { it.startsWith("$map.key$AutoConfig.SEPERATOR") } != null) {
                 localPath.append("/$map.key/$moduleName")
             } else return
             if (username == null || password == null) throw new RuntimeException("you must config git username and password before clone code from git!!!!!")
@@ -152,7 +152,7 @@ public class AutoInclude {
     void formatLocalPath(Map<String, String> locals, File dir, int deep) {
         if (deep < 0) return
         new File(dir, "build.gradle").with {
-            if (exists()) locals += [name: path.replace("\\", "/")]
+            if (exists()) locals += [name: path.replace("\\\\", "/")]
         }
         dir.eachDir { locals += formatLocalPath(locals, it, deep - 1) }
     }
@@ -170,16 +170,16 @@ class AutoConfig {
     /**
      * 本地配置文件路径
      */
-    static final String txt_include = "include.txt"
+    static final String TXT_INCLUDE = "include.txt"
 
     /**
      * git配置模板
      */
-    static final String mould_gitproject = "<git baseUrl=\"http://192.168.3.200/android\">\n" +
-            "    <project name = \"test\"  url=\"\" introduce = \"Example Project\">\n" +
-            "        <submodule name =\"sub_test\" introduce = \"Example SubProject\"/>\n" +
-            "    </project>\n" +
+    static final String mould_gitproject = "<git baseUrl=\\\"http://192.168.3.200/android\\\">\\n" +
+            "    <project name = \\\"test\\\"  url=\\\"\\\" introduce = \\\"Example Project\\\">\\n" +
+            "        <submodule name =\\\"sub_test\\\" introduce = \\\"Example SubProject\\\"/>\\n" +
+            "    </project>\\n" +
             "</git>"
 
-    static final String mould_include = "username = \npassword = \nemail= \ninclude = \ntargetInclude =\n"
+    static final String mould_include = "username = \\npassword = \\nemail= \\ninclude = \\ntargetInclude =\\n"
 }

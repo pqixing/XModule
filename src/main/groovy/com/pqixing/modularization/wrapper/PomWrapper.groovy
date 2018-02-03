@@ -2,13 +2,11 @@ package com.pqixing.modularization.wrapper
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.dependent.Module
-import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.utils.Print
-
 /**
  * Pom解析包裹类
- * @see http://192.168.3.7:9527/nexus/content/repositories/androidtest/com/dachen/android/dccommon/1.0.2/dccommon-1.0.2.pom
+ * http://192.168.3.7:9527/nexus/content/repositories/androidtest/com/dachen/android/dccommon/1.0.2/dccommon-1.0.2.pom
  */
 class PomWrapper extends XmlWrapper {
 

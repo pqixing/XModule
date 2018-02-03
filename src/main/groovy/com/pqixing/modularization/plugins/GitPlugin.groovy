@@ -33,7 +33,7 @@ class GitPlugin extends BasePlugin {
         if (writeMouldGradle()) {
             throw new RuntimeException("init setting file, please sync again -- 初始化设置，请重新同步")
         }
-        readGitProject(project.gradle)
+//        readGitProject(project.gradle)
     }
 
     /**
@@ -64,11 +64,10 @@ class GitPlugin extends BasePlugin {
      * 修改原来的setting文件
      */
     void addMouldGradle() {
-        File setting = new File(project.rootDir, "settings.gradle").with {
-            if (!exists()) createNewFile()
-        }
+        File setting = new File(project.rootDir, "settings.gradle")
+        if (!setting.exists()) setting.createNewFile()
         if (!setting.text.contains(Keys.TAG_AUTO_ADD))
-            setting.append("file('$BuildConfig.dirName/$SETTING_FILE').with {  if(exists()) apply from: path}")
+            setting.append("\nfile('$BuildConfig.dirName/$SETTING_FILE').with {  if(exists()) apply from: path} //$Keys.TAG_AUTO_ADD")
     }
     /**
      * 输出模板设置文件
@@ -78,7 +77,7 @@ class GitPlugin extends BasePlugin {
         //如果模板已经存在，并且版本号不小于当前，则不需要重写
         if (mouldFile.exists() && mouldFile.readLines()[0].trim() >= mouldVersion) return false
         Moulds moulds = Moulds.with()
-        moulds.params += ["AutoInclude", moulds.autoInclude]
+        moulds.params += ["AutoInclude":moulds.autoInclude]
         FileUtils.write(mouldFile, "$mouldVersion\n$moulds.settingGradle")
         return true
     }

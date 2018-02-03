@@ -19,7 +19,7 @@ void writeMoulds(File dir) {
     StringBuilder cls = new StringBuilder("package auto \n")
             .append("import com.pqixing.modularization.base.* \n")
             .append("public class ").append(clsName).append(" extends BaseString{\n")
-            .append("public static $clsName with( Map<String, Object> params = [] ) {\n")
+            .append("public static $clsName with( Map<String, Object> params = [:] ) {\n")
             .append("   def instance = new $clsName () \n").append("   instance.params = params \n")
             .append("   return instance \n}\n")
 
@@ -59,7 +59,7 @@ uploadArchives {
             }
             pom.groupId = groupId // 组名
             pom.artifactId = artifactId // 插件名
-            pom.version = getLastVersion(repository.url) // 版本号
+            pom.version = getLastVersion(repository.url.hashCode().toString()) // 版本号
         }
     }
 }
@@ -71,13 +71,13 @@ Properties loadProperties(File file) {
 }
 
 String getLastVersion(def url) {
-    return loadProperties(localFile).getProperty(url.hashCode().toString())?.toString() ?: "1.0"
+    return loadProperties(localFile).getProperty(url.toString())?.toString() ?: "1.0D"
 }
 
 uploadArchives.doLast {
     //自动更新版本号
     String key = repositories.mavenDeployer.repository.url.hashCode().toString()
-    float newVersion = getLastVersion(key).toFloat() + 0.1f
+    double newVersion = getLastVersion(key).toDouble() + 0.1D
     def localConfig = loadProperties(localFile)
     localConfig.put(key, newVersion.toString())
     localConfig.store(localFile.newDataOutputStream(), null)

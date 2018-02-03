@@ -4,8 +4,6 @@ import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.configs.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
-import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-25.
  */
@@ -21,7 +19,7 @@ class Module extends BaseExtension {
     String artifactId
     /**
      * 依赖模式
-     * @see runtimeOnly , compileOnly , implementation , compile
+     * runtimeOnly , compileOnly , implementation , compile
      */
     String scope = scop_runtime
 

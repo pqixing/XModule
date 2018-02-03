@@ -21,19 +21,28 @@ class BaseString {
         if(CheckUtils.isEmpty(params)) return source
         def builder = new StringBuilder()
         source.eachLine { str ->
-            if (NormalUtils.isEmpty(str)) return
+            if (CheckUtils.isEmpty(str)) return
             boolean ignore = false
             keyPattern.matcher(str).findAll()?.each { key ->
                 if (ignore) return
 
-                def value = properties.find { it.key == (findRealKey(key)) }?.value
+                def value = params.find { it.key == (findRealKey(key)) }?.value
 
-                ignore = isEmpty(value) && key.startsWith("#1")
+                ignore = CheckUtils.isEmpty(value) && key.startsWith("#1")
 
                 if (!ignore) str = str.replace(key, String.valueOf(value))
             }
             if (!ignore) builder.append(str).append("\n")//替换#（任意）key
         }
         return builder.toString()
+    }
+
+    /**
+     * 查找出待替换的key
+     * @param source
+     * @return
+     */
+    static String findRealKey(String key) {
+        return key.substring(key.indexOf("{") + 1, key.lastIndexOf("}"))
     }
 }
