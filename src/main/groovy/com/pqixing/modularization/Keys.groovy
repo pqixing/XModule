@@ -103,4 +103,12 @@ class Keys {
      * 时间后缀
      */
     public static final String SUFFIX_STAMP = "-stamp"
+    /**
+     * 包名前缀
+     */
+    public static final String PREFIX_PKG = "auto."
+    /**
+     * 清单文件名
+     */
+    public static final String MANIFEST = "AndroidManifest.xml"
 }

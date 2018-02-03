@@ -17,6 +17,14 @@ class ToMavenTask extends BaseTask {
 
     @Override
     void start() {
+        def dependent = wrapper.getExtends(Dependencies.class)
+        if (dependent.hasLocalModule) {//如果有本地工程，抛异常
+            throw new RuntimeException("current dependencies contain local project, please remove before upload : ${dependent.localImportModules.toString()}")
+        }
+        if (!CheckUtils.isEmpty(dependent.dependentLose)) {
+            throw new RuntimeException("some dependencies lose, please import before upload : ${dependent.dependentLose.toString()}")
+        }
+
         String baseVersion = MetadataWrapper.create(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId)
                 .release.find(Pattern.compile("\\d*[.\\d*]"))
         if (!CheckUtils.isEmpty(baseVersion)) baseVersion = Keys.VERSION_DEFAULT //如果仓库没有版本，默认使用1.0

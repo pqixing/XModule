@@ -41,10 +41,10 @@ class Print {
     }
 
     static String getProStr(Object p, int deep = 2) {
-        if (deep <= 0 || p instanceof String || TextUtils.isEmpty(p?.properties)) return p?.toString()
+        if (deep <= 0 || p instanceof String || CheckUtils.isEmpty(p?.properties)) return p?.toString()
         StringBuilder sb = new StringBuilder().append("{ ")
         p.properties.toSpreadMap().each { map ->
-            String proStr = TextUtils.isEmpty(map?.value?.properties) ? map.value : getProStr(map.value, deep - 1)
+            String proStr = CheckUtils.isEmpty(map?.value?.properties) ? map.value : getProStr(map.value, deep - 1)
             sb.append("$map.key :$proStr  ,")
         }
         return sb.append(" }").toString()

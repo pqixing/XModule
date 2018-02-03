@@ -49,8 +49,8 @@ public class DocSyncTask extends BaseTask {
     }
 
     void updateDocGitPath() {
-        if (TextUtils.isEmpty(docGitPath)) docGitPath = getModulePaths()
-        if (TextUtils.isEmpty(updateDesc)) updateDesc = "update doc"
+        if (CheckUtils.isEmpty(docGitPath)) docGitPath = getModulePaths()
+        if (CheckUtils.isEmpty(updateDesc)) updateDesc = "update doc"
     }
 
     void updateDocGit() {
@@ -66,7 +66,7 @@ public class DocSyncTask extends BaseTask {
 
     void copyFile() {
         project.task("${tempTaskName}${tempTaskCount++}", type: Copy) {
-            from TextUtils.isEmpty(docFileDirs) ? "doc-${project.name}.md" : docFileDirs
+            from CheckUtils.isEmpty(docFileDirs) ? "doc-${project.name}.md" : docFileDirs
             into "$docGitPath/readme/$project.name"
         }.execute()
     }

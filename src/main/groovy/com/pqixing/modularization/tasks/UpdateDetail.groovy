@@ -32,7 +32,7 @@ public class UpdateDetail extends DefaultTask {
         StringBuilder sb = new StringBuilder("##  ${moduleName}组件更新日志   \n")
         String metaUrl = XmlUtils.getMetaUrl(urls, compileGroup, moduleName)
         List<String> versions = XmlUtils.parseListXmlByKey(XmlUtils.request(metaUrl), 'version')
-        if (TextUtils.isEmpty(versions)) return
+        if (CheckUtils.isEmpty(versions)) return
         for (int i = versions.size() - 1; i >= 0; i--) {
             def version = versions[i]
            String pomStr = FileUtils.readCachePom(project,urls,env,Default.groupName,moduleName,version)

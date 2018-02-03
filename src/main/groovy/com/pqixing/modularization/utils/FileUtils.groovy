@@ -2,12 +2,22 @@ package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.configs.BuildConfig
+
 /**
  * Created by pqixing on 17-11-30.
  */
 
 class FileUtils {
 
+    /**
+     * 根据包名获取路径
+     * @param dir
+     * @param pkgName
+     * @return
+     */
+    static File getFileForClass(String dir, String fullName) {
+        return new File(dir, "${pkgName.replace(".", "/")}.java")
+    }
 
     static String readCache(String url) {
         File fileName = new File(BuildConfig.netCacheDir, TextUtils.numOrLetter(url))
@@ -33,11 +43,12 @@ class FileUtils {
         return newUrl.substring(0, newUrl.size() - 1)
     }
 
-    static Properties readMaps(File file){
-        Properties p =new Properties()
-        if(file.exists()) p.load(file.newInputStream())
+    static Properties readMaps(File file) {
+        Properties p = new Properties()
+        if (file.exists()) p.load(file.newInputStream())
         return p
     }
+
     static String read(String file) {
         return read(new File(file))
     }

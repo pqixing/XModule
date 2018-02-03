@@ -5,12 +5,17 @@ package com.pqixing.modularization.wrapper
 class XmlWrapper {
     public Node node
 
-    public XmlWrapper(String xmlString) {
-        node = new XmlParser().parseText(xmlString)
+    static Node parse(String xmlString) {
+        return new XmlParser().parseText(xmlString)
     }
 
-    public void save(File outFile){
-        outFile.mkdirs()
-        new XmlNodePrinter(new PrintWriter(outFile).print(node))
+    public XmlWrapper(String xmlString) {
+        node = parse(xmlString)
     }
+
+    public void writeTo(File outFile) {
+        outFile.mkdirs()
+        new XmlNodePrinter(new PrintWriter(outFile)).print(node)
+    }
+
 }

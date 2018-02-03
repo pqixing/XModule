@@ -43,10 +43,10 @@ class MavenType extends BaseContainer {
 
     private void mergerData() {
         MavenType defType = wrapper.getExtends(ModuleConfig).mavenTypes.getByName(Keys.DEFAULT)
-        if (TextUtils.isEmpty(pom_version)) m.pom_version = defType.pom_version
-        if (TextUtils.isEmpty(uploadEnable)) m.uploadEnable = defType.uploadEnable
-        if (TextUtils.isEmpty(updateDesc)) m.updateDesc = defType.updateDesc
-        if (TextUtils.isEmpty(uploadKey)) m.uploadKey = defType.uploadKey
+        if (CheckUtils.isEmpty(pom_version)) m.pom_version = defType.pom_version
+        if (CheckUtils.isEmpty(uploadEnable)) m.uploadEnable = defType.uploadEnable
+        if (CheckUtils.isEmpty(updateDesc)) m.updateDesc = defType.updateDesc
+        if (CheckUtils.isEmpty(uploadKey)) m.uploadKey = defType.uploadKey
         focusUpload |= defType.focusUpload
     }
 

@@ -72,7 +72,7 @@ class GitManager extends BasePlugin {
     void createCloneTask() {
         project.task("cloneAllProjects", type: Exec) {
             doFirst {
-                if (TextUtils.isEmpty(project.gitUserName) || TextUtils.isEmpty(project.gitPassWord)) {
+                if (CheckUtils.isEmpty(project.gitUserName) || CheckUtils.isEmpty(project.gitPassWord)) {
                     throw new RuntimeException("git gitUserName or gitPassWord can not be null, please config in config.gradle")
                 }
             }

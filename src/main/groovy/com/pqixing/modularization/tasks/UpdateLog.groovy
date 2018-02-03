@@ -49,7 +49,7 @@ public class UpdateLog extends DefaultTask {
         modules.each { moduleName ->
             String metaUrl = XmlUtils.getMetaUrl(urls, compileGroup, moduleName)
             String xmlTxt = XmlUtils.request(metaUrl)
-            if (TextUtils.isEmpty(xmlTxt)) return
+            if (CheckUtils.isEmpty(xmlTxt)) return
             sb.append("###   [$moduleName](${metaUrl})    \n")
                     .append("").append("最新版本:　${XmlUtils.parseXmlByKey(xmlTxt, 'release')}")
                     .append("　　　　　").append("最后更新时间:　").append(XmlUtils.parseXmlByKey(xmlTxt, "lastUpdated"))

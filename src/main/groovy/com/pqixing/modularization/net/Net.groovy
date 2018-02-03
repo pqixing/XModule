@@ -22,11 +22,11 @@ class Net {
         String netResult = ""
         if(GlobalConfig.offlineMode) {
             netResult = FileUtils.readCache(url)
-            if (TextUtils.isEmpty(netResult)) throw new RuntimeException("offlineMode invail there is no cache for url :$url")
+            if (CheckUtils.isEmpty(netResult)) throw new RuntimeException("offlineMode invail there is no cache for url :$url")
             return netResult
         }
         if(useCache) netResult = FileUtils.readCache(url)
-        if(!TextUtils.isEmpty(netResult)) return netResult
+        if(!CheckUtils.isEmpty(netResult)) return netResult
         netResult = requestNet(url)
         FileUtils.saveCache(url,netResult)
         return netResult

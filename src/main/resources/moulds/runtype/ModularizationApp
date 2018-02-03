@@ -1,4 +1,4 @@
-package auto.#{packageName};
+package #{javaPackage};
 import android.app.Application;
 import com.dachen.router.dcrouter.services.IApplicationLike;
 /**
