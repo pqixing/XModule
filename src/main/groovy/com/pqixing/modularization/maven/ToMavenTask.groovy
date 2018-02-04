@@ -48,7 +48,7 @@ class ToMavenTask extends BaseTask {
         pom.groupId = mavenInfo.groupName
         pom.artifactId = mavenInfo.artifactId
         pom.version = mavenInfo.pom_version
-        pom.name = "${System.currentTimeMillis()}$Keys.SEPERATOR Git记录:${wrapper.getExtends(GitConfig).lastLog}"
+        pom.name = "${System.currentTimeMillis()}$Keys.SEPERATOR-Git记录:${wrapper.getExtends(GitConfig).lastLog}-num:${wrapper.getExtends(GitConfig).revisionNum}"
     }
 
     @Override
