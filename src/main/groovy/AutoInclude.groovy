@@ -1,4 +1,5 @@
 import org.gradle.api.invocation.Gradle
+
 /**
  * Created by pqixing on 18-2-3.
  */
@@ -74,11 +75,11 @@ public class AutoInclude {
         if (!AutoConfig.XML_DEFAULT_GIT.startsWith("#")) {
             String docDir = AutoConfig.XML_DEFAULT_GIT.substring(AutoConfig.XML_DEFAULT_GIT.lastIndexOf("/") + 1).replace(".git", "")
             defaultXml = new File(rootDir.parentFile, "$docDir/$AutoConfig.XML_DEFAULT_NAME")
-            if(!defaultXml.exists()) {
+            if (!defaultXml.exists()) {
                 error = "git clone $AutoConfig.XML_DEFAULT_GIT".execute(null, rootDir.parentFile)?.text
-            }else includes+= docDir
+            } else includes += docDir
         }
-        if(!defaultXml?.exists()?:false) {
+        if (!defaultXml?.exists() ?: false) {
             defaultXml = new File(rootDir, AutoConfig.XML_DEFAULT_NAME)
             println "clone faile please check url: $AutoConfig.XML_DEFAULT_GIT error : $error"
         }
@@ -176,9 +177,8 @@ public class AutoInclude {
      */
     void formatLocalPath(Map<String, String> locals, File dir, int deep) {
         if (deep < 0) return
-        new File(dir, "build.gradle").with {
-            if (exists()) locals += [name: path.replace("\\\\", "/")]
-        }
+        File buildGradle = new File(dir, "build.gradle")
+        if (buildGradle.exists()) locals += ["$dir.name": dir.path.replace("\\\\", "/")]
         dir.eachDir { formatLocalPath(locals, it, deep - 1) }
     }
 }
