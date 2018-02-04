@@ -9,4 +9,12 @@ class GitUtils {
     static boolean  cloneOrUpdate(String path){
 
     }
+    /**
+     * 获取git名称
+     * @param url
+     * @return
+     */
+    static String getNameFromUrl(String url){
+        return url.substring(url.lastIndexOf("/") + 1).replace(".git", "")
+    }
 }

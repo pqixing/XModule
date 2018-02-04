@@ -116,4 +116,8 @@ class Keys {
      * 清单文件名
      */
     public static final String MANIFEST = "AndroidManifest.xml"
+    /**
+     * 默认的gradle文件名
+     */
+    public static final String NAME_GRADLE_DEFAULT = "default.gradle"
 }

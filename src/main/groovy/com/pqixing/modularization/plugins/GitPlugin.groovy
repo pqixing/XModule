@@ -8,6 +8,7 @@ import com.pqixing.modularization.configs.GlobalConfig
 import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.git.GitProject
 import com.pqixing.modularization.utils.FileUtils
+import com.pqixing.modularization.utils.GitUtils
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
 
@@ -34,7 +35,24 @@ class GitPlugin extends BasePlugin {
         if (writeMouldGradle()) {
             throw new RuntimeException("init setting file, please sync again -- 初始化设置，请重新同步")
         }
-//        readGitProject(project.gradle)
+        readGitProject(project.gradle)
+        applyDefaultGradle()
+        applyLocalGradle()
+    }
+    /**
+     * 如果文档库中有default.gradle文件，则应用
+     */
+    void applyDefaultGradle() {
+        String docDir = GitUtils.getNameFromUrl(GlobalConfig.docGitUrl)
+        def defaultGradle = new File(rootProject.rootDir.parentFile, "$docDir/$Keys.NAME_GRADLE_DEFAULT")
+        if (defaultGradle.exists()) wrapper.apply from: defaultGradle.path
+    }
+    /**
+     * 如果有本地gradle文件，则使用
+     */
+    void applyLocalGradle() {
+        def localGradle = new File(project.rootDir,Keys.LOCAL_GRADLE)
+        if(localGradle.exists()) wrapper.apply from: localGradle.path
     }
 
     /**
@@ -78,8 +96,8 @@ class GitPlugin extends BasePlugin {
         //如果模板已经存在，并且版本号不小于当前，则不需要重写
         if (mouldFile.exists() && mouldFile.readLines()[0].trim() >= mouldVersion) return false
         Moulds moulds = Moulds.with()
-        moulds.params += ["defaultXmlGitUrl":GlobalConfig.docGitUrl]
-        moulds.params += ["AutoInclude":moulds.autoInclude]
+        moulds.params += ["defaultXmlGitUrl": GlobalConfig.docGitUrl]
+        moulds.params += ["AutoInclude": moulds.autoInclude]
         FileUtils.write(mouldFile, "$mouldVersion\n$moulds.settingGradle")
         return true
     }
