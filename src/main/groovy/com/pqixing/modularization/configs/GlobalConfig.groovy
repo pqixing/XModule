@@ -17,7 +17,7 @@ class GlobalConfig {
      */
     public static boolean offlineMode = false
     /**
-     * 是否在同步前，更新一遍版本号,如果为false，间隔一小时更新一次
+     * 是否在同步前，更新一遍版本号,如果为false，间隔两小时更新一次，非常不建议开启
      */
     public static boolean updateBeforeSync = true
     //集成默认的依赖库
@@ -31,7 +31,7 @@ class GlobalConfig {
      * 依赖方式改变
      * localFirst,localOnly,mavenOnly,mavenFirst
      */
-    public static String dependenModel = "mavenOnly"
+    public static String dependentModel = "mavenOnly"
 
     /**
      * 上传所需的用户名
@@ -54,7 +54,7 @@ class GlobalConfig {
      */
     static String mavenGroupUrl = "http://192.168.3.7:9527/nexus/content/groups/androidgroup/"
     /**
-     * 文档仓库管理,可以设置多个，方便同时管理，只能支持git
+     * 文档管理仓库,支持git,自动下载，并且从中读取default.xml,default.gradle等文件，自动同步文档导该git中
      */
     static String docGitUrl = "http://pengqixing:pengqixing@192.168.3.200/android/Document.git"
     /**

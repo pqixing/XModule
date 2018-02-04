@@ -81,8 +81,13 @@ class Dependencies extends BaseExtension {
     String getLastVersion(String group, String artifactId) {
         String timeStamp = "$artifactId$Keys.SUFFIX_STAMP"
         String version = versionMaps.getProperty(artifactId)
+        long afterLastUpdate = System.currentTimeMillis() - (versionMaps.getProperty(timeStamp)?.toLong() ?: 0L)
+        //更新版本的时间差
+        long updateGap = 1000 * 60
+        if (!GlobalConfig.updateBeforeSync) updateGap *= 20
+
         //一分钟秒内,不更新相同的组件版本,避免不停的爬取相同的接口
-        if (System.currentTimeMillis() - (versionMaps.getProperty(timeStamp)?.toLong() ?: 0L) >= 1000 * 60) {
+        if (afterLastUpdate > updateGap) {
             String release = MetadataWrapper.create(mavenType.maven_url, group, artifactId).release
             if (!CheckUtils.isVersionCode(release)) {
                 version = release
@@ -184,7 +189,7 @@ class Dependencies extends BaseExtension {
         StringBuilder sb = new StringBuilder("dependencies { \n")
         modules.each { model ->
             if (model.moduleName == project.name) return
-            switch (GlobalConfig.dependenModel) {
+            switch (GlobalConfig.dependentModel) {
             //只依赖本地工程
                 case "localOnly":
                     if (onLocalCompile(model)) return
