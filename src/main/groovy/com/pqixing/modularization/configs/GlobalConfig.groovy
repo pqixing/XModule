@@ -56,7 +56,7 @@ class GlobalConfig {
     /**
      * 文档仓库管理,可以设置多个，方便同时管理，只能支持git
      */
-    static String docGitUrl = "Document.git"
+    static String docGitUrl = "http://pengqixing:pengqixing@192.168.3.200/android/Document.git"
     /**
      * 文档存放目录
      */

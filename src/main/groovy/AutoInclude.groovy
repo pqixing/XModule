@@ -1,7 +1,4 @@
 import org.gradle.api.invocation.Gradle
-
-import java.util.regex.Pattern
-
 /**
  * Created by pqixing on 18-2-3.
  */
@@ -75,7 +72,7 @@ public class AutoInclude {
         String error = ""
 
         //优先使用文档仓库中存在的文件
-        if (!AutoConfig.XML_DEFAULT_GIT.matches(Pattern.compile("#\\{.*}"))) {
+        if (!AutoConfig.XML_DEFAULT_GIT.startsWith("#")) {
             String docDir = AutoConfig.XML_DEFAULT_GIT.substring(AutoConfig.XML_DEFAULT_GIT.lastIndexOf("/") + 1).replace(".git", "")
             defaultXml = new File(rootDir.parentFile, "$docDir/$AutoConfig.XML_DEFAULT_NAME")
             if(!defaultXml.exists()) {
