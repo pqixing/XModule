@@ -4,6 +4,7 @@ import auto.Moulds
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.configs.BuildConfig
+import com.pqixing.modularization.configs.GlobalConfig
 import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.git.GitProject
 import com.pqixing.modularization.utils.FileUtils
@@ -78,6 +79,7 @@ class GitPlugin extends BasePlugin {
         if (mouldFile.exists() && mouldFile.readLines()[0].trim() >= mouldVersion) return false
         Moulds moulds = Moulds.with()
         moulds.params += ["AutoInclude":moulds.autoInclude]
+        moulds.params += ["defaultXmlGitUrl":GlobalConfig.docGitUrl]
         FileUtils.write(mouldFile, "$mouldVersion\n$moulds.settingGradle")
         return true
     }

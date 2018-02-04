@@ -25,10 +25,7 @@ public class DocSyncTask extends BaseTask {
 
     @Override
     void start() {
-        GlobalConfig.docGits.each { map ->
-
-        }
-        if (!CheckUtils.isGit(GlobalConfig.docGits)) throw new RuntimeException("$docDir ")
+        if (!CheckUtils.isGit(GlobalConfig.docGitUrl)) throw new RuntimeException("$docDir ")
         docDir = wrapper.getExtends(BuildConfig.class).docDir
     }
 

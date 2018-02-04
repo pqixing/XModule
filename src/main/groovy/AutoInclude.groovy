@@ -1,10 +1,11 @@
 import org.gradle.api.invocation.Gradle
 
+import java.util.regex.Pattern
+
 /**
  * Created by pqixing on 18-2-3.
  */
 public class AutoInclude {
-
 
     Gradle gradle
     File rootDir
@@ -70,8 +71,24 @@ public class AutoInclude {
      * 解析default xml 加载所有的git信息
      */
     void formatXml() {
-        File defaultXml = new File(rootDir, AutoConfig.XML_GITPROJECT)
+        File defaultXml = null
+        String error = ""
+
+        //优先使用文档仓库中存在的文件
+        if (!AutoConfig.XML_DEFAULT_GIT.matches(Pattern.compile("#\\{.*}"))) {
+            String docDir = AutoConfig.XML_DEFAULT_GIT.substring(AutoConfig.XML_DEFAULT_GIT.lastIndexOf("/") + 1).replace(".git", "")
+            defaultXml = new File(rootDir.parentFile, "$docDir/$AutoConfig.XML_DEFAULT_NAME")
+            if(!defaultXml.exists()) {
+                error = "git clone $AutoConfig.XML_DEFAULT_GIT".execute(null, rootDir.parentFile)?.text
+            }
+        }
+        if(!defaultXml?.exists()?:false) {
+            defaultXml = new File(rootDir, AutoConfig.XML_DEFAULT_NAME)
+            println "clone faile please check url: $AutoConfig.XML_DEFAULT_GIT error : $error"
+        }
         if (!defaultXml.exists()) defaultXml.write(AutoConfig.mould_gitproject)
+
+
         Node gitNode = new XmlParser().parse(defaultXml)
         submodules = [:]
         projectUrls = [:]
@@ -139,7 +156,7 @@ public class AutoInclude {
             } != null) {
                 localPath.append("/$map.key/$moduleName")
             } else return
-            if (username?.isEmpty()|| password?.isEmpty()) throw new RuntimeException("you must config git username and password before clone code from git!!!!!")
+            if (username?.isEmpty() || password?.isEmpty()) throw new RuntimeException("you must config git username and password before clone code from git!!!!!")
             //如果本地不存在该目录
             File localDir = new File(localPath.toString())
             String urlWitUser = gitUrl.replace("//", "//$username:$password@")
@@ -149,7 +166,7 @@ public class AutoInclude {
                 error = "git clone ${urlWitUser}".execute(null, rootDir.parentFile)?.text
             }
             if (!localDir.exists()) throw new RuntimeException("clone faile please check url: $urlWitUser error : $error")
-            realInclude.put(moduleName,localDir.path)
+            realInclude.put(moduleName, localDir.path)
             //如果重新clone，则重新加载本地工程目录数据
             formatLocalPath(localProject, rootDir.parentFile, 3)
             find = true
@@ -171,6 +188,11 @@ public class AutoInclude {
 }
 
 class AutoConfig {
+
+    /**
+     * 默认的defaultxml路径
+     */
+    static final String XML_DEFAULT_GIT = "#{defaultXmlGitUrl}"
     /**
      * 代码分割线
      */
@@ -178,7 +200,7 @@ class AutoConfig {
     /**
      * gitxml路径解析
      */
-    static final String XML_GITPROJECT = "default.xml"
+    static final String XML_DEFAULT_NAME = "default.xml"
     /**
      * 本地配置文件路径
      */
