@@ -17,7 +17,7 @@ public class AutoInclude {
      */
     HashMap<String, String> projectUrls
     HashMap<String, String> localProject = [:]
-    Set<String> includes
+    Set<String> includes = []
     private String baseGitUrl
     private String username
     private String password
@@ -35,7 +35,6 @@ public class AutoInclude {
     void formatInclude() {
         File includeFile = new File(rootDir, AutoConfig.TXT_INCLUDE)
         if (!includeFile.exists()) includeFile.write(AutoConfig.mould_include)
-        includes = []
         readInclude(includeFile)
         gradle.ext.gitUserName = username
         gradle.ext.gitPassword = password
@@ -77,7 +76,7 @@ public class AutoInclude {
             defaultXml = new File(rootDir.parentFile, "$docDir/$AutoConfig.XML_DEFAULT_NAME")
             if(!defaultXml.exists()) {
                 error = "git clone $AutoConfig.XML_DEFAULT_GIT".execute(null, rootDir.parentFile)?.text
-            }
+            }else includes+= docDir
         }
         if(!defaultXml?.exists()?:false) {
             defaultXml = new File(rootDir, AutoConfig.XML_DEFAULT_NAME)
