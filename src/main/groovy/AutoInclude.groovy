@@ -94,7 +94,7 @@ public class AutoInclude {
         gitNode.project.each { Node p ->
             String name = p.@name
             String url = p.@url
-            if (url.isEmpty()) url = "$baseGitUrl/${name}.git"
+            if (url?.isEmpty() ?: true) url = "$baseGitUrl/${name}.git"
             String introduce = p.@introduce
 
             projectUrls.put(name, "$url$AutoConfig.SEPERATOR$introduce")
@@ -154,14 +154,17 @@ public class AutoInclude {
             } != null) {
                 localPath.append("/$map.key/$moduleName")
             } else return
-            if (username?.isEmpty() || password?.isEmpty()) throw new RuntimeException("you must config git username and password before clone code from git!!!!!")
+            if (username == null || password == null
+                    || username.isEmpty() || password.isEmpty()) throw new RuntimeException("you must config git username and password before clone code from git!!!!!")
             //如果本地不存在该目录
             File localDir = new File(localPath.toString())
             String urlWitUser = gitUrl.replace("//", "//$username:$password@")
 
             String error = ""
             if (!localDir.exists()) {
+                println("clone .... $urlWitUser")
                 error = "git clone ${urlWitUser}".execute(null, rootDir.parentFile)?.text
+                println("clone end.... $urlWitUser")
             }
             if (!localDir.exists()) throw new RuntimeException("clone faile please check url: $urlWitUser error : $error")
             realInclude.put(moduleName, localDir.path)
@@ -179,7 +182,7 @@ public class AutoInclude {
     void formatLocalPath(Map<String, String> locals, File dir, int deep) {
         if (deep < 0) return
         File buildGradle = new File(dir, "build.gradle")
-        if (buildGradle.exists()) locals += ["$dir.name": dir.path.replace("\\\\", "/")]
+        if (buildGradle.exists()) locals.put("$dir.name", dir.path.replace("\\\\", "/"))
         dir.eachDir { formatLocalPath(locals, it, deep - 1) }
     }
 }

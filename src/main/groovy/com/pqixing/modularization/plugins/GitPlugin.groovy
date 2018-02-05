@@ -11,7 +11,6 @@ import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.GitUtils
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
-
 /**
  * Created by pqixing on 17-12-20.
  */
@@ -51,8 +50,8 @@ class GitPlugin extends BasePlugin {
      * 如果有本地gradle文件，则使用
      */
     void applyLocalGradle() {
-        def localGradle = new File(project.rootDir,Keys.LOCAL_GRADLE)
-        if(localGradle.exists()) wrapper.apply from: localGradle.path
+        def localGradle = new File(project.rootDir, Keys.LOCAL_GRADLE)
+        if (localGradle.exists()) wrapper.apply from: localGradle.path
     }
 
     /**
@@ -77,7 +76,6 @@ class GitPlugin extends BasePlugin {
             def childs = submodules[map.key]
             if (childs != null) project.submodules += childs
         }
-
     }
     /**
      * 修改原来的setting文件
