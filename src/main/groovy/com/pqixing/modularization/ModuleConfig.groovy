@@ -70,12 +70,12 @@ class ModuleConfig extends BaseExtension {
     @Override
     LinkedList<String> getOutFiles() {
         LinkedList<String> files = []
-//        files += androidConfig.getOutFiles()
+        files += androidConfig.getOutFiles()
         files += mavenType?.getOutFiles()
         files += runType?.getOutFiles()
         files += dependModules.getOutFiles()
         Print.ln("getOutFiles --------2")
-        files += writeConfig.getOutFiles()
+//        files += writeConfig.getOutFiles()
         Print.ln("getOutFiles --------3")
         return files
     }
