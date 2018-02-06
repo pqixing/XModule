@@ -36,7 +36,7 @@ class AndroidConfig extends BaseExtension {
 
     AndroidConfig(Project project) {
         super(project)
-        flavor = flavor
+        flavor = new FlavorConfig(project)
     }
 
     @Override
@@ -45,7 +45,7 @@ class AndroidConfig extends BaseExtension {
         ModuleConfig config = wrapper.getExtends(ModuleConfig.class)
         BuildConfig buildConfig = wrapper.getExtends(BuildConfig.class)
 
-        Android file = Android.with(properties)
+        Android file = new Android(properties)
 
         file.params += ["pluginName": config.runType?.asApp ? Keys.NAME_APP : wrapper.pluginName]
         file.params += ["maven_url": config.mavenType.maven_url]

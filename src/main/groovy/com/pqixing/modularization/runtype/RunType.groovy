@@ -66,7 +66,7 @@ class RunType extends BaseContainer {
             applicationId = "${buildConfig.packageName}.$wrapper.artifactId"
         }
 
-        Runtype file = Runtype.with(properties)
+        Runtype file = new Runtype(properties)
         if (!afterLogin) file.params.remove("afterLogin")
         file += [buildConfig.properties]
 

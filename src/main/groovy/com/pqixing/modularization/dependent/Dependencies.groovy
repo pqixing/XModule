@@ -211,7 +211,7 @@ class Dependencies extends BaseExtension {
             }
             throwCompileLose(model)
         }
-        sb.append("} \nconfigurations { \\n\"")
+        sb.append("} \nconfigurations { \n")
         masterExclude.each { name ->
             allExclude(group: GlobalConfig.groupName, module: name)
         }
