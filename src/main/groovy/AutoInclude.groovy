@@ -161,7 +161,7 @@ public class AutoInclude {
                 localPath.append("/$moduleName")
                 //子工程包含目标模块
             } else if (submodules[map.key]?.find {
-                it.startsWith("$map.key$AutoConfig.SEPERATOR")
+                it.startsWith("$moduleName$AutoConfig.SEPERATOR")
             } != null) {
                 localPath.append("/$map.key/$moduleName")
             } else return
