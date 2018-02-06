@@ -71,15 +71,18 @@ Properties loadProperties(File file) {
 }
 
 String getLastVersion(def url) {
-    return loadProperties(localFile).getProperty(url.toString())?.toString() ?: "1.0D"
+    return loadProperties(localFile).getProperty(url.toString())?.toString() ?: "1.0"
 }
 
 uploadArchives.doLast {
     //自动更新版本号
     String key = repositories.mavenDeployer.repository.url.hashCode().toString()
-    double newVersion = getLastVersion(key).toDouble() + 0.1D
+    String oldVersion = getLastVersion(key)
+    int lastSplit = oldVersion.lastIndexOf(".") + 1
+    String newVersion = oldVersion.substring(0, lastSplit) + (oldVersion.substring(lastSplit).toInteger() + 1).toString()
+
     def localConfig = loadProperties(localFile)
-    localConfig.put(key, newVersion.toString())
+    localConfig.put(key, newVersion)
     localConfig.store(localFile.newDataOutputStream(), null)
 }
 

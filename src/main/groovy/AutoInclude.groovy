@@ -44,12 +44,12 @@ public class AutoInclude {
     }
 
     void readInclude(StringBuilder autoTxt, File f) {
-        if (!f.exists()) return
+        if (!f.exists()||!f.isFile()) return
         boolean end = false
         StringBuilder icTxt = new StringBuilder()
         f.eachLine { line ->
+            end |= line.startsWith(AutoConfig.TAG_AUTO_ADD)
             if (end) return
-            else end = line.startsWith(AutoConfig.TAG_AUTO_ADD)
 
             def map = line.split("=")
             if (map.length < 2) return
@@ -62,7 +62,7 @@ public class AutoInclude {
                     break
                 case "email": email = value
                     break
-                case "targetInclude": readInclude(new File(rootDir, value))
+                case "targetInclude": readInclude(autoTxt,new File(rootDir, value))
                     break
                 case "include":
                     value?.split(",")?.each { includes += it.trim() }
@@ -70,7 +70,7 @@ public class AutoInclude {
             }
             icTxt.append(line).append("\\n")
         }
-        f.write("${icTxt.toString()}\\n$AutoConfig.TAG_AUTO_ADD ------------- \\n${autoTxt.toString()}")
+        f.write("${icTxt.toString()}\\n$AutoConfig.TAG_AUTO_ADD ------------- the config below this line is not work!!!!! \\n${autoTxt.toString()}")
     }
     /**
      * 解析default xml 加载所有的git信息
@@ -229,5 +229,5 @@ class AutoConfig {
             "</git>"
 
     static
-    final String mould_include = "username = \\npassword = \\nemail= \\ninclude = \\ntargetInclude =\\n"
+    final String mould_include = "username = \\npassword = \\nemail= \\ninclude = \\ntargetInclude = \\n\\n"
 }
