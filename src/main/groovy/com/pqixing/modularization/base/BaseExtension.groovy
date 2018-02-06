@@ -8,8 +8,8 @@ import org.gradle.api.Project
  */
 
 abstract class BaseExtension {
-    protected Project project
-    protected ProjectWrapper wrapper
+    public Project project
+    public ProjectWrapper wrapper
 
     BaseExtension(Project project) {
         setProject(project)
@@ -17,7 +17,7 @@ abstract class BaseExtension {
 
     void setProject(Project project) {
         this.project = project
-        project?.ext."${getClass().name}" = this//初始化赋值
+        project?.ext?."${getClass().name}" = this//初始化赋值
         wrapper = ProjectWrapper.with(project)
     }
 /**

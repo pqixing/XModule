@@ -56,7 +56,7 @@ class Net {
      * http://192.168.3.7:9527/nexus/content/repositories/androidtest/com/dachen/android/router/0.1.7/router-0.1.7.pom
      */
     static String getPomStr(MavenType maven, String moduleName, String version) {
-        BuildConfig buildConfig = maven.project.buildConfig
+        BuildConfig buildConfig = maven.wrapper.getExtends(BuildConfig)
         StringBuilder pomUrl = new StringBuilder(maven.maven_url)
         if (!maven.maven_url.endsWith("/")) pomUrl.append("/")
         pomUrl.append(buildConfig.groupName.replace(".", "/"))

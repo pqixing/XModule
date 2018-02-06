@@ -1,6 +1,5 @@
 package com.pqixing.modularization.android
 
-import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.configs.BuildConfig
 import com.pqixing.modularization.utils.FileUtils
@@ -10,12 +9,10 @@ import org.gradle.api.Project
  */
 
 class PreWriteConfig extends BaseExtension {
-    Project project
     HashMap<String, String> writeConfigs
 
     PreWriteConfig(Project project) {
         super(project)
-        this.project = project
         writeConfigs = new HashMap<>()
     }
 
@@ -25,8 +22,7 @@ class PreWriteConfig extends BaseExtension {
     @Override
     LinkedList<String> getOutFiles() {
 
-        BuildConfig buildConfig = project.buildConfig
-        ModuleConfig moduleConfig = project.moduleConfig
+        BuildConfig buildConfig = wrapper.getExtends(BuildConfig)
 
         String appLikeValue = "/applike/$buildConfig.projectName"
         appLikeValue = "/${appLikeValue.hashCode()}$appLikeValue".replace("-","_")
@@ -36,7 +32,7 @@ class PreWriteConfig extends BaseExtension {
 
         String className = "${buildConfig.projectName}Config".replace("-","_")
         className = className.substring(0,1).toUpperCase()+className.substring(1)
-        def clsString = new StringBuilder("package auto.#{packageName};\n")
+        def clsString = new StringBuilder("package #{javaPackage};\n")
         clsString.append("public final class $className { \n")
         writeConfigs.each { map ->
             clsString.append("public static final String $map.key = \"$map.value\"; \n")

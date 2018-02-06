@@ -8,7 +8,7 @@ class CheckUtils {
      * @param obj
      * @return
      */
-    static boolean isEmpty(def obj) {
+    static boolean isEmpty(Object obj) {
         if (null == obj || "" == obj.toString() || "null" == obj.toString()) return true
         if (obj instanceof Collection) return obj.isEmpty()
         return false

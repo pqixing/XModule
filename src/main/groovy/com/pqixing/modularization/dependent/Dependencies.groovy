@@ -111,7 +111,8 @@ class Dependencies extends BaseExtension {
     }
 
     void saveVersionMap() {
-        versionMaps?.store(versionFile.newOutputStream(), Keys.CHARSET)
+        if(versionFile.exists())
+            versionMaps?.store(versionFile.newOutputStream(), Keys.CHARSET)
         versionMaps?.clear()
         versionMaps = null
     }
@@ -217,6 +218,6 @@ class Dependencies extends BaseExtension {
         allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)},test")
         sb.append("${excludeStr("all*.exclude", allExcludes)}\n } \n")
         saveVersionMap()
-        return [FileUtils.write(new File(project.buildConfig.cacheDir, "dependencies.gradle"), sb.toString())];
+        return [FileUtils.write(new File(wrapper.getExtends(BuildConfig).cacheDir, "dependencies.gradle"), sb.toString())];
     }
 }

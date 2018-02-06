@@ -37,7 +37,6 @@ abstract class AndroidPlugin extends BasePlugin {
             if (it instanceof Closure) it.call(moduleConfig)
 
             //配置结束
-            moduleConfig.onConfigEnd()
             moduleConfig.outFiles.findAll { it != null }.each { wrapper.apply from: it }
             project.afterEvaluate {//添加上传前依赖
                 project.toMaven.dependsOn project.assembleRelease
@@ -56,7 +55,7 @@ abstract class AndroidPlugin extends BasePlugin {
      */
     void loadRemoteGradle() {
         String remotePath = wrapper.get(Keys.REMOTE_GRADLE)
-        if (remotePath.startsWith(Keys.PREFIX_NET)) {
+        if (remotePath?.startsWith(Keys.PREFIX_NET)) {
             File remoteFile = new File(BuildConfig.rootOutDir, Keys.REMOTE_GRADLE)
             remotePath = FileUtils.write(remoteFile, Net.get(remotePath, true))
         }

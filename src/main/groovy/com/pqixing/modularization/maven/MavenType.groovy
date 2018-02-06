@@ -5,9 +5,8 @@ import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseContainer
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.configs.GlobalConfig
-import com.pqixing.modularization.utils.TextUtils
+import com.pqixing.modularization.utils.CheckUtils
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -43,10 +42,10 @@ class MavenType extends BaseContainer {
 
     private void mergerData() {
         MavenType defType = wrapper.getExtends(ModuleConfig).mavenTypes.getByName(Keys.DEFAULT)
-        if (CheckUtils.isEmpty(pom_version)) m.pom_version = defType.pom_version
-        if (CheckUtils.isEmpty(uploadEnable)) m.uploadEnable = defType.uploadEnable
-        if (CheckUtils.isEmpty(updateDesc)) m.updateDesc = defType.updateDesc
-        if (CheckUtils.isEmpty(uploadKey)) m.uploadKey = defType.uploadKey
+        if (CheckUtils.isEmpty(pom_version)) pom_version = defType.pom_version
+        if (CheckUtils.isEmpty(uploadEnable)) uploadEnable = defType.uploadEnable
+        if (CheckUtils.isEmpty(updateDesc)) updateDesc = defType.updateDesc
+        if (CheckUtils.isEmpty(uploadKey)) uploadKey = defType.uploadKey
         focusUpload |= defType.focusUpload
     }
 

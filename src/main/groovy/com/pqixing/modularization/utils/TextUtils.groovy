@@ -29,7 +29,7 @@ class TextUtils {
      * @return
      */
     static String collection2Str(Collection collection) {
-        if (isEmpty(collection)) return ""
+        if (CheckUtils.isEmpty(collection)) return ""
         StringBuilder sb = new StringBuilder()
         collection.each { sb.append(it).append(Keys.SEPERATOR) }
         return sb.substring(0, sb.length() - Keys.SEPERATOR.length())
