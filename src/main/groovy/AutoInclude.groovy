@@ -34,18 +34,23 @@ public class AutoInclude {
     /**
      * 解析本地需要导入的工程
      */
-    void formatInclude() {
+    void formatInclude(StringBuilder icTxt) {
         File includeFile = new File(rootDir, AutoConfig.TXT_INCLUDE)
         if (!includeFile.exists()) includeFile.write(AutoConfig.mould_include)
-        readInclude(includeFile)
+        readInclude(icTxt, includeFile)
         gradle.ext.gitUserName = username
         gradle.ext.gitPassword = password
         gradle.ext.gitEmail = email
     }
 
-    void readInclude(File f) {
+    void readInclude(StringBuilder autoTxt, File f) {
         if (!f.exists()) return
+        boolean end = false
+        StringBuilder icTxt = new StringBuilder()
         f.eachLine { line ->
+            if (end) return
+            else end = line.startsWith(AutoConfig.TAG_AUTO_ADD)
+
             def map = line.split("=")
             if (map.length < 2) return
             String key = map[0].trim()
@@ -63,12 +68,14 @@ public class AutoInclude {
                     value?.split(",")?.each { includes += it.trim() }
                     break
             }
+            icTxt.append(line).append("\\n")
         }
+        f.write("${icTxt.toString()}\\n$AutoConfig.TAG_AUTO_ADD ------------- \\n${autoTxt.toString()}")
     }
     /**
      * 解析default xml 加载所有的git信息
      */
-    void formatXml() {
+    void formatXml(StringBuilder icTxt) {
         File defaultXml = null
         String error = ""
 
@@ -98,11 +105,14 @@ public class AutoInclude {
             String introduce = p.@introduce
 
             projectUrls.put(name, "$url$AutoConfig.SEPERATOR$introduce")
+            icTxt.append("include = $name    --introduce = $introduce \\n")
+
             List<String> subLists = []
             p.submodule.each { Node s ->
                 String s_name = s.@name
                 String s_introduce = s.@introduce
                 subLists += "${s_name}$AutoConfig.SEPERATOR${s_introduce}"
+                icTxt.append("include = $s_name    --introduce = $s_introduce \\n")
             }
             if (!subLists.isEmpty()) submodules.put(name, subLists)
         }
@@ -121,8 +131,9 @@ public class AutoInclude {
     }
 
     void save() {
-        formatXml()
-        formatInclude()
+        StringBuilder icTxt = new StringBuilder()
+        formatXml(icTxt)
+        formatInclude(icTxt)
         formatLocalPath(localProject, rootDir.parentFile, 3)
         Map<String, String> realInclude = [:]
 
@@ -188,6 +199,8 @@ public class AutoInclude {
 }
 
 class AutoConfig {
+
+    static final String TAG_AUTO_ADD = "Auto Add By Modularization"
 
     /**
      * 默认的defaultxml路径
