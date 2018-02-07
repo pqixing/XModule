@@ -93,7 +93,7 @@ class GitPlugin extends BasePlugin {
         File mouldFile = new File(BuildConfig.rootOutDir, SETTING_FILE)
         //如果模板已经存在，并且版本号不小于当前，则不需要重写
         if (mouldFile.exists() && mouldFile.readLines()[0].trim() >= mouldVersion) return false
-        Moulds moulds = Moulds.with()
+        Moulds moulds =new Moulds()
         moulds.params += ["defaultXmlGitUrl": GlobalConfig.docGitUrl]
         moulds.params += ["AutoInclude": moulds.autoInclude]
         FileUtils.write(mouldFile, "$mouldVersion\n$moulds.settingGradle")
