@@ -39,7 +39,7 @@ abstract class AndroidPlugin extends BasePlugin {
             //配置结束
             moduleConfig.outFiles.findAll { it != null }.each { wrapper.apply from: it }
             project.afterEvaluate {//添加上传前依赖
-                project.toMaven.dependsOn project.assembleRelease
+                project.ToMaven.dependsOn project.assembleRelease
             }
             //添加打印依赖的task
             BaseTask.task(project, DependentPrintTask.class)

@@ -43,8 +43,8 @@ class BuildConfig extends BaseExtension {
     BuildConfig(Project project) {
         super(project)
         projectName = TextUtils.numOrLetter(project.name).toLowerCase()
-        outDir = FileUtils.urls(project.path, dirName)
-        docDir = FileUtils.urls(project.path, GlobalConfig.docDirName)
+        outDir = FileUtils.urls(project.projectDir.path, dirName)
+        docDir = FileUtils.urls(project.projectDir.path, GlobalConfig.docDirName)
 
         cacheDir = FileUtils.urls(outDir, ".cache")
         javaDir = FileUtils.urls(outDir, "java")

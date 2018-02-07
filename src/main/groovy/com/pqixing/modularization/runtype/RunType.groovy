@@ -80,7 +80,7 @@ class RunType extends BaseContainer {
         FileUtils.write(FileUtils.getFileForClass(buildConfig.cacheJavaDir, "${buildConfig.javaPackage}.DefaultActivity"), file.lauchActivity)
 
         //清单文件解析
-        ManifestWrapper manifestWrapper = new ManifestWrapper(FileUtils.read(new File(project.path, "src/main/$Keys.MANIFEST")))
+        ManifestWrapper manifestWrapper = new ManifestWrapper(FileUtils.read(new File(project.projectDir, "src/main/$Keys.MANIFEST")))
 
         manifestWrapper.appLabel = app_name
         manifestWrapper.appTheme = app_theme

@@ -32,7 +32,7 @@ public abstract class BaseTask extends DefaultTask {
     }
 
     static <T extends DefaultTask> T task(Project project, Class<T> tClass) {
-        return project.task("${tClass.name.replace("Task", "")}", type: tClass)
+        return project.task("${tClass.simpleName.replace("Task", "")}", type: tClass)
     }
 
     boolean excuteTask(Project project, String taskName) {
