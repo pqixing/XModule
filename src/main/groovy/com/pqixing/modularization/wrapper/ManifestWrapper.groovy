@@ -1,5 +1,6 @@
 package com.pqixing.modularization.wrapper
 
+import auto.Android
 import groovy.xml.Namespace
 
 import javax.xml.soap.Node
@@ -14,7 +15,12 @@ class ManifestWrapper extends XmlWrapper {
 
     public ManifestWrapper(String xmlString) {
         super(xmlString)
-        appNode = node.application[0]
+        def appNodes = node.application
+        if (appNodes.isEmpty()) {
+            appNode = new XmlParser().parse(new Android([:]).nodeApp)
+            node.append(appNode)
+        } else appNode = appNodes[0]
+
         // 声明命名空间
         android = new Namespace('http://schemas.android.com/apk/res/android', 'android')
         tools = new Namespace('http://schemas.android.com/tools', 'tools')

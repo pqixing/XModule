@@ -68,7 +68,7 @@ class RunType extends BaseContainer {
 
         Runtype file = new Runtype(properties)
         if (!afterLogin) file.params.remove("afterLogin")
-        file += [buildConfig.properties]
+        file.params += buildConfig.properties
 
         String applicationPkg = "${buildConfig.javaPackage}.ModularizationApp"
 

@@ -6,7 +6,6 @@ import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.dependent.Dependencies
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.runtype.RunType
-import com.pqixing.modularization.utils.Print
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 /**
@@ -70,13 +69,11 @@ class ModuleConfig extends BaseExtension {
     @Override
     LinkedList<String> getOutFiles() {
         LinkedList<String> files = []
-        files += androidConfig.getOutFiles()
-        files += mavenType?.getOutFiles()
-        files += runType?.getOutFiles()
-        files += dependModules.getOutFiles()
-        Print.ln("getOutFiles --------2")
+        files += androidConfig.outFiles
+        files += mavenType?.outFiles
+        files += runType?.outFiles
+        files += dependModules.outFiles
 //        files += writeConfig.getOutFiles()
-        Print.ln("getOutFiles --------3")
         return files
     }
 }

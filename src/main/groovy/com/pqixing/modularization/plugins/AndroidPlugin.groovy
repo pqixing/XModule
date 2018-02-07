@@ -26,11 +26,6 @@ abstract class AndroidPlugin extends BasePlugin {
         project.extensions.add(Keys.CONFIG_MODULE, moduleConfig)
 
         loadRemoteGradle()
-        //添加直接使用的配置
-        project.ext.support_v7 = { moduleConfig.androidConfig.support_v7 }
-        project.ext.support_v4 = { moduleConfig.androidConfig.support_v4 }
-        project.ext.printPros = { pro -> Print.lnPro(pro) }
-
         //允许配置全局使用的配置文件
         project.ext.endConfig = {
             loadLocalGradle()
@@ -47,6 +42,11 @@ abstract class AndroidPlugin extends BasePlugin {
             //添加分析的任务
 //            BaseTask.task(wrapper.project, wrapper.getExtends(GitConfig.class)
 //                    .branchName == "master" ? MavenMergerTask.class : BranchMergerTask.class)
+            //添加直接使用的配置
+            project.ext.support_v7 =  moduleConfig.androidConfig.support_v7
+            project.ext.support_v4 =  moduleConfig.androidConfig.support_v4
+            project.ext.printPros = { pro -> Print.lnPro(pro) }
+
         }
     }
 
