@@ -31,10 +31,10 @@ class BuildConfig extends BaseExtension {
     final String javaDir
 
 
-    String packageName
+    final String packageName
     //java包名
-    String javaPackage
-    String groupName
+   final String javaPackage
+   final String groupName
     /**
      * 输出文档路径
      */

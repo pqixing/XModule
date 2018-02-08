@@ -31,6 +31,8 @@ class RunType extends BaseContainer {
     String applicationId
     boolean afterLogin
 
+    String applicationName
+
     RunType(String name) {
         super(name)
     }
@@ -38,12 +40,16 @@ class RunType extends BaseContainer {
     @Override
     void onCreate(Project project) {
         super.onCreate(project)
-        asApp = true
-        afterLogin = false
-        app_name = wrapper.artifactId
-        app_theme = "@android:style/Theme.Light.NoTitleBar"
-        versionName = new SimpleDateFormat("MM.dd.HH.mm").format(new Date())
-        versionCode = versionName.replace(".", "")
+        if (name == Keys.DEFAULT) {
+            asApp = true
+            afterLogin = false
+            app_name = wrapper.artifactId
+            app_theme = "@android:style/Theme.Light.NoTitleBar"
+            versionName = new SimpleDateFormat("MM.dd.HH.mm").format(new Date())
+            versionCode = versionName.replace(".", "")
+            applicationId = "${wrapper.getExtends(BuildConfig.class).packageName}.$wrapper.artifactId"
+            applicationName = "com.pqixing.modularization.VirtualApplication"
+        }
     }
 
     void mergerData() {
@@ -52,6 +58,9 @@ class RunType extends BaseContainer {
         if (CheckUtils.isEmpty(app_name)) app_name = defType.app_name
         if (CheckUtils.isEmpty(app_theme)) app_theme = defType.app_theme
         if (CheckUtils.isEmpty(applicationId)) applicationId = defType.applicationId
+        if (CheckUtils.isEmpty(applicationName)) applicationName = defType.applicationName
+        if (CheckUtils.isEmpty(versionName)) versionName = defType.versionName
+        if (CheckUtils.isEmpty(versionCode)) versionCode = defType.versionCode
         afterLogin &= defType.afterLogin
         asApp &= defType.asApp
     }
@@ -62,9 +71,6 @@ class RunType extends BaseContainer {
         if (wrapper.pluginName == Keys.NAME_APP || !asApp) return []//不独立运行，不生产缓存类文件
 
         BuildConfig buildConfig = wrapper.getExtends(BuildConfig.class)
-        if (CheckUtils.isEmpty(applicationId)) {
-            applicationId = "${buildConfig.packageName}.$wrapper.artifactId"
-        }
 
         Runtype file = new Runtype(properties)
         if (!afterLogin) file.params.remove("afterLogin")
