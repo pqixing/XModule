@@ -3,6 +3,7 @@ package com.pqixing.modularization.git
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseExtension
 import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-12-7.
  * 基础信息编译生成的
@@ -29,14 +30,15 @@ class GitConfig extends BaseExtension {
      * 全部的git工程
      */
     List<GitProject> allGitProjects = []
-    Map<String,String> localProject
+    Map<String, String> localProject
 
     GitConfig(Project project) {
         super(project)
         branchName = "git rev-parse --abbrev-ref HEAD".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.trim()
         revisionNum = "git rev-parse HEAD".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.trim()
-        lastLog = "git branch -vv".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.find {
-            it.startsWith("*")
+        def lines = "git branch -vv".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.readLines()
+        if (lines != null) for (String l : lines) {
+            if (l.startsWith("*")) lastLog = l.trim()
         }
     }
 

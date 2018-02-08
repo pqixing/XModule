@@ -23,6 +23,11 @@ class TextUtils {
         return wrapper.master ? name : "$name$Keys.BRANCH_TAG${wrapper.getExtends(GitConfig.class).branchName}"
     }
 
+    static String firstUp(String source) {
+        if (source == null) return ""
+        return "${source.substring(0, 1).toUpperCase()}${source.substring(1)}"
+    }
+
     /**
      * 集合转字符串
      * @param collection

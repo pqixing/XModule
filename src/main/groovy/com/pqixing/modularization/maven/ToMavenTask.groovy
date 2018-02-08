@@ -17,6 +17,9 @@ class ToMavenTask extends BaseTask {
 
     @Override
     void start() {
+        if (wrapper.pluginName != Keys.NAME_LIBRARY) {
+            throw new RuntimeException("current plugin is ${wrapper.pluginName} ,can not upload to maven !!!!!")
+        }
         def dependent = wrapper.getExtends(Dependencies.class)
         if (dependent.hasLocalModule) {//如果有本地工程，抛异常
             throw new RuntimeException("current dependencies contain local project, please remove before upload : ${dependent.localImportModules.toString()}")

@@ -1,58 +1,49 @@
 package com.pqixing.modularization.android
 
+import com.alibaba.fastjson.JSON
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.configs.BuildConfig
+import com.pqixing.modularization.dependent.Dependencies
+import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.utils.FileUtils
+import com.pqixing.modularization.utils.TextUtils
 import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-12-7.
  */
 
 class PreWriteConfig extends BaseExtension {
-    HashMap<String, String> writeConfigs
+    HashMap<String, String> configs
 
     PreWriteConfig(Project project) {
         super(project)
-        writeConfigs = new HashMap<>()
+        configs = new HashMap<>()
     }
 
     void addConfig(Map<String, String> configs) {
-        writeConfigs += configs
+        this.configs += configs
     }
+
     @Override
     LinkedList<String> getOutFiles() {
 
-        BuildConfig buildConfig = wrapper.getExtends(BuildConfig)
-
+        def buildConfig = wrapper.getExtends(BuildConfig)
+        def gitConfig = wrapper.getExtends(GitConfig)
+        def dependent = wrapper.getExtends(Dependencies)
         String appLikeValue = "/applike/$buildConfig.projectName"
-        appLikeValue = "/${appLikeValue.hashCode()}$appLikeValue".replace("-","_")
-        addConfig(["NAME": buildConfig.projectName, "PATH_APPLIE": appLikeValue,"BUILD_TIME":System.currentTimeMillis().toString(),"BUILD_TIME_STR":new Date().toLocaleString()])
-//        addConfig(["GIT_COMMIT": project.lastCommit,"DEPENDENCIES": JSON.toJSONString(moduleConfig.dependModules.dependModules).replace("\"","")])
+        appLikeValue = "/${appLikeValue.hashCode()}$appLikeValue"
+        addConfig(["NAME": buildConfig.projectName, "PATH_APPLIE": appLikeValue, "BUILD_TIME": System.currentTimeMillis().toString(), "BUILD_TIME_STR": new Date().toLocaleString()])
+        addConfig(["GIT_COMMIT_LOG": gitConfig.lastLog, "GIT_COMMIT_NUM": gitConfig.revisionNum, "DEPENDENCIES": JSON.toJSONString(dependent.modules).replace("\"", "")])
 
+        def confStr = new StringBuilder()
+        configs.each { confStr.append("public static final String $it.key = \"$it.value\"; \n") }
 
-        String className = "${buildConfig.projectName}Config".replace("-","_")
-        className = className.substring(0,1).toUpperCase()+className.substring(1)
-        def clsString = new StringBuilder("package #{javaPackage};\n")
-        clsString.append("public final class $className { \n")
-        writeConfigs.each { map ->
-            clsString.append("public static final String $map.key = \"$map.value\"; \n")
-        }
-        clsString.append("} \n")
-        String fileName = FileUtils.urls(buildConfig.javaDir, "auto",buildConfig.packageName.replace('.', File.separator), "${className}.java")
-        FileUtils.write(new File(fileName), XmlUtils.parseString(clsString.toString(), ["packageName": buildConfig.packageName]))
-        return [FileUtils.write(new File(buildConfig.cacheDir, "java.gradle"), XmlUtils.parseString(sourceSetTxt, ["javaDir": buildConfig.javaDir]))]
-    }
+        def writes = new auto.Prewrite(buildConfig.properties)
+        String className = TextUtils.firstUp("${buildConfig.projectName}Config")
+        writes.params += ["preConfigs": confStr.toString(), "className": className]
 
-    String getSourceSetTxt() {
-        return '''
-android{
- sourceSets {
-        //在main目录中
-        main {
-            java.srcDirs += "#{javaDir}"
-        }
-    }
-}
-'''
+        FileUtils.write(FileUtils.getFileForClass(buildConfig.javaDir, "${buildConfig.javaPackage}.$className"), writes.configClass)
+        return [FileUtils.write(new File(buildConfig.cacheDir, "java.gradle"), writes.sourceSet)]
     }
 }

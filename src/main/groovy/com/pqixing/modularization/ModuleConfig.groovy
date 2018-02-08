@@ -8,6 +8,7 @@ import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.runtype.RunType
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -73,7 +74,7 @@ class ModuleConfig extends BaseExtension {
         files += mavenType?.outFiles
         files += runType?.outFiles
         files += dependModules.outFiles
-//        files += writeConfig.getOutFiles()
+        files += writeConfig?.outFiles
         return files
     }
 }
