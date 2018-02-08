@@ -32,6 +32,12 @@ class GitConfig extends BaseExtension {
    static List<GitProject> allGitProjects = []
    static Map<String, String> localProject
 
+    /**
+     * 默认git操作目标
+     * include，all
+     */
+    String target = "include"
+
     GitConfig(Project project) {
         super(project)
         branchName = "git rev-parse --abbrev-ref HEAD".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.trim()?:""

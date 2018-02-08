@@ -1,4 +1,4 @@
-package com.pqixing.modularization.git
+package com.pqixing.modularization.docs
 
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
