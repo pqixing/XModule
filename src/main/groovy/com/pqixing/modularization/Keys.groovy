@@ -106,7 +106,7 @@ class Keys {
     /**
      * 包名前缀
      */
-    public static final String PREFIX_PKG = "auto."
+    public static final String PREFIX_PKG = "auto"
 
     /**
      * 自动添加的代码tag

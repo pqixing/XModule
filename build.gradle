@@ -1,11 +1,11 @@
 // 应用插件
 apply plugin: "groovy"
 apply plugin: "maven"
-ext.autoDir = new File(projectDir, "src/main/groovy/auto")
+ext.autoDir = new File(projectDir, "src/main/java/auto")
 autoDir.mkdirs()
-//sourceSets {
-//    main.groovy.srcDirs += autoDir.parent // 指定源码目录
-//}
+sourceSets {
+    main.groovy.srcDirs += autoDir.parent // 指定源码目录
+}
 task("init") { group = "build" }
 
 file("src/main/resources/moulds/AutoInclude").write(file("src/main/groovy/AutoInclude.groovy").text)

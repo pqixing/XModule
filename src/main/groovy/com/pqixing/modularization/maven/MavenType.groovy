@@ -52,7 +52,9 @@ class MavenType extends BaseContainer {
     @Override
     LinkedList<String> getOutFiles() {
         mergerData()
-        BaseTask.task(project, ToMavenTask.class).mavenInfo = this
+        ToMavenTask task =  BaseTask.task(project, ToMavenTask.class)
+        task.dependsOn "assembleRelease"
+        task.mavenInfo = this
         return []
     }
 }

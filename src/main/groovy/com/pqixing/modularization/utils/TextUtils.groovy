@@ -20,7 +20,7 @@ class TextUtils {
     }
 
     static String getBranchArtifactId(String name, ProjectWrapper wrapper) {
-        return wrapper.master ? name : "$name$Keys.${wrapper.getExtends(GitConfig.class).branchName}"
+        return wrapper.master ? name : "$name$Keys.BRANCH_TAG${wrapper.getExtends(GitConfig.class).branchName}"
     }
 
     /**

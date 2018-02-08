@@ -2,9 +2,6 @@ package com.pqixing.modularization.wrapper
 
 import auto.Android
 import groovy.xml.Namespace
-
-import javax.xml.soap.Node
-
 /**
  * 拓展类Utils
  */
@@ -17,7 +14,8 @@ class ManifestWrapper extends XmlWrapper {
         super(xmlString)
         def appNodes = node.application
         if (appNodes.isEmpty()) {
-            appNode = new XmlParser().parse(new Android([:]).nodeApp)
+            appNode = new XmlParser().parseText(new Android([:]).nodeApp)
+//            appNode = new Node()
             node.append(appNode)
         } else appNode = appNodes[0]
 
@@ -63,7 +61,7 @@ class ManifestWrapper extends XmlWrapper {
      */
     ManifestWrapper updateReplace() {
         StringBuilder sb = new StringBuilder()
-        manifest.application[0].attributes().each { item ->
+        appNode.attributes().each { item ->
             String key = item.key.toString().replaceFirst("\\{.*}", "")
             if (key != "replace") sb.append("android:$key,")
         }

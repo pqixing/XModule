@@ -14,7 +14,7 @@ class XmlWrapper {
     }
 
     public void writeTo(File outFile) {
-        outFile.mkdirs()
+        outFile.parentFile.mkdirs()
         new XmlNodePrinter(new PrintWriter(outFile)).print(node)
     }
 

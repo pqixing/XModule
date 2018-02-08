@@ -1,6 +1,7 @@
 <activity  xmlns:android="http://schemas.android.com/apk/res/android"
        android:name="#{javaPackage}.DefaultActivity"
        android:launchMode="singleTask"
+       android:theme="@android:style/Theme.Light"
        >
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
