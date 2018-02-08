@@ -34,12 +34,13 @@ class GitConfig extends BaseExtension {
 
     GitConfig(Project project) {
         super(project)
-        branchName = "git rev-parse --abbrev-ref HEAD".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.trim()
-        revisionNum = "git rev-parse HEAD".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.trim()
+        branchName = "git rev-parse --abbrev-ref HEAD".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.trim()?:""
+        revisionNum = "git rev-parse HEAD".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.trim()?:""
         def lines = "git branch -vv".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.readLines()
         if (lines != null) for (String l : lines) {
             if (l.startsWith("*")) lastLog = l.trim()
         }
+        if(lastLog == null) lastLog = ""
     }
 
     List<String> log(int num = 5) {
