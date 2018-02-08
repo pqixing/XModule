@@ -1,4 +1,4 @@
-package com.pqixing.modularization.plugins
+package com.pqixing.modularization.docs
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
@@ -13,12 +13,12 @@ class DocPlugin extends BasePlugin {
         super.apply(project)
 //        println("name Document : ${NormalUtils.getBranchName(project)}  lastCommit : ${NormalUtils.getLastCommit(project)}")
 
-//        def updateDoc = project.task("updateDoc", type: UpdateLog) {
+//        def updateDoc = project.task("updateDoc", type: com.pqixing.modularization.docs.UpdateLog) {
 //            compileGroup = Default.groupName
 //            envs = ["test": Default.maven_url_test, "release": Default.maven_url_release,"debug":Default.maven_url_debug]
 //        }
-//        UpdateLog.findModules(project.file("readme")).each {
-//            project.task("log-$it", type: UpdateDetail) {
+//        com.pqixing.modularization.docs.UpdateLog.findModules(project.file("readme")).each {
+//            project.task("log-$it", type: com.pqixing.modularization.docs.UpdateDetail) {
 //                compileGroup = Default.groupName
 //                envs = ["test": Default.maven_url_test, "release": Default.maven_url_release,"debug":Default.maven_url_debug]
 //                moduleName = "router"

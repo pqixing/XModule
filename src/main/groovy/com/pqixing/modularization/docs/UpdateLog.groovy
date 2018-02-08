@@ -1,3 +1,4 @@
+package com.pqixing.modularization.docs
 //package com.pqixing.modularization.tasks
 //
 //import com.pqixing.modularization.Default
@@ -10,12 +11,12 @@
 // * Created by pqixing on 17-12-22.
 // */
 //
-//public class UpdateLog extends DefaultTask {
+//public class com.pqixing.modularization.docs.UpdateLog extends DefaultTask {
 //    List<String> modules
 //    Map<String, String> envs
 //    String compileGroup
 //
-//    UpdateLog(){
+//    com.pqixing.modularization.docs.UpdateLog(){
 //        group = Default.taskGroup
 //    }
 //    @TaskAction
