@@ -1,7 +1,7 @@
 package com.pqixing.modularization.net
 
-import com.pqixing.modularization.configs.BuildConfig
-import com.pqixing.modularization.configs.GlobalConfig
+import com.pqixing.modularization.common.BuildConfig
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils

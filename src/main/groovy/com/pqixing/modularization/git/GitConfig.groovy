@@ -16,21 +16,21 @@ class GitConfig extends BaseExtension {
     /**
      * git用户名
      */
-    String userName
+    static String userName
     /**
      * git密码
      */
-    String password
+    static String password
     /**
      * git email信息
      */
-    String email
-    String baseGitUrl
+    static String email
+    static String baseGitUrl
     /**
      * 全部的git工程
      */
-    List<GitProject> allGitProjects = []
-    Map<String, String> localProject
+   static List<GitProject> allGitProjects = []
+   static Map<String, String> localProject
 
     GitConfig(Project project) {
         super(project)

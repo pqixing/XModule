@@ -1,8 +1,8 @@
 package com.pqixing.modularization.git
 
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.configs.BuildConfig
-import com.pqixing.modularization.configs.GlobalConfig
+import com.pqixing.modularization.common.BuildConfig
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec

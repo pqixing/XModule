@@ -2,7 +2,7 @@ package com.pqixing.modularization.android
 
 import com.alibaba.fastjson.JSON
 import com.pqixing.modularization.base.BaseExtension
-import com.pqixing.modularization.configs.BuildConfig
+import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.dependent.Dependencies
 import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.utils.FileUtils

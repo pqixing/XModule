@@ -1,4 +1,4 @@
-package com.pqixing.modularization.configs
+package com.pqixing.modularization.common
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseExtension

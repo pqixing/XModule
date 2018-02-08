@@ -51,7 +51,7 @@ public class AutoInclude {
             end |= line.startsWith(AutoConfig.TAG_AUTO_ADD)
             if (end) return
 
-            def map = line.split("=")
+            def map = line.replaceAll("//.*","").split("=")
             if (map.length < 2) return
             String key = map[0].trim()
             String value = map[1].trim()
@@ -105,14 +105,14 @@ public class AutoInclude {
             String introduce = p.@introduce
 
             projectUrls.put(name, "$url$AutoConfig.SEPERATOR$introduce")
-            icTxt.append("include = $name    --introduce = $introduce \\n")
+            icTxt.append("include = $name    //--introduce = $introduce \\n")
 
             List<String> subLists = []
             p.submodule.each { Node s ->
                 String s_name = s.@name
                 String s_introduce = s.@introduce
                 subLists += "${s_name}$AutoConfig.SEPERATOR${s_introduce}"
-                icTxt.append("include = $s_name    --introduce = $s_introduce \\n")
+                icTxt.append("include = $s_name    //--introduce = $s_introduce \\n")
             }
             if (!subLists.isEmpty()) submodules.put(name, subLists)
         }

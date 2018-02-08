@@ -61,6 +61,11 @@ class Keys {
      * 模块配置
      */
     public static final String CONFIG_MODULE = "moduleConfig"
+
+    /**
+     * 模块配置
+     */
+    public static final String CONFIG_GIT = "gitConfig"
     /**
      * 强制更新配置
      */

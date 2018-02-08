@@ -1,10 +1,10 @@
-package com.pqixing.modularization.plugins
+package com.pqixing.modularization.android
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.configs.BuildConfig
+import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.dependent.DependentPrintTask
 import com.pqixing.modularization.git.DocSyncTask
 import com.pqixing.modularization.maven.MavenType

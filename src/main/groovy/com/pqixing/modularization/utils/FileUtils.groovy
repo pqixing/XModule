@@ -1,7 +1,7 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.configs.BuildConfig
+import com.pqixing.modularization.common.BuildConfig
 
 /**
  * Created by pqixing on 17-11-30.

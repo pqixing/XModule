@@ -2,7 +2,7 @@ package com.pqixing.modularization.dependent
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.configs.BuildConfig
+import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.utils.TextUtils
 /**
  * Created by pqixing on 17-12-18.

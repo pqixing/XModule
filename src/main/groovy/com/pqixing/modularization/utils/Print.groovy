@@ -1,6 +1,6 @@
 package com.pqixing.modularization.utils
 
-import com.pqixing.modularization.configs.BuildConfig
+import com.pqixing.modularization.common.BuildConfig
 
 class Print {
 

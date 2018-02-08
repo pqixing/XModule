@@ -4,8 +4,8 @@ import auto.Android
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseExtension
-import com.pqixing.modularization.configs.BuildConfig
-import com.pqixing.modularization.configs.GlobalConfig
+import com.pqixing.modularization.common.BuildConfig
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.FileUtils
 import org.gradle.api.Project
 

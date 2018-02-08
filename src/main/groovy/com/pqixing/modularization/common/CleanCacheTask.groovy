@@ -1,7 +1,6 @@
-package com.pqixing.modularization.tasks
+package com.pqixing.modularization.common
 
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.configs.BuildConfig
 
 /**
  * Created by pqixing on 17-12-22.

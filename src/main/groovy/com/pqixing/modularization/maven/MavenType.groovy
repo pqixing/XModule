@@ -4,7 +4,7 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseContainer
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.configs.GlobalConfig
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
 import org.gradle.api.Project
 /**

@@ -1,11 +1,10 @@
 package com.pqixing.modularization.base
 
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.configs.BuildConfig
-import com.pqixing.modularization.configs.GlobalConfig
+import com.pqixing.modularization.common.BuildConfig
+import com.pqixing.modularization.common.CleanCacheTask
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.git.GitConfig
-import com.pqixing.modularization.git.GitPullTask
-import com.pqixing.modularization.tasks.CleanCacheTask
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.wrapper.ProjectWrapper
 import org.gradle.api.Plugin
@@ -32,7 +31,6 @@ abstract class BasePlugin implements Plugin<Project> {
         new GitConfig(project)//生成git相关信息
         new BuildConfig(project)//生成一个Build配置信息
 
-        BaseTask.task(project, GitPullTask.class)
         BaseTask.task(project, CleanCacheTask.class)
     }
 

@@ -1,4 +1,4 @@
-package com.pqixing.modularization.plugins
+package com.pqixing.modularization.android
 
 import com.pqixing.modularization.Keys;
 

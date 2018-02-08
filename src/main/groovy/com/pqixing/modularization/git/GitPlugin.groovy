@@ -1,12 +1,11 @@
-package com.pqixing.modularization.plugins
+package com.pqixing.modularization.git
 
 import auto.Moulds
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.configs.BuildConfig
-import com.pqixing.modularization.configs.GlobalConfig
-import com.pqixing.modularization.git.GitConfig
-import com.pqixing.modularization.git.GitProject
+import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.common.BuildConfig
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.GitUtils
 import org.gradle.api.Project
@@ -34,6 +33,9 @@ class GitPlugin extends BasePlugin {
         if (writeMouldGradle()) {
             throw new RuntimeException("init setting file, please sync again -- 初始化设置，请重新同步")
         }
+        project.extensions.add(Keys.CONFIG_GIT, wrapper.getExtends(GitConfig))
+        BaseTask.task(project, GitPullTask.class)
+
         readGitProject(project.gradle)
         applyDefaultGradle()
         applyLocalGradle()
@@ -59,12 +61,11 @@ class GitPlugin extends BasePlugin {
      * @param gradle
      */
     void readGitProject(Gradle gradle) {
-        def gitConfig = wrapper.getExtends(GitConfig)
-        gitConfig.email = gradle.gitEmail
-        gitConfig.baseGitUrl = gradle.ext.baseGitUrl
-        gitConfig.userName = gradle.ext.gitUserName
-        gitConfig.password = gradle.ext.gitPassword
-        gitConfig.localProject = gradle.ext.localProject
+        GitConfig.email = gradle.gitEmail
+        GitConfig.baseGitUrl = gradle.ext.baseGitUrl
+        GitConfig.userName = gradle.ext.gitUserName
+        GitConfig.password = gradle.ext.gitPassword
+        GitConfig.localProject = gradle.ext.localProject
 
         HashMap<String, List<String>> submodules = gradle.ext.submodules
         gradle.projectUrls.each { map ->
@@ -72,7 +73,7 @@ class GitPlugin extends BasePlugin {
             project.name = map.key
             project.gitUrl = map.value.split(Keys.SEPERATOR)[0]
             project.introduce = map.value.replace("$project.gitUrl$Keys.SEPERATOR", "")
-            gitConfig.allGitProjects += project
+            GitConfig.allGitProjects += project
             def childs = submodules[map.key]
             if (childs != null) project.submodules += childs
         }

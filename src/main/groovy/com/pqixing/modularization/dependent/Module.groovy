@@ -2,7 +2,7 @@ package com.pqixing.modularization.dependent
 
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.configs.GlobalConfig
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
 /**
  * Created by pqixing on 17-12-25.
