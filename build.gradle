@@ -53,8 +53,8 @@ ext.localFile = file("local.properties")
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url:  "http://192.168.3.7:9527/nexus/content/repositories/androidsnap/") {
-//            repository(url: uri("/home/pqixing/.repo")) {
+//            repository(url:  "http://192.168.3.7:9527/nexus/content/repositories/androidsnap/") {
+            repository(url: uri("/home/pqixing/.repo")) {
                 authentication(userName: mavenUserName, password: mavenUserPsw)
             }
             pom.groupId = groupId // 组名

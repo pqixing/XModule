@@ -34,11 +34,14 @@ class GitPlugin extends BasePlugin {
             throw new RuntimeException("init setting file, please sync again -- 初始化设置，请重新同步")
         }
         project.extensions.add(Keys.CONFIG_GIT, wrapper.getExtends(GitConfig))
-        BaseTask.task(project, GitPullTask.class)
+        BaseTask.task(project, PullTask.class)
+        BaseTask.task(project, CheckOutTask.class)
+        BaseTask.task(project, CloneAllTask.class)
 
         readGitProject(project.gradle)
         applyDefaultGradle()
         applyLocalGradle()
+
     }
     /**
      * 如果文档库中有default.gradle文件，则应用
@@ -61,6 +64,7 @@ class GitPlugin extends BasePlugin {
      * @param gradle
      */
     void readGitProject(Gradle gradle) {
+        GitConfig.allGitProjects.clear()
         GitConfig.email = gradle.gitEmail
         GitConfig.baseGitUrl = gradle.ext.baseGitUrl
         GitConfig.userName = gradle.ext.gitUserName
@@ -73,9 +77,9 @@ class GitPlugin extends BasePlugin {
             project.name = map.key
             project.gitUrl = map.value.split(Keys.SEPERATOR)[0]
             project.introduce = map.value.replace("$project.gitUrl$Keys.SEPERATOR", "")
-            GitConfig.allGitProjects += project
+            GitConfig.allGitProjects.add(project)
             def childs = submodules[map.key]
-            if (childs != null) project.submodules += childs
+            if (childs != null) project.submodules.add(childs)
         }
     }
     /**
@@ -94,7 +98,7 @@ class GitPlugin extends BasePlugin {
         File mouldFile = new File(BuildConfig.rootOutDir, SETTING_FILE)
         //如果模板已经存在，并且版本号不小于当前，则不需要重写
         if (mouldFile.exists() && mouldFile.readLines()[0].trim() >= mouldVersion) return false
-        Moulds moulds =new Moulds()
+        Moulds moulds = new Moulds()
         moulds.params += ["defaultXmlGitUrl": GlobalConfig.docGitUrl]
         moulds.params += ["AutoInclude": moulds.autoInclude]
         FileUtils.write(mouldFile, "$mouldVersion\n$moulds.settingGradle")

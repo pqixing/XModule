@@ -29,4 +29,14 @@ class GitProject extends BaseExtension {
     GitProject() {
         super(BasePlugin.rootProject)
     }
+
+    @Override
+    public String toString() {
+        return "GitProject{" +
+                "name='" + name + '\'' +
+                ", introduce='" + introduce + '\'' +
+                ", gitUrl='" + gitUrl + '\'' +
+                ", submodules=" + submodules +
+                '}';
+    }
 }

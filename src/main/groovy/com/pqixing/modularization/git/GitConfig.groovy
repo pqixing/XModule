@@ -2,6 +2,7 @@ package com.pqixing.modularization.git
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.utils.GitUtils
 import org.gradle.api.Project
 
 /**
@@ -29,24 +30,28 @@ class GitConfig extends BaseExtension {
     /**
      * 全部的git工程
      */
-   static List<GitProject> allGitProjects = []
-   static Map<String, String> localProject
+    static List<GitProject> allGitProjects = []
+    static Map<String, String> localProject
 
     /**
      * 默认git操作目标
      * include，all
      */
     String target = "include"
+    /**
+     * 分支名称
+     */
+    String checkout = "master"
 
     GitConfig(Project project) {
         super(project)
-        branchName = "git rev-parse --abbrev-ref HEAD".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.trim()?:""
-        revisionNum = "git rev-parse HEAD".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.trim()?:""
-        def lines = "git branch -vv".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.readLines()
+        branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", project.projectDir)?.trim() ?: ""
+        revisionNum = GitUtils.run("git rev-parse HEAD", project.projectDir)?.trim() ?: ""
+        def lines = GitUtils.run("git checkout -vv", project.projectDir)?.readLines()
         if (lines != null) for (String l : lines) {
             if (l.startsWith("*")) lastLog = l.trim()
         }
-        if(lastLog == null) lastLog = ""
+        if (lastLog == null) lastLog = ""
     }
 
     List<String> log(int num = 5) {
