@@ -40,7 +40,8 @@ class PreWriteConfig extends BaseExtension {
         def confStr = new StringBuilder()
         configs.each { confStr.append("public static final String $it.key = \"$it.value\"; \n") }
 
-        def writes = new auto.Prewrite(buildConfig.properties)
+        def writes = new auto.Prewrite()
+        writes.params += buildConfig.properties
         String className = TextUtils.firstUp("${buildConfig.projectName}Config")
         writes.params += ["preConfigs": confStr.toString(), "className": className]
 

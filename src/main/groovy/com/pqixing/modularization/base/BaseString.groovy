@@ -10,7 +10,7 @@ import java.util.regex.Pattern
 class BaseString {
     static final keyPattern = Pattern.compile("#\\d?\\{(?s).*?}")
 
-    public Map<String, Object> params
+    public Map<String, Object> params = [:]
 
     /**
      * 替换字符串中的变量

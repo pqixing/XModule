@@ -2,15 +2,19 @@
 apply plugin: "groovy"
 apply plugin: "maven"
 ext.autoDir = new File(projectDir, "src/main/java/auto")
-autoDir.mkdirs()
+
 sourceSets {
     main.groovy.srcDirs += autoDir.parent // 指定源码目录
 }
-task("init") { group = "build" }
+task("auto") {
+    group = "build"
+    doFirst {
+        autoDir.mkdirs()
+        writeMoulds(new File(projectDir, "src/main/resources/moulds"))
+    }
+}
 
 file("src/main/resources/moulds/AutoInclude").write(file("src/main/groovy/AutoInclude.groovy").text)
-
-writeMoulds(new File(projectDir, "src/main/resources/moulds"))
 
 void writeMoulds(File dir) {
     if (!dir.isDirectory()) return
@@ -19,8 +23,6 @@ void writeMoulds(File dir) {
     StringBuilder cls = new StringBuilder("package auto \n")
             .append("import com.pqixing.modularization.base.* \n")
             .append("public class ").append(clsName).append(" extends BaseString{\n")
-            .append("public  $clsName ( Map<String, Object> params = [:] ) {\n")
-            .append("   this.params = params \n } \n")
 //            .append("   return instance \n}\n")
 
     dir.listFiles().each { f ->

@@ -45,8 +45,8 @@ class AndroidConfig extends BaseExtension {
         ModuleConfig config = wrapper.getExtends(ModuleConfig.class)
         BuildConfig buildConfig = wrapper.getExtends(BuildConfig.class)
 
-        Android file = new Android(properties)
-
+        Android file = new Android()
+        file.params += properties
         file.params += ["pluginName": config.runType?.asApp ? Keys.NAME_APP : wrapper.pluginName]
         file.params += ["maven_url": config.mavenType.maven_url]
         file.params += ["mavenGroupUrl": GlobalConfig.mavenGroupUrl]

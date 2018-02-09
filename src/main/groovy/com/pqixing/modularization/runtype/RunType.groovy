@@ -72,7 +72,8 @@ class RunType extends BaseContainer {
 
         BuildConfig buildConfig = wrapper.getExtends(BuildConfig.class)
 
-        Runtype file = new Runtype(properties)
+        Runtype file = new Runtype()
+        file.params += properties
         if (!afterLogin) file.params.remove("afterLogin")
         file.params += buildConfig.properties
 
