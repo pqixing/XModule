@@ -8,4 +8,4 @@ gradlew.bat
 gradle.properties
 local.properties
 src/main/resources/moulds/AutoInclude
-/src/main/groovy/auto
+/src/main/java/auto
