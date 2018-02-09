@@ -38,7 +38,7 @@ class DependentPrintTask extends BaseTask {
                 strList.removeLast()
                 strList.removeLast()
             } else {
-                strList.add(it + "\n")
+                strList.add("$it\n")
             }
         }
         FileUtils.write(androidDp, "Inner Dp :\n ${JSON.toJSONString(wrapper.getExtends(Dependencies).modules, true)}\n Android Dp : \n$strList")
