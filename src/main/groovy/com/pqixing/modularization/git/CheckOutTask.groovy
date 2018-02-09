@@ -11,7 +11,7 @@ class CheckOutTask extends GitTask {
 
     @Override
     String onGitProject(String gitName, String gitUrl, File gitDir) {
-        if (!gitDir.exists()) return "CheckOutTask --- $gitName CheckOutTask git do not existes"
+        if (!gitDir.exists()) return "git do not existes"
         String result = ""
         result += GitUtils.run("git stash save -a 'messeag'", gitDir)
         result += GitUtils.run("git branch -D $gitConfig.checkout", gitDir)

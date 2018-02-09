@@ -40,8 +40,8 @@ abstract class GitTask extends BaseTask {
             }
         }
         targetGits.each { p ->
-            Print.ln("GitTask onGitProject $p.name $p.gitUrl")
-            onGitProject(p.name, p.gitUrl, new File(project.rootDir.parentFile, p.name))
+            String result = onGitProject(p.name, p.gitUrl, new File(project.rootDir.parentFile, p.name))
+            Print.ln("GitTask $name -> $p.name $result $p.gitUrl ")
         }
     }
     /**

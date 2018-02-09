@@ -7,7 +7,7 @@ import com.pqixing.modularization.utils.GitUtils
  * 同步文档的任务
  */
 
-class CloneAllTask extends GitTask {
+class CloneGitTask extends GitTask {
 
     @Override
     void start() {
@@ -17,7 +17,7 @@ class CloneAllTask extends GitTask {
 
     @Override
     String onGitProject(String gitName, String gitUrl, File gitDir) {
-        if (gitDir.exists()) return "CloneAllTask $gitName ----already exists"
+        if (gitDir.exists()) return "----already exists"
         return GitUtils.run("git clone ${GitUtils.getFullGitUrl(gitUrl)}", gitDir.parentFile)
     }
 }
