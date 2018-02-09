@@ -7,6 +7,7 @@ import com.pqixing.modularization.base.BaseContainer
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
+import com.pqixing.modularization.utils.TextUtils
 import com.pqixing.modularization.wrapper.ManifestWrapper
 import com.pqixing.modularization.wrapper.XmlWrapper
 import org.gradle.api.Project
@@ -47,7 +48,7 @@ class RunType extends BaseContainer {
             app_theme = "@android:style/Theme.Light.NoTitleBar"
             versionName = new SimpleDateFormat("MM.dd.HH.mm").format(new Date())
             versionCode = versionName.replace(".", "")
-            applicationId = "${wrapper.getExtends(BuildConfig.class).packageName}.$wrapper.artifactId"
+            applicationId = "${wrapper.getExtends(BuildConfig.class).packageName}.${TextUtils.numOrLetter(wrapper.artifactId)}"
             applicationName = "com.pqixing.modularization.VirtualApplication"
         }
     }
