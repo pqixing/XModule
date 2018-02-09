@@ -40,6 +40,7 @@ abstract class GitTask extends BaseTask {
             }
         }
         targetGits.each { p ->
+            if (gitConfig.excludeGit.contains(p.name)) return
             String result = onGitProject(p.name, p.gitUrl, new File(project.rootDir.parentFile, p.name))
             Print.ln("GitTask $name -> $p.name $result $p.gitUrl ")
         }

@@ -43,6 +43,8 @@ class GitConfig extends BaseExtension {
      */
     String checkout = "master"
 
+    Set<String> excludeGit = []
+
     GitConfig(Project project) {
         super(project)
         branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", project.projectDir)?.trim() ?: ""
