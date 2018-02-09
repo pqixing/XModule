@@ -27,22 +27,21 @@ abstract class GitTask extends BaseTask {
 
     @Override
     void runTask() {
-        if (gitConfig.target == "all") {
-            targetGits.addAll(GitConfig.allGitProjects)
-        } else {
-            Set<String> gitDirNames = new HashSet<>()
-            project.rootProject.allprojects.each { p ->
-                String gitName = GitUtils.findGitDir(p.projectDir)?.name
-                if (!CheckUtils.isEmpty(gitName)) gitDirNames.add(gitName)
-            }
-            GitConfig.allGitProjects.each { p ->
-                if (gitDirNames.contains(p.name)) targetGits.add(p)
-            }
-        }
-        targetGits.each { p ->
-            if (gitConfig.excludeGit.contains(p.name)) return
-            String result = onGitProject(p.name, p.gitUrl, new File(project.rootDir.parentFile, p.name))
-            Print.ln("GitTask $name -> $p.name $result $p.gitUrl ")
+        switch (gitConfig.target) {
+            case "all":
+                targetGits.addAll(GitConfig.allGitProjects)
+                break
+            default:
+                Set<String> gitDirNames = new HashSet<>()
+                project.rootProject.allprojects.each { p ->
+                    String gitName = GitUtils.findGitDir(p.projectDir)?.name
+                    if (!CheckUtils.isEmpty(gitName)) gitDirNames.add(gitName)
+                }
+
+                GitConfig.allGitProjects.each { p ->
+                    if (gitDirNames.contains(p.name)) targetGits.add(p)
+                }
+                break
         }
     }
     /**
@@ -55,6 +54,10 @@ abstract class GitTask extends BaseTask {
 
     @Override
     void end() {
-
+        targetGits.each { p ->
+            if (gitConfig.excludeGit.contains(p.name)) return
+            String result = onGitProject(p.name, p.gitUrl, new File(project.rootDir.parentFile, p.name))
+            Print.ln("GitTask $name -> $p.name $result $p.gitUrl ")
+        }
     }
 }
