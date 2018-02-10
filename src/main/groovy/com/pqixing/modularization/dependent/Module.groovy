@@ -14,7 +14,10 @@ class Module extends BaseExtension {
     public static final String scop_compileonly = "compileOnly"
     public static final String SCOP_IMPL = "implementation"
 
-    Boolean onLocalCompile
+    /**
+     * 当前模块是否使用了本地依赖
+     */
+    boolean onLocalCompile
     String moduleName
     String artifactId
     /**

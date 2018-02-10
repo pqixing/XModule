@@ -26,7 +26,6 @@ class Dependencies extends BaseExtension {
     Set<String> masterExclude = new HashSet<>()
     Set<Module> dependentLose = new HashSet<>()
 
-    boolean hasLocalModule = false
     Set<String> localImportModules
 
     File versionFile
@@ -65,6 +64,10 @@ class Dependencies extends BaseExtension {
         Module inner = add(moduleName, closure)
         inner.scope = Module.SCOP_IMPL
         return inner
+    }
+
+    boolean getHasLocalModule() {
+       return modules.find {it.onLocalCompile}!=null
     }
 
     List<String> getModuleNames() {
@@ -143,7 +146,7 @@ class Dependencies extends BaseExtension {
         sb.append("${excludeStr("exclude", module.excludes)}\n}\n")
 
         //如果有本地依赖工程，则移除相同的仓库依赖
-        hasLocalModule = true
+        module.onLocalCompile = true
         allExclude(module: module.moduleName)
         allExclude(module: TextUtils.getBranchArtifactId(module.groupId, module.moduleName))
     }
@@ -166,6 +169,7 @@ class Dependencies extends BaseExtension {
             focusVersion = " \n force = true \n"
             module.version = lastVersion
         }
+        module.onLocalCompile = false
         sb.append("    $module.scope  ('$module.groupId:$module.artifactId:$module.version') \n { $focusVersion")
         sb.append("${excludeStr("exclude", module.excludes)}\n}\n")
 
