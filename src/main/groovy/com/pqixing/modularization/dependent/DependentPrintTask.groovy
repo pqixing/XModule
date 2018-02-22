@@ -46,6 +46,7 @@ class DependentPrintTask extends BaseTask {
 
     @Override
     void end() {
-
+        //输出批量上传脚本以及依赖排序
+        wrapper.getExtends(Dependencies).modules
     }
 }
