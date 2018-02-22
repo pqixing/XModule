@@ -65,7 +65,7 @@ uploadArchives {
         }
     }
 }
-
+uploadArchives.dependsOn "auto"
 Properties loadProperties(File file) {
     def configs = new Properties()
     configs.load(file.newInputStream())

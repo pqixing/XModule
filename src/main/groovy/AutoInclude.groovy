@@ -85,7 +85,8 @@ public class AutoInclude {
             defaultXml = new File(rootDir.parentFile, "$docDir/$AutoConfig.XML_DEFAULT_NAME")
             if (!defaultXml.exists()) {
                 error = "git clone $AutoConfig.XML_DEFAULT_GIT".execute(null, rootDir.parentFile)?.text
-            } else includes += docDir
+            }
+            includes += docDir
         }
         if (!defaultXml?.exists() ?: false) {
             defaultXml = new File(rootDir, AutoConfig.XML_DEFAULT_NAME)
@@ -138,9 +139,10 @@ public class AutoInclude {
         Map<String, String> realInclude = [:]
 
         includes.each { key ->
+            String url = localProject.find {it.key == key}?.value
             //如果本地存在工程目录，直接导入,否则尝试从网络导入
-            if (localProject.containsKey(key)) {
-                realInclude += [key: localProject[key]]
+            if (url!=null&&!url.isEmpty()) {
+                realInclude.put(key, url)
             } else fromGit(realInclude, key)
         }
         saveToFile(realInclude)

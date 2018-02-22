@@ -25,8 +25,8 @@ class Dependencies extends BaseExtension {
     //传递下来的master分支的exclude
     Set<String> masterExclude = new HashSet<>()
     Set<Module> dependentLose = new HashSet<>()
-
-    boolean hasLocalModule = false
+    //本地依赖的模块名称,可传递给主工程使用
+    Set<String> localDependency
     Set<String> localImportModules
 
     File versionFile
@@ -104,7 +104,7 @@ class Dependencies extends BaseExtension {
         versionMaps = FileUtils.readMaps(versionFile)
         localImportModules = new HashSet<>()
         project.rootProject.allprojects.each { localImportModules += it.name }
-
+        localDependency = new HashSet<>()
         if (autoImpl && !GlobalConfig.autoImpl.contains(project.name)) {//如果当前不是需要自动导入的工程之一，则自动导入依赖
             GlobalConfig.autoImpl.each { addImpl(it) }
         }
@@ -143,9 +143,7 @@ class Dependencies extends BaseExtension {
         sb.append("${excludeStr("exclude", module.excludes)}\n}\n")
 
         //如果有本地依赖工程，则移除相同的仓库依赖
-        hasLocalModule = true
-        allExclude(module: module.moduleName)
-        allExclude(module: TextUtils.getBranchArtifactId(module.groupId, module.moduleName))
+        localDependency.add(module.moduleName)
     }
     /**
      * 进行仓库依赖
@@ -215,9 +213,20 @@ class Dependencies extends BaseExtension {
         masterExclude.each { name ->
             allExclude(group: GlobalConfig.groupName, module: name)
         }
+        localDependency.each {name ->
+            allExclude(module: name)
+            allExclude(module: TextUtils.getBranchArtifactId(name, wrapper))
+        }
         allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)},test")
         sb.append("${excludeStr("all*.exclude", allExcludes)}\n } \n")
         saveVersionMap()
         return [FileUtils.write(new File(wrapper.getExtends(BuildConfig).cacheDir, "dependencies.gradle"), sb.toString())];
+    }
+    /**
+     * 是否有本地依赖存在
+     * @return
+     */
+    boolean getHasLocalModule() {
+        return !localDependency?.isEmpty()?:true
     }
 }
