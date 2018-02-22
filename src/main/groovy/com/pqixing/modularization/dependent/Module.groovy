@@ -1,7 +1,6 @@
 package com.pqixing.modularization.dependent
 
 import com.pqixing.modularization.base.BaseExtension
-import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
 /**
@@ -63,10 +62,6 @@ class Module extends BaseExtension {
     }
 
 
-    Module() {
-        super(BasePlugin.rootProject)
-    }
-
     String getArtifactId() {
         if (CheckUtils.isEmpty(artifactId)) return moduleName
         return artifactId
@@ -74,6 +69,6 @@ class Module extends BaseExtension {
 
     @Override
     LinkedList<String> getOutFiles() {
-        return null
+        return []
     }
 }

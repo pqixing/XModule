@@ -2,6 +2,7 @@ package com.pqixing.modularization.wrapper
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.git.GitConfig
+import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.utils.TextUtils
 import org.gradle.api.Project
@@ -37,10 +38,11 @@ class ProjectWrapper {
     }
 
     public void apply(Map<String, ?> map) {
+        if (CheckUtils.isEmpty(map)) return
         try {
             project.apply(map)
         } catch (Exception e) {
-            Print.lne("ProjectWrapper apply", e)
+            Print.lne("ProjectWrapper apply $map\n", e)
         }
     }
 

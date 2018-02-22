@@ -9,6 +9,7 @@ import com.pqixing.modularization.dependent.DependentPrintTask
 import com.pqixing.modularization.docs.DocSyncTask
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.runtype.RunType
+import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
@@ -53,7 +54,9 @@ abstract class AndroidPlugin extends BasePlugin {
      */
     void loadRemoteGradle() {
         String remotePath = wrapper.get(Keys.REMOTE_GRADLE)
-        if (remotePath?.startsWith(Keys.PREFIX_NET)) {
+        if(CheckUtils.isEmpty(remotePath)) return
+
+        if (remotePath.startsWith(Keys.PREFIX_NET)) {
             File remoteFile = new File(BuildConfig.rootOutDir, Keys.REMOTE_GRADLE)
             remotePath = FileUtils.write(remoteFile, Net.get(remotePath, true))
         }

@@ -141,6 +141,7 @@ class Dependencies extends BaseExtension {
         if (!localImportModules.contains(module.moduleName)) return false
         sb.append("    $module.scope ( project(':$model.moduleName')) \n {")
         sb.append("${excludeStr("exclude", module.excludes)}\n}\n")
+        module.onLocalCompile = true
 
         //如果有本地依赖工程，则移除相同的仓库依赖
         localDependency.add(module.moduleName)

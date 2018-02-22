@@ -1,6 +1,7 @@
 package com.pqixing.modularization.git
 
 import auto.Moulds
+import auto.Plugin
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.BaseTask
@@ -8,8 +9,10 @@ import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.GitUtils
+import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
+
 /**
  * Created by pqixing on 17-12-20.
  */
@@ -41,7 +44,7 @@ class GitPlugin extends BasePlugin {
         readGitProject(project.gradle)
         applyDefaultGradle()
         applyLocalGradle()
-
+        Print.lnf("Plugin version : $Plugin.VERSION URL : $Plugin.URL")
     }
     /**
      * 如果文档库中有default.gradle文件，则应用

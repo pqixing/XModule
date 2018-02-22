@@ -11,6 +11,7 @@ class CheckUtils {
     static boolean isEmpty(Object obj) {
         if (null == obj || "" == obj.toString() || "null" == obj.toString()) return true
         if (obj instanceof Collection) return obj.isEmpty()
+        if (obj instanceof Map) return obj.isEmpty()
         return false
     }
 

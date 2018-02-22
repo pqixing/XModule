@@ -11,6 +11,14 @@ task("auto") {
     doFirst {
         autoDir.mkdirs()
         writeMoulds(new File(projectDir, "src/main/resources/moulds"))
+        String clsName = "Plugin"
+        String url = project.uploadArchives.repositories.mavenDeployer.repository.url
+        StringBuilder cls = new StringBuilder("package auto \n")
+                .append("public class ").append(clsName).append(" {\n")
+                .append("static String URL = '$url' \n")
+                .append("static String VERSION = '${getLastVersion(url)}' \n")
+                .append("\n }")
+        new File(autoDir, "${clsName}.groovy").write(cls.toString())
     }
 }
 
@@ -56,16 +64,18 @@ uploadArchives {
     repositories {
         mavenDeployer {
 //            repository(url:  "http://192.168.3.7:9527/nexus/content/repositories/androidsnap/") {
-            repository(url: uri("/Users/pqixing/.repo")) {
+            repository(url: uri("/home/pqixing/.repo")) {
                 authentication(userName: mavenUserName, password: mavenUserPsw)
             }
             pom.groupId = groupId // 组名
             pom.artifactId = artifactId // 插件名
-            pom.version = getLastVersion(repository.url.hashCode().toString()) // 版本号
+            pom.version = getLastVersion(repository.url) // 版本号
         }
     }
 }
+uploadArchives.dependsOn "clean"
 uploadArchives.dependsOn "auto"
+
 Properties loadProperties(File file) {
     def configs = new Properties()
     configs.load(file.newInputStream())
@@ -78,7 +88,7 @@ String getLastVersion(def url) {
 
 uploadArchives.doLast {
     //自动更新版本号
-    String key = repositories.mavenDeployer.repository.url.hashCode().toString()
+    String key = repositories.mavenDeployer.repository.url
     String oldVersion = getLastVersion(key)
     int lastSplit = oldVersion.lastIndexOf(".") + 1
     String newVersion = oldVersion.substring(0, lastSplit) + (oldVersion.substring(lastSplit).toInteger() + 1).toString()
