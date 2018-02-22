@@ -224,7 +224,7 @@ class Dependencies extends BaseExtension {
         sb.append("${excludeStr("all*.exclude", allExcludes)}\n } \n")
         saveVersionMap()
 
-        if (!CheckUtils.isEmpty(dependentLose)) Print.lnf("dependentLose : ${JSON.toJSONString(dependentLose, true)}")
+        if (!CheckUtils.isEmpty(dependentLose)) Print.lnf("$project.name dependentLose : ${JSON.toJSONString(dependentLose, true)}")
         return [FileUtils.write(new File(wrapper.getExtends(BuildConfig).cacheDir, "dependencies.gradle"), sb.toString())];
     }
     /**
