@@ -8,7 +8,7 @@ import org.gradle.api.Project
 abstract class BaseContainer extends BaseExtension {
     String name
     BaseContainer(String name) {
-        super(null)
+        super()
         this.name = name
     }
 

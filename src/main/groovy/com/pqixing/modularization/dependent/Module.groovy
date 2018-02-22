@@ -23,7 +23,7 @@ class Module extends BaseExtension {
      * 依赖模式
      * runtimeOnly , compileOnly , implementation , compile
      */
-    String scope = scop_runtime
+    String scope = SCOP_RUNTIME
 
     String groupId = GlobalConfig.groupName
     String version

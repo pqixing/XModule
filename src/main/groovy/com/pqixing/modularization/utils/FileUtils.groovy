@@ -14,7 +14,7 @@ class FileUtils {
      * @param str
      * @return
      */
-    static File appendIfNotExists(String str){
+    static File appendIfNotExists(String str) {
         return null
     }
 
@@ -85,5 +85,13 @@ class FileUtils {
         out.flush()
         out.close()
         return file.path
+    }
+    /**
+     * 字符串转为输入流
+     * @param coverStr
+     * @return
+     */
+    static InputStream coverStream(String coverStr) {
+        return new File(write(new File(BuildConfig.rootOutDir, "cover/${TextUtils.onlyName}"), coverStr)).newInputStream()
     }
 }

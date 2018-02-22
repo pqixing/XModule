@@ -1,5 +1,6 @@
 package com.pqixing.modularization.dependent
 
+import com.alibaba.fastjson.JSON
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.common.BuildConfig
@@ -8,6 +9,7 @@ import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
+import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.utils.TextUtils
 import com.pqixing.modularization.wrapper.MetadataWrapper
 import com.pqixing.modularization.wrapper.PomWrapper
@@ -111,7 +113,7 @@ class Dependencies extends BaseExtension {
     }
 
     void saveVersionMap() {
-        if(versionFile.exists())
+        if (versionFile.exists())
             versionMaps?.store(versionFile.newOutputStream(), Keys.CHARSET)
         versionMaps?.clear()
         versionMaps = null
@@ -139,7 +141,7 @@ class Dependencies extends BaseExtension {
     boolean onLocalCompile(StringBuilder sb, Module module) {
         //如果该依赖没有本地导入，不进行本地依赖
         if (!localImportModules.contains(module.moduleName)) return false
-        sb.append("    $module.scope ( project(':$model.moduleName')) \n {")
+        sb.append("    $module.scope ( project(':$module.moduleName')) \n {")
         sb.append("${excludeStr("exclude", module.excludes)}\n}\n")
         module.onLocalCompile = true
 
@@ -159,7 +161,7 @@ class Dependencies extends BaseExtension {
 
         if (!CheckUtils.isVersionCode(lastVersion)) return false//如果分支和master都没有依赖，则仓库依赖失败
 
-        //如果配置中没有配置指定版本号，用最新版本好，否则，强制使用配置中的版本号
+        //如果配置中没有配置指定版本号，用最新版本好，否则，强制使用配置中的版本号mvpbase
         String focusVersion = ""
         if (!CheckUtils.isVersionCode(module.version)) {//
             focusVersion = " \n force = true \n"
@@ -192,20 +194,20 @@ class Dependencies extends BaseExtension {
             switch (GlobalConfig.dependentModel) {
             //只依赖本地工程
                 case "localOnly":
-                    if (onLocalCompile(model)) return
+                    if (onLocalCompile(sb, model)) return
                     break
             //优先依赖本地工程
                 case "localFirst":
-                    if (onLocalCompile(model) || onMavenCompile()) return
+                    if (onLocalCompile(sb, model) || onMavenCompile(sb, model)) return
                     break
             //优先仓库版本
                 case "mavenFirst":
-                    if (onMavenCompile() || onLocalCompile(model)) return
+                    if (onMavenCompile(sb, model) || onLocalCompile(sb, model)) return
                     break
             //只依赖仓库版本
                 case "mavenOnly":
                 default:
-                    if (onMavenCompile()) return
+                    if (onMavenCompile(sb, model)) return
                     break
             }
             throwCompileLose(model)
@@ -214,13 +216,15 @@ class Dependencies extends BaseExtension {
         masterExclude.each { name ->
             allExclude(group: GlobalConfig.groupName, module: name)
         }
-        localDependency.each {name ->
+        localDependency.each { name ->
             allExclude(module: name)
             allExclude(module: TextUtils.getBranchArtifactId(name, wrapper))
         }
         allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)},test")
         sb.append("${excludeStr("all*.exclude", allExcludes)}\n } \n")
         saveVersionMap()
+
+        if (!CheckUtils.isEmpty(dependentLose)) Print.lnf("dependentLose : ${JSON.toJSONString(dependentLose, true)}")
         return [FileUtils.write(new File(wrapper.getExtends(BuildConfig).cacheDir, "dependencies.gradle"), sb.toString())];
     }
     /**
@@ -228,6 +232,6 @@ class Dependencies extends BaseExtension {
      * @return
      */
     boolean getHasLocalModule() {
-        return !localDependency?.isEmpty()?:true
+        return !localDependency?.isEmpty() ?: true
     }
 }

@@ -23,7 +23,7 @@ class PomWrapper extends XmlWrapper {
     }
 
     public static PomWrapper create(String envUrl, String group, String moduleName) {
-        return new PomWrapper(getPomUrl(envUrl, group, moduleName))
+        return create(getPomUrl(envUrl, group, moduleName))
     }
 
     public static PomWrapper create(String url) {

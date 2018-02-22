@@ -5,6 +5,7 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
+import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.wrapper.ProjectWrapper
 
 /**
@@ -62,15 +63,11 @@ class GlobalConfig {
      */
     static String docDirName = "docDir"
 
-    private static boolean init = false
-
     /**
      * 初始化配置
      * @return
      */
     public static void init() {
-        if (init) return
-        init = true
         ProjectWrapper wrapper = ProjectWrapper.with(BasePlugin.rootProject)
         String remote = wrapper.get(Keys.REMOTE_CONFIG)
         if (!CheckUtils.isEmpty(remote)) {//有远程配置，优先使用
@@ -80,12 +77,27 @@ class GlobalConfig {
         File configFile = new File(wrapper.project.rootDir, Keys.GLOBAL_CONFIG_NAME)
         if (configFile.exists())
             updateConfig(configFile.text)
+
+        Print.ln("GlobalConfig ${GlobalConfig.staticProperties}")
+    }
+
+    public static HashMap<String, Object> getStaticProperties() {
+        def p = new HashMap<String, Object>()
+        GlobalConfig.class.getDeclaredFields().each {
+            if (it == null) return
+            try {
+                it.setAccessible(true)
+                p.put(it.name, it.get(null))
+            } catch (Exception e) {
+            }
+        }
+        return p
     }
 
     private static void updateConfig(String configStr) {
         Properties config = new Properties()
-        config.load(new DataInputStream(configStr.getBytes()))
-        GlobalConfig.properties.each { p ->
+        config.load(FileUtils.coverStream(configStr))
+        GlobalConfig.staticProperties.each { p ->
             updateKey(p.key, config)
         }
     }

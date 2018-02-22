@@ -18,7 +18,7 @@ class MetadataWrapper extends XmlWrapper {
     }
 
     public static MetadataWrapper create(String envUrl, String group, String moduleName) {
-        return new MetadataWrapper(getMetaUrl(envUrl, group, moduleName))
+        return create(getMetaUrl(envUrl, group, moduleName))
     }
 
     public static MetadataWrapper create(String url) {

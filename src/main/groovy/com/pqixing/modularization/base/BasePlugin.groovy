@@ -3,13 +3,11 @@ package com.pqixing.modularization.base
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.common.CleanCacheTask
-import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.wrapper.ProjectWrapper
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-20.
  */
@@ -21,17 +19,20 @@ abstract class BasePlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        this.rootProject = project.rootProject
-        this.project = project
-        project.ext."$Keys.NAME_PUGLIN" = pluginName
-        wrapper = ProjectWrapper.with(project)
-        GlobalConfig.init()
+        initProject(project)
         addIgnoreFile()
 
         new GitConfig(project)//生成git相关信息
         new BuildConfig(project)//生成一个Build配置信息
 
         BaseTask.task(project, CleanCacheTask.class)
+    }
+
+    protected void initProject(Project project) {
+        this.rootProject = project.rootProject
+        this.project = project
+        project.ext."$Keys.NAME_PUGLIN" = pluginName
+        wrapper = ProjectWrapper.with(project)
     }
 
     void addIgnoreFile() {

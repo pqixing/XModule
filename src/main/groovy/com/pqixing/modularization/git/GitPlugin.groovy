@@ -31,6 +31,8 @@ class GitPlugin extends BasePlugin {
 
     @Override
     void apply(Project project) {
+        initProject(project)
+        GlobalConfig.init()
         super.apply(project)
         addMouldGradle()
         if (writeMouldGradle()) {

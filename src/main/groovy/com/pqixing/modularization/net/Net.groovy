@@ -10,7 +10,7 @@ import com.pqixing.modularization.utils.Print
 class Net {
 
     static String get(String url) {
-        return get(url,false)
+        return get(url, false)
     }
     /**
      * 封装网络请求
@@ -18,17 +18,19 @@ class Net {
      * @param useCache
      * @return
      */
-    static String get(String url,boolean useCache) {
+    static String get(String url, boolean useCache) {
         String netResult = ""
-        if(GlobalConfig.offlineMode) {
+        if (GlobalConfig.offlineMode) {
             netResult = FileUtils.readCache(url)
             if (CheckUtils.isEmpty(netResult)) throw new RuntimeException("offlineMode invail there is no cache for url :$url")
             return netResult
         }
-        if(useCache) netResult = FileUtils.readCache(url)
-        if(!CheckUtils.isEmpty(netResult)) return netResult
+        if (useCache) netResult = FileUtils.readCache(url)
+        if (!CheckUtils.isEmpty(netResult)) return netResult
         netResult = requestNet(url)
-        FileUtils.saveCache(url,netResult)
+
+        if (!CheckUtils.isEmpty(netResult)) FileUtils.saveCache(url, netResult)
+
         return netResult
     }
     /**
@@ -36,19 +38,19 @@ class Net {
      * @param url
      * @return
      */
-    private static String requestNet(String url){
+    private static String requestNet(String url) {
         try {
             def conn = new URL(url).openConnection()
             conn.connectTimeout = BuildConfig.timOut//4秒超时
-           return conn.inputStream.text
+            return conn.inputStream.text
         } catch (Exception e) {
             Print.ln("requestNet -> $url e : ${e.toString()}")
-          return   ""
+            return ""
         }
     }
 
     /**
-     *获取指定版本的pom信息
+     * 获取指定版本的pom信息
      * @param envUrl
      * @param group
      * @param moduleName
@@ -61,6 +63,6 @@ class Net {
         if (!maven.maven_url.endsWith("/")) pomUrl.append("/")
         pomUrl.append(buildConfig.groupName.replace(".", "/"))
                 .append("/$moduleName/$version/$moduleName-${version}.pom")
-        return get(pomUrl.toString(),true)
+        return get(pomUrl.toString(), true)
     }
 }
