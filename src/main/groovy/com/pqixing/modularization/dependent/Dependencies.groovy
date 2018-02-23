@@ -91,7 +91,7 @@ class Dependencies extends BaseExtension {
         //一分钟秒内,不更新相同的组件版本,避免不停的爬取相同的接口
         if (afterLastUpdate > updateGap) {
             String release = MetadataWrapper.create(mavenType.maven_url, group, artifactId).release
-            if (!CheckUtils.isVersionCode(release)) {
+            if (CheckUtils.isVersionCode(release)) {
                 version = release
                 versionMaps.put(timeStamp, System.currentTimeMillis().toString())
                 versionMaps.put(artifactId, release)
@@ -126,10 +126,10 @@ class Dependencies extends BaseExtension {
     String excludeStr(String prefix, List<Map<String, String>> excludes) {
         StringBuilder sb = new StringBuilder()
         excludes.each { item ->
-            sb.append("         $prefix (  ")
+            sb.append("    $prefix ( ")
             item.each { map -> sb.append("$map.key : '$map.value',") }
             sb.deleteCharAt(sb.length() - 1)
-            sb.append("  ) \n")
+            sb.append(" ) \n")
         }
         return sb.toString()
     }
@@ -141,8 +141,8 @@ class Dependencies extends BaseExtension {
     boolean onLocalCompile(StringBuilder sb, Module module) {
         //如果该依赖没有本地导入，不进行本地依赖
         if (!localImportModules.contains(module.moduleName)) return false
-        sb.append("    $module.scope ( project(':$module.moduleName')) \n {")
-        sb.append("${excludeStr("exclude", module.excludes)}\n}\n")
+        sb.append(" $module.scope ( project(':$module.moduleName')) {")
+        sb.append("${excludeStr("exclude", module.excludes)} }\n")
         module.onLocalCompile = true
 
         //如果有本地依赖工程，则移除相同的仓库依赖
@@ -163,17 +163,18 @@ class Dependencies extends BaseExtension {
 
         //如果配置中没有配置指定版本号，用最新版本好，否则，强制使用配置中的版本号mvpbase
         String focusVersion = ""
-        if (!CheckUtils.isVersionCode(module.version)) {//
+        if (CheckUtils.isVersionCode(module.version)) {//
             focusVersion = " \n force = true \n"
-            module.version = lastVersion
-        }
-        sb.append("    $module.scope  ('$module.groupId:$module.artifactId:$module.version') \n { $focusVersion")
-        sb.append("${excludeStr("exclude", module.excludes)}\n}\n")
+        } else module.version = lastVersion
+        sb.append(" $module.scope ('$module.groupId:$module.artifactId:$module.version') { $focusVersion")
+        sb.append("${excludeStr("exclude", module.excludes)} }\n")
 
         //如果依赖的是分支，获取该依赖中传递的master仓库依赖去除
         if (module.artifactId.contains(Keys.BRANCH_TAG)) {
-            masterExclude + PomWrapper.create(mavenType.maven_url, module.groupId, module.artifactId).masterExclude
+            masterExclude += PomWrapper.create(mavenType.maven_url, module.groupId, module.artifactId, module.version).masterExclude
+            masterExclude += module.moduleName
         }
+        return true
     }
     /**
      * 抛出依赖缺失异常
@@ -191,26 +192,27 @@ class Dependencies extends BaseExtension {
         StringBuilder sb = new StringBuilder("dependencies { \n")
         modules.each { model ->
             if (model.moduleName == project.name) return
+            boolean compile
             switch (GlobalConfig.dependentModel) {
             //只依赖本地工程
                 case "localOnly":
-                    if (onLocalCompile(sb, model)) return
+                    compile = onLocalCompile(sb, model)
                     break
             //优先依赖本地工程
                 case "localFirst":
-                    if (onLocalCompile(sb, model) || onMavenCompile(sb, model)) return
+                    compile = onLocalCompile(sb, model) || onMavenCompile(sb, model)
                     break
             //优先仓库版本
                 case "mavenFirst":
-                    if (onMavenCompile(sb, model) || onLocalCompile(sb, model)) return
+                    compile = onMavenCompile(sb, model) || onLocalCompile(sb, model)
                     break
             //只依赖仓库版本
                 case "mavenOnly":
                 default:
-                    if (onMavenCompile(sb, model)) return
+                    compile = onMavenCompile(sb, model)
                     break
             }
-            throwCompileLose(model)
+            if (!compile) throwCompileLose(model)
         }
         sb.append("} \nconfigurations { \n")
         masterExclude.each { name ->
@@ -220,11 +222,11 @@ class Dependencies extends BaseExtension {
             allExclude(module: name)
             allExclude(module: TextUtils.getBranchArtifactId(name, wrapper))
         }
-        allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)},test")
-        sb.append("${excludeStr("all*.exclude", allExcludes)}\n } \n")
+        allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)},justTag")
+        sb.append("${excludeStr("all*.exclude", allExcludes)}} \n")
         saveVersionMap()
 
-        if (!CheckUtils.isEmpty(dependentLose)) Print.lnf("$project.name dependentLose : ${JSON.toJSONString(dependentLose, true)}")
+        if (!CheckUtils.isEmpty(dependentLose)) Print.lnf("$project.name dependentLose : ${JSON.toJSONString(dependentLose)}")
         return [FileUtils.write(new File(wrapper.getExtends(BuildConfig).cacheDir, "dependencies.gradle"), sb.toString())];
     }
     /**

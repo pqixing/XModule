@@ -22,8 +22,8 @@ class PomWrapper extends XmlWrapper {
         return "$envUrl/${group.replace(".", "/")}/$moduleName/$version/${moduleName}-${version}.xml"
     }
 
-    public static PomWrapper create(String envUrl, String group, String moduleName) {
-        return create(getPomUrl(envUrl, group, moduleName))
+    public static PomWrapper create(String envUrl, String group, String moduleName,String version) {
+        return create(getPomUrl(envUrl, group, moduleName,version))
     }
 
     public static PomWrapper create(String url) {

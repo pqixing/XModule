@@ -44,7 +44,7 @@ class Net {
             conn.connectTimeout = BuildConfig.timOut//4秒超时
             return conn.inputStream.text
         } catch (Exception e) {
-            Print.ln("requestNet -> $url e : ${e.toString()}")
+            Print.ln("requestNet -> e: ${e.toString()}")
             return ""
         }
     }
