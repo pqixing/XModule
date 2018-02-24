@@ -113,7 +113,7 @@ public class AutoInclude {
                 String s_name = s.@name
                 String s_introduce = s.@introduce
                 subLists += "${s_name}$AutoConfig.SEPERATOR${s_introduce}"
-                icTxt.append("     |- - include = $s_name    //--introduce = $s_introduce \\n")
+                icTxt.append("     |- - $s_name    //--introduce = $s_introduce \\n")
             }
             if (!subLists.isEmpty()) submodules.put(name, subLists)
         }
