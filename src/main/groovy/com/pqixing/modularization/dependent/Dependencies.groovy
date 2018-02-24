@@ -113,8 +113,9 @@ class Dependencies extends BaseExtension {
     }
 
     void saveVersionMap() {
-        if (versionFile.exists())
-            versionMaps?.store(versionFile.newOutputStream(), Keys.CHARSET)
+        versionFile.parentFile.mkdirs()
+        versionFile.createNewFile()
+        versionMaps?.store(versionFile.newOutputStream(), Keys.CHARSET)
         versionMaps?.clear()
         versionMaps = null
     }
@@ -181,7 +182,7 @@ class Dependencies extends BaseExtension {
      * @param module
      */
     void throwCompileLose(Module module) {
-        if (GlobalConfig.abortDependenLose) throw new RuntimeException("Lose dependent $module.artifactId , please chack config!!!!!!!")
+        if (GlobalConfig.abortDependentLose) throw new RuntimeException("Lose dependent $module.artifactId , please chack config!!!!!!!")
         dependentLose += module
     }
 
@@ -219,7 +220,7 @@ class Dependencies extends BaseExtension {
             allExclude(group: GlobalConfig.groupName, module: name)
         }
         localDependency.each { name ->
-            allExclude(module: name)
+//            allExclude(module: name)
             allExclude(module: TextUtils.getBranchArtifactId(name, wrapper))
         }
         allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)},justTag")
@@ -234,6 +235,6 @@ class Dependencies extends BaseExtension {
      * @return
      */
     boolean getHasLocalModule() {
-        return !localDependency?.isEmpty() ?: true
+        return !CheckUtils.isEmpty(localDependency)
     }
 }

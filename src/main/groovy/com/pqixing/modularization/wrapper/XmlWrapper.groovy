@@ -19,7 +19,24 @@ class XmlWrapper {
 
     public void writeTo(File outFile) {
         outFile.parentFile.mkdirs()
-        new XmlNodePrinter(new PrintWriter(outFile)).print(node)
+        new Printer(new PrintWriter(outFile)).print(node)
+    }
+
+    static class Printer extends XmlNodePrinter {
+
+        Printer(PrintWriter out) {
+            super(out)
+        }
+
+        @Override
+        void print(Node node) {
+
+            namespaceAware = true
+            def nameSpaces = XmlNodePrinter.NamespaceContext.class.newInstance(this)
+//            nameSpaces.registerNamespacePrefix("android", "http://schemas.android.com/apk/res/android")
+//            nameSpaces.registerNamespacePrefix("tools", "http://schemas.android.com/tools")
+            print(node, nameSpaces)
+        }
     }
 
 }

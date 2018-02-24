@@ -53,6 +53,7 @@ class AndroidConfig extends BaseExtension {
 
         //输出android.gradle
         list += FileUtils.write(new File(buildConfig.cacheDir, "android.gradle"), file.androidGradle)
+        list += FileUtils.write(new File(buildConfig.cacheDir, "maven.gradle"), file.maven)
         if (kotlinEnable)
             list += FileUtils.write(new File(buildConfig.cacheDir, "kotlin.gradle"), file.ktolin)
         if (flavor.flavorEnable)

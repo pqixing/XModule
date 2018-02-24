@@ -103,7 +103,7 @@ class Keys {
     /**
      * 默认初始版本号
      */
-    public static final String VERSION_DEFAULT = "1.0"
+    public static final String VERSION_DEFAULT = "1.0.0"
     /**
      * 时间后缀
      */

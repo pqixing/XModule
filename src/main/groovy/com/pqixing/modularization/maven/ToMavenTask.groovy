@@ -9,8 +9,6 @@ import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.wrapper.MetadataWrapper
 
-import java.util.regex.Pattern
-
 class ToMavenTask extends BaseTask {
 
     MavenType mavenInfo
@@ -22,16 +20,19 @@ class ToMavenTask extends BaseTask {
         }
         def dependent = wrapper.getExtends(Dependencies.class)
         if (dependent.hasLocalModule) {//如果有本地工程，抛异常
-            throw new RuntimeException("current dependencies contain local project, please remove before upload : ${dependent.localImportModules.toString()}")
+            throw new RuntimeException("${wrapper.project.name} : current dependencies contain local project, please remove before upload : ${dependent.localDependency.toString()}")
         }
         if (!CheckUtils.isEmpty(dependent.dependentLose)) {
             throw new RuntimeException("some dependencies lose, please import before upload : ${dependent.dependentLose.toString()}")
         }
+        String lastRelease = MetadataWrapper.create(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId).release.trim()
+        if (CheckUtils.isEmpty(lastRelease)) lastRelease = Keys.VERSION_DEFAULT //如果仓库没有版本，默认使用1.0
+        int lastPoint = lastRelease.lastIndexOf(".")
+        String baseVersion = lastRelease.substring(0, lastPoint)
+        int lastVersion = lastRelease.substring(lastPoint + 1).toInteger() + 1
 
-        String baseVersion = MetadataWrapper.create(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId)
-                .release.find(Pattern.compile("\\d*[.\\d*]"))
-        if (!CheckUtils.isEmpty(baseVersion)) baseVersion = Keys.VERSION_DEFAULT //如果仓库没有版本，默认使用1.0
         if (!CheckUtils.isEmpty(mavenInfo.pom_version)) mavenInfo.pom_version = baseVersion
+        mavenInfo.pom_version += ".$lastVersion"
 
         if (mavenInfo.pom_version < baseVersion) {
             if (mavenInfo.focusUpload) mavenInfo.pom_version = baseVersion
@@ -57,10 +58,11 @@ class ToMavenTask extends BaseTask {
     @Override
     void end() {
         project.uploadArchives.execute()
-        Print.lnf("uploadArchives success -> version :$mavenInfo.version artifactId : $mavenInfo.artifactId url : $mavenInfo.maven_url ")
+        Print.lnf("uploadArchives success -> version :$mavenInfo.pom_version artifactId : $mavenInfo.artifactId url : $mavenInfo.maven_url ")
 
         //上传完成以后,更新本地依赖版本信息
         File versionFile = wrapper.getExtends(Dependencies.class).versionFile
+        versionFile.parentFile.mkdirs()
         def pros = FileUtils.readMaps(versionFile)
         String timeStamp = "$mavenInfo.artifactId$Keys.SUFFIX_STAMP"
         pros.put(timeStamp, System.currentTimeMillis().toString())

@@ -42,7 +42,7 @@ class GlobalConfig {
     /**
      * 当依赖缺失时，是否拦截报错，默认为true
      */
-    public static boolean abortDependenLose = true
+    public static boolean abortDependentLose = true
     /**
      * 预设仓库地址
      */

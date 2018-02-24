@@ -24,12 +24,12 @@ public abstract class BaseTask extends DefaultTask {
     @TaskAction
     public void run() {
         long startTime = System.currentTimeMillis()
-        Print.ln("start task $name -> ${new Date(startTime).toLocaleString()}")
+        Print.ln("start task $project.name:$name -> ${new Date(startTime).toLocaleString()}")
         start()
         runTask()
         end()
         long endTime = System.currentTimeMillis()
-        Print.ln("end task $name count :  ${endTime - startTime}  :-> ${new Date(endTime).toLocaleString()}")
+        Print.ln("end task $project.name:$name count :  ${endTime - startTime}  :-> ${new Date(endTime).toLocaleString()}")
     }
 
     static <T extends DefaultTask> T task(Project project, Class<T> tClass) {
