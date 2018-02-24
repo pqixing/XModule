@@ -34,8 +34,8 @@ class ToMavenTask extends BaseTask {
         if (!CheckUtils.isEmpty(mavenInfo.pom_version)) mavenInfo.pom_version = baseVersion
         mavenInfo.pom_version += ".$lastVersion"
 
-        if (mavenInfo.pom_version < baseVersion) {
-            if (mavenInfo.focusUpload) mavenInfo.pom_version = baseVersion
+        if (mavenInfo.pom_version < lastRelease) {
+            if (mavenInfo.focusUpload) mavenInfo.pom_version = lastRelease
             else throw new RuntimeException("pom_version can not less than maven version : $baseVersion --------------")
         }
     }
