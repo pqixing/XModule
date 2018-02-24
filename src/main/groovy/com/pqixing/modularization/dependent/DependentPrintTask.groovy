@@ -20,6 +20,7 @@ class DependentPrintTask extends BaseTask {
     File outDir
     BuildConfig buildConfig
     MavenType mavenType
+    List<SimpleModule> dpBySortList
 
     @Override
     void start() {
@@ -58,10 +59,58 @@ class DependentPrintTask extends BaseTask {
 
     @Override
     void end() {
+        HashMap<String, SimpleModule> container = new HashMap<>()
+        wrapper.getExtends(Dependencies).modules.each { sortDependent(container, it, 1) }
 
+        StringBuilder sb = new StringBuilder("$project.name Sort Dp By Level:\n")
+        StringBuilder names = new StringBuilder("\n\nYou can upload all library according to the following order \n")
 
+        dpBySortList = container.values().toList().sort { it.level }
+
+        int curLevel = 0
+        dpBySortList.each {
+            names.append("$it.moduleName,")
+
+            if (it.level > curLevel) {
+                curLevel = it.level
+                sb.append("\n$curLevel").append(Keys.TAB)
+            }
+            sb.append(it.moduleName)
+            if (it.type == SimpleModule.TYPE_LOCAL) sb.append(" (local)")
+            else if (it.type == SimpleModule.TYPE_BRANCH) sb.append(" ($it.branchName)")
+            sb.append(Keys.TAB)
+        }
+        FileUtils.write(new File(outDir, Keys.FILE_SORT_DP), "${sb.toString()}${names.substring(0, names.length - 1)}")
     }
+    /**
+     * 根据依赖层级进行排序根据以下
+     * @param container
+     * @param module
+     * @param level
+     */
+    void sortDependent(HashMap<String, SimpleModule> container, Module module, int level) {
 
+        def split = module.artifactId.split(Keys.BRANCH_TAG)
+        String moduleName = split[0]
+
+        SimpleModule simple = container.get(moduleName)
+        if (simple == null) {
+            simple = new SimpleModule(moduleName)
+            container.put(moduleName, simple)
+        }
+
+        int type = SimpleModule.TYPE_MASTER
+        if (split.length > 1) {
+            simple.branchName = split[1]
+            type = SimpleModule.TYPE_BRANCH
+        }
+        if (module.onLocalCompile) type = SimpleModule.TYPE_LOCAL
+
+        simple.type = Math.max(type, simple.type)
+        simple.level = Math.max(level, simple.level)
+
+        module.modules.each { sortDependent(container, it, level + 1) }
+    }
     /**
      * 输出依赖文本
      * @param deep

@@ -98,7 +98,7 @@ class Keys {
     /**
      * 排序过后的以来关系
      */
-    public static final String FILE_SORT_DP = "sort.dp"
+    public static final String FILE_SORT_DP = "level.dp"
     /**
      * 依赖版本号名称
      */
