@@ -80,7 +80,7 @@ class DependentPrintTask extends BaseTask {
             else if (it.type == SimpleModule.TYPE_BRANCH) sb.append(" ($it.branchName)")
             sb.append(Keys.TAB)
         }
-        FileUtils.write(new File(outDir, Keys.FILE_SORT_DP), "${sb.toString()}${names.substring(0, names.length - 1)}")
+        FileUtils.write(new File(outDir, Keys.FILE_SORT_DP), "${sb.toString()}${names.substring(0, names.length() - 1)}")
     }
     /**
      * 根据依赖层级进行排序根据以下
