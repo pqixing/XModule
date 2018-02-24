@@ -28,7 +28,7 @@ class Dependencies extends BaseExtension {
     Set<String> masterExclude = new HashSet<>()
     Set<Module> dependentLose = new HashSet<>()
     //本地依赖的模块名称,可传递给主工程使用
-    Set<String> localDependency
+    Set<Module> localDependency
     Set<String> localImportModules
 
     File versionFile
@@ -65,7 +65,7 @@ class Dependencies extends BaseExtension {
 
     Module addImpl(String moduleName, Closure closure = null) {
         Module inner = add(moduleName, closure)
-        inner.scope = Module.SCOP_IMPL
+        inner.scope = Module.SCOP_COMPILE
         return inner
     }
 
@@ -147,7 +147,7 @@ class Dependencies extends BaseExtension {
         module.onLocalCompile = true
 
         //如果有本地依赖工程，则移除相同的仓库依赖
-        localDependency.add(module.moduleName)
+        localDependency.add(module)
     }
     /**
      * 进行仓库依赖
@@ -219,9 +219,9 @@ class Dependencies extends BaseExtension {
         masterExclude.each { name ->
             allExclude(group: GlobalConfig.groupName, module: name)
         }
-        localDependency.each { name ->
-//            allExclude(module: name)
-            allExclude(module: TextUtils.getBranchArtifactId(name, wrapper))
+        localDependency.each { model ->
+            allExclude([group: model.groupId, module: model.moduleName])
+            allExclude([group: model.groupId, module: TextUtils.getBranchArtifactId(model.moduleName, wrapper)])
         }
         allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)},justTag")
         sb.append("${excludeStr("all*.exclude", allExcludes)}} \n")

@@ -2,6 +2,7 @@ package com.pqixing.modularization.git
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.GitUtils
 import org.gradle.api.Project
 
@@ -43,7 +44,7 @@ class GitConfig extends BaseExtension {
      */
     String checkout = "master"
 
-    Set<String> excludeGit = []
+    Set<String> excludeGit = [GitUtils.getNameFromUrl(GlobalConfig.docGitUrl)]
 
     GitConfig(Project project) {
         super(project)

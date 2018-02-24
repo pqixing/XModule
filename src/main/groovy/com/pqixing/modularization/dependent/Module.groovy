@@ -10,7 +10,7 @@ import com.pqixing.modularization.utils.CheckUtils
 class Module extends BaseExtension {
     public static final String SCOP_COMPILE = "compile"
     public static final String SCOP_RUNTIME = "runtimeOnly"
-    public static final String scop_compileonly = "compileOnly"
+    public static final String SCOP_COMPILEONLY = "compileOnly"
     public static final String SCOP_IMPL = "implementation"
 
     /**
@@ -70,5 +70,19 @@ class Module extends BaseExtension {
     @Override
     LinkedList<String> getOutFiles() {
         return []
+    }
+
+    @Override
+    public String toString() {
+        return "Module{" +
+                "onLocalCompile=" + onLocalCompile +
+                ", moduleName='" + moduleName + '\'' +
+                ", artifactId='" + artifactId + '\'' +
+                ", scope='" + scope + '\'' +
+                ", groupId='" + groupId + '\'' +
+                ", version='" + version + '\'' +
+                ", updateTime=" + updateTime +
+                ", gitLog='" + gitLog + '\'' +
+                '}';
     }
 }
