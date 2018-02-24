@@ -39,4 +39,16 @@ class TextUtils {
         collection.each { sb.append(it).append(Keys.SEPERATOR) }
         return sb.substring(0, sb.length() - Keys.SEPERATOR.length())
     }
+    /**
+     * 根据深度获取tab空格
+     * @param deep
+     * @return
+     */
+    static String getTab(int deep) {
+        StringBuilder sb = new StringBuilder()
+        for (int i = 0; i < deep; i++) {
+            sb.append(Keys.TAB)
+        }
+        return sb.toString()
+    }
 }

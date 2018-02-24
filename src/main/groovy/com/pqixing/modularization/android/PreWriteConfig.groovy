@@ -33,8 +33,8 @@ class PreWriteConfig extends BaseExtension {
         def dependent = wrapper.getExtends(Dependencies)
 
         String appLikeValue = "/applike/$buildConfig.projectName"
-        appLikeValue = "/${appLikeValue.hashCode()}$appLikeValue"
-        addConfig(["NAME": buildConfig.projectName, "PATH_APPLIE": appLikeValue, "BUILD_TIME": System.currentTimeMillis().toString(), "BUILD_TIME_STR": new Date().toLocaleString()])
+        appLikeValue = "/${appLikeValue.hashCode()}$appLikeValue".replace("-","_")
+        addConfig(["NAME": buildConfig.projectName, "PATH_APPLIKE": appLikeValue, "BUILD_TIME": System.currentTimeMillis().toString(), "BUILD_TIME_STR": new Date().toLocaleString()])
         addConfig(["GIT_COMMIT_LOG": gitConfig.lastLog, "GIT_COMMIT_NUM": gitConfig.revisionNum, "DEPENDENCIES": JSON.toJSONString(dependent.modules).replace("\"", "")])
 
         def confStr = new StringBuilder()

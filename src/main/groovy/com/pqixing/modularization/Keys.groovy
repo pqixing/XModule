@@ -2,6 +2,10 @@ package com.pqixing.modularization
 
 class Keys {
     /**
+     * 一个tab空格
+     */
+    public static final String TAB = "      "
+    /**
      * 默认
      */
     public static final String DEFAULT = "DEFAULT"
@@ -32,7 +36,7 @@ class Keys {
     /**
      * 代码分割线
      */
-    public static final String SEPERATOR = "###"
+    public static final String SEPERATOR = "##"
     /**
      * 任务分组
      */
@@ -87,6 +91,14 @@ class Keys {
      * Android依赖路径
      */
     public static final String FILE_ANDROID_DP = "android.dp"
+    /**
+     * 内部依赖版本日志
+     */
+    public static final String FILE_INNER_DP = "inner.dp"
+    /**
+     * 排序过后的以来关系
+     */
+    public static final String FILE_SORT_DP = "sort.dp"
     /**
      * 依赖版本号名称
      */

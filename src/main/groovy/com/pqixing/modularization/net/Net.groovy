@@ -1,5 +1,6 @@
 package com.pqixing.modularization.net
 
+import com.pqixing.modularization.Keys
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.maven.MavenType
@@ -42,7 +43,7 @@ class Net {
         try {
             def conn = new URL(url).openConnection()
             conn.connectTimeout = BuildConfig.timOut//4秒超时
-            return conn.inputStream.text
+            return conn.inputStream.getText(Keys.CHARSET)
         } catch (Exception e) {
             Print.ln("requestNet -> e: ${e.toString()}")
             return ""

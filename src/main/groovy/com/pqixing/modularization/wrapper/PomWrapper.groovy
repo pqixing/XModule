@@ -1,9 +1,11 @@
 package com.pqixing.modularization.wrapper
 
 import com.pqixing.modularization.Keys
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.dependent.Module
 import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.utils.Print
+
 /**
  * Pom解析包裹类
  * http://192.168.3.7:9527/nexus/content/repositories/androidtest/com/dachen/android/dccommon/1.0.2/dccommon-1.0.2.pom
@@ -19,11 +21,12 @@ class PomWrapper extends XmlWrapper {
      * http://192.168.3.7:9527/nexus/content/repositories/androidtest/com/dachen/android/router/0.1.7/router-0.1.7.pom
      */
     static String getPomUrl(String envUrl, String group, String moduleName, String version) {
-        return "$envUrl/${group.replace(".", "/")}/$moduleName/$version/${moduleName}-${version}.xml"
+        return "$envUrl/${group.replace(".", "/")}/$moduleName/$version/${moduleName}-${version}.pom"
     }
 
-    public static PomWrapper create(String envUrl, String group, String moduleName,String version) {
-        return create(getPomUrl(envUrl, group, moduleName,version))
+    public
+    static PomWrapper create(String envUrl, String group, String moduleName, String version) {
+        return create(getPomUrl(envUrl, group, moduleName, version))
     }
 
     public static PomWrapper create(String url) {
@@ -76,16 +79,21 @@ class PomWrapper extends XmlWrapper {
         m.updateTime = updateTime
         m.gitLog = gitLog
         node.dependencies.dependency.each { d ->
+            String groupId = d.groupId.text()
+            String artifactId = d.artifactId.text()
+            //不是内部依赖，则不处理
+            if (groupId != GlobalConfig.groupName||artifactId == "dcannotation") return
             Module dm = new Module()
-            m.artifactId = d.artifactId.text()
-            m.groupId = d.groupId.text()
-            m.version = d.version.text()
-            m.scope = d.scope.text()
-            m.modules += dm
+            dm.artifactId = d.artifactId.text()
+            dm.groupId = d.groupId.text()
+            dm.version = d.version.text()
+            dm.scope = d.scope.text()
+            m.modules.add(dm)
             d.exclusions.exclusion.each { e ->
                 dm.exclude(group: e.groupId.text(), module: e.artifactId.text())
             }
         }
+        return m
     }
     /**
      * 获取需要去除master依赖

@@ -7,9 +7,13 @@ import com.pqixing.modularization.utils.CheckUtils
  */
 class XmlWrapper {
     public Node node
+    public boolean empty
 
-    static Node parse(String xmlString) {
-        if (CheckUtils.isEmpty(xmlString)) xmlString = '''<empty></empty>'''
+    Node parse(String xmlString) {
+        if (CheckUtils.isEmpty(xmlString)) {
+            xmlString = '''<empty></empty>'''
+            empty = true
+        }
         return new XmlParser().parseText(xmlString)
     }
 

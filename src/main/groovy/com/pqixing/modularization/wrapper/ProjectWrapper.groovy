@@ -58,4 +58,7 @@ class ProjectWrapper {
         return get(Keys.NAME_PUGLIN)
     }
 
+    Project findProject(String name) {
+        return project.rootProject.allprojects.find { it.name == name }
+    }
 }
