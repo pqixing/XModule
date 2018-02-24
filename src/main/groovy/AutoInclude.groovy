@@ -38,20 +38,24 @@ public class AutoInclude {
         File includeFile = new File(rootDir, AutoConfig.TXT_INCLUDE)
         if (!includeFile.exists()) includeFile.write(AutoConfig.mould_include)
         readInclude(icTxt, includeFile)
+        //读取隐藏配置
+        File hideIncludeFile = new File(rootDir, AutoConfig.TXT_HIDEINCLUDE)
+        if (hideIncludeFile.exists()) readInclude(icTxt, hideIncludeFile)
+        
         gradle.ext.gitUserName = username
         gradle.ext.gitPassword = password
         gradle.ext.gitEmail = email
     }
 
     void readInclude(StringBuilder autoTxt, File f) {
-        if (!f.exists()||!f.isFile()) return
+        if (!f.exists() || !f.isFile()) return
         boolean end = false
         StringBuilder icTxt = new StringBuilder()
         f.eachLine { line ->
             end |= line.startsWith(AutoConfig.TAG_AUTO_ADD)
             if (end) return
 
-            def map = line.replaceAll("//.*","").split("=")
+            def map = line.replaceAll("//.*", "").split("=")
             if (map.length < 2) return
             String key = map[0].trim()
             String value = map[1].trim()
@@ -62,7 +66,7 @@ public class AutoInclude {
                     break
                 case "email": email = value
                     break
-                case "targetInclude": readInclude(autoTxt,new File(rootDir, value))
+                case "targetInclude": readInclude(autoTxt, new File(rootDir, value))
                     break
                 case "include":
                     value?.split(",")?.each { includes += it.trim() }
@@ -139,9 +143,9 @@ public class AutoInclude {
         Map<String, String> realInclude = [:]
 
         includes.each { key ->
-            String url = localProject.find {it.key == key}?.value
+            String url = localProject.find { it.key == key }?.value
             //如果本地存在工程目录，直接导入,否则尝试从网络导入
-            if (url!=null&&!url.isEmpty()) {
+            if (url != null && !url.isEmpty()) {
                 realInclude.put(key, url)
             } else fromGit(realInclude, key)
         }
@@ -220,6 +224,10 @@ class AutoConfig {
      * 本地配置文件路径
      */
     static final String TXT_INCLUDE = "include.txt"
+    /**
+     * 隐藏的导入文件，批量上传时使用
+     */
+    static final String TXT_HIDEINCLUDE = "hideInclude.txt"
 
     /**
      * git配置模板
