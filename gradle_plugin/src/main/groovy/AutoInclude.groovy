@@ -136,7 +136,7 @@ public class AutoInclude {
     }
 
     void saveToFile(Map<String, String> realInclude) {
-        StringBuilder sb = new StringBuilder("//Auto Add By Modularization")
+        StringBuilder sb =  new StringBuilder("//Auto Add By Modularization")
         realInclude.each { map ->
             sb.append("\\ninclude (':$map.key') \\n")
                     .append("project(':$map.key').projectDir = new File('$map.value')")
