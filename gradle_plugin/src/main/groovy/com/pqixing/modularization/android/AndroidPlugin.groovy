@@ -1,7 +1,10 @@
 package com.pqixing.modularization.android
 
+import auto.Android
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.ModuleConfig
+import com.pqixing.modularization.analysis.MergeToMasterTask
+import com.pqixing.modularization.analysis.MergeToReleaseTask
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
@@ -38,6 +41,8 @@ abstract class AndroidPlugin extends BasePlugin {
             //添加打印依赖的task
             BaseTask.task(project, DependentPrintTask.class)
             BaseTask.task(project, DocSyncTask.class)
+            BaseTask.task(project, MergeToMasterTask.class)
+            BaseTask.task(project, MergeToReleaseTask.class)
             //添加分析的任务
 //            BaseTask.task(wrapper.project, wrapper.getExtends(GitConfig.class)
 //                    .branchName == "master" ? MavenMergerTask.class : BranchMergerTask.class)
@@ -67,7 +72,7 @@ abstract class AndroidPlugin extends BasePlugin {
      */
     void loadLocalGradle() {
         File localConfig = project.file(Keys.LOCAL_GRADLE)
-        if (!localConfig.exists()) FileUtils.write(localConfig, Keys.LOCAL_GRADLE_MOULD)
+        if (!localConfig.exists()) FileUtils.write(localConfig, new Android().localGradle)
         wrapper.apply from: localConfig.path
         File focus = new File(project.rootDir, Keys.FOCUS_GRADLE)
         if (focus.exists()) wrapper.apply from: focus.path

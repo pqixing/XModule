@@ -17,7 +17,6 @@ public abstract class BaseTask extends DefaultTask {
 
     BaseTask() {
         group = Keys.GROUP_TASK
-        project.ext."${getClass().name}" = this//初始化赋值
         wrapper = ProjectWrapper.with(project)
     }
 

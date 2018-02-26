@@ -34,7 +34,7 @@ class Module extends BaseExtension {
     /**
      * 更新说明
      */
-    String gitLog
+    String gitLog = ""
     LinkedList<Map<String, String>> excludes = new LinkedList<>()
     /**
      * 依赖中的依赖树

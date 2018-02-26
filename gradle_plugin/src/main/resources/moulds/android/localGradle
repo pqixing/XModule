@@ -1,0 +1,5 @@
+//local config file
+ moduleConfig{
+//runType = runTypes.test
+
+}

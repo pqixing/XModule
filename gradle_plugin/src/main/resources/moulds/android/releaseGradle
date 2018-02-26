@@ -1,0 +1,3 @@
+moduleConfig{
+   mavenType = mavenTypes.release
+ }

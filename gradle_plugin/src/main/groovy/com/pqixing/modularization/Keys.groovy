@@ -64,7 +64,7 @@ class Keys {
     /**
      * 本地配置模板
      */
-    public static final String LOCAL_GRADLE_MOULD = "//local config file\n moduleConfig{\n\n\n}"
+    public static final String LOCAL_GRADLE_MOULD = "//local config file\n moduleConfig{\n//runType = runTypes.test\n\n}"
     /**
      * 模块配置
      */
@@ -145,4 +145,22 @@ class Keys {
      * Apk类型会自动生成默认入口类，方便反射获取
      */
     public static final String NAME_ENTER_CONFIG = "auto.com.pqixing.configs.Enter"
+
+    /**
+     * 批量上传全部工程文件
+     */
+    public static final String BATH_ALL = "batch_all"
+    /**
+     * 合并依赖到master分支
+     */
+    public static final String BATH_MASTER = "batch_master"
+    /**
+     * 合并依赖到release分支
+     */
+    public static final String BATH_RELEASE = "batch_release"
+    /**
+     * 隐藏的导入文件，批量上传时使用
+     */
+    static final String TXT_HIDE_INCLUDE = "hideInclude.txt"
+
 }
