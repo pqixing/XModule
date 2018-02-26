@@ -1,4 +1,4 @@
-package com.pqixing.compiler.annotation;
+package com.pqixing.annotation;
 
 /**
  * 标记自动加载的AppLike接口

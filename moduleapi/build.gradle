@@ -26,9 +26,7 @@ android {
 dependencies {
 //    compile project(':compiler')
 //    annotationProcessor project(':compiler')
-    compile ("com.pqixing.android:compiler:+"){
-        exclude group :"com.google.auto.service"
-    }
+    compile 'com.pqixing.android:annotation:+'
     annotationProcessor "com.pqixing.android:compiler:+"
 }
 

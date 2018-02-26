@@ -10,6 +10,10 @@ class Keys {
      */
     public static final String DEFAULT = "DEFAULT"
     /**
+     * 测试环境
+     */
+    public static final String TEST = "test"
+    /**
      * 文档管理插件名称
      */
     public static final String NAME_DOC = "docment"

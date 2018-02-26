@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:gravity="center"
     android:orientation="vertical"
-    tools:context=".LaunchActivity">
+    tools:context=".VirtualActivity">
 
     <TextView
         android:layout_width="match_parent"

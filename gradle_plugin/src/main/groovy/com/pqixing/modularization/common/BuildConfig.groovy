@@ -33,8 +33,8 @@ class BuildConfig extends BaseExtension {
 
     final String packageName
     //java包名
-   final String javaPackage
-   final String groupName
+    final String javaPackage
+    final String groupName
     /**
      * 输出文档路径
      */
@@ -49,7 +49,8 @@ class BuildConfig extends BaseExtension {
         cacheDir = FileUtils.urls(outDir, ".cache")
         javaDir = FileUtils.urls(outDir, "java")
         cacheJavaDir = FileUtils.urls(cacheDir, "java")
-        packageName = "${GlobalConfig.groupName}.$projectName"
+        groupName = GlobalConfig.groupName
+        packageName = "${groupName}.$projectName"
         javaPackage = "${Keys.PREFIX_PKG}.$packageName"
     }
 

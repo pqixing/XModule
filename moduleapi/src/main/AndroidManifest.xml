@@ -4,7 +4,7 @@
 
     <application>
         <activity
-            android:name=".LaunchActivity"
+            android:name=".VirtualActivity"
             android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar"></activity>
     </application>
 

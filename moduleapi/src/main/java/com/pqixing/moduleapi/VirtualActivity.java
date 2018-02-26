@@ -10,7 +10,7 @@ import android.widget.ListView;
 
 import java.util.List;
 
-public class LaunchActivity extends Activity implements AdapterView.OnItemClickListener {
+public class VirtualActivity extends Activity implements AdapterView.OnItemClickListener {
     List<Class> launchClass;
 
     @Override

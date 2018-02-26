@@ -1,1 +1,1 @@
-include ':gradle_plugin', ':moduleapi', ':compiler'
+include ':gradle_plugin', ':moduleapi', ':compiler', ':annotation'

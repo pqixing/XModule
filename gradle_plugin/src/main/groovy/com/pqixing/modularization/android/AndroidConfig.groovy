@@ -50,6 +50,7 @@ class AndroidConfig extends BaseExtension {
         file.params += ["pluginName": config.runType?.asApp ? Keys.NAME_APP : wrapper.pluginName]
         file.params += ["maven_url": config.mavenType.maven_url]
         file.params += ["mavenGroupUrl": GlobalConfig.mavenGroupUrl]
+        file.params += ["groupName": GlobalConfig.groupName]
 
         //输出android.gradle
         list += FileUtils.write(new File(buildConfig.cacheDir, "android.gradle"), file.androidGradle)

@@ -37,7 +37,7 @@ class PreWriteConfig extends BaseExtension {
 
         StringBuilder dpNames = new StringBuilder()
         dependent.modules.each { m ->
-            dpNames.append("${buildConfig.javaPackage}.${TextUtils.firstUp(TextUtils.numOrLetter(m.moduleName))}Config,")
+            dpNames.append("$Keys.PREFIX_PKG.${m.groupId}.${TextUtils.numOrLetter(m.moduleName)}.${TextUtils.className(m.moduleName)}Config,")
         }
         if (dpNames.length() > 1) dpNames.deleteCharAt(dpNames.length() - 1)
         String launchClass = "${buildConfig.javaPackage}.${TextUtils.firstUp(buildConfig.projectName)}Launch"

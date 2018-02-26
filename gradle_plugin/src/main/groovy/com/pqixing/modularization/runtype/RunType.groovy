@@ -13,7 +13,6 @@ import com.pqixing.modularization.wrapper.XmlWrapper
 import org.gradle.api.Project
 
 import java.text.SimpleDateFormat
-
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -47,7 +46,7 @@ class RunType extends BaseContainer {
             versionName = new SimpleDateFormat("MM.dd.HH.mm").format(new Date())
             versionCode = versionName.replace(".", "")
             applicationId = "${wrapper.getExtends(BuildConfig.class).packageName}.${TextUtils.numOrLetter(wrapper.artifactId)}"
-            applicationName = "com.pqixing.moduleapi.LaunchApplication"
+            applicationName = "com.pqixing.moduleapi.VirtualApplication"
         }
     }
 
@@ -60,7 +59,7 @@ class RunType extends BaseContainer {
         if (CheckUtils.isEmpty(applicationName)) applicationName = defType.applicationName
         if (CheckUtils.isEmpty(versionName)) versionName = defType.versionName
         if (CheckUtils.isEmpty(versionCode)) versionCode = defType.versionCode
-        asApp &= defType.asApp
+        asApp |= defType.asApp
     }
 
     @Override
@@ -85,7 +84,7 @@ class RunType extends BaseContainer {
         manifestWrapper.application = applicationName
         //添加启动Activity配置//保存新的清单文件到缓存目录
         manifestWrapper.updateReplace()
-                .addComponent(XmlWrapper.parse(file.activityMeta))
+                .addComponent(new XmlWrapper(file.activityMeta).node)
                 .writeTo(new File(buildConfig.cacheDir, Keys.MANIFEST))
 
         return [FileUtils.write(new File(buildConfig.cacheDir, "runType.gradle"), file.runTypeGradle)]

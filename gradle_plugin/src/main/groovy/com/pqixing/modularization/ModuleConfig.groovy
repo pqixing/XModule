@@ -41,6 +41,7 @@ class ModuleConfig extends BaseExtension {
         this.runTypes = runTypes
         runTypes.whenObjectAdded { it.onCreate(project) }
         runTypes.add(new RunType(Keys.DEFAULT))
+        runTypes.add(new RunType(Keys.TEST))
 
 
     }

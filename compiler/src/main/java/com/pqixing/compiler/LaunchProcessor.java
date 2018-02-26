@@ -1,8 +1,8 @@
 package com.pqixing.compiler;
 
 import com.google.auto.service.AutoService;
-import com.pqixing.compiler.annotation.LaunchActivity;
-import com.pqixing.compiler.annotation.LaunchAppLike;
+import com.pqixing.annotation.LaunchActivity;
+import com.pqixing.annotation.LaunchAppLike;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -79,7 +79,6 @@ public class LaunchProcessor extends AbstractProcessor {
         for (Element e : targets) {
             sb.append(((TypeElement) e).getQualifiedName() + ",");
         }
-        if (sb.length() > 1) sb.deleteCharAt(sb.length() - 1);
         sb.append("\";\n");
     }
 

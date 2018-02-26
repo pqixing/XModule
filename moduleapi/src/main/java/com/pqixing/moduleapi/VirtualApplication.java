@@ -1,9 +1,10 @@
 package com.pqixing.moduleapi;
 
 import android.app.Application;
+import android.util.Log;
 import android.widget.Toast;
 
-public class LaunchApplication extends Application {
+public class VirtualApplication extends Application {
 
     @Override
     public void onCreate() {
@@ -12,5 +13,6 @@ public class LaunchApplication extends Application {
         for (IApplicationLike like : Module.installAppLilke(this)) {
             like.onVirtualCreate(this);
         }
+        Log.i("VirtualApplication", "all application like : "+Module.likeHashMap);
     }
 }

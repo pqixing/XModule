@@ -1,11 +1,6 @@
 apply plugin: 'java'
 apply plugin: "maven"
 
-dependencies {
-    compile 'com.google.auto.service:auto-service:1.0-rc2'
-    compile 'com.pqixing.android:annotation:+'
-}
-
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 // 上传到本地代码库
@@ -17,7 +12,7 @@ uploadArchives {
                 authentication(userName: mavenUserName, password: mavenUserPsw)
             }
             pom.groupId = groupId // 组名
-            pom.artifactId = "compiler" // 插件名
+            pom.artifactId = "annotation" // 插件名
             pom.version = "0.1"// 版本号
         }
     }

@@ -27,7 +27,9 @@ class TextUtils {
         if (source == null) return ""
         return "${source.substring(0, 1).toUpperCase()}${source.substring(1)}"
     }
-
+    static String className(String source){
+        return firstUp(numOrLetter(source))
+    }
     /**
      * 集合转字符串
      * @param collection
