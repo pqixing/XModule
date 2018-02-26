@@ -1,10 +1,5 @@
 package com.pqixing.moduleapi;
 
-import com.pqixing.compiler.annotation.LaunchActivity;
-import com.pqixing.compiler.annotation.LaunchAppLike;
-
-@LaunchAppLike
-@LaunchActivity
 public class TextUtils {
     /**
      * 只保留数字和字母

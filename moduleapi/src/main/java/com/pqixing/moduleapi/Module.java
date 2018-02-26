@@ -4,16 +4,11 @@ import android.app.Application;
 import android.os.Handler;
 import android.os.HandlerThread;
 
-import com.pqixing.compiler.annotation.LaunchActivity;
-import com.pqixing.compiler.annotation.LaunchAppLike;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@LaunchAppLike
-@LaunchActivity
 public class Module {
     public static final String ENTER_CLASS = "auto.com.pqixing.configs.Enter";
 
