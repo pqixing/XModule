@@ -41,7 +41,7 @@ public class AutoInclude {
         //读取隐藏配置
         File hideIncludeFile = new File(rootDir, AutoConfig.TXT_HIDEINCLUDE)
         if (hideIncludeFile.exists()) readInclude(icTxt, hideIncludeFile)
-        
+
         gradle.ext.gitUserName = username
         gradle.ext.gitPassword = password
         gradle.ext.gitEmail = email
@@ -110,20 +110,29 @@ public class AutoInclude {
             String introduce = p.@introduce
 
             projectUrls.put(name, "$url$AutoConfig.SEPERATOR$introduce")
-            icTxt.append("include = $name    //--introduce = $introduce \\n")
+            icTxt.append(getIncludeLine("include = $name", introduce))
 
             List<String> subLists = []
             p.submodule.each { Node s ->
                 String s_name = s.@name
                 String s_introduce = s.@introduce
                 subLists += "${s_name}$AutoConfig.SEPERATOR${s_introduce}"
-                icTxt.append("     |- - $s_name    //--introduce = $s_introduce \\n")
+                icTxt.append(getIncludeLine("     |- - $s_name", s_introduce))
             }
             if (!subLists.isEmpty()) submodules.put(name, subLists)
         }
         gradle.ext.submodules = submodules
         gradle.ext.projectUrls = projectUrls
         gradle.ext.baseGitUrl = baseGitUrl
+    }
+
+    String getIncludeLine(String includeKey, String introduce) {
+        StringBuilder sb = new StringBuilder(includeKey)
+        int space = 50 - sb.length()
+        for (int i = 0; i < space; i++) {
+            sb.append(" ")
+        }
+        return sb.append("//-- $introduce \\n")
     }
 
     void saveToFile(Map<String, String> realInclude) {

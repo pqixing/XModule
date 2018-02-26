@@ -40,7 +40,7 @@ dependencies {
     }
     implementation "com.pqixing.android:moduleapi:+"
     if("com.dachen.android" == "#{groupName}"){//兼容大辰内部注解
-      compile 'com.dachen.android:dcannotation:2.7'
+      compile 'com.dachen.android:dcannotation:+'
     }
     if(!#{kotlinEnable}){
       annotationProcessor 'com.alibaba:arouter-compiler:1.1.4'
