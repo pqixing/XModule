@@ -13,6 +13,6 @@ public class VirtualApplication extends Application {
         for (IApplicationLike like : Module.installAppLilke(this)) {
             like.onVirtualCreate(this);
         }
-        Log.i("VirtualApplication", "all application like : "+Module.likeHashMap);
+        Log.i("VirtualApplication", "all application like : " + Module.likeHashMap.keySet());
     }
 }
