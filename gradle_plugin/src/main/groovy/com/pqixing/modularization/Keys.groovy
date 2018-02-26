@@ -137,4 +137,8 @@ class Keys {
      * 默认的gradle文件名
      */
     public static final String NAME_GRADLE_DEFAULT = "default.gradle"
+    /**
+     * Apk类型会自动生成默认入口类，方便反射获取
+     */
+    public static final String NAME_ENTER_CONFIG = "auto.com.pqixing.configs.Enter"
 }

@@ -1,6 +1,8 @@
 package com.pqixing.modularization.android
 
 import com.alibaba.fastjson.JSON
+import com.pqixing.modularization.Keys
+import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.dependent.Dependencies
@@ -29,14 +31,23 @@ class PreWriteConfig extends BaseExtension {
     LinkedList<String> getOutFiles() {
 
         def buildConfig = wrapper.getExtends(BuildConfig)
+        def moduleConfig = wrapper.getExtends(ModuleConfig)
         def gitConfig = wrapper.getExtends(GitConfig)
         def dependent = wrapper.getExtends(Dependencies)
 
-        String appLikeValue = "/applike/$buildConfig.projectName"
-        appLikeValue = "/${appLikeValue.hashCode()}$appLikeValue".replace("-","_")
-        addConfig(["NAME": buildConfig.projectName, "PATH_APPLIKE": appLikeValue, "BUILD_TIME": System.currentTimeMillis().toString(), "BUILD_TIME_STR": new Date().toLocaleString()])
-        addConfig(["GIT_COMMIT_LOG": gitConfig.lastLog, "GIT_COMMIT_NUM": gitConfig.revisionNum, "DEPENDENCIES": JSON.toJSONString(dependent.modules).replace("\"", "")])
+        StringBuilder dpNames = new StringBuilder()
+        dependent.modules.each { m ->
+            dpNames.append("${buildConfig.javaPackage}.${TextUtils.firstUp(TextUtils.numOrLetter(m.moduleName))}Config,")
+        }
+        if (dpNames.length() > 1) dpNames.deleteCharAt(dpNames.length() - 1)
+        String launchClass = "${buildConfig.javaPackage}.${TextUtils.firstUp(buildConfig.projectName)}Launch"
 
+        addConfig("NAME": buildConfig.projectName, "DP_CONFIGS_NAMES": dpNames.toString())
+        addConfig("LAUNCH_CONFIG": launchClass)
+        addConfig("DEPENDENCIES": JSON.toJSONString(dependent.modules).replace("\"", ""))
+
+        addConfig(["BUILD_TIME": System.currentTimeMillis().toString(), "BUILD_TIME_STR": new Date().toLocaleString()])
+        addConfig(["GIT_COMMIT_LOG": gitConfig.lastLog, "GIT_COMMIT_NUM": gitConfig.revisionNum])
         def confStr = new StringBuilder()
         configs.each { confStr.append("public static final String $it.key = \"$it.value\"; \n") }
 
@@ -45,7 +56,18 @@ class PreWriteConfig extends BaseExtension {
         String className = TextUtils.firstUp("${buildConfig.projectName}Config")
         writes.params += ["preConfigs": confStr.toString(), "className": className]
 
-        FileUtils.write(FileUtils.getFileForClass(buildConfig.javaDir, "${buildConfig.javaPackage}.$className"), writes.configClass)
+        String fullName = "${buildConfig.javaPackage}.$className"
+        FileUtils.write(FileUtils.getFileForClass(buildConfig.javaDir, fullName), writes.configClass)
+
+        File enterFile = FileUtils.getFileForClass(buildConfig.javaDir, Keys.NAME_ENTER_CONFIG)
+        boolean isApp = wrapper.pluginName == Keys.NAME_APP || (moduleConfig.runType?.asApp ?: false)
+        if (!isApp) enterFile.delete()
+        else {
+            writes.params += ["configClass": fullName]
+            writes.params += ["launchClass": launchClass]
+            FileUtils.write(enterFile, writes.enter)
+        }
+
         return [FileUtils.write(new File(buildConfig.cacheDir, "java.gradle"), writes.sourceSet)]
     }
 }

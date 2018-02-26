@@ -8,6 +8,13 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.0.0'
     }
 }
-repositories {
-    google()
+
+allprojects {
+    repositories {
+        maven {
+            url uri("/home/pqixing/.repo")
+        }
+        jcenter()
+        google()
+    }
 }

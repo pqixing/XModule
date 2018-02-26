@@ -70,7 +70,7 @@ uploadArchives {
                 authentication(userName: mavenUserName, password: mavenUserPsw)
             }
             pom.groupId = groupId // 组名
-            pom.artifactId = artifactId // 插件名
+            pom.artifactId = "modularization" // 插件名
             pom.version = getLastVersion(repository.url) // 版本号
         }
     }
