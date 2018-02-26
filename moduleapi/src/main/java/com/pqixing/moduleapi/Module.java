@@ -1,7 +1,6 @@
 package com.pqixing.moduleapi;
 
 import android.app.Application;
-import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 
@@ -20,19 +19,28 @@ public class Module {
 
     /**
      * 安装运行AppLike
-     *
-     * @param context
      */
-    public static final List<String> installActivity(Context context) {
+    public static final List<Class> installActivity() {
         String launchConfig = TextUtils.getStringFields(ENTER_CLASS, "LAUNCH");
         String activityStrs = TextUtils.getStringFields(launchConfig, "LAUNCH_ACTIVITY");
         if (TextUtils.empty(activityStrs)) return new ArrayList<>();
-        ArrayList<String> activityList = new ArrayList<>();
+        ArrayList<Class> activityList = new ArrayList<>();
         for (String s : activityStrs.split(",")) {
-            if (TextUtils.empty(s)) continue;
-            activityList.add(s);
+            Class aClass = forName(s);
+            if (aClass == null) continue;
+            activityList.add(aClass);
         }
         return activityList;
+    }
+
+    public static Class forName(String name) {
+        if (TextUtils.empty(name)) return null;
+        try {
+            return Class.forName(name);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+
     }
 
     /**
