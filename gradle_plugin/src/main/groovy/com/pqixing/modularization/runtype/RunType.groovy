@@ -30,7 +30,6 @@ class RunType extends BaseContainer {
 
     //配置appId
     String applicationId
-    boolean afterLogin
 
     String applicationName
 
@@ -43,13 +42,12 @@ class RunType extends BaseContainer {
         super.onCreate(project)
         if (name == Keys.DEFAULT) {
             asApp = true
-            afterLogin = false
             app_name = wrapper.artifactId
             app_theme = "@android:style/Theme.Light.NoTitleBar"
             versionName = new SimpleDateFormat("MM.dd.HH.mm").format(new Date())
             versionCode = versionName.replace(".", "")
             applicationId = "${wrapper.getExtends(BuildConfig.class).packageName}.${TextUtils.numOrLetter(wrapper.artifactId)}"
-            applicationName = "com.pqixing.modularization.VirtualApplication"
+            applicationName = "com.pqixing.moduleapi.LaunchApplication"
         }
     }
 
@@ -62,7 +60,6 @@ class RunType extends BaseContainer {
         if (CheckUtils.isEmpty(applicationName)) applicationName = defType.applicationName
         if (CheckUtils.isEmpty(versionName)) versionName = defType.versionName
         if (CheckUtils.isEmpty(versionCode)) versionCode = defType.versionCode
-        afterLogin &= defType.afterLogin
         asApp &= defType.asApp
     }
 
@@ -75,15 +72,8 @@ class RunType extends BaseContainer {
 
         Runtype file = new Runtype()
         file.params += properties
-        if (!afterLogin) file.params.remove("afterLogin")
         file.params += buildConfig.properties
 
-        String applicationPkg = "${buildConfig.javaPackage}.ModularizationApp"
-
-        //输出Application
-        FileUtils.write(FileUtils.getFileForClass(buildConfig.cacheJavaDir, applicationPkg), file.modularizationApp)
-        //输出登录回调
-        FileUtils.write(FileUtils.getFileForClass(buildConfig.cacheJavaDir, "${buildConfig.javaPackage}.LoginCallBack"), file.loginCallBack)
         //输出Activity类
         FileUtils.write(FileUtils.getFileForClass(buildConfig.cacheJavaDir, "${buildConfig.javaPackage}.DefaultActivity"), file.lauchActivity)
 
@@ -92,7 +82,7 @@ class RunType extends BaseContainer {
 
         manifestWrapper.appLabel = app_name
         manifestWrapper.appTheme = app_theme
-        manifestWrapper.application = applicationPkg
+        manifestWrapper.application = applicationName
         //添加启动Activity配置//保存新的清单文件到缓存目录
         manifestWrapper.updateReplace()
                 .addComponent(XmlWrapper.parse(file.activityMeta))

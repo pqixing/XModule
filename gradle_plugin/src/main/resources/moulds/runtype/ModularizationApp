@@ -1,8 +1,0 @@
-package #{javaPackage};
-/**
- * Created by pqixing on 17-11-24.
- */
-
-public class ModularizationApp extends #{applicationName} {
-
-}
