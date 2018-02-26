@@ -5,7 +5,7 @@ ext.autoDir = new File(projectDir, "src/main/java/auto")
 
 sourceSets {
     main.groovy.srcDirs += autoDir.parent // 指定源码目录
-}//
+}///
 task("auto") {
     group = "build"
     doFirst {
