@@ -1,6 +1,7 @@
 import org.gradle.api.invocation.Gradle
 
 /**
+ * /
  * Created by pqixing on 18-2-3.
  * this class will run on setting.gradle,so can not import any other class
  */
