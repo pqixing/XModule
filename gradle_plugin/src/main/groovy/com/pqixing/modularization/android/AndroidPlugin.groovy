@@ -35,6 +35,7 @@ abstract class AndroidPlugin extends BasePlugin {
             //添加直接使用的配置
             project.ext.support_v7 = moduleConfig.androidConfig.support_v7
             project.ext.support_v4 = moduleConfig.androidConfig.support_v4
+            project.ext.support_constraint = moduleConfig.androidConfig.support_constraint
 
             //配置结束
             moduleConfig.outFiles.findAll { it != null }.each { wrapper.apply from: it }
