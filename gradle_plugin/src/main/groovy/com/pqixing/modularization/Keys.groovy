@@ -66,11 +66,6 @@ class Keys {
      */
     public static final String LOCAL_GRADLE = "local.gradle"
     /**
-     * 本地配置模板
-     */
-    public static
-    final String LOCAL_GRADLE_MOULD = "//local config file\n moduleConfig{\n//runType = runTypes.test\n\n}"
-    /**
      * 模块配置
      */
     public static final String CONFIG_MODULE = "moduleConfig"

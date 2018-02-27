@@ -75,10 +75,24 @@ class GlobalConfig {
             else updateConfig(FileUtils.read(remote))
         }
         File configFile = new File(wrapper.project.rootDir, Keys.GLOBAL_CONFIG_NAME)
-        if (configFile.exists())
+        if (configFile.exists()) {
             updateConfig(configFile.text)
+        } else {
+
+        }
 
         Print.ln("GlobalConfig ${GlobalConfig.staticProperties}")
+    }
+    /**
+     * 输出模板Global文件
+     * @param outFile
+     */
+    public static void writeGlobalModu(File outFile) {
+        StringBuilder sb = new StringBuilder("#$Keys.TAG_AUTO_ADD \n")
+        GlobalConfig.staticProperties.each { p ->
+            sb.append("#$p.key = $p.value \n")
+        }
+        outFile.write(sb.toString())
     }
 
     public static HashMap<String, Object> getStaticProperties() {
