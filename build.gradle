@@ -18,3 +18,6 @@ allprojects {
         google()
     }
 }
+
+project.ext.mavenUrl=uri("/home/pqixing/.repo")
+//ext.mavenUrl ="http://192.168.3.7:9527/nexus/content/repositories/androidsnap/"

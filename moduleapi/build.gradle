@@ -13,34 +13,11 @@ android {
             }
         }
     }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-
 }
 
 dependencies {
-//    compile project(':compiler')
-//    annotationProcessor project(':compiler')
     compile 'com.pqixing.android:annotation:+'
     annotationProcessor "com.pqixing.android:compiler:+"
 }
-
-// 上传到本地代码库
-uploadArchives {
-    repositories {
-        mavenDeployer {
-//            repository(url:  "http://192.168.3.7:9527/nexus/content/repositories/androidsnap/") {
-            repository(url: uri("/home/pqixing/.repo")) {
-                authentication(userName: mavenUserName, password: mavenUserPsw)
-            }
-            pom.groupId = groupId // 组名
-            pom.artifactId = "moduleapi" // 插件名
-            pom.version = "0.1"// 版本号
-        }
-    }
-}
+project.ext.artifactId = "moduleapi"
+apply from :"../upload.gradle"
