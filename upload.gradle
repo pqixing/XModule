@@ -1,5 +1,5 @@
 project.ext.key = "${mavenUrl.toString()}$artifactId"
-project.ext.localFile = file("local.properties")
+project.ext.localFile = new File(project.rootDir,"version.properties")
 
 // 上传到本地代码库
 uploadArchives {
