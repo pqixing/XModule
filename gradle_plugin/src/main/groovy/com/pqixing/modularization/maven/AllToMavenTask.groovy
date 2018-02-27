@@ -4,6 +4,7 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.dependent.DependentPrintTask
+import com.pqixing.modularization.git.CheckMasterTask
 import com.pqixing.modularization.utils.FileUtils
 
 class AllToMavenTask extends BaseTask {
@@ -20,6 +21,7 @@ class AllToMavenTask extends BaseTask {
         winOs = org.gradle.internal.os.OperatingSystem.current().isWindows()
         outFile = new File(wrapper.getExtends(BuildConfig).outDir, "$Keys.BATH_ALL.${winOs ? "bat" : "sh"}")
         outContent = new StringBuilder("cd ${project.rootDir.absolutePath} \n")
+        outContent.append("gradle :${getTaskName(CheckMasterTask)} \n")
     }
 
     @Override
@@ -34,8 +36,8 @@ class AllToMavenTask extends BaseTask {
 
     @Override
     void end() {
+        outContent.append("echo  > $Keys.TXT_HIDE_INCLUDE \n")
         FileUtils.write(outFile, outContent.toString())
-        new File(project.rootDir, Keys.TXT_HIDE_INCLUDE).delete()
     }
 
     void writeBathScrip(StringBuilder sb, String moduleName) {

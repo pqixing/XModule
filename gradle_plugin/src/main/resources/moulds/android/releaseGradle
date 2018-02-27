@@ -1,3 +1,4 @@
+//Auto Add By Modularization
 moduleConfig{
    mavenType = mavenTypes.release
  }

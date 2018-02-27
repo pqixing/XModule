@@ -7,7 +7,7 @@ import com.pqixing.modularization.utils.GitUtils
  * 同步文档的任务
  */
 
-class CloneGitTask extends GitTask {
+class GitCloneTask extends GitTask {
 
     @Override
     void start() {

@@ -46,6 +46,10 @@ class Keys {
      */
     public static final String GROUP_TASK = "modularization"
     /**
+     * other任务分组
+     */
+    public static final String GROUP_OTHER = "other"
+    /**
      * 远程配置项
      */
     public static final String REMOTE_CONFIG = "remoteConfig"

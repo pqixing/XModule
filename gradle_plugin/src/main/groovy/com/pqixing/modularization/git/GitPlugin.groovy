@@ -39,9 +39,12 @@ class GitPlugin extends BasePlugin {
             throw new RuntimeException("init setting file, please sync again -- 初始化设置，请重新同步")
         }
         project.extensions.add(Keys.CONFIG_GIT, wrapper.getExtends(GitConfig))
-        BaseTask.task(project, CodePullTask.class)
-        BaseTask.task(project, CheckOutTask.class)
-        BaseTask.task(project, CloneGitTask.class)
+        BaseTask.task(project, GitPullTask.class)
+        BaseTask.task(project, CheckBranchTask.class)
+        BaseTask.task(project, GitCloneTask.class)
+        BaseTask.task(project, CheckMasterTask.class)
+        BaseTask.task(project, ModuReleaseTask.class)
+        BaseTask.task(project, DelModuReleaseTask.class)
 
         readGitProject(project.gradle)
         applyDefaultGradle()
