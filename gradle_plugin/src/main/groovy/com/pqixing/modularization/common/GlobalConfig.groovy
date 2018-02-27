@@ -78,7 +78,7 @@ class GlobalConfig {
         if (configFile.exists()) {
             updateConfig(configFile.text)
         } else {
-
+            writeGlobalModu(configFile)
         }
 
         Print.ln("GlobalConfig ${GlobalConfig.staticProperties}")
@@ -90,7 +90,8 @@ class GlobalConfig {
     public static void writeGlobalModu(File outFile) {
         StringBuilder sb = new StringBuilder("#$Keys.TAG_AUTO_ADD \n")
         GlobalConfig.staticProperties.each { p ->
-            sb.append("#$p.key = $p.value \n")
+            String s = p.value instanceof String ?"\"":""
+            sb.append("#$p.key = $s$p.value$s \n")
         }
         outFile.write(sb.toString())
     }
