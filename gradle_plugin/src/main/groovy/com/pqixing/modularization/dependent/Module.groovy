@@ -8,7 +8,7 @@ import com.pqixing.modularization.utils.CheckUtils
  */
 
 class Module extends BaseExtension {
-    public static final String SCOP_COMPILE = "compile"
+    public static final String SCOP_API = "api"
     public static final String SCOP_RUNTIME = "runtimeOnly"
     public static final String SCOP_COMPILEONLY = "compileOnly"
     public static final String SCOP_IMPL = "implementation"

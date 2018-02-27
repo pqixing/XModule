@@ -65,7 +65,7 @@ class Dependencies extends BaseExtension {
 
     Module addImpl(String moduleName, Closure closure = null) {
         Module inner = add(moduleName, closure)
-        inner.scope = Module.SCOP_COMPILE
+        inner.scope = Module.SCOP_API
         return inner
     }
 

@@ -5,9 +5,7 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.wrapper.ProjectWrapper
-
 /**
  * Created by pqixing on 17-12-7.
  * 全局配置，主要在gradle.propeties中的配置信息
@@ -75,10 +73,23 @@ class GlobalConfig {
             else updateConfig(FileUtils.read(remote))
         }
         File configFile = new File(wrapper.project.rootDir, Keys.GLOBAL_CONFIG_NAME)
-        if (configFile.exists())
+        if (configFile.exists()) {
             updateConfig(configFile.text)
-
-        Print.ln("GlobalConfig ${GlobalConfig.staticProperties}")
+        } else {
+            writeGlobalModu(configFile)
+        }
+    }
+    /**
+     * 输出模板Global文件
+     * @param outFile
+     */
+    public static void writeGlobalModu(File outFile) {
+        StringBuilder sb = new StringBuilder("#$Keys.TAG_AUTO_ADD \n")
+        GlobalConfig.staticProperties.each { p ->
+            String s = p.value instanceof String ?"\"":""
+            sb.append("#$p.key = $s$p.value$s \n")
+        }
+        outFile.write(sb.toString())
     }
 
     public static HashMap<String, Object> getStaticProperties() {

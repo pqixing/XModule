@@ -55,6 +55,9 @@ public class AutoInclude {
         f.eachLine { line ->
             end |= line.startsWith(AutoConfig.TAG_AUTO_ADD)
             if (end) return
+            if (!line.trim().isEmpty()) {
+                icTxt.append(line).append("\\n")
+            }
 
             def map = line.replaceAll("//.*", "").split("=")
             if (map.length < 2) return
@@ -73,9 +76,9 @@ public class AutoInclude {
                     value?.split(",")?.each { includes += it.trim() }
                     break
             }
-            icTxt.append(line).append("\\n")
+
         }
-        f.write("${icTxt.toString()}\\n$AutoConfig.TAG_AUTO_ADD ------------- the config below this line is not work!!!!! \\n${autoTxt.toString()}")
+        f.write("${icTxt.toString()}\\n$AutoConfig.TAG_AUTO_ADD below this line is not work!!!!! github -> https://github.com/pqixing/modularization \\n${autoTxt.toString()}")
     }
     /**
      * 解析default xml 加载所有的git信息
@@ -137,7 +140,7 @@ public class AutoInclude {
     }
 
     void saveToFile(Map<String, String> realInclude) {
-        StringBuilder sb =  new StringBuilder("//Auto Add By Modularization")
+        StringBuilder sb = new StringBuilder("//Auto Add By Modularization")
         realInclude.each { map ->
             sb.append("\\ninclude (':$map.key') \\n")
                     .append("project(':$map.key').projectDir = new File('$map.value')")

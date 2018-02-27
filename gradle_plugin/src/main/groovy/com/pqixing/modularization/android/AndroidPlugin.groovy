@@ -3,8 +3,6 @@ package com.pqixing.modularization.android
 import auto.Android
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.ModuleConfig
-import com.pqixing.modularization.analysis.MergeToMasterTask
-import com.pqixing.modularization.analysis.MergeToReleaseTask
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
@@ -16,7 +14,6 @@ import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-7.
  */
@@ -35,20 +32,20 @@ abstract class AndroidPlugin extends BasePlugin {
         project.ext.endConfig = {
             loadLocalGradle()
             if (it instanceof Closure) it.call(moduleConfig)
+            //添加直接使用的配置
+            project.ext.support_v7 = moduleConfig.androidConfig.support_v7
+            project.ext.support_v4 = moduleConfig.androidConfig.support_v4
+            project.ext.support_constraint = moduleConfig.androidConfig.support_constraint
 
             //配置结束
             moduleConfig.outFiles.findAll { it != null }.each { wrapper.apply from: it }
             //添加打印依赖的task
             BaseTask.task(project, DependentPrintTask.class)
             BaseTask.task(project, DocSyncTask.class)
-            BaseTask.task(project, MergeToMasterTask.class)
-            BaseTask.task(project, MergeToReleaseTask.class)
             //添加分析的任务
 //            BaseTask.task(wrapper.project, wrapper.getExtends(GitConfig.class)
 //                    .branchName == "master" ? MavenMergerTask.class : BranchMergerTask.class)
-            //添加直接使用的配置
-            project.ext.support_v7 = moduleConfig.androidConfig.support_v7
-            project.ext.support_v4 = moduleConfig.androidConfig.support_v4
+
             project.ext.printPros = { pro -> Print.lnPro(pro) }
 
         }

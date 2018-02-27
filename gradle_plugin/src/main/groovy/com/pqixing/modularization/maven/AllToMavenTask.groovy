@@ -20,22 +20,32 @@ class AllToMavenTask extends BaseTask {
         winOs = org.gradle.internal.os.OperatingSystem.current().isWindows()
         outFile = new File(wrapper.getExtends(BuildConfig).outDir, "$Keys.BATH_ALL.${winOs ? "bat" : "sh"}")
         outContent = new StringBuilder("cd ${project.rootDir.absolutePath} \n")
+//        outContent.append("gradle :${getTaskName(CheckMasterTask)} \n")
     }
 
     @Override
     void runTask() {
+        StringBuilder temp = new StringBuilder()
+
+        outContent.append("echo start batch upload :")
         //所有依赖的文件
         wrapper.getTask(DependentPrintTask).dpBySortList.each {
-            writeBathScrip(outContent, it.moduleName)
+            outContent.append(it.moduleName).append(",")
+            writeBathScrip(temp, it.moduleName)
         }
-        if (wrapper.pluginName == Keys.NAME_LIBRARY) writeBathScrip(outContent, project.name)
+        if (wrapper.pluginName == Keys.NAME_LIBRARY) {
+            outContent.append(project.name).append(",")
+            writeBathScrip(temp, project.name)
+        }
+
+        outContent.append(" >> ${BuildConfig.mavenRecordFile}\n").append(temp)
     }
 
 
     @Override
     void end() {
+        outContent.append("echo batch upload end > $Keys.TXT_HIDE_INCLUDE \n")
         FileUtils.write(outFile, outContent.toString())
-        new File(project.rootDir, Keys.TXT_HIDE_INCLUDE).delete()
     }
 
     void writeBathScrip(StringBuilder sb, String moduleName) {

@@ -63,7 +63,7 @@ public class LaunchProcessor extends AbstractProcessor {
         if (activitys.isEmpty() && applikes.isEmpty()) return false;
         messager.printMessage(Diagnostic.Kind.NOTE, "LaunchProcessor:-> activitys :" + activitys + "  applikes:" + applikes);
 
-        String pkg = "auto." + groupName + "." + TextUtils.numOrLetter(moduleName);
+        String pkg = "auto." + groupName + "." + TextUtils.numOrLetter(moduleName).toLowerCase();
         String javaName = TextUtils.className(moduleName + "Launch");
         StringBuilder classStr = new StringBuilder("package " + pkg + ";\n");
         classStr.append("public class " + javaName + "{ \n");

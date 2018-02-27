@@ -1,13 +1,12 @@
 package com.pqixing.modularization.wrapper
 
 import com.pqixing.modularization.Keys
+import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.utils.CheckUtils
-import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.utils.TextUtils
 import org.gradle.api.Project
 import org.gradle.api.Task
-
 /**
  * 拓展类Utils
  */
@@ -31,8 +30,7 @@ class ProjectWrapper {
     }
 
     public <T extends Task> T getTask(Class<T> tClass) {
-        String taskName = tClass.simpleName.replace("Task", "")
-        return project."$taskName"
+        return project."${BaseTask.getTaskName(tClass)}"
     }
 
     public def get(String key) {

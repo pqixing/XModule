@@ -46,6 +46,10 @@ class Keys {
      */
     public static final String GROUP_TASK = "modularization"
     /**
+     * other任务分组
+     */
+    public static final String GROUP_OTHER = "other"
+    /**
      * 远程配置项
      */
     public static final String REMOTE_CONFIG = "remoteConfig"
@@ -61,10 +65,6 @@ class Keys {
      * 本地配置
      */
     public static final String LOCAL_GRADLE = "local.gradle"
-    /**
-     * 本地配置模板
-     */
-    public static final String LOCAL_GRADLE_MOULD = "//local config file\n moduleConfig{\n//runType = runTypes.test\n\n}"
     /**
      * 模块配置
      */
@@ -119,7 +119,7 @@ class Keys {
     /**
      * 默认初始版本号
      */
-    public static final String VERSION_DEFAULT = "1.0.0"
+    public static final String VERSION_DEFAULT = "2.0.0"
     /**
      * 时间后缀
      */
@@ -162,5 +162,10 @@ class Keys {
      * 隐藏的导入文件，批量上传时使用
      */
     static final String TXT_HIDE_INCLUDE = "hideInclude.txt"
+
+    /**
+     * 上传日志记录
+     */
+    public static final String MAVEN_RECORD = "maven.record"
 
 }

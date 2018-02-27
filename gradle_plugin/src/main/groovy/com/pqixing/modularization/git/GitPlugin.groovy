@@ -1,7 +1,6 @@
 package com.pqixing.modularization.git
 
 import auto.Moulds
-import auto.Plugin
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.BaseTask
@@ -9,10 +8,8 @@ import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.GitUtils
-import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
-
 /**
  * Created by pqixing on 17-12-20.
  */
@@ -39,14 +36,16 @@ class GitPlugin extends BasePlugin {
             throw new RuntimeException("init setting file, please sync again -- 初始化设置，请重新同步")
         }
         project.extensions.add(Keys.CONFIG_GIT, wrapper.getExtends(GitConfig))
-        BaseTask.task(project, CodePullTask.class)
-        BaseTask.task(project, CheckOutTask.class)
-        BaseTask.task(project, CloneGitTask.class)
+        BaseTask.task(project, GitUpdateTask.class)
+        BaseTask.task(project, CheckBranchTask.class)
+        BaseTask.task(project, GitCloneAllTask.class)
+        BaseTask.task(project, CheckMasterTask.class)
+        BaseTask.task(project, ModuReleaseTask.class)
+        BaseTask.task(project, DelModuReleaseTask.class)
 
         readGitProject(project.gradle)
         applyDefaultGradle()
         applyLocalGradle()
-        Print.lnf("Plugin version : $Plugin.VERSION URL : $Plugin.URL")
     }
     /**
      * 如果文档库中有default.gradle文件，则应用

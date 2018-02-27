@@ -12,9 +12,12 @@ buildscript {
 allprojects {
     repositories {
         maven {
-            url uri("/home/pqixing/.repo")
+            url "http://192.168.3.7:9527/nexus/content/groups/androidgroup/"
         }
         jcenter()
         google()
     }
 }
+
+//project.ext.mavenUrl=uri("/home/pqixing/.repo")
+ext.mavenUrl ="http://192.168.3.7:9527/nexus/content/repositories/releases/"

@@ -17,17 +17,19 @@ abstract class GitTask extends BaseTask {
      */
     Set<GitProject> targetGits
     String target = "include"
+    String checkout = "master"
 
     @Override
     void start() {
         gitConfig = wrapper.getExtends(GitConfig)
         target = gitConfig.target
+        checkout = gitConfig.checkout
         targetGits = new HashSet<>()
     }
 
     @Override
     void runTask() {
-        switch (gitConfig.target) {
+        switch (target) {
             case "all":
                 targetGits.addAll(GitConfig.allGitProjects)
                 break
