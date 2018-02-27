@@ -21,6 +21,7 @@ class BuildConfig extends BaseExtension {
     final String rootOutDir = FileUtils.urls(BasePlugin.rootProject.rootDir.absolutePath, dirName)
     public static final String versionDir = FileUtils.urls(rootOutDir, "versions")
     public static final String netCacheDir = FileUtils.urls(rootOutDir, "netCache")
+    public static final String mavenRecordFile = FileUtils.urls(rootOutDir, Keys.MAVEN_RECORD)
 
     final String projectName
     //根目录的输出路径

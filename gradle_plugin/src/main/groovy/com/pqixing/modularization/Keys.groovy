@@ -68,7 +68,8 @@ class Keys {
     /**
      * 本地配置模板
      */
-    public static final String LOCAL_GRADLE_MOULD = "//local config file\n moduleConfig{\n//runType = runTypes.test\n\n}"
+    public static
+    final String LOCAL_GRADLE_MOULD = "//local config file\n moduleConfig{\n//runType = runTypes.test\n\n}"
     /**
      * 模块配置
      */
@@ -166,5 +167,10 @@ class Keys {
      * 隐藏的导入文件，批量上传时使用
      */
     static final String TXT_HIDE_INCLUDE = "hideInclude.txt"
+
+    /**
+     * 上传日志记录
+     */
+    public static final String MAVEN_RECORD = "maven.record"
 
 }
