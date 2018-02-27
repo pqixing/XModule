@@ -61,11 +61,24 @@ class PomWrapper extends XmlWrapper {
         }
         return 0L
     }
+    /**
+     * 获取最后一次的git版本号
+     * @return
+     */
+    public String getRevisionNum() {
+        try {
+            String name = node.name.text()
+            return name.substring(name.lastIndexOf(Keys.SEPERATOR) + Keys.SEPERATOR.length(), name.lastIndexOf(Keys.SEPERATOR))
+        } catch (Exception e) {
+            Print.lne(e)
+        }
+        return "null"
+    }
 
     public String getGitLog() {
         try {
             String name = node.name.text()
-            return name.substring(name.indexOf(Keys.SEPERATOR) + Keys.SEPERATOR.length())
+            return name.substring(name.lastIndexOf(Keys.SEPERATOR) + Keys.SEPERATOR.length())
         } catch (Exception e) {
             Print.lne(e)
         }
@@ -82,7 +95,7 @@ class PomWrapper extends XmlWrapper {
             String groupId = d.groupId.text()
             String artifactId = d.artifactId.text()
             //不是内部依赖，则不处理
-            if (groupId != GlobalConfig.groupName||artifactId == "dcannotation") return
+            if (groupId != GlobalConfig.groupName || artifactId == "dcannotation") return
             Module dm = new Module()
             dm.artifactId = d.artifactId.text()
             dm.groupId = d.groupId.text()

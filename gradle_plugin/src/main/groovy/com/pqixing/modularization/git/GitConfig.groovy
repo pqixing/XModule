@@ -50,11 +50,7 @@ class GitConfig extends BaseExtension {
         super(project)
         branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", project.projectDir)?.trim() ?: ""
         revisionNum = GitUtils.run("git rev-parse HEAD", project.projectDir)?.trim() ?: ""
-        def lines = GitUtils.run("git branch -vv", project.projectDir)?.readLines()
-        if (lines != null) for (String l : lines) {
-            if (l.startsWith("*")) lastLog = l.trim()
-        }
-        if (lastLog == null) lastLog = ""
+        lastLog = GitUtils.run("git log -1 --oneline ${revisionNum}", project.projectDir)?.trim() ?: ""
     }
 
     List<String> log(int num = 5) {
