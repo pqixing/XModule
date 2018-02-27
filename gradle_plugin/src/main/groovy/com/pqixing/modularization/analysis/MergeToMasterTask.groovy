@@ -24,7 +24,7 @@ class MergeToMasterTask extends BaseTask {
 
     @Override
     void runTask() {
-        //所有依赖的文件
+        //所有依赖的文件test
         wrapper.getTask(DependentPrintTask).dpBySortList.each {
             writeBathScrip(outContent, it.moduleName)
         }
