@@ -32,6 +32,9 @@ abstract class AndroidPlugin extends BasePlugin {
         project.ext.endConfig = {
             loadLocalGradle()
             if (it instanceof Closure) it.call(moduleConfig)
+            //添加直接使用的配置
+            project.ext.support_v7 = moduleConfig.androidConfig.support_v7
+            project.ext.support_v4 = moduleConfig.androidConfig.support_v4
 
             //配置结束
             moduleConfig.outFiles.findAll { it != null }.each { wrapper.apply from: it }
@@ -41,9 +44,7 @@ abstract class AndroidPlugin extends BasePlugin {
             //添加分析的任务
 //            BaseTask.task(wrapper.project, wrapper.getExtends(GitConfig.class)
 //                    .branchName == "master" ? MavenMergerTask.class : BranchMergerTask.class)
-            //添加直接使用的配置
-            project.ext.support_v7 = moduleConfig.androidConfig.support_v7
-            project.ext.support_v4 = moduleConfig.androidConfig.support_v4
+
             project.ext.printPros = { pro -> Print.lnPro(pro) }
 
         }

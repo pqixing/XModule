@@ -16,7 +16,7 @@ task("auto") {
         StringBuilder cls = new StringBuilder("package auto \n")
                 .append("public class ").append(clsName).append(" {\n")
                 .append("static String URL = '$url' \n")
-                .append("static String VERSION = '${lastVersion(url)}' \n")
+                .append("static String VERSION = '${lastVersion(key)}' \n")
                 .append("\n }")
         new File(autoDir, "${clsName}.groovy").write(cls.toString())
     }
