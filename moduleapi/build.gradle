@@ -16,7 +16,7 @@ android {
 }
 
 dependencies {
-    compile 'com.pqixing.android:annotation:+'
+    api 'com.pqixing.android:annotation:+'
     annotationProcessor "com.pqixing.android:compiler:+"
 }
 project.ext.artifactId = "moduleapi"
