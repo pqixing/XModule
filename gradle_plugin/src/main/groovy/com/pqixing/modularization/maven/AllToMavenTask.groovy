@@ -29,7 +29,9 @@ class AllToMavenTask extends BaseTask {
 
         outContent.append("echo start batch upload :")
         //所有依赖的文件
-        wrapper.getTask(DependentPrintTask).dpBySortList.each {
+        def dpBySortList = wrapper.getTask(DependentPrintTask).dpBySortList
+        for (int i = dpBySortList.size() - 1; i >= 0; i--) {
+            def it = dpBySortList.get(i)
             outContent.append(it.moduleName).append(",")
             writeBathScrip(temp, it.moduleName)
         }

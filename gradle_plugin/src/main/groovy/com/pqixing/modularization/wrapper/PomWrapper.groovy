@@ -68,7 +68,7 @@ class PomWrapper extends XmlWrapper {
     public String getRevisionNum() {
         try {
             String name = node.name.text()
-            return name.substring(name.lastIndexOf(Keys.SEPERATOR) + Keys.SEPERATOR.length(), name.lastIndexOf(Keys.SEPERATOR))
+            return name.substring(name.indexOf(Keys.SEPERATOR) + Keys.SEPERATOR.length(), name.lastIndexOf(Keys.SEPERATOR))
         } catch (Exception e) {
             Print.lne(e)
         }

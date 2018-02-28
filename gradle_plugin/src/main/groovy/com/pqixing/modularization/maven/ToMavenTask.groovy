@@ -51,16 +51,18 @@ class ToMavenTask extends BaseTask {
         int lastPoint = lastRelease.lastIndexOf(".")
         String baseVersion = lastRelease.substring(0, lastPoint)
         int lastVersion = lastRelease.substring(lastPoint + 1).toInteger() + 1
+        lastRelease = "${baseVersion}.${lastVersion}"
 
-        if (!CheckUtils.isEmpty(mavenInfo.pom_version)) mavenInfo.pom_version = baseVersion
-        mavenInfo.pom_version += ".$lastVersion"
+        if (CheckUtils.isEmpty(mavenInfo.pom_version)) mavenInfo.pom_version = baseVersion
 
-        if (mavenInfo.pom_version < lastRelease) {
+        if (mavenInfo.pom_version < baseVersion) {
             if (mavenInfo.focusUpload) mavenInfo.pom_version = lastRelease
             else {
-                addMavenRecord("pom_version can not less than maven version : $baseVersion")
-                throw new RuntimeException("pom_version can not less than maven version : $baseVersion")
+                addMavenRecord("pom_version error  cur ${mavenInfo.pom_version} maven : $baseVersion ")
+                throw new RuntimeException("pom_version error  cur ${mavenInfo.pom_version} maven : $baseVersion ")
             }
+        }else {
+            mavenInfo.pom_version = "${mavenInfo.pom_version}.$lastVersion"
         }
     }
 
