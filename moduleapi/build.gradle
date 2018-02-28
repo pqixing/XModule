@@ -16,8 +16,7 @@ android {
 }
 
 dependencies {
-    api 'com.pqixing.android:annotation:+'
-    annotationProcessor "com.pqixing.android:compiler:+"
+    api 'com.pqixing.android:annotation:0.3'
 }
 project.ext.artifactId = "moduleapi"
 apply from :"../upload.gradle"

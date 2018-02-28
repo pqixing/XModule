@@ -79,6 +79,7 @@ class ToMavenTask extends BaseTask {
         pom.artifactId = mavenInfo.artifactId
         pom.version = mavenInfo.pom_version
         pom.name = "${System.currentTimeMillis()}${Keys.SEPERATOR}${wrapper.getExtends(GitConfig).revisionNum}$Keys.SEPERATOR-Git记录 ${gitConfig.branchName}:${gitConfig.lastLog}"
+        addMavenRecord("uploadArchives -> pom: $pom")
     }
 
     @Override
@@ -102,7 +103,7 @@ class ToMavenTask extends BaseTask {
      */
     void addMavenRecord(String msg) {
         if (recordFile == null) recordFile = new File(BuildConfig.mavenRecordFile)
-        if (!recordFile.exists()) recordFile.mkdirs()
+        if (!recordFile.exists()) recordFile.parentFile.mkdirs()
         recordFile.append("${new Date().toLocaleString()} -> $msg\n")
         Print.lnf(msg)
     }
