@@ -68,7 +68,7 @@ class PomWrapper extends XmlWrapper {
     public String getRevisionNum() {
         try {
             String name = node.name.text()
-            return name.substring(name.lastIndexOf(Keys.SEPERATOR) + Keys.SEPERATOR.length(), name.lastIndexOf(Keys.SEPERATOR))
+            return name.substring(name.indexOf(Keys.SEPERATOR) + Keys.SEPERATOR.length(), name.lastIndexOf(Keys.SEPERATOR))
         } catch (Exception e) {
             Print.lne(e)
         }
@@ -117,7 +117,9 @@ class PomWrapper extends XmlWrapper {
         node.dependencies.dependency.each { d ->
             d.exclusions.exclusion.each { e ->
                 if (e.groupId.text() == Keys.GROUP_MASTER) {
-                    excludes += e.artifactId.text().toString().split(Keys.SEPERATOR)
+                    e.artifactId.text().toString().split(Keys.SEPERATOR).each{
+                        excludes.add(it)
+                    }
                 }
             }
         }

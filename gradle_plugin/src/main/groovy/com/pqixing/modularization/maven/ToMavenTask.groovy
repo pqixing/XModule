@@ -51,16 +51,18 @@ class ToMavenTask extends BaseTask {
         int lastPoint = lastRelease.lastIndexOf(".")
         String baseVersion = lastRelease.substring(0, lastPoint)
         int lastVersion = lastRelease.substring(lastPoint + 1).toInteger() + 1
+        lastRelease = "${baseVersion}.${lastVersion}"
 
-        if (!CheckUtils.isEmpty(mavenInfo.pom_version)) mavenInfo.pom_version = baseVersion
-        mavenInfo.pom_version += ".$lastVersion"
+        if (CheckUtils.isEmpty(mavenInfo.pom_version)) mavenInfo.pom_version = baseVersion
 
-        if (mavenInfo.pom_version < lastRelease) {
+        if (mavenInfo.pom_version < baseVersion) {
             if (mavenInfo.focusUpload) mavenInfo.pom_version = lastRelease
             else {
-                addMavenRecord("pom_version can not less than maven version : $baseVersion")
-                throw new RuntimeException("pom_version can not less than maven version : $baseVersion")
+                addMavenRecord("pom_version error  cur ${mavenInfo.pom_version} maven : $baseVersion ")
+                throw new RuntimeException("pom_version error  cur ${mavenInfo.pom_version} maven : $baseVersion ")
             }
+        }else {
+            mavenInfo.pom_version = "${mavenInfo.pom_version}.$lastVersion"
         }
     }
 
@@ -77,6 +79,7 @@ class ToMavenTask extends BaseTask {
         pom.artifactId = mavenInfo.artifactId
         pom.version = mavenInfo.pom_version
         pom.name = "${System.currentTimeMillis()}${Keys.SEPERATOR}${wrapper.getExtends(GitConfig).revisionNum}$Keys.SEPERATOR-Git记录 ${gitConfig.branchName}:${gitConfig.lastLog}"
+        addMavenRecord("uploadArchives -> pom: $pom")
     }
 
     @Override
@@ -100,7 +103,7 @@ class ToMavenTask extends BaseTask {
      */
     void addMavenRecord(String msg) {
         if (recordFile == null) recordFile = new File(BuildConfig.mavenRecordFile)
-        if (!recordFile.exists()) recordFile.mkdirs()
+        if (!recordFile.exists()) recordFile.parentFile.mkdirs()
         recordFile.append("${new Date().toLocaleString()} -> $msg\n")
         Print.lnf(msg)
     }

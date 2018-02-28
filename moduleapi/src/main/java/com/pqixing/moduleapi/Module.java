@@ -4,12 +4,14 @@ import android.app.Application;
 import android.os.Handler;
 import android.os.HandlerThread;
 
+import com.pqixing.annotation.LaunchActivity;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+@LaunchActivity(name = "",group = "",intent = "key:'ddd',key:value")
 public class Module {
     public static HashMap<String, IApplicationLike> likeHashMap = new HashMap<>();
     public static final String ENTER_CLASS = "auto.com.pqixing.configs.Enter";
@@ -47,7 +49,6 @@ public class Module {
      */
     public static final List<IApplicationLike> installAppLilke(Application app) {
         Set<String> applikes = new HashSet<>();
-        likeHashMap.clear();
         loadAppLike(applikes, TextUtils.getStringFields(ENTER_CLASS, "CONFIG"));
 
         List<IApplicationLike> likes = new ArrayList<>();

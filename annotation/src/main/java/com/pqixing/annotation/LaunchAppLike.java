@@ -5,4 +5,5 @@ package com.pqixing.annotation;
  */
 public @interface LaunchAppLike {
     String name() default "";
+    String group() default "";
 }
