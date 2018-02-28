@@ -22,7 +22,7 @@ import org.gradle.api.Project
 class Dependencies extends BaseExtension {
 
     //对应all*.exclude
-    HashMap<String,Map<String, String>> allExcludes
+    HashMap<String, Map<String, String>> allExcludes
     HashSet<Module> modules
     //传递下来的master分支的exclude
     Set<String> masterExclude = new HashSet<>()
@@ -41,7 +41,7 @@ class Dependencies extends BaseExtension {
      * @param exclude
      */
     void allExclude(Map<String, String> exclude) {
-        allExcludes.put(exclude.toString(),exclude)
+        allExcludes.put(exclude.toString(), exclude)
     }
 
     Dependencies(Project project) {
@@ -128,7 +128,11 @@ class Dependencies extends BaseExtension {
         StringBuilder sb = new StringBuilder()
         excludes.each { item ->
             sb.append("    $prefix ( ")
-            item.each { map -> sb.append("$map.key : '$map.value',") }
+            item.each { map ->
+                String value = map.value
+                if(CheckUtils.isEmpty(value)) value = "empty"
+                sb.append("$map.key : '$value',")
+            }
             sb.deleteCharAt(sb.length() - 1)
             sb.append(" ) \n")
         }
@@ -224,7 +228,8 @@ class Dependencies extends BaseExtension {
             allExclude([group: model.groupId, module: TextUtils.getBranchArtifactId(model.moduleName, wrapper)])
         }
         allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)}${Keys.SEPERATOR}justTag")
-        sb.append("${excludeStr("all*.exclude", allExcludes.values())}} \n")
+       // sb.append("${excludeStr("all*.exclude", allExcludes.values())}} \n")
+        sb.append("}\n")
         saveVersionMap()
 
         if (!CheckUtils.isEmpty(dependentLose)) Print.lnf("$project.name dependentLose : ${JSON.toJSONString(dependentLose)}")
