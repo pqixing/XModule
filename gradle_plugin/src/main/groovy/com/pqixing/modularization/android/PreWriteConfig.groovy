@@ -40,7 +40,7 @@ class PreWriteConfig extends BaseExtension {
             dpNames.append("$Keys.PREFIX_PKG.${m.groupId}.${TextUtils.numOrLetter(m.moduleName).toLowerCase()}.${TextUtils.className(m.moduleName)}Config,")
         }
         if (dpNames.length() > 1) dpNames.deleteCharAt(dpNames.length() - 1)
-        String launchClass = "${buildConfig.javaPackage}.${TextUtils.firstUp(buildConfig.projectName)}Launch"
+        String launchClass = "${buildConfig.javaPackage}.${TextUtils.className(project.name)}Launch"
 
         addConfig("NAME": buildConfig.projectName, "DP_CONFIGS_NAMES": dpNames.toString())
         addConfig("LAUNCH_CONFIG": launchClass)
@@ -53,7 +53,7 @@ class PreWriteConfig extends BaseExtension {
 
         def writes = new auto.Prewrite()
         writes.params += buildConfig.properties
-        String className = TextUtils.firstUp("${buildConfig.projectName}Config")
+        String className = TextUtils.className("${project.name}Config")
         writes.params += ["preConfigs": confStr.toString(), "className": className]
 
         String fullName = "${buildConfig.javaPackage}.$className"
