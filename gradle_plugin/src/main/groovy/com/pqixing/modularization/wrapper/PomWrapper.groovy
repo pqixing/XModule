@@ -117,7 +117,9 @@ class PomWrapper extends XmlWrapper {
         node.dependencies.dependency.each { d ->
             d.exclusions.exclusion.each { e ->
                 if (e.groupId.text() == Keys.GROUP_MASTER) {
-                    excludes += e.artifactId.text().toString().split(Keys.SEPERATOR)
+                    e.artifactId.text().toString().split(Keys.SEPERATOR).each{
+                        excludes.add(it)
+                    }
                 }
             }
         }

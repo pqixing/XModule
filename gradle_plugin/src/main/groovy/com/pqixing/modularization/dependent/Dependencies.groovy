@@ -22,7 +22,7 @@ import org.gradle.api.Project
 class Dependencies extends BaseExtension {
 
     //对应all*.exclude
-    LinkedList<Map<String, String>> allExcludes
+    HashMap<String,Map<String, String>> allExcludes
     HashSet<Module> modules
     //传递下来的master分支的exclude
     Set<String> masterExclude = new HashSet<>()
@@ -41,13 +41,13 @@ class Dependencies extends BaseExtension {
      * @param exclude
      */
     void allExclude(Map<String, String> exclude) {
-        allExcludes += exclude
+        allExcludes.put(exclude.toString(),exclude)
     }
 
     Dependencies(Project project) {
         super(project)
         modules = new HashSet<>()
-        allExcludes = new LinkedList<>()
+        allExcludes = new HashMap<>()
     }
 
 
@@ -124,7 +124,7 @@ class Dependencies extends BaseExtension {
      * @param sb
      * @param module
      */
-    String excludeStr(String prefix, List<Map<String, String>> excludes) {
+    String excludeStr(String prefix, Collection<Map<String, String>> excludes) {
         StringBuilder sb = new StringBuilder()
         excludes.each { item ->
             sb.append("    $prefix ( ")
@@ -172,8 +172,8 @@ class Dependencies extends BaseExtension {
 
         //如果依赖的是分支，获取该依赖中传递的master仓库依赖去除
         if (module.artifactId.contains(Keys.BRANCH_TAG)) {
-            masterExclude += PomWrapper.create(mavenType.maven_url, module.groupId, module.artifactId, module.version).masterExclude
-            masterExclude += module.moduleName
+            masterExclude.addAll(PomWrapper.create(mavenType.maven_url, module.groupId, module.artifactId, module.version).masterExclude)
+            masterExclude.add(module.moduleName)
         }
         return true
     }
@@ -223,8 +223,8 @@ class Dependencies extends BaseExtension {
             allExclude([group: model.groupId, module: model.moduleName])
             allExclude([group: model.groupId, module: TextUtils.getBranchArtifactId(model.moduleName, wrapper)])
         }
-        allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)},justTag")
-        sb.append("${excludeStr("all*.exclude", allExcludes)}} \n")
+        allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)}${Keys.SEPERATOR}justTag")
+        sb.append("${excludeStr("all*.exclude", allExcludes.values())}} \n")
         saveVersionMap()
 
         if (!CheckUtils.isEmpty(dependentLose)) Print.lnf("$project.name dependentLose : ${JSON.toJSONString(dependentLose)}")
