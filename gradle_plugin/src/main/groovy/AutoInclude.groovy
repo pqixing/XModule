@@ -77,7 +77,9 @@ public class AutoInclude {
             }
 
         }
-        f.write("${icTxt.toString()}\\n$AutoConfig.TAG_AUTO_ADD below this line is not work!!!!! github -> https://github.com/pqixing/modularization \\n${autoTxt.toString()}")
+        def wirter = f.newPrintWriter("utf-8")
+        wirter.write("${icTxt.toString()}\\n$AutoConfig.TAG_AUTO_ADD below this line is not work!!!!! github -> https://github.com/pqixing/modularization \\n${autoTxt.toString()}")
+        wirter.close()
     }
     /**
      * 解析default xml 加载所有的git信息

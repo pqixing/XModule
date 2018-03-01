@@ -172,6 +172,9 @@ class Keys {
      */
     public static final String TAG_EMPTY = "emptyTag"
 
-
+    /**
+     * gradle.properteis文件
+     */
+    public static final String  NAME_PRO_GRADLE= "gradle.properties"
 
 }

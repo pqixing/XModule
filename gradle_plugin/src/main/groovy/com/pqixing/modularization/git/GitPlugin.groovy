@@ -10,6 +10,7 @@ import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.GitUtils
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
+
 /**
  * Created by pqixing on 17-12-20.
  */
@@ -32,6 +33,7 @@ class GitPlugin extends BasePlugin {
         GlobalConfig.init()
         super.apply(project)
         addMouldGradle()
+        addGradleFile()
         if (writeMouldGradle()) {
             throw new RuntimeException("init setting file, please sync again -- 初始化设置，请重新同步")
         }
@@ -46,6 +48,13 @@ class GitPlugin extends BasePlugin {
         readGitProject(project.gradle)
         applyDefaultGradle()
         applyLocalGradle()
+    }
+
+    void addGradleFile() {
+        def gradleProperties = new File(project.rootDir, Keys.NAME_PRO_GRADLE)
+        if (!gradleProperties.exists()) {
+            FileUtils.write(gradleProperties, new Moulds().gradleProperteis)
+        }
     }
     /**
      * 如果文档库中有default.gradle文件，则应用
