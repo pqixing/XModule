@@ -14,6 +14,7 @@ import com.pqixing.modularization.utils.TextUtils
 import com.pqixing.modularization.wrapper.MetadataWrapper
 import com.pqixing.modularization.wrapper.PomWrapper
 import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-12-25.
  */
@@ -84,7 +85,7 @@ class Dependencies extends BaseExtension {
         String version = versionMaps.getProperty(artifactId)
         long afterLastUpdate = System.currentTimeMillis() - (versionMaps.getProperty(timeStamp)?.toLong() ?: 0L)
         //更新版本的时间差
-        long updateGap = 1000 * 60
+        long updateGap = GlobalConfig.netCacheTime
         if (!GlobalConfig.updateBeforeSync) updateGap *= 20
 
         //一分钟秒内,不更新相同的组件版本,避免不停的爬取相同的接口
@@ -129,7 +130,7 @@ class Dependencies extends BaseExtension {
             sb.append("    $prefix ( ")
             item.each { map ->
                 String value = map.value
-                if(CheckUtils.isEmpty(value)) value = Keys.TAG_EMPTY
+                if (CheckUtils.isEmpty(value)) value = Keys.TAG_EMPTY
                 sb.append("$map.key : '$value',")
             }
             sb.deleteCharAt(sb.length() - 1)
@@ -223,12 +224,18 @@ class Dependencies extends BaseExtension {
             allExclude(group: GlobalConfig.groupName, module: name)
         }
         localDependency.each { model ->
-            allExclude([group: model.groupId, module: model.moduleName])
-            allExclude([group: model.groupId, module: TextUtils.getBranchArtifactId(model.moduleName, wrapper)])
+            String branchVersion = getLastVersion(model.groupId, model.moduleName)
+            if (CheckUtils.isVersionCode(branchVersion)) {
+                allExclude([group: model.groupId, module: model.moduleName])
+            }
+
+            branchVersion = getLastVersion(model.groupId, TextUtils.getBranchArtifactId(model.moduleName, wrapper))
+            if (CheckUtils.isVersionCode(branchVersion)) {
+                allExclude([group: model.groupId, module: TextUtils.getBranchArtifactId(model.moduleName, wrapper)])
+            }
         }
         allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)}${Keys.SEPERATOR}$Keys.TAG_EMPTY")
-       // sb.append("${excludeStr("all*.exclude", allExcludes.values())}} \n")
-        sb.append("}\n")
+        sb.append("${excludeStr("all*.exclude", allExcludes.values())}} \n")
         saveVersionMap()
 
         if (!CheckUtils.isEmpty(dependentLose)) Print.lnf("$project.name dependentLose : ${JSON.toJSONString(dependentLose)}")

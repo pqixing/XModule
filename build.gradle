@@ -1,8 +1,11 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     repositories {
-        jcenter()
-        google()
+//        jcenter()
+//        google()
+        maven {
+            url "http://192.168.3.7:9527/nexus/content/groups/androidgroup/"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.0'
@@ -14,8 +17,8 @@ allprojects {
         maven {
             url "http://192.168.3.7:9527/nexus/content/groups/androidgroup/"
         }
-        jcenter()
-        google()
+//        jcenter()
+//        google()
     }
 }
 

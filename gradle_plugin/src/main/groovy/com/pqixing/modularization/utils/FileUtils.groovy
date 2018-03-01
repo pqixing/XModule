@@ -40,7 +40,9 @@ class FileUtils {
      */
     static boolean cacheVail(String url) {
         File fileName = new File(BuildConfig.netCacheDir, TextUtils.numOrLetter(url))
-        return fileName.exists() && (System.currentTimeMillis() - fileName.lastModified() < GlobalConfig.netCacheTime)
+
+        boolean vail = fileName.exists() && (System.currentTimeMillis() - fileName.lastModified()) <= GlobalConfig.netCacheTime
+        return vail
     }
 
     static void saveCache(String url, String cache) {
