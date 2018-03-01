@@ -2,11 +2,11 @@ package com.pqixing.modularization.dependent
 
 import com.alibaba.fastjson.JSON
 import com.pqixing.modularization.Keys
+import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.maven.MavenType
-import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print
@@ -14,7 +14,6 @@ import com.pqixing.modularization.utils.TextUtils
 import com.pqixing.modularization.wrapper.MetadataWrapper
 import com.pqixing.modularization.wrapper.PomWrapper
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-25.
  */
@@ -130,7 +129,7 @@ class Dependencies extends BaseExtension {
             sb.append("    $prefix ( ")
             item.each { map ->
                 String value = map.value
-                if(CheckUtils.isEmpty(value)) value = "empty"
+                if(CheckUtils.isEmpty(value)) value = Keys.TAG_EMPTY
                 sb.append("$map.key : '$value',")
             }
             sb.deleteCharAt(sb.length() - 1)
@@ -227,7 +226,7 @@ class Dependencies extends BaseExtension {
             allExclude([group: model.groupId, module: model.moduleName])
             allExclude([group: model.groupId, module: TextUtils.getBranchArtifactId(model.moduleName, wrapper)])
         }
-        allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)}${Keys.SEPERATOR}justTag")
+        allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)}${Keys.SEPERATOR}$Keys.TAG_EMPTY")
        // sb.append("${excludeStr("all*.exclude", allExcludes.values())}} \n")
         sb.append("}\n")
         saveVersionMap()

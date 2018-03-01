@@ -16,6 +16,10 @@ class GlobalConfig {
      */
     public static boolean offlineMode = false
     /**
+     * 网络缓存5分钟
+     */
+    public static long netCacheTime = 1000*60*5
+    /**
      * 是否在同步前，更新一遍版本号,如果为false，间隔两小时更新一次，非常不建议开启
      */
     public static boolean updateBeforeSync = true

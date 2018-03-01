@@ -2,6 +2,7 @@ package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.common.BuildConfig
+import com.pqixing.modularization.common.GlobalConfig
 
 /**
  * Created by pqixing on 17-11-30.
@@ -31,6 +32,15 @@ class FileUtils {
     static String readCache(String url) {
         File fileName = new File(BuildConfig.netCacheDir, TextUtils.numOrLetter(url))
         if (fileName.exists()) return fileName.text
+    }
+    /**
+     * 缓存是否有效
+     * @param url
+     * @return
+     */
+    static boolean cacheVail(String url) {
+        File fileName = new File(BuildConfig.netCacheDir, TextUtils.numOrLetter(url))
+        return fileName.exists() && (System.currentTimeMillis() - fileName.lastModified() < GlobalConfig.netCacheTime)
     }
 
     static void saveCache(String url, String cache) {
