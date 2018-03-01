@@ -9,7 +9,7 @@ import com.pqixing.modularization.common.GlobalConfig
  */
 
 class FileUtils {
-    private static WeakHashMap<String, Long> cacheTime = new WeakHashMap<>()
+    private static HashMap<String, Long> cacheTime = new HashMap<>()
     /**
      * 如果某个
      * @param str
@@ -40,8 +40,8 @@ class FileUtils {
      */
     static boolean cacheVail(String url) {
         File fileName = new File(BuildConfig.netCacheDir, TextUtils.numOrLetter(url))
-        long lastTime = cacheTime.get(url)?.toLong() ?: 0L
-        boolean vail = fileName.exists() && System.currentTimeMillis() - lastTime <= GlobalConfig.netCacheTime
+        long lastTime = Math.max(fileName.lastModified(), cacheTime.get(url)?.toLong() ?: 0L)
+        boolean vail = fileName.exists() && (System.currentTimeMillis() - lastTime) <= GlobalConfig.netCacheTime
         return vail
     }
 
