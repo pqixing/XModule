@@ -6,15 +6,33 @@ import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.wrapper.ProjectWrapper
+
 /**
  * Created by pqixing on 17-12-7.
  * 全局配置，主要在gradle.propeties中的配置信息
  */
 class GlobalConfig {
+
+    /**
+     * 默认git操作目标
+     * include，all
+     */
+    static String target = "include"
+    /**
+     * 分支名称
+     */
+    static String branchName = "newModules"
+
+    static Set<String> excludeGit = []
+
     /**
      * 是否开启离线模式，如果开启了离线模式，网络请求默认全部都使用本地的。如果本地不存在缓存时，则会抛出异常
      */
     public static boolean offlineMode = false
+    /**
+     * 网络缓存5分钟
+     */
+    public static long netCacheTime = 1000 * 60 * 3
     /**
      * 是否在同步前，更新一遍版本号,如果为false，间隔两小时更新一次，非常不建议开启
      */
@@ -76,20 +94,42 @@ class GlobalConfig {
         if (configFile.exists()) {
             updateConfig(configFile.text)
         } else {
-            writeGlobalModu(configFile)
+            writeGlobal("#", configFile)
         }
+        writeGlobal("", new File(BuildConfig.rootOutDir, Keys.GLOBAL_CONFIG_NAME))
     }
     /**
      * 输出模板Global文件
      * @param outFile
      */
-    public static void writeGlobalModu(File outFile) {
+    public static void writeGlobal(String preFix, File outFile) {
         StringBuilder sb = new StringBuilder("#$Keys.TAG_AUTO_ADD \n")
         GlobalConfig.staticProperties.each { p ->
-            String s = p.value instanceof String ?"\"":""
-            sb.append("#$p.key = $s$p.value$s \n")
+            sb.append("$preFix$p.key = ${getValueStr(p.value)} \n")
         }
-        outFile.write(sb.toString())
+        FileUtils.write(outFile, sb.toString())
+    }
+
+    public static String getValueStr(Object value) {
+        StringBuilder valueStr = new StringBuilder()
+        if (value instanceof String) {
+            valueStr.append("\"${value}\"")
+        } else if (value instanceof Collection) {
+            valueStr.append("[")
+            value.each { s ->
+                valueStr.append("\"${s}\",")
+            }
+            if (valueStr.length() > 1) valueStr.deleteCharAt(valueStr.length() - 1)
+            valueStr.append("]")
+        } else if (value instanceof Map) {
+            valueStr.append("[")
+            value.each { map ->
+                valueStr.append("\"${map.key}\":\"${map.value}\",")
+            }
+            if (valueStr.length() > 1) valueStr.deleteCharAt(valueStr.length() - 1)
+            valueStr.append("]")
+        } else valueStr.append("$value")
+        return valueStr.toString()
     }
 
     public static HashMap<String, Object> getStaticProperties() {
@@ -114,6 +154,12 @@ class GlobalConfig {
     }
 
     private static void updateKey(String key, Properties config) {
-        if (config.containsKey(key)) GlobalConfig."$key" = new GroovyShell().evaluate(config.getProperty(key))
+        if (config.containsKey(key)) {
+            try {
+                GlobalConfig."$key" = new GroovyShell().evaluate(config.getProperty(key))
+            } catch (Exception e) {
+
+            }
+        }
     }
 }

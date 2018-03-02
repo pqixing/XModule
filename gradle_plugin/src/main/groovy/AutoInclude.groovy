@@ -1,5 +1,6 @@
 import org.gradle.api.invocation.Gradle
 
+import java.util.concurrent.TimeUnit
 /**
  *
  * Created by pqixing on 18-2-3.
@@ -25,12 +26,22 @@ public class AutoInclude {
     private String username
     private String password
     private String email
+    private String branchName = "master"
 
 
     AutoInclude(Gradle gradle, File rootDir, File outIncludeFile) {
         this.gradle = gradle
         this.rootDir = rootDir
         this.outIncludeFile = outIncludeFile
+        def globalConfig = new File(rootDir, ".modularization/global.properties")
+        if (globalConfig.exists()) {
+            def gp = new Properties()
+            gp.load(globalConfig.newInputStream())
+            String branchName = gp.getProperty("branchName")
+            if (branchName != null && !branchName.isEmpty()) {
+                this.branchName = branchName.replaceAll("[^0-9a-zA-Z]", "")
+            }
+        }
     }
     /**
      * 解析本地需要导入的工程
@@ -78,7 +89,9 @@ public class AutoInclude {
             }
 
         }
-        f.write("${icTxt.toString()}\\n$AutoConfig.TAG_AUTO_ADD below this line is not work!!!!! github -> https://github.com/pqixing/modularization \\n${autoTxt.toString()}")
+        def wirter = f.newPrintWriter("utf-8")
+        wirter.write("${icTxt.toString()}\\n$AutoConfig.TAG_AUTO_ADD below this line is not work!!!!! github -> https://github.com/pqixing/modularization \\n${autoTxt.toString()}")
+        wirter.close()
     }
     /**
      * 解析default xml 加载所有的git信息
@@ -92,7 +105,7 @@ public class AutoInclude {
             String docDir = AutoConfig.XML_DEFAULT_GIT.substring(AutoConfig.XML_DEFAULT_GIT.lastIndexOf("/") + 1).replace(".git", "")
             defaultXml = new File(rootDir.parentFile, "$docDir/$AutoConfig.XML_DEFAULT_NAME")
             if (!defaultXml.exists()) {
-                error = "git clone $AutoConfig.XML_DEFAULT_GIT".execute(null, rootDir.parentFile)?.text
+                error = run("git clone $AutoConfig.XML_DEFAULT_GIT", rootDir.parentFile)
             }
             includes += docDir
         }
@@ -193,7 +206,8 @@ public class AutoInclude {
             String error = ""
             if (!localDir.exists()) {
                 println("clone .... $urlWitUser")
-                error = "git clone ${urlWitUser}".execute(null, rootDir.parentFile)?.text
+                error += run("git clone ${urlWitUser}", rootDir.parentFile)
+                error += run("git checkout -b ${branchName} origin/${branchName}", localDir)
                 println("clone end.... $urlWitUser")
             }
             if (!localDir.exists()) throw new RuntimeException("clone faile please check url: $urlWitUser error : $error")
@@ -214,6 +228,29 @@ public class AutoInclude {
         File buildGradle = new File(dir, "build.gradle")
         if (buildGradle.exists()) locals.put("$dir.name", dir.path.replace("\\\\", "/"))
         dir.eachDir { formatLocalPath(locals, it, deep - 1) }
+    }
+
+    static String run(String cmd, File dir) {
+        String result = ""
+        try {
+            def process = cmd.execute(null, dir)
+            if (process == null) return ""
+
+            if (process.waitFor(2, TimeUnit.MINUTES)) {
+                InputStream input = process.exitValue() == 0 ? process.inputStream : process.errorStream
+                result = input?.getText("utf-8")
+            } else {
+                result = "run $cmd : Time Out count :2 MINUTES"
+            }
+            process.closeStreams()
+            if (process.alive) {
+                process.destroy()
+            }
+            Thread.sleep(1000)//两秒后关闭
+
+        } catch (Exception e) {
+        }
+        return result
     }
 }
 

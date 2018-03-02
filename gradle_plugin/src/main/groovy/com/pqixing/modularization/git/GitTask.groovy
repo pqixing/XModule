@@ -1,6 +1,7 @@
 package com.pqixing.modularization.git
 
 import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.Print
@@ -11,19 +12,20 @@ import com.pqixing.modularization.utils.Print
  */
 
 abstract class GitTask extends BaseTask {
-    GitConfig gitConfig
     /**
      * 待操作的目标git目录
      */
     Set<GitProject> targetGits
-    String target = "include"
-    String checkout = "master"
+    String target
+    String branchName
+    Set<String> excludeGit = [GitUtils.getNameFromUrl(GlobalConfig.docGitUrl)]
 
     @Override
     void start() {
-        gitConfig = wrapper.getExtends(GitConfig)
-        target = gitConfig.target
-        checkout = gitConfig.checkout
+        target = GlobalConfig.target
+        branchName = GlobalConfig.branchName
+        excludeGit += GlobalConfig.excludeGit
+
         targetGits = new HashSet<>()
     }
 
@@ -57,9 +59,11 @@ abstract class GitTask extends BaseTask {
     @Override
     void end() {
         targetGits.each { p ->
-            if (gitConfig.excludeGit.contains(p.name)) return
-            String result = onGitProject(p.name, p.gitUrl, new File(project.rootDir.parentFile, p.name))
-            Print.ln("GitTask $name -> $p.name $result $p.gitUrl ")
+            if (excludeGit.contains(p.name)) return
+            String fullUrl = GitUtils.getFullGitUrl(p.gitUrl)
+            Print.ln("GitTask $name -> start : $p.name $fullUrl ")
+            String result = onGitProject(p.name, fullUrl, new File(project.rootDir.parentFile, p.name))
+            Print.ln("GitTask $name -> result : $result ")
         }
     }
 }

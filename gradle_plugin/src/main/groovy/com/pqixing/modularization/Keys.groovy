@@ -167,5 +167,13 @@ class Keys {
      * 上传日志记录
      */
     public static final String MAVEN_RECORD = "maven.record"
+    /**
+     * 空白标签
+     */
+    public static final String TAG_EMPTY = "emptyTag"
 
+    /**
+     * gradle.properteis文件
+     */
+    public static final String  NAME_PRO_GRADLE= "gradle.properties"
 }

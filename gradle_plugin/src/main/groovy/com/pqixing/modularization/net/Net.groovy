@@ -20,17 +20,18 @@ class Net {
      * @return
      */
     static String get(String url, boolean useCache) {
-        String netResult = ""
+        boolean cacheVail = FileUtils.cacheVail(url)
+
+        String netResult = FileUtils.readCache(url)
         if (GlobalConfig.offlineMode) {
-            netResult = FileUtils.readCache(url)
             if (CheckUtils.isEmpty(netResult)) throw new RuntimeException("offlineMode invail there is no cache for url :$url")
             return netResult
         }
-        if (useCache) netResult = FileUtils.readCache(url)
-        if (!CheckUtils.isEmpty(netResult)) return netResult
-        netResult = requestNet(url)
 
-        if (!CheckUtils.isEmpty(netResult)) FileUtils.saveCache(url, netResult)
+        if (cacheVail || (!CheckUtils.isEmpty(netResult) && useCache)) return netResult
+
+        netResult = requestNet(url)
+        FileUtils.saveCache(url, netResult)
 
         return netResult
     }
@@ -43,7 +44,9 @@ class Net {
         try {
             def conn = new URL(url).openConnection()
             conn.connectTimeout = BuildConfig.timOut//4秒超时
-            return conn.inputStream.getText(Keys.CHARSET)
+            def result = conn.inputStream.getText(Keys.CHARSET)
+//            Print.ln("requestNet -> url: $url result :$result")
+            return result
         } catch (Exception e) {
             Print.ln("requestNet -> e: ${e.toString()}")
             return ""

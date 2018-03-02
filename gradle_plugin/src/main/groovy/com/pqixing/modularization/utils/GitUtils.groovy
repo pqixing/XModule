@@ -3,9 +3,32 @@ package com.pqixing.modularization.utils
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.git.GitConfig
 
+import java.util.concurrent.TimeUnit
+
 class GitUtils {
     static String run(String cmd, File dir) {
-        return cmd.execute(null, dir)?.in?.getText(Keys.CHARSET)
+        String result = ""
+        try {
+            def process = cmd.execute(null, dir)
+            if (process == null) return ""
+
+            if (process.waitFor(2, TimeUnit.MINUTES)) {
+                InputStream input = process.exitValue() == 0 ? process.inputStream : process.errorStream;
+                result = input?.getText(Keys.CHARSET)
+            } else {
+                result = "run $cmd : Time Out count :2 MINUTES"
+                Print.ln(result)
+            }
+            process.closeStreams()
+            if (process.alive){
+                process.destroy()
+            }
+            Thread.sleep(1000)//两秒后关闭
+
+        } catch (Exception e) {
+            Print.lne("GitUtils run ", e)
+        }
+        return result
     }
     /**
      * 获取完整的giturl

@@ -2,10 +2,8 @@ package com.pqixing.modularization.git
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseExtension
-import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.GitUtils
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-7.
  * 基础信息编译生成的
@@ -33,18 +31,6 @@ class GitConfig extends BaseExtension {
      */
     static List<GitProject> allGitProjects = []
     static Map<String, String> localProject
-
-    /**
-     * 默认git操作目标
-     * include，all
-     */
-    String target = "include"
-    /**
-     * 分支名称
-     */
-    String checkout = "master"
-
-    Set<String> excludeGit = [GitUtils.getNameFromUrl(GlobalConfig.docGitUrl)]
 
     GitConfig(Project project) {
         super(project)
