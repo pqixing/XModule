@@ -93,7 +93,7 @@ public class AutoInclude {
             String docDir = AutoConfig.XML_DEFAULT_GIT.substring(AutoConfig.XML_DEFAULT_GIT.lastIndexOf("/") + 1).replace(".git", "")
             defaultXml = new File(rootDir.parentFile, "$docDir/$AutoConfig.XML_DEFAULT_NAME")
             if (!defaultXml.exists()) {
-                error = "git clone $AutoConfig.XML_DEFAULT_GIT".execute(null, rootDir.parentFile)?.text
+                error = run("git clone $AutoConfig.XML_DEFAULT_GIT", rootDir.parentFile)
             }
             includes += docDir
         }
@@ -194,7 +194,7 @@ public class AutoInclude {
             String error = ""
             if (!localDir.exists()) {
                 println("clone .... $urlWitUser")
-                error = "git clone ${urlWitUser}".execute(null, rootDir.parentFile)?.text
+                error = run("git clone ${urlWitUser}", rootDir.parentFile)
                 println("clone end.... $urlWitUser")
             }
             if (!localDir.exists()) throw new RuntimeException("clone faile please check url: $urlWitUser error : $error")
@@ -215,6 +215,20 @@ public class AutoInclude {
         File buildGradle = new File(dir, "build.gradle")
         if (buildGradle.exists()) locals.put("$dir.name", dir.path.replace("\\\\", "/"))
         dir.eachDir { formatLocalPath(locals, it, deep - 1) }
+    }
+
+    static String run(String cmd, File dir) {
+        try {
+            def process = cmd.execute(null, dir)
+            if (process == null) return ""
+
+            InputStream input = process.waitFor() == 0 ? process.inputStream : process.errorStream
+            String text = input?.getText("utf-8")
+            if (process.alive) process.destroy()
+            return text
+        } catch (Exception e) {
+            return ""
+        }
     }
 }
 

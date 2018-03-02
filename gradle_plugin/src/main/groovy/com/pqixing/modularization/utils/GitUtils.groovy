@@ -5,7 +5,21 @@ import com.pqixing.modularization.git.GitConfig
 
 class GitUtils {
     static String run(String cmd, File dir) {
-        return cmd.execute(null, dir)?.in?.getText(Keys.CHARSET)
+        String result = ""
+        try {
+            def process = cmd.execute(null, dir)
+            if (process == null) return ""
+            InputStream input = process.waitFor() == 0 ? process.inputStream : process.errorStream;
+            result = input?.getText(Keys.CHARSET)
+
+            process.closeStreams()
+            if (process.alive) process.destroy()
+            Thread.sleep(2000)//两秒后关闭
+
+        } catch (Exception e) {
+            Print.lne("GitUtils run ",e)
+        }
+        return result
     }
     /**
      * 获取完整的giturl
