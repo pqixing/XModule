@@ -18,13 +18,13 @@ abstract class GitTask extends BaseTask {
     Set<GitProject> targetGits
     String target
     String branchName
-    Set<String> excludeGit
+    Set<String> excludeGit = [GitUtils.getNameFromUrl(GlobalConfig.docGitUrl)]
 
     @Override
     void start() {
         target = GlobalConfig.target
         branchName = GlobalConfig.branchName
-        excludeGit = GlobalConfig.excludeGit
+        excludeGit += GlobalConfig.excludeGit
 
         targetGits = new HashSet<>()
     }
