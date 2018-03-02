@@ -1,5 +1,5 @@
+import com.pqixing.modularization.utils.Print
 import org.gradle.api.invocation.Gradle
-
 /**
  * Created by pqixing on 18-2-3.
  * this class will run on setting.gradle,so can not import any other class
@@ -216,19 +216,22 @@ public class AutoInclude {
         if (buildGradle.exists()) locals.put("$dir.name", dir.path.replace("\\\\", "/"))
         dir.eachDir { formatLocalPath(locals, it, deep - 1) }
     }
-
     static String run(String cmd, File dir) {
+        String result = ""
         try {
             def process = cmd.execute(null, dir)
             if (process == null) return ""
+            InputStream input = process.waitFor() == 0 ? process.inputStream : process.errorStream;
+            result = input?.getText("utf-8")
 
-            InputStream input = process.waitFor() == 0 ? process.inputStream : process.errorStream
-            String text = input?.getText("utf-8")
+            process.closeStreams()
             if (process.alive) process.destroy()
-            return text
+            Thread.sleep(2000)//两秒后关闭
+
         } catch (Exception e) {
-            return ""
+            Print.lne("GitUtils run ",e)
         }
+        return result
     }
 }
 
