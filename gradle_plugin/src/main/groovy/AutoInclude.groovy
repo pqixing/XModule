@@ -39,6 +39,7 @@ public class AutoInclude {
             String branchName = gp.getProperty("branchName")
             if (branchName != null && !branchName.isEmpty()) this.branchName = branchName
         }
+        this.branchName.replaceAll("[^0-9a-zA-Z]", "")
     }
     /**
      * 解析本地需要导入的工程

@@ -94,24 +94,23 @@ class GlobalConfig {
         if (configFile.exists()) {
             updateConfig(configFile.text)
         } else {
-            writeGlobal("#", true, configFile)
+            writeGlobal("#", configFile)
         }
-        writeGlobal("", false, new File(BuildConfig.rootOutDir, Keys.GLOBAL_CONFIG_NAME))
+        writeGlobal("", new File(BuildConfig.rootOutDir, Keys.GLOBAL_CONFIG_NAME))
     }
     /**
      * 输出模板Global文件
      * @param outFile
      */
-    public static void writeGlobal(String preFix, boolean useType, File outFile) {
+    public static void writeGlobal(String preFix, File outFile) {
         StringBuilder sb = new StringBuilder("#$Keys.TAG_AUTO_ADD \n")
         GlobalConfig.staticProperties.each { p ->
-            sb.append("$preFix$p.key = ${getValueStr(p.value, useType)} \n")
+            sb.append("$preFix$p.key = ${getValueStr(p.value)} \n")
         }
         FileUtils.write(outFile, sb.toString())
     }
 
-    public static String getValueStr(Object value, boolean useType) {
-        if (!useType) "$value"
+    public static String getValueStr(Object value) {
         StringBuilder valueStr = new StringBuilder()
         if (value instanceof String) {
             valueStr.append("\"${value}\"")
