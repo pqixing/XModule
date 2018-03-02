@@ -37,7 +37,7 @@ class GitPlugin extends BasePlugin {
         if (writeMouldGradle()) {
             throw new RuntimeException("init setting file, please sync again -- 初始化设置，请重新同步")
         }
-        project.extensions.add(Keys.CONFIG_GIT, wrapper.getExtends(GitConfig))
+
         BaseTask.task(project, GitUpdateTask.class)
         BaseTask.task(project, CheckBranchTask.class)
         BaseTask.task(project, GitCloneAllTask.class)

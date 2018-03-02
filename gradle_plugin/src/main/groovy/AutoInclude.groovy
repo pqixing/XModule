@@ -1,5 +1,8 @@
 import com.pqixing.modularization.utils.Print
 import org.gradle.api.invocation.Gradle
+
+import java.util.concurrent.TimeUnit
+
 /**
  * Created by pqixing on 18-2-3.
  * this class will run on setting.gradle,so can not import any other class
@@ -24,12 +27,20 @@ public class AutoInclude {
     private String username
     private String password
     private String email
+    private String branchName = "master"
 
 
     AutoInclude(Gradle gradle, File rootDir, File outIncludeFile) {
         this.gradle = gradle
         this.rootDir = rootDir
         this.outIncludeFile = outIncludeFile
+        def globalConfig = new File(rootDir, "global.properties")
+        if (globalConfig.exists()) {
+            def gp = new Properties()
+            gp.load(globalConfig.newInputStream())
+            String branchName = gp.getProperty("branchName")
+            if (branchName != null && !branchName.isEmpty()) this.branchName = branchName
+        }
     }
     /**
      * 解析本地需要导入的工程
@@ -194,7 +205,8 @@ public class AutoInclude {
             String error = ""
             if (!localDir.exists()) {
                 println("clone .... $urlWitUser")
-                error = run("git clone ${urlWitUser}", rootDir.parentFile)
+                error += run("git clone ${urlWitUser}", rootDir.parentFile)
+                error += run("git checkout -b ${branchName} origin/${branchName}", localDir)
                 println("clone end.... $urlWitUser")
             }
             if (!localDir.exists()) throw new RuntimeException("clone faile please check url: $urlWitUser error : $error")
@@ -216,20 +228,28 @@ public class AutoInclude {
         if (buildGradle.exists()) locals.put("$dir.name", dir.path.replace("\\\\", "/"))
         dir.eachDir { formatLocalPath(locals, it, deep - 1) }
     }
+
     static String run(String cmd, File dir) {
         String result = ""
         try {
             def process = cmd.execute(null, dir)
             if (process == null) return ""
-            InputStream input = process.waitFor() == 0 ? process.inputStream : process.errorStream;
-            result = input?.getText("utf-8")
 
+            if (process.waitFor(2, TimeUnit.MINUTES)) {
+                InputStream input = process.exitValue() == 0 ? process.inputStream : process.errorStream
+                result = input?.getText("utf-8")
+            } else {
+                result = "run $cmd : Time Out count :2 MINUTES"
+                Print.ln(result)
+            }
             process.closeStreams()
-            if (process.alive) process.destroy()
-            Thread.sleep(2000)//两秒后关闭
+            if (process.alive) {
+                process.destroy()
+            }
+            Thread.sleep(1000)//两秒后关闭
 
         } catch (Exception e) {
-            Print.lne("GitUtils run ",e)
+            Print.lne("GitUtils run ", e)
         }
         return result
     }

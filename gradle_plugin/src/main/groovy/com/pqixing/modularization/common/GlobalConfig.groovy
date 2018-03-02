@@ -5,12 +5,27 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
+import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.wrapper.ProjectWrapper
 /**
  * Created by pqixing on 17-12-7.
  * 全局配置，主要在gradle.propeties中的配置信息
  */
 class GlobalConfig {
+
+    /**
+     * 默认git操作目标
+     * include，all
+     */
+    static String target = "include"
+    /**
+     * 分支名称
+     */
+    static String branchName = "master"
+
+    static Set<String> excludeGit = [GitUtils.getNameFromUrl(GlobalConfig.docGitUrl)]
+
+
     /**
      * 是否开启离线模式，如果开启了离线模式，网络请求默认全部都使用本地的。如果本地不存在缓存时，则会抛出异常
      */
