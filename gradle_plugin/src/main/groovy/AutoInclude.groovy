@@ -1,8 +1,6 @@
-import com.pqixing.modularization.utils.Print
 import org.gradle.api.invocation.Gradle
 
 import java.util.concurrent.TimeUnit
-
 /**
  * Created by pqixing on 18-2-3.
  * this class will run on setting.gradle,so can not import any other class
@@ -34,7 +32,7 @@ public class AutoInclude {
         this.gradle = gradle
         this.rootDir = rootDir
         this.outIncludeFile = outIncludeFile
-        def globalConfig = new File(rootDir, "global.properties")
+        def globalConfig = new File(rootDir, ".modularization/global.properties")
         if (globalConfig.exists()) {
             def gp = new Properties()
             gp.load(globalConfig.newInputStream())
@@ -240,7 +238,6 @@ public class AutoInclude {
                 result = input?.getText("utf-8")
             } else {
                 result = "run $cmd : Time Out count :2 MINUTES"
-                Print.ln(result)
             }
             process.closeStreams()
             if (process.alive) {
@@ -249,7 +246,6 @@ public class AutoInclude {
             Thread.sleep(1000)//两秒后关闭
 
         } catch (Exception e) {
-            Print.lne("GitUtils run ", e)
         }
         return result
     }
