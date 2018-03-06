@@ -19,12 +19,7 @@ class ToMavenTask extends BaseTask {
 
     ToMavenTask(){
 //        finalizedBy "uploadArchives"
-        project.afterEvaluate {
-            project.uploadArchives.dependsOn "assembleRelease"
-            project.uploadArchives.doLast{
-                afterUpload()
-            }
-        }
+        this.dependsOn "assembleRelease"
     }
 
     @Override
@@ -94,7 +89,9 @@ class ToMavenTask extends BaseTask {
 
     @Override
     void end() {
+        addMavenRecord("---------end -> pom:")
         project.uploadArchives.execute()
+        afterUpload()
     }
 
     void afterUpload() {
