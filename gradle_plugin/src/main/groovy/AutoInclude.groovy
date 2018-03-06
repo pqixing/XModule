@@ -155,7 +155,7 @@ public class AutoInclude {
         StringBuilder sb = new StringBuilder("//Auto Add By Modularization")
         realInclude.each { map ->
             sb.append("\\ninclude (':$map.key') \\n")
-                    .append("project(':$map.key').projectDir = new File('${map.valuere.place("\\\\", "/")}')")
+                    .append("project(':$map.key').projectDir = new File('${map.value.replace("\\\\", "/")}')")
         }
         outIncludeFile.write(sb.toString())
     }
