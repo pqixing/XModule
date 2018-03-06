@@ -48,6 +48,8 @@ class AndroidConfig extends BaseExtension {
 
         Android file = new Android()
         file.params += properties
+        config.runType?.mergerData()
+
         file.params += ["pluginName": config.runType?.asApp ? Keys.NAME_APP : wrapper.pluginName]
         file.params += ["maven_url": config.mavenType.maven_url]
         file.params += ["mavenGroupUrl": GlobalConfig.mavenGroupUrl]
