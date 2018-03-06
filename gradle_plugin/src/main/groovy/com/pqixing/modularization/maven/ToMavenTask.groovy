@@ -17,6 +17,18 @@ class ToMavenTask extends BaseTask {
     File recordFile
     GitConfig gitConfig
 
+    ToMavenTask(){
+        finalizedBy "uploadArchives"
+        project.afterEvaluate {
+            project.uploadArchives.doLast{
+                afterUpload()
+            }
+            project.uploadArchives.doFirst{
+                addMavenRecord("$project.name start upload to Maven -----------")
+            }
+        }
+    }
+
     @Override
     void start() {
         gitConfig = wrapper.getExtends(GitConfig)
@@ -84,7 +96,11 @@ class ToMavenTask extends BaseTask {
 
     @Override
     void end() {
-        project.uploadArchives.execute()
+
+    }
+
+    void afterUpload() {
+//        project.uploadArchives.execute()
         addMavenRecord("uploadArchives success -> version :$mavenInfo.pom_version artifactId : $mavenInfo.artifactId url : ${PomWrapper.getPomUrl(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId, mavenInfo.pom_version)} ")
 
         //上传完成以后,更新本地依赖版本信息
