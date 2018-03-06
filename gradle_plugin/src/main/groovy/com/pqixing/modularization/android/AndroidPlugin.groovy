@@ -8,7 +8,9 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.dependent.DependentPrintTask
 import com.pqixing.modularization.docs.DocSyncTask
+import com.pqixing.modularization.maven.AllToMavenTask
 import com.pqixing.modularization.maven.MavenType
+import com.pqixing.modularization.maven.ToMavenTask
 import com.pqixing.modularization.runtype.RunType
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
@@ -42,12 +44,16 @@ abstract class AndroidPlugin extends BasePlugin {
             //添加打印依赖的task
             BaseTask.task(project, DependentPrintTask.class)
             BaseTask.task(project, DocSyncTask.class)
+            BaseTask.task(project, AllToMavenTask.class)
             //添加分析的任务
 //            BaseTask.task(wrapper.project, wrapper.getExtends(GitConfig.class)
 //                    .branchName == "master" ? MavenMergerTask.class : BranchMergerTask.class)
 
             project.ext.printPros = { pro -> Print.lnPro(pro) }
-
+            project.afterEvaluate {
+                ToMavenTask task =  BaseTask.task(project, ToMavenTask.class)
+                task.mavenInfo = moduleConfig.mavenType
+            }
         }
     }
 

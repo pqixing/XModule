@@ -18,13 +18,11 @@ class ToMavenTask extends BaseTask {
     GitConfig gitConfig
 
     ToMavenTask(){
-        finalizedBy "uploadArchives"
+//        finalizedBy "uploadArchives"
         project.afterEvaluate {
+            project.uploadArchives.dependsOn "assembleRelease"
             project.uploadArchives.doLast{
                 afterUpload()
-            }
-            project.uploadArchives.doFirst{
-                addMavenRecord("$project.name start upload to Maven -----------")
             }
         }
     }
@@ -55,7 +53,7 @@ class ToMavenTask extends BaseTask {
         }
 
         if (!CheckUtils.isEmpty(errorMsg)) {
-            errorMsg = "$project.name upload fail" + errorMsg
+            errorMsg = "$project.name upload fail " + errorMsg
             addMavenRecord(errorMsg)
             throw new RuntimeException(errorMsg)
         }
@@ -96,11 +94,10 @@ class ToMavenTask extends BaseTask {
 
     @Override
     void end() {
-
+        project.uploadArchives.execute()
     }
 
     void afterUpload() {
-//        project.uploadArchives.execute()
         addMavenRecord("uploadArchives success -> version :$mavenInfo.pom_version artifactId : $mavenInfo.artifactId url : ${PomWrapper.getPomUrl(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId, mavenInfo.pom_version)} ")
 
         //上传完成以后,更新本地依赖版本信息
