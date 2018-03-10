@@ -7,6 +7,7 @@ import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print
+import com.pqixing.modularization.utils.TextUtils
 
 class Net {
 
@@ -20,7 +21,7 @@ class Net {
      * @return
      */
     static String get(String url, boolean useCache) {
-        boolean cacheVail = FileUtils.cacheVail(url)
+//        boolean cacheVail = FileUtils.cacheVail(url)
 
         String netResult = FileUtils.readCache(url)
         if (GlobalConfig.offlineMode) {
@@ -28,11 +29,11 @@ class Net {
             return netResult
         }
 
-        if (cacheVail || (!CheckUtils.isEmpty(netResult) && useCache)) return netResult
+        if ((!CheckUtils.isEmpty(netResult) && useCache)) return netResult
 
         netResult = requestNet(url)
-        FileUtils.saveCache(url, netResult)
-
+        def cacheFile = FileUtils.saveCache(url, netResult)
+        Print.ln("requestNet -> url: $url cacheFile : file://$cacheFile.absolutePath")
         return netResult
     }
     /**
@@ -45,7 +46,6 @@ class Net {
             def conn = new URL(url).openConnection()
             conn.connectTimeout = BuildConfig.timOut//4秒超时
             def result = conn.inputStream.getText(Keys.CHARSET)
-//            Print.ln("requestNet -> url: $url result :$result")
             return result
         } catch (Exception e) {
             Print.ln("requestNet -> e: ${e.toString()}")
@@ -65,7 +65,7 @@ class Net {
         BuildConfig buildConfig = maven.wrapper.getExtends(BuildConfig)
         StringBuilder pomUrl = new StringBuilder(maven.maven_url)
         if (!maven.maven_url.endsWith("/")) pomUrl.append("/")
-        pomUrl.append(buildConfig.groupName.replace(".", "/"))
+        pomUrl.append(TextUtils.getUrl(buildConfig.groupName))
                 .append("/$moduleName/$version/$moduleName-${version}.pom")
         return get(pomUrl.toString(), true)
     }

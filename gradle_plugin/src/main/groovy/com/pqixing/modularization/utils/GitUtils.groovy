@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit
 class GitUtils {
     static String run(String cmd, File dir) {
         String result = ""
+
         try {
             def process = cmd.execute(null, dir)
             if (process == null) return ""
@@ -28,6 +29,7 @@ class GitUtils {
         } catch (Exception e) {
             Print.lne("GitUtils run ", e)
         }
+        Print.ln("run: $cmd in $dir.name   ->   $result")
         return result
     }
     /**

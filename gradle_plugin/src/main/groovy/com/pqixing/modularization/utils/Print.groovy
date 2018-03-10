@@ -7,22 +7,23 @@ class Print {
     static String silentLog = "N"
 
     static String ln(String str, Closure closure = null) {
-        return l(str + "\n",false, closure)
-    }
-    static String lnf(String str, Closure closure = null) {
-        return l(str + "\n",true, closure)
+        return l(str + "\n", false, closure)
     }
 
-    static String lne(String str ="",Exception e){
+    static String lnf(String str, Closure closure = null) {
+        return l(str + "\n", true, closure)
+    }
+
+    static String lne(String str = "", Exception e) {
         lnf("$str Exception -> ${e.toString()}")
     }
 
-    static String l(String str,boolean focusLog = false, Closure closure = null) {
+    static String l(String str, boolean focusLog = false, Closure closure = null) {
         closure?.call(str)
-        if ("Y" == silentLog&&!focusLog) return
+        if ("Y" == silentLog && !focusLog) return
         print(str)
-        def newStr = "${new Date().toLocaleString()} --> $str"
-        write(newStr)
+//        def newStr = "${new Date().toLocaleString()} --> $str"
+//        write(newStr)
         return str
     }
     static File outputFile
@@ -51,5 +52,14 @@ class Print {
         }
         return sb.append(" }").toString()
     }
-
+    /**
+     * 打印Maven上传日志
+     * @param msg
+     */
+    static void lnm(String msg) {
+        File recordFile = new File(BuildConfig.mavenRecordFile)
+        if (!recordFile.exists()) recordFile.parentFile.mkdirs()
+        recordFile.append("${new Date().toLocaleString()} -> $msg\n")
+        lnf(msg)
+    }
 }

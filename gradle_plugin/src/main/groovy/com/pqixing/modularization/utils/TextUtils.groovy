@@ -53,4 +53,8 @@ class TextUtils {
         }
         return sb.toString()
     }
+
+    static String getUrl(String pkg){
+        return pkg.replace(".","/")
+    }
 }

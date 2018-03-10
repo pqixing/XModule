@@ -1,7 +1,7 @@
 package com.pqixing.modularization.wrapper
 
 import com.pqixing.modularization.net.Net
-
+import com.pqixing.modularization.utils.TextUtils
 /**
  * 头信息包裹类
  */
@@ -14,10 +14,12 @@ class MetadataWrapper extends XmlWrapper {
      * @return
      */
     static String getMetaUrl(String envUrl, String group, String moduleName) {
-        return "$envUrl/${group.replace(".", "/")}/$moduleName/maven-metadata.xml"
+        return "$envUrl/${TextUtils.getUrl(group)}/$moduleName/maven-metadata.xml"
     }
 
     public static MetadataWrapper create(String envUrl, String group, String moduleName) {
+//        String metaXml = MavenUtils.getDocMetaXml(MavenUtils.getNameByUrl(envUrl), moduleName)
+//        if (!CheckUtils.isEmpty(metaXml)) return new MetadataWrapper(metaXml)
         return create(getMetaUrl(envUrl, group, moduleName))
     }
 

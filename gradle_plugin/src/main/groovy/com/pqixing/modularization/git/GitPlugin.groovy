@@ -6,6 +6,7 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.common.GlobalConfig
+import com.pqixing.modularization.maven.UpdateMavenTask
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.GitUtils
 import org.gradle.api.Project
@@ -16,7 +17,7 @@ import org.gradle.api.invocation.Gradle
  */
 
 class GitPlugin extends BasePlugin {
-    public static final String mouldVersion = "//1.0"
+    public static final String mouldVersion = "//1.3"
     /**
      * 设置页面文件
      */
@@ -44,6 +45,7 @@ class GitPlugin extends BasePlugin {
         BaseTask.task(project, CheckMasterTask.class)
         BaseTask.task(project, ModuReleaseTask.class)
         BaseTask.task(project, DelModuReleaseTask.class)
+        BaseTask.task(project, UpdateMavenTask.class)
 
         readGitProject(project.gradle)
         applyDefaultGradle()

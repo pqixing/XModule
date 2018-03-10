@@ -4,6 +4,14 @@ class Keys {
     /**
      * 一个tab空格
      */
+    public static final String MODURIZATION = "modurization"
+    /**
+     * 一个tab空格
+     */
+    public static final String MAVEN = ".maven"
+    /**
+     * 一个tab空格
+     */
     public static final String TAB = "      "
     /**
      * 默认

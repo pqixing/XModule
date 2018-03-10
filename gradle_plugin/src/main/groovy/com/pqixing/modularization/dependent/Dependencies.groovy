@@ -7,14 +7,9 @@ import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.maven.MavenType
-import com.pqixing.modularization.utils.CheckUtils
-import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.Print
-import com.pqixing.modularization.utils.TextUtils
-import com.pqixing.modularization.wrapper.MetadataWrapper
+import com.pqixing.modularization.utils.*
 import com.pqixing.modularization.wrapper.PomWrapper
 import org.gradle.api.Project
-
 /**
  * Created by pqixing on 17-12-25.
  */
@@ -31,8 +26,8 @@ class Dependencies extends BaseExtension {
     Set<Module> localDependency
     Set<String> localImportModules
 
-    File versionFile
-    Properties versionMaps
+//    File versionFile
+//    Properties versionMaps
     MavenType mavenType
 
     boolean autoImpl = true
@@ -81,29 +76,30 @@ class Dependencies extends BaseExtension {
      * @return
      */
     String getLastVersion(String group, String artifactId) {
-        String timeStamp = "$artifactId$Keys.SUFFIX_STAMP"
-        String version = versionMaps.getProperty(artifactId)
-        long afterLastUpdate = System.currentTimeMillis() - (versionMaps.getProperty(timeStamp)?.toLong() ?: 0L)
-        //更新版本的时间差
-        long updateGap = GlobalConfig.netCacheTime
-        if (!GlobalConfig.updateBeforeSync) updateGap *= 20
-
-        //一分钟秒内,不更新相同的组件版本,避免不停的爬取相同的接口
-        if (afterLastUpdate > updateGap) {
-            String release = MetadataWrapper.create(mavenType.maven_url, group, artifactId).release
-            if (CheckUtils.isVersionCode(release)) {
-                version = release
-                versionMaps.put(timeStamp, System.currentTimeMillis().toString())
-                versionMaps.put(artifactId, release)
-            }
-        }
-        return CheckUtils.isEmpty(version) ? "+" : version
+       return MavenUtils.getVersion(mavenType.name,artifactId)
+//        String timeStamp = "$artifactId$Keys.SUFFIX_STAMP"
+//        String version = versionMaps.getProperty(artifactId)
+//        long afterLastUpdate = System.currentTimeMillis() - (versionMaps.getProperty(timeStamp)?.toLong() ?: 0L)
+//        //更新版本的时间差
+//        long updateGap = GlobalConfig.netCacheTime
+//        if (!GlobalConfig.updateBeforeSync) updateGap *= 20
+//
+//        //一分钟秒内,不更新相同的组件版本,避免不停的爬取相同的接口
+//        if (afterLastUpdate > updateGap) {
+//            String release = MetadataWrapper.create(mavenType.maven_url, group, artifactId).release
+//            if (CheckUtils.isVersionCode(release)) {
+//                version = release
+//                versionMaps.put(timeStamp, System.currentTimeMillis().toString())
+//                versionMaps.put(artifactId, release)
+//            }
+//        }
+//        return CheckUtils.isEmpty(version) ? "+" : version
     }
 
-    void initVersionMap() {
+    void init() {
         mavenType = wrapper.getExtends(ModuleConfig.class).mavenType
-        versionFile = new File(BuildConfig.versionDir, "$mavenType.name/$Keys.FILE_VERSION")
-        versionMaps = FileUtils.readMaps(versionFile)
+//        versionFile = new File(BuildConfig.versionDir, "$mavenType.name/$Keys.FILE_VERSION")
+//        versionMaps = FileUtils.readMaps(versionFile)
         localImportModules = new HashSet<>()
         project.rootProject.allprojects.each { localImportModules += it.name }
         localDependency = new HashSet<>()
@@ -112,13 +108,13 @@ class Dependencies extends BaseExtension {
         }
     }
 
-    void saveVersionMap() {
-        versionFile.parentFile.mkdirs()
-        versionFile.createNewFile()
-        versionMaps?.store(versionFile.newOutputStream(), Keys.CHARSET)
-        versionMaps?.clear()
-        versionMaps = null
-    }
+//    void saveVersionMap() {
+//        versionFile.parentFile.mkdirs()
+//        versionFile.createNewFile()
+//        versionMaps?.store(versionFile.newOutputStream(), Keys.CHARSET)
+//        versionMaps?.clear()
+//        versionMaps = null
+//    }
     /**
      * 添加依赖去除
      * @param sb
@@ -192,7 +188,7 @@ class Dependencies extends BaseExtension {
 
     @Override
     LinkedList<String> getOutFiles() {
-        initVersionMap()
+        init()
 
         StringBuilder sb = new StringBuilder("dependencies { \n")
         modules.each { model ->
@@ -236,7 +232,7 @@ class Dependencies extends BaseExtension {
         }
         allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)}${Keys.SEPERATOR}$Keys.TAG_EMPTY")
         sb.append("${excludeStr("all*.exclude", allExcludes.values())}} \n")
-        saveVersionMap()
+//        saveVersionMap()
 
         if (!CheckUtils.isEmpty(dependentLose)) Print.lnf("$project.name dependentLose : ${JSON.toJSONString(dependentLose)}")
         return [FileUtils.write(new File(wrapper.getExtends(BuildConfig).cacheDir, "dependencies.gradle"), sb.toString())];

@@ -1,6 +1,7 @@
 import org.gradle.api.invocation.Gradle
 
 import java.util.concurrent.TimeUnit
+
 /**
  *
  * Created by pqixing on 18-2-3.
@@ -107,6 +108,7 @@ public class AutoInclude {
             if (!defaultXml.exists()) {
                 error = run("git clone $AutoConfig.XML_DEFAULT_GIT", rootDir.parentFile)
             }
+            run("git pull ", new File(rootDir.parentFile, docDir))
             includes += docDir
         }
         if (!defaultXml?.exists() ?: false) {
@@ -156,7 +158,7 @@ public class AutoInclude {
         StringBuilder sb = new StringBuilder("//Auto Add By Modularization")
         realInclude.each { map ->
             sb.append("\\ninclude (':$map.key') \\n")
-                    .append("project(':$map.key').projectDir = new File('$map.value')")
+                    .append("project(':$map.key').projectDir = new File('${map.value.replace("\\\\", "/")}')")
         }
         outIncludeFile.write(sb.toString())
     }

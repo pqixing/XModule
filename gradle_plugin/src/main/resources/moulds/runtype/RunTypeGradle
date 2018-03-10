@@ -9,6 +9,6 @@ android{
     defaultConfig {
         applicationId '#1{applicationId}'
         versionName '#1{versionName}'
-        versionCode '#1{versionCode}'
+        versionCode #1{versionCode}
     }
 }
