@@ -28,11 +28,6 @@ class DependentPrintTask extends BaseTask {
         outDir = new File(buildConfig.outDir, Keys.DIR_DEPENDENT)
         mavenType = wrapper.getExtends(ModuleConfig).mavenType
 
-        File androidDp = new File(outDir, Keys.FILE_ANDROID_DP)
-        project.task(TextUtils.onlyName, type: org.gradle.api.tasks.diagnostics.DependencyReportTask) {
-            outputFile = new File(outDir, Keys.FILE_ANDROID_DP)
-        }.execute()
-
         def strList = new LinkedList<String>()
         androidDp.eachLine {
             if (it.startsWith("No dependencies")) {
