@@ -1,6 +1,7 @@
 import org.gradle.api.invocation.Gradle
 
 import java.util.concurrent.TimeUnit
+
 /**
  * Created by pqixing on 18-2-3.
  * this class will run on setting.gradle,so can not import any other class
@@ -106,6 +107,7 @@ public class AutoInclude {
             if (!defaultXml.exists()) {
                 error = run("git clone $AutoConfig.XML_DEFAULT_GIT", rootDir.parentFile)
             }
+            run("git pull ", new File(rootDir.parentFile, docDir))
             includes += docDir
         }
         if (!defaultXml?.exists() ?: false) {
