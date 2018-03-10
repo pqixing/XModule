@@ -50,6 +50,7 @@ class MavenUtils {
         def maps = FileUtils.readMaps(versionMaps)
         maps.put(artifactId, metaWrapper.release)
         FileUtils.saveMaps(maps, versionMaps)
+        BasePlugin.rootProject."${mavenName}Maps" = maps
 
         //缓存meta 文件
         FileUtils.write(new File(mavenDir, "$artifactId/meta.xml"), metaWrapper.xmlString)
@@ -64,5 +65,6 @@ class MavenUtils {
             }
         }
 //        GitUtils.run("git add ${$Keys.MODURIZATION}/*&& git commit -m 'update version $artifactId '&& git push", docDir)
+        return true
     }
 }
