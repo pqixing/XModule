@@ -2,14 +2,12 @@ package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.common.BuildConfig
-import com.pqixing.modularization.common.GlobalConfig
-
 /**
  * Created by pqixing on 17-11-30.
  */
 
 class FileUtils {
-    private static HashMap<String, Long> cacheTime = new HashMap<>()
+//    private static HashMap<String, Long> cacheTime = new HashMap<>()
 
 
     /**
@@ -37,21 +35,21 @@ class FileUtils {
         File fileName = new File(BuildConfig.netCacheDir, TextUtils.numOrLetter(url))
         if (fileName.exists()) return fileName.text
     }
-    /**
-     * 缓存是否有效
-     * @param url
-     * @return
-     */
-    static boolean cacheVail(String url) {
-        File fileName = new File(BuildConfig.netCacheDir, TextUtils.numOrLetter(url))
-        long lastTime = Math.max(fileName.lastModified(), cacheTime.get(url)?.toLong() ?: 0L)
-        boolean vail = fileName.exists() && (System.currentTimeMillis() - lastTime) <= GlobalConfig.netCacheTime
-        return vail
-    }
+//    /**
+//     * 缓存是否有效
+//     * @param url
+//     * @return
+//     */
+//    static boolean cacheVail(String url) {
+//        File fileName = new File(BuildConfig.netCacheDir, TextUtils.numOrLetter(url))
+//        long lastTime = Math.max(fileName.lastModified(), cacheTime.get(url)?.toLong() ?: 0L)
+//        boolean vail = fileName.exists() && (System.currentTimeMillis() - lastTime) <= GlobalConfig.netCacheTime
+//        return vail
+//    }
 
     static File saveCache(String url, String cache) {
         File fileName = new File(BuildConfig.netCacheDir, TextUtils.numOrLetter(url))
-        cacheTime.put(url, System.currentTimeMillis())
+//        cacheTime.put(url, System.currentTimeMillis())
         write(fileName, cache)
         return fileName
     }

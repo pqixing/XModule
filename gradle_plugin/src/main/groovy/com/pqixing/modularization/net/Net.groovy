@@ -21,7 +21,7 @@ class Net {
      * @return
      */
     static String get(String url, boolean useCache) {
-        boolean cacheVail = FileUtils.cacheVail(url)
+//        boolean cacheVail = FileUtils.cacheVail(url)
 
         String netResult = FileUtils.readCache(url)
         if (GlobalConfig.offlineMode) {
@@ -29,7 +29,7 @@ class Net {
             return netResult
         }
 
-        if (cacheVail || (!CheckUtils.isEmpty(netResult) && useCache)) return netResult
+        if ((!CheckUtils.isEmpty(netResult) && useCache)) return netResult
 
         netResult = requestNet(url)
         def cacheFile = FileUtils.saveCache(url, netResult)

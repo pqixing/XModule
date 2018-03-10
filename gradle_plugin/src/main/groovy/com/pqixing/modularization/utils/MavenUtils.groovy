@@ -84,7 +84,7 @@ class MavenUtils {
         //缓存meta 文件
         FileUtils.write(new File(mavenDir, "$artifactId/meta.xml"), metaWrapper.xmlString)
         def versions = metaWrapper.versions
-        Print.ln("updateMavenRecord $mavenName :- >$versions")
+        Print.ln("updateMavenRecord $mavenName $artifactId:- >$versions")
         //缓存所有版本的pom 文件
         versions.each { v ->
             File pomFile = new File(mavenDir, "$artifactId/$v/pom.xml")

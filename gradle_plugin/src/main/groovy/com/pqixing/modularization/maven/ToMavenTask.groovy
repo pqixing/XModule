@@ -28,6 +28,7 @@ class ToMavenTask extends BaseTask {
     @Override
     void runTask() {
         Print.lnm("uploadArchives success -> version :$mavenInfo.pom_version artifactId : $mavenInfo.artifactId url : ${PomWrapper.getPomUrl(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId, mavenInfo.pom_version)} ")
+        Thread.sleep("2000")//睡眠两秒，再去更新
         if (!MavenUtils.updateMavenRecord(wrapper, mavenInfo.name, mavenInfo.maven_url, mavenInfo.artifactId)) {
             throw new GradleException("Update Maven Record Fail!!!! Please Run Task UpdateMaven By Yours Self!! ")
         }
