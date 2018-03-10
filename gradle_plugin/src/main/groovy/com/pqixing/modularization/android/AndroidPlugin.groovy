@@ -47,7 +47,7 @@ abstract class AndroidPlugin extends BasePlugin {
             //添加打印依赖的task
             BaseTask.task(project, DependentPrintTask.class)
                     .dependsOn project.task(TextUtils.onlyName, type: org.gradle.api.tasks.diagnostics.DependencyReportTask) {
-                outputFile = new File(outDir, Keys.FILE_ANDROID_DP)
+                outputFile = new File(wrapper.getExtends(BuildConfig).outDir, "$Keys.DIR_DEPENDENT/$Keys.FILE_ANDROID_DP")
             }
             BaseTask.task(project, DocSyncTask.class)
             BaseTask.task(project, AllToMavenTask.class)

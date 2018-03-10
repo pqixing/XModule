@@ -16,6 +16,10 @@ class ToMavenCheckTask extends BaseTask {
     MavenType mavenInfo
     GitConfig gitConfig
 
+    ToMavenCheckTask(){
+        group = ""
+    }
+
     @Override
     void start() {
         mavenInfo = wrapper.getExtends(ModuleConfig).mavenType
