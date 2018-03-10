@@ -10,14 +10,7 @@ import com.pqixing.modularization.common.GlobalConfig
 
 class FileUtils {
     private static HashMap<String, Long> cacheTime = new HashMap<>()
-    /**
-     * 如果某个
-     * @param str
-     * @return
-     */
-    static File appendIfNotExists(String str) {
-        return null
-    }
+
 
     /**
      * 根据包名获取路径
@@ -27,6 +20,17 @@ class FileUtils {
      */
     static File getFileForClass(String dir, String fullName) {
         return new File(dir, "${fullName.replace(".", "/")}.java")
+    }
+    /**
+     * 如果文件不存在,先创建文件
+     * @param file
+     * @return
+     */
+    static boolean createIfNotExist(File file) {
+        if (file.exists()) return false
+        file.parentFile.mkdirs()
+        file.createNewFile()
+        return true
     }
 
     static String readCache(String url) {
@@ -45,10 +49,11 @@ class FileUtils {
         return vail
     }
 
-    static void saveCache(String url, String cache) {
+    static File saveCache(String url, String cache) {
         File fileName = new File(BuildConfig.netCacheDir, TextUtils.numOrLetter(url))
         cacheTime.put(url, System.currentTimeMillis())
         write(fileName, cache)
+        return fileName
     }
 
     /**
@@ -69,6 +74,14 @@ class FileUtils {
         Properties p = new Properties()
         if (file.exists()) p.load(file.newInputStream())
         return p
+    }
+
+    static void saveMaps(Properties maps, File file) {
+        if (!file.exists()) {
+            file.parentFile.mkdirs()
+            file.createNewFile()
+        }
+        maps.store(file.newPrintWriter(), Keys.CHARSET)
     }
 
     static String read(String file) {
