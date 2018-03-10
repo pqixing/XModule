@@ -7,6 +7,7 @@ import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print
+import com.pqixing.modularization.utils.TextUtils
 
 class Net {
 
@@ -64,7 +65,7 @@ class Net {
         BuildConfig buildConfig = maven.wrapper.getExtends(BuildConfig)
         StringBuilder pomUrl = new StringBuilder(maven.maven_url)
         if (!maven.maven_url.endsWith("/")) pomUrl.append("/")
-        pomUrl.append(buildConfig.groupName.replace(".", "/"))
+        pomUrl.append(TextUtils.getUrl(buildConfig.groupName))
                 .append("/$moduleName/$version/$moduleName-${version}.pom")
         return get(pomUrl.toString(), true)
     }

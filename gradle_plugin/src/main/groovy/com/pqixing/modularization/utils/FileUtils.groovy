@@ -19,7 +19,7 @@ class FileUtils {
      * @return
      */
     static File getFileForClass(String dir, String fullName) {
-        return new File(dir, "${fullName.replace(".", "/")}.java")
+        return new File(dir, "${TextUtils.getUrl(fullName)}.java")
     }
     /**
      * 如果文件不存在,先创建文件

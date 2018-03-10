@@ -5,6 +5,7 @@ import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.dependent.Module
 import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.utils.Print
+import com.pqixing.modularization.utils.TextUtils
 
 /**
  * Pom解析包裹类
@@ -21,7 +22,7 @@ class PomWrapper extends XmlWrapper {
      * http://192.168.3.7:9527/nexus/content/repositories/androidtest/com/dachen/android/router/0.1.7/router-0.1.7.pom
      */
     static String getPomUrl(String envUrl, String group, String moduleName, String version) {
-        return "$envUrl/${group.replace(".", "/")}/$moduleName/$version/${moduleName}-${version}.pom"
+        return "$envUrl/${TextUtils.getUrl(group)}/$moduleName/$version/${moduleName}-${version}.pom"
     }
 
     public
