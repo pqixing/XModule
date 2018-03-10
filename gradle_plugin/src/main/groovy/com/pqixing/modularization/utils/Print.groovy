@@ -22,8 +22,8 @@ class Print {
         closure?.call(str)
         if ("Y" == silentLog && !focusLog) return
         print(str)
-        def newStr = "${new Date().toLocaleString()} --> $str"
-        write(newStr)
+//        def newStr = "${new Date().toLocaleString()} --> $str"
+//        write(newStr)
         return str
     }
     static File outputFile
