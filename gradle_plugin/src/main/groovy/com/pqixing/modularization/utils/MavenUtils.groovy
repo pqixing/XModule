@@ -9,20 +9,20 @@ import com.pqixing.modularization.wrapper.PomWrapper
 import com.pqixing.modularization.wrapper.ProjectWrapper
 
 class MavenUtils {
-    static String getNameByUrl(String mavenUrl){
+    static String getNameByUrl(String mavenUrl) {
         String name = Keys.TEST
         GlobalConfig.preMavenUrl.each { map ->
-            if(map.value == mavenUrl) name = map.key
+            if (map.value == mavenUrl) name = map.key
         }
         return name
     }
 
     static String getDocMetaXml(String mavenName, String artifactId) {
-        return FileUtils.read(new File(documentDir,"$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$artifactId/meta.xml"))
+        return FileUtils.read(new File(documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$artifactId/meta.xml"))
     }
 
     static String getDocPomXml(String mavenName, String artifactId, String version) {
-        return FileUtils.read(new File(documentDir,"$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$artifactId/$version/pom.xml"))
+        return FileUtils.read(new File(documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$artifactId/$version/pom.xml"))
     }
 
     /**
@@ -65,7 +65,7 @@ class MavenUtils {
     /**
      * 更新某个模块的maven仓库记录
      */
-    static boolean updateMavenRecord(ProjectWrapper wrapper, String mavenName, String mavenUrl, String artifactId) {
+    static boolean updateMavenRecord(ProjectWrapper wrapper, String mavenName, String mavenUrl, String artifactId, boolean push = true) {
         MetadataWrapper metaWrapper = MetadataWrapper.create(mavenUrl, GlobalConfig.groupName, artifactId)
         if (metaWrapper.empty) return false
 
@@ -79,7 +79,7 @@ class MavenUtils {
         def maps = FileUtils.readMaps(versionMaps)
         maps.put(artifactId, metaWrapper.release)
         FileUtils.saveMaps(maps, versionMaps)
-        BasePlugin.rootProject."${mavenName}Maps" = maps
+        BasePlugin.rootProject.ext."${mavenName}Maps" = maps
 
         //缓存meta 文件
         FileUtils.write(new File(mavenDir, "$artifactId/meta.xml"), metaWrapper.xmlString)
@@ -93,7 +93,16 @@ class MavenUtils {
                 if (!CheckUtils.isEmpty(pomXml)) FileUtils.write(pomFile, pomXml)
             }
         }
-//        GitUtils.run("git add ${$Keys.MODURIZATION}/*&& git commit -m 'update version $artifactId '&& git push", docDir)
+        if (push) pushMaven()
         return true
+    }
+    /**
+     * push文件库
+     */
+    static void pushMaven() {
+        File docDir = checkDocDir()
+        GitUtils.run("git add $Keys.MODURIZATION/*", docDir)
+        GitUtils.run("git commit -m update", docDir)
+        GitUtils.run("git push", docDir)
     }
 }

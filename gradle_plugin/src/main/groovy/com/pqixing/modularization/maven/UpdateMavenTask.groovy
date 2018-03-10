@@ -16,10 +16,11 @@ class UpdateMavenTask extends BaseTask {
                 int groupIndex = line.indexOf(groupUrl)
                 if (groupIndex != -1 && line.contains("href=")) {
                     String artifactId = line.substring(groupIndex + length + 1, line.indexOf("/\">"))
-                    MavenUtils.updateMavenRecord(wrapper, mavenInfo.key, mavenInfo.value, artifactId)
+                    MavenUtils.updateMavenRecord(wrapper, mavenInfo.key, mavenInfo.value, artifactId,false)
                 }
             }
         }
+        MavenUtils.pushMaven()
     }
 
     @Override
