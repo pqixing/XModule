@@ -4,6 +4,8 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.dependent.Module
 import com.pqixing.modularization.net.Net
+import com.pqixing.modularization.utils.CheckUtils
+import com.pqixing.modularization.utils.MavenUtils
 import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.utils.TextUtils
 
@@ -25,8 +27,10 @@ class PomWrapper extends XmlWrapper {
         return "$envUrl/${TextUtils.getUrl(group)}/$moduleName/$version/${moduleName}-${version}.pom"
     }
 
-    public
+
     static PomWrapper create(String envUrl, String group, String moduleName, String version) {
+        String pomXml = MavenUtils.getDocPomXml(MavenUtils.getNameByUrl(envUrl), moduleName, version)
+        if (!CheckUtils.isEmpty(pomXml)) return new PomWrapper(pomXml)
         return create(getPomUrl(envUrl, group, moduleName, version))
     }
 
@@ -118,7 +122,7 @@ class PomWrapper extends XmlWrapper {
         node.dependencies.dependency.each { d ->
             d.exclusions.exclusion.each { e ->
                 if (e.groupId.text() == Keys.GROUP_MASTER) {
-                    e.artifactId.text().toString().split(Keys.SEPERATOR).each{
+                    e.artifactId.text().toString().split(Keys.SEPERATOR).each {
                         excludes.add(it)
                     }
                 }

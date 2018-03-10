@@ -9,25 +9,54 @@ import com.pqixing.modularization.wrapper.PomWrapper
 import com.pqixing.modularization.wrapper.ProjectWrapper
 
 class MavenUtils {
+    static String getNameByUrl(String mavenUrl){
+        String name = Keys.TEST
+        GlobalConfig.preMavenUrl.each { map ->
+            if(map.value == mavenUrl) name = map.key
+        }
+        return name
+    }
+
+    static String getDocMetaXml(String mavenName, String artifactId) {
+        return FileUtils.read(new File(documentDir,"$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$artifactId/meta.xml"))
+    }
+
+    static String getDocPomXml(String mavenName, String artifactId, String version) {
+        return FileUtils.read(new File(documentDir,"$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$artifactId/$version/pom.xml"))
+    }
+
+    /**
+     * 获取最后的版本号
+     * @param mavenName
+     * @param artifactId
+     * @return
+     */
+    static String getVersion(String mavenName, String artifactId) {
+        return getMavenMaps(mavenName).get(artifactId)?.toString() ?: "+"
+    }
 
     static Properties getMavenMaps(String mavenName) {
         String mapKey = "${mavenName}Maps"
         if (BasePlugin.rootProject.hasProperty(mapKey)) {
             return BasePlugin.rootProject."$mapKey"
         }
-        String docGitName = GitUtils.getNameFromUrl(GlobalConfig.docGitUrl)
-        def mapFile = new File(BasePlugin.rootProject.rootDir.parentFile, "$docGitName/$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$Keys.FILE_VERSION")
+
+        def mapFile = new File(documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$Keys.FILE_VERSION")
         BasePlugin.rootProject.ext."$mapKey" = FileUtils.readMaps(mapFile)
 
         FileUtils.createIfNotExist(mapFile)
         return BasePlugin.rootProject."$mapKey"
     }
 
-    static File checkDocDir(ProjectWrapper wrapper) {
+    static File getDocumentDir() {
         String docGitName = GitUtils.getNameFromUrl(GlobalConfig.docGitUrl)
-        File docDir = GitUtils.findGitDir(new File(wrapper.project.rootDir.parentFile, docGitName))
+        return GitUtils.findGitDir(new File(BasePlugin.rootProject.rootDir.parentFile, docGitName))
+    }
+
+    static File checkDocDir() {
+        File docDir = documentDir
         if (CheckUtils.isEmpty(docDir)) {//如果文档库还不存在
-            GitUtils.run("git clone $GlobalConfig.docGitUrl", wrapper.project.rootDir)
+            GitUtils.run("git clone $GlobalConfig.docGitUrl", docDir.parentFile)
         } else GitUtils.run("git pull", docDir)
 
         return docDir
@@ -40,7 +69,7 @@ class MavenUtils {
         MetadataWrapper metaWrapper = MetadataWrapper.create(mavenUrl, GlobalConfig.groupName, artifactId)
         if (metaWrapper.empty) return false
 
-        File docDir = checkDocDir(wrapper)
+        File docDir = checkDocDir()
         if (!docDir.exists()) return false
 
         File mavenDir = new File(docDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName")

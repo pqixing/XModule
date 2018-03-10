@@ -1,13 +1,12 @@
 package com.pqixing.modularization.maven
 
-import com.pqixing.modularization.Keys
 import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.dependent.Dependencies
 import com.pqixing.modularization.git.GitConfig
-import com.pqixing.modularization.utils.FileUtils
+import com.pqixing.modularization.utils.MavenUtils
 import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.wrapper.PomWrapper
+import org.gradle.api.GradleException
 
 class ToMavenTask extends BaseTask {
 
@@ -29,16 +28,9 @@ class ToMavenTask extends BaseTask {
     @Override
     void runTask() {
         Print.lnm("uploadArchives success -> version :$mavenInfo.pom_version artifactId : $mavenInfo.artifactId url : ${PomWrapper.getPomUrl(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId, mavenInfo.pom_version)} ")
-
-        //上传完成以后,更新本地依赖版本信息
-        File versionFile = wrapper.getExtends(Dependencies.class).versionFile
-        versionFile.parentFile.mkdirs()
-        def pros = FileUtils.readMaps(versionFile)
-        String timeStamp = "$mavenInfo.artifactId$Keys.SUFFIX_STAMP"
-        pros.put(timeStamp, System.currentTimeMillis().toString())
-        pros.put(mavenInfo.artifactId, mavenInfo.pom_version)
-        pros.store(versionFile.newOutputStream(), Keys.CHARSET)
-        pros.clear()
+        if (!MavenUtils.updateMavenRecord(wrapper, mavenInfo.name, mavenInfo.maven_url, mavenInfo.artifactId)) {
+            throw new GradleException("Update Maven Record Fail!!!! Please Run Task UpdateMaven By Yours Self!! ")
+        }
     }
 
     @Override
