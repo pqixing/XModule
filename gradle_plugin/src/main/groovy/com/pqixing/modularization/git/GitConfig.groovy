@@ -36,11 +36,18 @@ class GitConfig extends BaseExtension {
 
     GitConfig(Project project) {
         super(project)
+        File gitDir = GitUtils.findGitDir(project.projectDir)
+        if(gitDir == null){
+            branchName =""
+            revisionNum =""
+            lastLog = ""
+            return
+        }
+
         branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", project.projectDir).trim()
         revisionNum = GitUtils.run("git rev-parse HEAD", project.projectDir).trim()
         lastLog = GitUtils.run("git log -1 --oneline ${revisionNum}", project.projectDir).trim()
-        File gitDir = GitUtils.findGitDir(project.projectDir)
-        if (gitDir != null && gitDir.absolutePath != project.projectDir.absolutePath) {
+        if (gitDir.absolutePath != project.projectDir.absolutePath) {
             String dirLog = GitUtils.run("git log -1 --oneline ${project.name}/", gitDir).trim()
             //如果当前工程不是单独一个git，则使用目录的版本号作为最后的版本号
             if (!CheckUtils.isEmpty(dirLog)) {
