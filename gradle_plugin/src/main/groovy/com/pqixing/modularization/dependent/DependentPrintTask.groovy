@@ -27,7 +27,7 @@ class DependentPrintTask extends BaseTask {
         buildConfig = wrapper.getExtends(BuildConfig.class)
         outDir = new File(buildConfig.outDir, Keys.DIR_DEPENDENT)
         mavenType = wrapper.getExtends(ModuleConfig).mavenType
-
+        File androidDp =new File(wrapper.getExtends(BuildConfig).outDir, "$Keys.DIR_DEPENDENT/$Keys.FILE_ANDROID_DP")
         def strList = new LinkedList<String>()
         androidDp.eachLine {
             if (it.startsWith("No dependencies")) {
