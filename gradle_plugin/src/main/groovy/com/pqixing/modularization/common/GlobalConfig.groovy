@@ -12,7 +12,10 @@ import com.pqixing.modularization.wrapper.ProjectWrapper
  * 全局配置，主要在gradle.propeties中的配置信息
  */
 class GlobalConfig {
-
+    /**
+     * 是否打印日志
+     */
+    static boolean silentLog = true
     /**
      * 默认git操作目标
      * include，all
