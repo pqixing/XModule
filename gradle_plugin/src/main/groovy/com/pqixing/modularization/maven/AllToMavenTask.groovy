@@ -10,7 +10,7 @@ class AllToMavenTask extends BaseTask {
     boolean winOs
     File outFile
     StringBuilder outContent
-
+    String runGradle
     AllToMavenTask() {
         dependsOn "DependentPrint"
     }
@@ -18,6 +18,7 @@ class AllToMavenTask extends BaseTask {
     @Override
     void start() {
         winOs = org.gradle.internal.os.OperatingSystem.current().isWindows()
+        runGradle = winOs?"call gradlew.bat":"./gradlew"
         outFile = new File(wrapper.getExtends(BuildConfig).outDir, "$Keys.BATH_ALL.${winOs ? "bat" : "sh"}")
         outContent = new StringBuilder("cd ${project.rootDir.absolutePath} \n")
 //        outContent.append("gradle :${getTaskName(CheckMasterTask)} \n")
@@ -52,7 +53,7 @@ class AllToMavenTask extends BaseTask {
 
     void writeBathScrip(StringBuilder sb, String moduleName) {
         sb.append("echo include = $moduleName > $Keys.TXT_HIDE_INCLUDE \n")
-        sb.append("gradle :$moduleName:clean \n")
-        sb.append("gradle :$moduleName:ToMaven \n")
+        sb.append("$runGradle :CheckBranch :GitUpdate \n")
+        sb.append("$runGradle :$moduleName:clean :$moduleName:ToMaven \n")
     }
 }
