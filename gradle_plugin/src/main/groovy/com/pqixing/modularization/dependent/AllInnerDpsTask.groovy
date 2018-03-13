@@ -1,18 +1,17 @@
-package com.pqixing.modularization.maven
+package com.pqixing.modularization.dependent
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
-import com.pqixing.modularization.dependent.DependentPrintTask
 import com.pqixing.modularization.utils.FileUtils
 
-class DpsToMavenTask extends BaseTask {
+class AllInnerDpsTask extends BaseTask {
     boolean winOs
     File outFile
     StringBuilder outContent
     String runGradle
 
-    DpsToMavenTask() {
+    AllInnerDpsTask() {
         dependsOn "DependentPrint"
     }
 
@@ -27,22 +26,23 @@ class DpsToMavenTask extends BaseTask {
 
     @Override
     void runTask() {
-        StringBuilder temp = new StringBuilder("\n$runGradle :CheckBranch :GitUpdate \n")
+        outContent.append("echo ")
 
-        outContent.append("echo include=")
+        StringBuilder temp = new StringBuilder("\n$runGradle :CheckBranch :GitUpdate \n")
+        StringBuilder includeStr = new StringBuilder("include=")
         //所有依赖的文件
         def dpBySortList = wrapper.getTask(DependentPrintTask).dpBySortList
         for (int i = dpBySortList.size() - 1; i >= 0; i--) {
             def it = dpBySortList.get(i)
-            outContent.append(it.moduleName).append(",")
+            includeStr.append(it.moduleName).append(",")
             writeBathScrip(temp, it.moduleName)
         }
         if (wrapper.pluginName == Keys.NAME_LIBRARY) {
-            outContent.append(project.name).append(",")
+            includeStr.append(project.name).append(",")
             writeBathScrip(temp, project.name)
         }
-
-        outContent.append(" > $project.rootDir.absolutePath/$Keys.TXT_HIDE_INCLUDE\n").append(temp)
+        FileUtils.write(new File(project.projectDir,Keys.TXT_HIDE_INCLUDE),includeStr.toString())
+        outContent.append(includeStr).append(" > $project.rootDir.absolutePath/$Keys.TXT_HIDE_INCLUDE\n").append(temp)
     }
 
 
