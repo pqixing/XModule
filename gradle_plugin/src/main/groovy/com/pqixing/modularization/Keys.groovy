@@ -157,7 +157,7 @@ class Keys {
     /**
      * 批量上传全部工程文件
      */
-    public static final String BATH_ALL = "batch_all"
+    public static final String BATH_ALL = "UpDps_all"
     /**
      * 合并依赖到master分支
      */

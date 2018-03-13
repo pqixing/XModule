@@ -6,12 +6,13 @@ import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.dependent.DependentPrintTask
 import com.pqixing.modularization.utils.FileUtils
 
-class AllToMavenTask extends BaseTask {
+class DpsToMavenTask extends BaseTask {
     boolean winOs
     File outFile
     StringBuilder outContent
     String runGradle
-    AllToMavenTask() {
+
+    DpsToMavenTask() {
         dependsOn "DependentPrint"
     }
 
@@ -26,9 +27,9 @@ class AllToMavenTask extends BaseTask {
 
     @Override
     void runTask() {
-        StringBuilder temp = new StringBuilder()
+        StringBuilder temp = new StringBuilder("\n$runGradle :CheckBranch :GitUpdate \n")
 
-        outContent.append("echo start batch upload :")
+        outContent.append("echo include=")
         //所有依赖的文件
         def dpBySortList = wrapper.getTask(DependentPrintTask).dpBySortList
         for (int i = dpBySortList.size() - 1; i >= 0; i--) {
@@ -41,7 +42,7 @@ class AllToMavenTask extends BaseTask {
             writeBathScrip(temp, project.name)
         }
 
-        outContent.append(" >> ${BuildConfig.mavenRecordFile}\n").append(temp)
+        outContent.append(" > $project.rootDir.absolutePath/$Keys.TXT_HIDE_INCLUDE\n").append(temp)
     }
 
 
@@ -49,11 +50,11 @@ class AllToMavenTask extends BaseTask {
     void end() {
         outContent.append("echo batch upload end > $Keys.TXT_HIDE_INCLUDE \n")
         FileUtils.write(outFile, outContent.toString())
+        FileUtils.write(new File(BuildConfig.rootOutDir,outFile.name.replace("all",project.name)), outContent.toString())
     }
 
     void writeBathScrip(StringBuilder sb, String moduleName) {
         sb.append("echo include = $moduleName > $Keys.TXT_HIDE_INCLUDE \n")
-        sb.append("$runGradle :CheckBranch :GitUpdate \n")
         sb.append("$runGradle :$moduleName:clean :$moduleName:ToMaven \n")
     }
 }

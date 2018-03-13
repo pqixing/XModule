@@ -8,7 +8,7 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.dependent.DependentPrintTask
 import com.pqixing.modularization.docs.DocSyncTask
-import com.pqixing.modularization.maven.AllToMavenTask
+import com.pqixing.modularization.maven.DpsToMavenTask
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.maven.ToMavenCheckTask
 import com.pqixing.modularization.maven.ToMavenTask
@@ -50,7 +50,7 @@ abstract class AndroidPlugin extends BasePlugin {
                 outputFile = new File(wrapper.getExtends(BuildConfig).outDir, "$Keys.DIR_DEPENDENT/$Keys.FILE_ANDROID_DP")
             }
             BaseTask.task(project, DocSyncTask.class)
-            BaseTask.task(project, AllToMavenTask.class)
+            BaseTask.task(project, DpsToMavenTask.class)
             //添加分析的任务
 //            BaseTask.task(wrapper.project, wrapper.getExtends(GitConfig.class)
 //                    .branchName == "master" ? MavenMergerTask.class : BranchMergerTask.class)
