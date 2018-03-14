@@ -24,7 +24,7 @@ class GlobalConfig {
     /**
      * 分支名称
      */
-    static String branchName = "newModules"
+    static String branchName = "master"
 
     static Set<String> excludeGit = []
 
