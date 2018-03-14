@@ -62,6 +62,16 @@ class MavenUtils {
         return docDir
     }
 
+    static boolean clearVersionMaps(String mavenName){
+        File docDir = checkDocDir()
+        if (!docDir.exists()) return false
+
+        File mavenDir = new File(docDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName")
+
+        //保存最新的版本号
+        new File(mavenDir, Keys.FILE_VERSION).delete()
+    }
+
     /**
      * 更新某个模块的maven仓库记录
      */
