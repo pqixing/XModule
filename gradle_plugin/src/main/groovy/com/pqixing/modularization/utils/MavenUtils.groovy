@@ -87,7 +87,7 @@ class MavenUtils {
         MetadataWrapper metaWrapper = MetadataWrapper.create(mavenUrl, GlobalConfig.groupName, artifactId)
         if (metaWrapper.empty) return false
 
-        File docDir = documentDir()
+        File docDir = documentDir
         if (!docDir.exists()) return false
 
         File mavenDir = new File(docDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName")
