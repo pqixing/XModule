@@ -4,6 +4,7 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.GitUtils
+import com.pqixing.modularization.utils.Print
 import org.gradle.api.Project
 
 /**
@@ -45,16 +46,15 @@ class GitConfig extends BaseExtension {
             lastUpdate = ""
             return
         }
-        def gitInfo = GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H::%cd::%D::%s' --date=format:'%Y%m%d%H%M%S'").trim().split("::")
+        def gitInfo = GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H::%cd::%D::%s' --date=format:'%Y%m%d%H%M%S'", gitDir).trim().split("::")
         if (gitInfo.length > 0)
             revisionNum = gitInfo[0]
         if (gitInfo.length > 1)
             lastUpdate = gitInfo[1]
         if (gitInfo.length > 2)
-            branchName = gitInfo[2]
+            branchName = gitInfo[2].split(",")[0].replace("HEAD", "").replace("->", "").trim()
         if (gitInfo.length > 3)
             lastLog = gitInfo[3]
-
 
 //        branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", project.projectDir).trim()
 //        revisionNum = GitUtils.run("git rev-parse HEAD", project.projectDir).trim()
@@ -67,6 +67,7 @@ class GitConfig extends BaseExtension {
                 revisionNum = dirLog
             }
         }
+        Print.ln("revisionNum :$revisionNum branchName :$branchName lastUpdate : $lastUpdate lastLog : $lastLog")
 
     }
 
