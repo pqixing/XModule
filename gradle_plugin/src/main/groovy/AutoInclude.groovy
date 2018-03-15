@@ -60,14 +60,14 @@ public class AutoInclude {
         gradle.ext.gitEmail = email
     }
 
-    void readInclude(StringBuilder autoTxt, File f) {
+    void readInclude(StringBuilder autoTxt, File f, boolean desc = true) {
         if (!f.exists() || !f.isFile()) return
         boolean end = false
         StringBuilder icTxt = new StringBuilder()
         f.eachLine { line ->
             end |= line.startsWith(AutoConfig.TAG_AUTO_ADD)
             if (end) return
-            if (!line.trim().isEmpty()) {
+            if (desc && !line.trim().isEmpty()) {
                 icTxt.append(line).append("\\n")
             }
 
@@ -82,18 +82,31 @@ public class AutoInclude {
                     break
                 case "email": email = value
                     break
-                case "targetInclude": readInclude(autoTxt, new File(rootDir, value))
+                case "targetInclude": readInclude(autoTxt, new File(rootDir, value), false)
                     break
                 case "include":
                     value?.split(",")?.each { includes += it.trim() }
                     break
+                case "dpsInclude"://批量导入子项目
+                    value?.split(",")?.each { readDpsInclude(autoTxt, it.trim()) }
+                    break
             }
 
         }
-        def wirter = f.newPrintWriter("utf-8")
-        wirter.write("${icTxt.toString()}\\n$AutoConfig.TAG_AUTO_ADD below this line is not work!!!!! github -> https://github.com/pqixing/modularization \\n${autoTxt.toString()}")
-        wirter.close()
+        if (desc) {
+            def wirter = f.newPrintWriter("utf-8")
+            wirter.write("${icTxt.toString()}\\n$AutoConfig.TAG_AUTO_ADD below this line is not work!!!!! github -> https://github.com/pqixing/modularization \\n${autoTxt.toString()}")
+            wirter.close()
+        }
     }
+
+    void readDpsInclude(StringBuilder autoTxt, String dpsName) {
+        String url = localProject.find { it.key == dpsName }?.value
+        if (url == null || url.isEmpty()) return
+        def f = new File(url, AutoConfig.TXT_HIDEINCLUDE)
+        if (f.exists()) readInclude(autoTxt, f, false)
+    }
+
     /**
      * 解析default xml 加载所有的git信息
      */
@@ -165,9 +178,9 @@ public class AutoInclude {
 
     void save() {
         StringBuilder icTxt = new StringBuilder()
+        formatLocalPath(localProject, rootDir.parentFile, 3)
         formatXml(icTxt)
         formatInclude(icTxt)
-        formatLocalPath(localProject, rootDir.parentFile, 3)
         Map<String, String> realInclude = [:]
 
         includes.each { key ->
@@ -291,5 +304,5 @@ class AutoConfig {
             "</git>"
 
     static
-    final String mould_include = "username = \\npassword = \\nemail= \\ninclude = \\ntargetInclude = \\n\\n"
+    final String mould_include = "username = \\npassword = \\nemail= \\ninclude = \\ndpsInclude = \\ntargetInclude = \\n\\n"
 }

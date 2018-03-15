@@ -1,10 +1,9 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.common.BuildConfig
+import com.pqixing.modularization.common.GlobalConfig
 
 class Print {
-
-    static String silentLog = "N"
 
     static String ln(String str, Closure closure = null) {
         return l(str + "\n", false, closure)
@@ -20,10 +19,10 @@ class Print {
 
     static String l(String str, boolean focusLog = false, Closure closure = null) {
         closure?.call(str)
-        if ("Y" == silentLog && !focusLog) return
+        if (GlobalConfig.silentLog &&  !focusLog) return
         print(str)
-//        def newStr = "${new Date().toLocaleString()} --> $str"
-//        write(newStr)
+        def newStr = "${new Date().toLocaleString()} --> $str"
+        write(newStr)
         return str
     }
     static File outputFile

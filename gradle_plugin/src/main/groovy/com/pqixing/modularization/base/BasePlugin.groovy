@@ -38,7 +38,7 @@ abstract class BasePlugin implements Plugin<Project> {
     void addIgnoreFile() {
         File ignoreFile = project.file(Keys.GIT_IGNORE)
         StringBuilder sb = new StringBuilder(FileUtils.read(ignoreFile))
-        Set<String> defSets = ["build", Keys.GLOBAL_CONFIG_NAME, Keys.FOCUS_GRADLE, BuildConfig.dirName, "*.iml"] + ignoreFields
+        Set<String> defSets = ["build", Keys.GLOBAL_CONFIG_NAME, Keys.FOCUS_GRADLE, BuildConfig.dirName, "*.iml",Keys.TXT_HIDE_INCLUDE] + ignoreFields
 
         defSets.each { if (!sb.contains(it)) sb.append("\n$it\n") }
         FileUtils.write(ignoreFile, sb.toString())

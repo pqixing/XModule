@@ -15,7 +15,7 @@ class CheckMasterTask extends CheckBranchTask {
     @Override
     void start() {
         super.start()
-        checkout = "master"
+        branchName = "master"
         target = "all"
     }
 }
