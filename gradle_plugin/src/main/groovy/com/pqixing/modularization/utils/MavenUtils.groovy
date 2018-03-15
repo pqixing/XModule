@@ -40,11 +40,19 @@ class MavenUtils {
         if (BasePlugin.rootProject.hasProperty(mapKey)) {
             return BasePlugin.rootProject."$mapKey"
         }
+        long start = System.currentTimeMillis()
+        //如果当前不存在版本号，则从遍历Doc目录创建
+        def maps = new Properties()
+        def mapsDir = new File(upDocumentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/")
+        mapsDir.eachDir { dir ->
+            String version = ""
+            dir.eachDir { if (it.name > version) version = it.name }
+            maps.put(dir.name, version)
+        }
 
-        def mapFile = new File(documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$Keys.FILE_VERSION")
-        BasePlugin.rootProject.ext."$mapKey" = FileUtils.readMaps(mapFile)
-
-        FileUtils.createIfNotExist(mapFile)
+        BasePlugin.rootProject.ext."$mapKey" = maps
+        Print.lnf("getMavenMaps cout:${System.currentTimeMillis()- start} -> $maps")
+//        FileUtils.createIfNotExist(mapFile)
         return BasePlugin.rootProject."$mapKey"
     }
 
@@ -53,7 +61,7 @@ class MavenUtils {
         return GitUtils.findGitDir(new File(BasePlugin.rootProject.rootDir.parentFile, docGitName))
     }
 
-    static File checkDocDir() {
+    static File getUpDocumentDir() {
         File docDir = documentDir
         if (CheckUtils.isEmpty(docDir)) {//如果文档库还不存在
             GitUtils.run("git clone $GlobalConfig.docGitUrl", docDir.parentFile)
@@ -62,15 +70,15 @@ class MavenUtils {
         return docDir
     }
 
-    static boolean clearVersionMaps(String mavenName){
-        File docDir = checkDocDir()
-        if (!docDir.exists()) return false
-
-        File mavenDir = new File(docDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName")
-
-        //保存最新的版本号
-        new File(mavenDir, Keys.FILE_VERSION).delete()
-    }
+//    static boolean clearVersionMaps(String mavenName) {
+//        File docDir = getUpDocumentDir()
+//        if (!docDir.exists()) return false
+//
+//        File mavenDir = new File(docDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName")
+//
+//        //保存最新的版本号
+//        new File(mavenDir, Keys.FILE_VERSION).delete()
+//    }
 
     /**
      * 更新某个模块的maven仓库记录
@@ -79,17 +87,13 @@ class MavenUtils {
         MetadataWrapper metaWrapper = MetadataWrapper.create(mavenUrl, GlobalConfig.groupName, artifactId)
         if (metaWrapper.empty) return false
 
-        File docDir = checkDocDir()
+        File docDir = documentDir()
         if (!docDir.exists()) return false
 
         File mavenDir = new File(docDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName")
 
         //保存最新的版本号
-        File versionMaps = new File(mavenDir, Keys.FILE_VERSION)
-        def maps = FileUtils.readMaps(versionMaps)
-        maps.put(artifactId, metaWrapper.release)
-        FileUtils.saveMaps(maps, versionMaps)
-        BasePlugin.rootProject.ext."${mavenName}Maps" = maps
+        getMavenMaps(mavenName).put(artifactId,metaWrapper.release)
 
         //缓存meta 文件
         FileUtils.write(new File(mavenDir, "$artifactId/meta.xml"), metaWrapper.xmlString)
@@ -110,7 +114,7 @@ class MavenUtils {
      * push文件库
      */
     static void pushMaven() {
-        File docDir = checkDocDir()
+        File docDir = getUpDocumentDir()
         GitUtils.run("git add $Keys.MODURIZATION/*", docDir)
         GitUtils.run("git commit -m update", docDir)
         GitUtils.run("git push", docDir)

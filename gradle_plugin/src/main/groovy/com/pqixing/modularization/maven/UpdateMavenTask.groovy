@@ -3,7 +3,6 @@ package com.pqixing.modularization.maven
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.net.Net
-import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.MavenUtils
 import com.pqixing.modularization.utils.TextUtils
 
@@ -15,7 +14,7 @@ class UpdateMavenTask extends BaseTask {
         GlobalConfig.preMavenUrl.each { mavenInfo ->
 
             def mavenStr = Net.get("$mavenInfo.value/$groupUrl")
-            if (!CheckUtils.isEmpty(mavenStr)) MavenUtils.clearVersionMaps(mavenInfo.key)
+//            if (!CheckUtils.isEmpty(mavenStr)) MavenUtils.clearVersionMaps(mavenInfo.key)
             mavenStr.eachLine { line ->
                 int groupIndex = line.indexOf(groupUrl)
                 if (groupIndex != -1 && line.contains("href=")) {
