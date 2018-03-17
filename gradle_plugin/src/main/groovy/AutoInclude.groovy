@@ -72,8 +72,8 @@ public class AutoInclude {
 
             def map = line.replaceAll("//.*", "").split("=")
             if (map.length < 2) return
-            String key = map[0].trim()
-            String value = map[1].trim()
+            String key = map[0].replace("var ", "").replace("val ", "").trim()
+            String value = map[1].replace("+", ",").trim()
             switch (key) {
                 case "username": username = value
                     break
@@ -141,14 +141,14 @@ public class AutoInclude {
             String introduce = p.@introduce
 
             projectUrls.put(name, "$url$AutoConfig.SEPERATOR$introduce")
-            icTxt.append(getIncludeLine("include = $name", introduce))
+            icTxt.append(getIncludeLine("val $name", introduce))
 
             List<String> subLists = []
             p.submodule.each { Node s ->
                 String s_name = s.@name
                 String s_introduce = s.@introduce
                 subLists += "${s_name}$AutoConfig.SEPERATOR${s_introduce}"
-                icTxt.append(getIncludeLine("     |- - $s_name", s_introduce))
+                icTxt.append(getIncludeLine("    val $s_name", s_introduce))
             }
             if (!subLists.isEmpty()) submodules.put(name, subLists)
         }
@@ -159,11 +159,11 @@ public class AutoInclude {
 
     String getIncludeLine(String includeKey, String introduce) {
         StringBuilder sb = new StringBuilder(includeKey)
-        int space = 50 - sb.length()
+        int space = 40 - sb.length()
         for (int i = 0; i < space; i++) {
             sb.append(" ")
         }
-        return sb.append("//-- $introduce \\n")
+        return sb.append("= '$introduce' \\n")
     }
 
     void saveToFile(Map<String, String> realInclude) {
@@ -175,13 +175,22 @@ public class AutoInclude {
         outIncludeFile.write(sb.toString())
     }
 
+    void formatGroup() {
+        submodules.findAll { includes.contains(it.key) }?.each { group ->
+            includes.remove(group.key)
+            group.value.each { includes.add(it.split("###")[0]) }
+        }
+
+    }
+
     void save() {
         StringBuilder icTxt = new StringBuilder()
         formatLocalPath(localProject, rootDir.parentFile, 3)
         formatXml(icTxt)
         formatInclude(icTxt)
-        Map<String, String> realInclude = [:]
+        formatGroup()
 
+        Map<String, String> realInclude = [:]
         includes.each { key ->
             String url = localProject.find { it.key == key }?.value
             //如果本地存在工程目录，直接导入,否则尝试从网络导入
@@ -287,11 +296,11 @@ class AutoConfig {
     /**
      * 本地配置文件路径
      */
-    static final String TXT_INCLUDE = "include.txt"
+    static final String TXT_INCLUDE = "include.kt"
     /**
      * 隐藏的导入文件，批量上传时使用
      */
-    static final String TXT_HIDEINCLUDE = "hideInclude.txt"
+    static final String TXT_HIDEINCLUDE = "hideInclude.kt"
 
     /**
      * git配置模板
@@ -303,5 +312,5 @@ class AutoConfig {
             "</git>"
 
     static
-    final String mould_include = "username = \\npassword = \\nemail= \\ninclude = \\ndpsInclude = \\ntargetInclude = \\n\\n"
+    final String mould_include = "username = \\npassword = \\nemail= \\nval include = \\nval dpsInclude = \\nval targetInclude = \\n\\n"
 }

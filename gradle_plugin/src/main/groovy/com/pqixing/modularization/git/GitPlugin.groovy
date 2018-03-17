@@ -17,7 +17,7 @@ import org.gradle.api.invocation.Gradle
  */
 
 class GitPlugin extends BasePlugin {
-    public static final String mouldVersion = "//1.3"
+    public static final String mouldVersion = "//1.4"
     /**
      * 设置页面文件
      */
@@ -25,7 +25,7 @@ class GitPlugin extends BasePlugin {
 
     @Override
     Set<String> getIgnoreFields() {
-        return ["config.gradle", "include.txt", "local.gradle", "git.properties", "config2.gradle"]
+        return ["config.gradle", "include.kt", "local.gradle", "git.properties", "config2.gradle"]
     }
 
     @Override
@@ -111,12 +111,18 @@ class GitPlugin extends BasePlugin {
      */
     boolean writeMouldGradle() {
         File mouldFile = new File(BuildConfig.rootOutDir, SETTING_FILE)
+        String oldVersion = ""
         //如果模板已经存在，并且版本号不小于当前，则不需要重写
-        if (mouldFile.exists() && mouldFile.readLines()[0].trim() >= mouldVersion) return false
+        if (mouldFile.exists() && (oldVersion = mouldFile.readLines()[0].trim()) >= mouldVersion) return false
         Moulds moulds = new Moulds()
         moulds.params += ["defaultXmlGitUrl": GlobalConfig.docGitUrl]
         moulds.params += ["AutoInclude": moulds.autoInclude]
         FileUtils.write(mouldFile, "$mouldVersion\n$moulds.settingGradle")
+        if(oldVersion <= "//1.3"){//如果是１．３版本一下，删除指定文件
+            new File(project.rootDir,"include.txt").delete()
+            new File(project.rootDir,"hideInclude.txt").delete()
+        }
+
         return true
     }
 

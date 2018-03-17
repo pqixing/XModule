@@ -169,7 +169,7 @@ class Keys {
     /**
      * 隐藏的导入文件，批量上传时使用
      */
-    static final String TXT_HIDE_INCLUDE = "hideInclude.txt"
+    static final String TXT_HIDE_INCLUDE = "hideInclude.kt"
 
     /**
      * 上传日志记录
