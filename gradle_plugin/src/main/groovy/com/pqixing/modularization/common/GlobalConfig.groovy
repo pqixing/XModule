@@ -15,17 +15,22 @@ class GlobalConfig {
     /**
      * 是否打印日志
      */
+    final
+    static List<String> NOTE_silentLog = ["是否禁用日志", "true:禁用", "false:不禁用（日志仅在调试时使用，其他时间可以禁用）"]
     static boolean silentLog = true
     /**
      * 默认git操作目标
      * include，all
      */
+    final
+    static List<String> NOTE_target = ["git操作目标范畴", "include:只操作当前导入的代码", "all:影响本地所有存在的代码(仅包含配置在default.xml的工程)"]
     static String target = "include"
     /**
      * 分支名称
      */
+    final static List<String> NOTE_branchName = ["git操作的分支名称", "branchName:分支名称,默认master"]
     static String branchName = "master"
-
+    final static List<String> NOTE_excludeGit = ["需要不被控制的git名称"]
     static Set<String> excludeGit = []
 
     /**
@@ -51,6 +56,12 @@ class GlobalConfig {
      * 依赖方式改变
      * localFirst,localOnly,mavenOnly,mavenFirst
      */
+    final static List<String> NOTE_dependentModel = ["模块依赖方式，默认: mavenOnly"
+                                                     , "mavenOnly:只使用maven仓库进行依赖，不关联本地代码"
+                                                     , "mavenFirst:优先使用maven仓库进行依赖，当仓库不存在依赖时，关联本地代码依赖"
+                                                     , "localFirst:优先使用本地导入模块代码，没有导入则使用maven仓库"
+                                                     , "localOnly:只使用本地导入的模块，禁用ｍａｖｅｎ仓库"
+    ]
     public static String dependentModel = "mavenOnly"
 
     /**
@@ -61,6 +72,8 @@ class GlobalConfig {
     /**
      * 当依赖缺失时，是否拦截报错，默认为true
      */
+    final
+    static List<String> NOTE_abortDependentLose = ["是否拦截依赖缺少的异常,默认true", "true:当有依赖模块缺少时，抛出异常，方便查找问题", "false:不拦截错误，方便代码导入AS，但是缺少依赖构建过程出现的类缺失异常问题很难定位"]
     public static boolean abortDependentLose = true
     /**
      * 预设仓库地址
@@ -107,11 +120,17 @@ class GlobalConfig {
      */
     public static void writeGlobal(String preFix, File outFile) {
         StringBuilder sb = new StringBuilder("#$Keys.TAG_AUTO_ADD \n")
-        GlobalConfig.staticProperties.each { p ->
-            sb.append("$preFix$p.key = ${getValueStr(p.value)} \n")
+
+        def maps = GlobalConfig.staticProperties
+        maps.findAll { it.key.startsWith("NOTE_") }.each { p ->
+            p.value.each { sb.append("##note:$it\n") }
+            String realKey = p.key.replace("NOTE_", "")
+            Object value = maps.find { it.key == realKey }?.value
+            sb.append("$preFix$realKey = ${getValueStr(value)} \n\n")
         }
         FileUtils.write(outFile, sb.toString())
     }
+
 
     public static String getValueStr(Object value) {
         StringBuilder valueStr = new StringBuilder()

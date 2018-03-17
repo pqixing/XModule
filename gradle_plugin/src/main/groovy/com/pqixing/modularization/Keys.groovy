@@ -64,7 +64,7 @@ class Keys {
     /**
      * 全局配置名称
      */
-    public static final String GLOBAL_CONFIG_NAME = "global.properties"
+    public static final String GLOBAL_CONFIG_NAME = "modularization.properties"
     /**
      * 远程配置gradle
      */
