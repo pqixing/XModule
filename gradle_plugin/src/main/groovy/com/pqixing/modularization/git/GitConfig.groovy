@@ -39,7 +39,7 @@ class GitConfig extends BaseExtension {
     GitConfig(Project project) {
         super(project)
         File gitDir = GitUtils.findGitDir(project.projectDir)
-        if (gitDir == null||!GlobalConfig.gitLog) {
+        if (gitDir == null || !GlobalConfig.gitLog) {
             branchName = ""
             revisionNum = ""
             lastLog = ""
@@ -50,6 +50,9 @@ class GitConfig extends BaseExtension {
             revisionNum = gitInfo[0]
         if (gitInfo.length > 1)
             branchName = gitInfo[1].split(",")[0].replace("HEAD", "").replace("->", "").trim()
+        if ("%D" == branchName) {
+            branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir).trim()
+        }
         if (gitInfo.length > 2)
             lastLog = gitInfo[2]
 
