@@ -2,6 +2,7 @@ package com.pqixing.modularization.git
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.Print
@@ -39,7 +40,7 @@ class GitConfig extends BaseExtension {
     GitConfig(Project project) {
         super(project)
         File gitDir = GitUtils.findGitDir(project.projectDir)
-        if (gitDir == null) {
+        if (gitDir == null||!GlobalConfig.gitLog) {
             branchName = ""
             revisionNum = ""
             lastLog = ""

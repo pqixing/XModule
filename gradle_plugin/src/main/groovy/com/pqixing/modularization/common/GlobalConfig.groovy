@@ -94,6 +94,10 @@ class GlobalConfig {
      * 文档存放目录
      */
     static String docDirName = "docDir"
+    /**
+     * 是否读取git日志
+     */
+    static boolean gitLog = true
 
     /**
      * 初始化配置
