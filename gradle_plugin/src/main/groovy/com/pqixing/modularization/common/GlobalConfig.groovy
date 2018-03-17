@@ -123,7 +123,7 @@ class GlobalConfig {
 
         def maps = GlobalConfig.staticProperties
         maps.findAll { it.key.startsWith("NOTE_") }.each { p ->
-            p.value.each { sb.append("##note:$it\n") }
+            p.value.each { sb.append("  #note:$it\n") }
             String realKey = p.key.replace("NOTE_", "")
             Object value = maps.find { it.key == realKey }?.value
             sb.append("$preFix$realKey = ${getValueStr(value)} \n\n")
