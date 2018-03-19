@@ -79,7 +79,7 @@ public class Module {
         try {
             like = (IApplicationLike) Class.forName(likeName).getConstructor().newInstance();
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         if (like != null) {
             like.init(app);
