@@ -46,7 +46,7 @@ class MavenUtils {
         def mapsDir = new File(upDocumentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/")
         mapsDir.eachDir { dir ->
             String version = ""
-            dir.eachDir { if (it.name > version) version = it.name }
+            dir.eachDir { if (it.name.length()>version.length()||it.name > version) version = it.name }
             maps.put(dir.name, version)
         }
 
