@@ -5,14 +5,11 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 
-import com.pqixing.annotation.LaunchActivity;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-@LaunchActivity(name = "",group = "",intent = "key:'ddd',key:value")
 public class Module {
     public static HashMap<String, IApplicationLike> likeHashMap = new HashMap<>();
     public static final String ENTER_CLASS = "auto.com.pqixing.configs.Enter";
