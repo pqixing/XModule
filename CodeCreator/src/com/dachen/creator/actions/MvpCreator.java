@@ -1,4 +1,4 @@
-package com.dachen.creator;
+package com.dachen.creator.actions;
 
 import com.dachen.creator.core.gennerator.MVPCreatorGenerator;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -11,7 +11,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 
-public class DcMvpCreator extends AnAction   {
+public class MvpCreator extends AnAction   {
 
     private String classPrefix;
     @Override

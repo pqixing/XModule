@@ -1,4 +1,4 @@
-package com.dachen.creator;
+package com.dachen.creator.actions;
 
 import com.dachen.creator.core.gennerator.RouterCreatorGenerator;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -14,7 +14,7 @@ import com.intellij.psi.PsiFile;
 
 import java.util.Objects;
 
-public class DcRouterCreator extends AnAction {
+public class PathCreator extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {

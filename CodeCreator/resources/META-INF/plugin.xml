@@ -1,47 +1,76 @@
 <idea-plugin version="2">
-  <id>com.DC.plugin.create</id>
-  <name>DCPluginCreator</name>
-  <version>1.0</version>
-  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <id>com.pqixing.modularization.codeCreator</id>
+    <name>CodeCreator</name>
+    <version>1.0</version>
+    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
 
-  <description><![CDATA[
+    <description><![CDATA[
       Enter short description for your plugin here.<br>
       <em>most HTML tags may be used</em>
     ]]></description>
 
-  <change-notes><![CDATA[
+    <change-notes><![CDATA[
       Add change notes here.<br>
       <em>most HTML tags may be used</em>
     ]]>
-  </change-notes>
+    </change-notes>
 
-  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="141.0"/>
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="141.0"/>
 
-  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-       on how to target different products -->
-  <!-- uncomment to enable plugin in all products
-  <depends>com.intellij.modules.lang</depends>
-  -->
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
 
-  <extensions defaultExtensionNs="com.intellij">
-    <!-- Add your extensions here -->
-  </extensions>
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
 
-  <actions>
-    <!-- Add your actions here -->
-    <action id="com.libiao.mvpcreator" class="com.dachen.creator.DcMvpCreator" text="createMvp" description="auto create MVP code">
-      <add-to-group group-id="NewGroup" anchor="first"/>
-      <keyboard-shortcut keymap="$default" first-keystroke="ctrl R"/>
-    </action>
-    <action id="com.libiao.routercreator" class="com.dachen.creator.DcRouterCreator" text="createRouter"
-            description="router auto create code">
-      <add-to-group group-id="GenerateGroup" anchor="first"/>
-      <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt COMMA"/>
-    </action>
-    <action id="com.libiao.modelcreator" class="com.dachen.creator.DcModelCreator" text="createModel"
-            description="auto create model code">
-      <add-to-group group-id="GenerateGroup" anchor="first"/>
-    </action>
-  </actions>
+
+    <actions>
+        <group class="com.dachen.creator.Modularization" popup="true" id="modularization" text="Modularization">
+            <add-to-group group-id="BuildMenu" anchor="first"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+            <group class="com.dachen.creator.Git" popup="true" id="git" text="Git">
+
+                <action id="CheckOut" class="com.dachen.creator.actions.CheckOut" text="CheckOut" description="CheckOut"/>
+                <action id="CreateBranch" class="com.dachen.creator.actions.CreateBranch" text="CreateBranch"
+                        description="CreateBranch"/>
+                <action id="Update" class="com.dachen.creator.actions.Update" text="Update" description="Update"/>
+                <action id="Clone" class="com.dachen.creator.actions.Clone" text="Clone" description="Clone"/>
+
+            </group>
+
+            <group class="com.dachen.creator.File" popup="true" id="file" text="File">
+                <action id="OpenInclude" class="com.dachen.creator.actions.OpenInclude" text="OpenInclude"
+                        description="OpenInclude">
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt COMMA"/>
+                </action>
+                <action id="OpenProperties" class="com.dachen.creator.actions.OpenProperties" text="OpenProperties"
+                        description="OpenProperties"/>
+
+            </group>
+            <action id="ToMaven" class="com.dachen.creator.actions.ToMaven" text="ToMaven" description="ToMaven"/>
+
+
+            <action id="DpsAnalyze" class="com.dachen.creator.actions.DpsAnalyze" text="DpsAnalyze"
+                    description="DpsAnalyze"/>
+            <separator/>
+
+            <action id="com.libiao.mvpcreator" class="com.dachen.creator.actions.MvpCreator" text="MvpCreator"
+                    description="auto create MVP code"/>
+            <action id="com.libiao.routercreator" class="com.dachen.creator.actions.PathCreator" text="RouterCreator"
+                    description="router auto create code"/>
+            <action id="com.libiao.modelcreator" class="com.dachen.creator.actions.ModelCreator" text="ModelCreator"
+                    description="auto create model code"/>
+        </group>
+        <!-- Add your actions here -->
+
+
+        <action id="DpsAnalyze" class="com.dachen.creator.actions.DpsAnalyze" text="DpsAnalyze"
+                description="DpsAnalyze"/>
+    </actions>
 </idea-plugin>

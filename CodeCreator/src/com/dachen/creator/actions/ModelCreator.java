@@ -1,4 +1,4 @@
-package com.dachen.creator;
+package com.dachen.creator.actions;
 
 import com.dachen.creator.core.gennerator.ModelCreatorGenerator;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -12,7 +12,7 @@ import com.intellij.psi.PsiFile;
 
 import java.util.Objects;
 
-public class DcModelCreator extends AnAction {
+public class ModelCreator extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
