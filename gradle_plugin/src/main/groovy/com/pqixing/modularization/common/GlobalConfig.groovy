@@ -116,6 +116,9 @@ class GlobalConfig {
         } else {
             writeGlobal("#", configFile)
         }
+        File buildFile = new File(wrapper.project.buildDir, Keys.GLOBAL_CONFIG_NAME)
+        if(buildFile.exists()) updateConfig(buildFile.text)
+
         writeGlobal("", new File(BuildConfig.rootOutDir, Keys.GLOBAL_CONFIG_NAME))
     }
     /**
