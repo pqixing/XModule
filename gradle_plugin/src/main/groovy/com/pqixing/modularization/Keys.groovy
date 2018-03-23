@@ -108,6 +108,10 @@ class Keys {
      */
     public static final String FILE_INNER_DP = "inner.dp"
     /**
+     * 当前最新的版本号
+     */
+    public static final String FILE_VERSION_DP = "version.dp"
+    /**
      * 排序过后的以来关系
      */
     public static final String FILE_SORT_DP = "level.dp"

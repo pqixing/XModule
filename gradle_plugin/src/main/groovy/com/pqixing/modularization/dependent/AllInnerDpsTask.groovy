@@ -26,23 +26,20 @@ class AllInnerDpsTask extends BaseTask {
 
     @Override
     void runTask() {
-        outContent.append("echo ")
 
-        StringBuilder temp = new StringBuilder("\n$runGradle :CheckBranch :GitUpdate \n")
         StringBuilder includeStr = new StringBuilder("include=")
         //所有依赖的文件
         def dpBySortList = wrapper.getTask(DependentPrintTask).dpBySortList
         for (int i = dpBySortList.size() - 1; i >= 0; i--) {
             def it = dpBySortList.get(i)
             includeStr.append(it.moduleName).append(",")
-            writeBathScrip(temp, it.moduleName)
+            writeBathScrip(outContent, it.moduleName)
         }
         if (wrapper.pluginName == Keys.NAME_LIBRARY) {
             includeStr.append(project.name).append(",")
-            writeBathScrip(temp, project.name)
+            writeBathScrip(outContent, project.name)
         }
-        FileUtils.write(new File(project.projectDir,Keys.TXT_HIDE_INCLUDE),includeStr.toString())
-        outContent.append(includeStr).append(" > $project.rootDir.absolutePath/$Keys.TXT_HIDE_INCLUDE\n").append(temp)
+        FileUtils.write(new File(project.projectDir,"$BuildConfig.dirName/$Keys.TXT_HIDE_INCLUDE"),includeStr.toString())
     }
 
 
@@ -54,7 +51,8 @@ class AllInnerDpsTask extends BaseTask {
     }
 
     void writeBathScrip(StringBuilder sb, String moduleName) {
-        sb.append("echo include = $moduleName > $Keys.TXT_HIDE_INCLUDE \n")
-        sb.append("$runGradle :$moduleName:clean :$moduleName:ToMaven \n")
+        sb.append("\necho include = $moduleName > $BuildConfig.dirName/$Keys.TXT_HIDE_INCLUDE \n")
+        sb.append("$runGradle :CheckBranch :GitUpdate :$moduleName:clean \n")
+        sb.append("$runGradle :$moduleName:ToMaven \n")
     }
 }

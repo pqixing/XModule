@@ -55,7 +55,7 @@ class MavenUtils {
         }
 
         BasePlugin.rootProject.ext."$mapKey" = maps
-        Print.lnf("getMavenMaps cout:${System.currentTimeMillis() - start} -> $maps")
+//        Print.lnf("getMavenMaps cout:${System.currentTimeMillis() - start} -> $maps")
 //        FileUtils.createIfNotExist(mapFile)
         return BasePlugin.rootProject."$mapKey"
     }

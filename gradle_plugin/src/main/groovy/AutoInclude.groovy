@@ -51,7 +51,7 @@ public class AutoInclude {
         if (!includeFile.exists()) includeFile.write(AutoConfig.mould_include)
         readInclude(icTxt, includeFile)
         //读取隐藏配置
-        File hideIncludeFile = new File(rootDir, AutoConfig.TXT_HIDEINCLUDE)
+        File hideIncludeFile = new File(rootDir, "$AutoConfig.dirName/$AutoConfig.TXT_HIDEINCLUDE")
         if (hideIncludeFile.exists()) readInclude(icTxt, hideIncludeFile)
 
         gradle.ext.gitUserName = username
@@ -102,7 +102,7 @@ public class AutoInclude {
     void readDpsInclude(StringBuilder autoTxt, String dpsName) {
         String url = localProject.find { it.key == dpsName }?.value
         if (url == null || url.isEmpty()) return
-        def f = new File(url, AutoConfig.TXT_HIDEINCLUDE)
+        def f = new File(url, "$AutoConfig.dirName/$AutoConfig.TXT_HIDEINCLUDE")
         if (f.exists()) readInclude(autoTxt, f, false)
     }
 
@@ -301,7 +301,8 @@ class AutoConfig {
      * 隐藏的导入文件，批量上传时使用
      */
     static final String TXT_HIDEINCLUDE = "hideInclude.kt"
-
+    //默认路径
+    public static final String dirName = ".modularization"
     /**
      * git配置模板
      */

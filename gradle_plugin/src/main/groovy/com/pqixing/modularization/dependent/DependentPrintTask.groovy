@@ -6,6 +6,7 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.utils.FileUtils
+import com.pqixing.modularization.utils.MavenUtils
 import com.pqixing.modularization.utils.TextUtils
 import com.pqixing.modularization.wrapper.PomWrapper
 import com.pqixing.modularization.wrapper.ProjectWrapper
@@ -42,6 +43,8 @@ class DependentPrintTask extends BaseTask {
 
     @Override
     void runTask() {
+        MavenUtils.getMavenMaps(mavenType.name)?.store(new File(outDir, Keys.FILE_VERSION_DP).newPrintWriter(),Keys.CHARSET)
+
         StringBuilder sb = new StringBuilder()
         //输出批量上传脚本以及依赖排序
         wrapper.getExtends(Dependencies).modules.each {
