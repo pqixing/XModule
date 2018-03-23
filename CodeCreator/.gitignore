@@ -1,11 +1,5 @@
-/build
-*.iml
-.idea
+build/
 .gradle/
 gradle/
 gradlew
 gradlew.bat
-gradle.properties
-local.properties
-src/main/resources/moulds/AutoInclude
-/src/main/java/auto
