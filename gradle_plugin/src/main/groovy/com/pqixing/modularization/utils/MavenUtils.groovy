@@ -46,15 +46,20 @@ class MavenUtils {
         def mapsDir = new File(upDocumentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/")
         mapsDir.eachDir { dir ->
             String version = ""
-            dir.eachDir { if (it.name > version) version = it.name }
+            dir.eachDir {
+                String newVersion = it.name.trim()
+                int len = newVersion.length() - version.length()
+                if (len == 0 && newVersion > version || len > 0) version = newVersion
+            }
             maps.put(dir.name, version)
         }
 
         BasePlugin.rootProject.ext."$mapKey" = maps
-        Print.lnf("getMavenMaps cout:${System.currentTimeMillis()- start} -> $maps")
+//        Print.lnf("getMavenMaps cout:${System.currentTimeMillis() - start} -> $maps")
 //        FileUtils.createIfNotExist(mapFile)
         return BasePlugin.rootProject."$mapKey"
     }
+
 
     static File getDocumentDir() {
         String docGitName = GitUtils.getNameFromUrl(GlobalConfig.docGitUrl)
@@ -93,7 +98,7 @@ class MavenUtils {
         File mavenDir = new File(docDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName")
 
         //保存最新的版本号
-        getMavenMaps(mavenName).put(artifactId,metaWrapper.release)
+        getMavenMaps(mavenName).put(artifactId, metaWrapper.release)
 
         //缓存meta 文件
         FileUtils.write(new File(mavenDir, "$artifactId/meta.xml"), metaWrapper.xmlString)

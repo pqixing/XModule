@@ -26,7 +26,7 @@ public class TextUtils {
         try {
             return Class.forName(fullName).getDeclaredField(keyName).get(null).toString();
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return null;
     }

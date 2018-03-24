@@ -2,6 +2,7 @@ package com.pqixing.modularization.git
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.Print
@@ -15,7 +16,6 @@ class GitConfig extends BaseExtension {
     final String branchName
     final String revisionNum
     final String lastLog
-    final String lastUpdate
 
     /**
      * git用户名
@@ -39,22 +39,22 @@ class GitConfig extends BaseExtension {
     GitConfig(Project project) {
         super(project)
         File gitDir = GitUtils.findGitDir(project.projectDir)
-        if (gitDir == null) {
+        if (gitDir == null || !GlobalConfig.gitLog) {
             branchName = ""
             revisionNum = ""
             lastLog = ""
-            lastUpdate = ""
             return
         }
-        def gitInfo = GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H::%cd::%D::%s' --date=format:'%Y%m%d%H%M%S'", gitDir).trim().split("::")
+        def gitInfo = GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H::%D::%s'", gitDir).trim().split("::")
         if (gitInfo.length > 0)
             revisionNum = gitInfo[0]
         if (gitInfo.length > 1)
-            lastUpdate = gitInfo[1]
+            branchName = gitInfo[1].split(",")[0].replace("HEAD", "").replace("->", "").trim()
+        if ("%D" == branchName) {
+            branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir).trim()
+        }
         if (gitInfo.length > 2)
-            branchName = gitInfo[2].split(",")[0].replace("HEAD", "").replace("->", "").trim()
-        if (gitInfo.length > 3)
-            lastLog = gitInfo[3]
+            lastLog = gitInfo[2]
 
 //        branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", project.projectDir).trim()
 //        revisionNum = GitUtils.run("git rev-parse HEAD", project.projectDir).trim()
@@ -67,7 +67,7 @@ class GitConfig extends BaseExtension {
                 revisionNum = dirLog
             }
         }
-        Print.ln("revisionNum :$revisionNum branchName :$branchName lastUpdate : $lastUpdate lastLog : $lastLog")
+        Print.ln("revisionNum :$revisionNum branchName :$branchName  lastLog : $lastLog")
 
     }
 

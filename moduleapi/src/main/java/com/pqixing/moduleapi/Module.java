@@ -3,15 +3,13 @@ package com.pqixing.moduleapi;
 import android.app.Application;
 import android.os.Handler;
 import android.os.HandlerThread;
-
-import com.pqixing.annotation.LaunchActivity;
+import android.os.Looper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-@LaunchActivity(name = "",group = "",intent = "key:'ddd',key:value")
 public class Module {
     public static HashMap<String, IApplicationLike> likeHashMap = new HashMap<>();
     public static final String ENTER_CLASS = "auto.com.pqixing.configs.Enter";
@@ -54,12 +52,13 @@ public class Module {
         List<IApplicationLike> likes = new ArrayList<>();
         if (applikes.isEmpty()) return likes;
 
+        final Handler uiHandler = new Handler(Looper.getMainLooper());
         final HandlerThread appinit = new HandlerThread("appinit");
         appinit.start();
         Handler handler = new Handler(appinit.getLooper());
 
         for (String likeName : applikes) {
-            IApplicationLike like = initLike(handler, app, likeName);
+            IApplicationLike like = initLike(uiHandler,handler, app, likeName);
             if (like != null) {
                 likes.add(like);
                 likeHashMap.put(like.getModuleName(), like);
@@ -74,17 +73,22 @@ public class Module {
         return likes;
     }
 
-    public static IApplicationLike initLike(Handler threadHandle, final Application app, String likeName) {
+    public static IApplicationLike initLike(Handler uiHandle,Handler threadHandle, final Application app, String likeName) {
         IApplicationLike like = null;
         try {
             like = (IApplicationLike) Class.forName(likeName).getConstructor().newInstance();
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         if (like != null) {
-            like.init(app);
-            like.onCreateOnUI(app);
             final IApplicationLike temp = like;
+            uiHandle.post(new Runnable() {
+                @Override
+                public void run() {
+                    temp.init(app);
+                    temp.onCreateOnUI(app);
+                }
+            });
             threadHandle.post(new Runnable() {
                 @Override
                 public void run() {

@@ -3,6 +3,7 @@ package com.pqixing.modularization.maven
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.dependent.Dependencies
 import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.utils.CheckUtils
@@ -31,6 +32,10 @@ class ToMavenCheckTask extends BaseTask {
         if (wrapper.pluginName != Keys.NAME_LIBRARY) {
             errorMsg = "current plugin is ${wrapper.pluginName} ,can not upload to maven !!!!!"
         }
+        if(!GlobalConfig.gitLog){
+            errorMsg = "gitLog is close ,please open it before upload !!!!!"
+        }
+
         def dependent = wrapper.getExtends(Dependencies.class)
         if (dependent.hasLocalModule) {//如果有本地工程，抛异常
             errorMsg = "current dependencies contain local project, please remove before upload : ${dependent.localDependency.toString()}"

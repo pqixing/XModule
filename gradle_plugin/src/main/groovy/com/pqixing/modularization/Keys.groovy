@@ -64,7 +64,7 @@ class Keys {
     /**
      * 全局配置名称
      */
-    public static final String GLOBAL_CONFIG_NAME = "global.properties"
+    public static final String GLOBAL_CONFIG_NAME = "modularization.properties"
     /**
      * 远程配置gradle
      */
@@ -107,6 +107,10 @@ class Keys {
      * 内部依赖版本日志
      */
     public static final String FILE_INNER_DP = "inner.dp"
+    /**
+     * 当前最新的版本号
+     */
+    public static final String FILE_VERSION_DP = "version.dp"
     /**
      * 排序过后的以来关系
      */
@@ -169,7 +173,7 @@ class Keys {
     /**
      * 隐藏的导入文件，批量上传时使用
      */
-    static final String TXT_HIDE_INCLUDE = "hideInclude.txt"
+    static final String TXT_HIDE_INCLUDE = "hideInclude.kt"
 
     /**
      * 上传日志记录
