@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.dachen.creator.ui.TwoStepMultiCheckBoxDialog">
+  <grid id="27dc6" binding="jComponent" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="204" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <grid id="d1505" binding="topContent" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false">
+            <minimum-size width="200" height="-1"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="a993d" class="javax.swing.JLabel" binding="topMsg">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="标题信息设置"/>
+            </properties>
+          </component>
+          <component id="846a6" class="javax.swing.JCheckBox" binding="stepTwo">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <selected value="true"/>
+              <text value="开启多选"/>
+              <toolTipText value=""/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <scrollpane id="8204e" binding="centerPanel">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <maximum-size width="-1" height="250"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none" title="选择列表"/>
+        <children>
+          <component id="bb8d0" class="javax.swing.JList" binding="checkBoxs">
+            <constraints/>
+            <properties>
+              <selectionMode value="0"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
+      <component id="d3d1d" class="javax.swing.JTextArea" binding="selectArea">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="50"/>
+            <maximum-size width="-1" height="150"/>
+          </grid>
+        </constraints>
+        <properties>
+          <columns value="3"/>
+          <editable value="false"/>
+          <lineWrap value="true"/>
+          <rows value="3"/>
+          <text value="                                                                                                                                                                                                                                                                                                                                                         "/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

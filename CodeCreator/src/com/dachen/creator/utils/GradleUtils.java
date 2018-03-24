@@ -17,7 +17,7 @@ public class GradleUtils {
     public static ProjectSystemId GRADLE = new ProjectSystemId("GRADLE");
 
     public static void runTask(@NotNull Project project, List<String> tasks, @Nullable TaskCallback callback) {
-        runTask(project, tasks, callback, ProgressExecutionMode.IN_BACKGROUND_ASYNC);
+        runTask(project, tasks, callback, ProgressExecutionMode.START_IN_FOREGROUND_ASYNC);
     }
 
     public static void runTask(@NotNull Project project, List<String> tasks, @Nullable TaskCallback callback, @NotNull ProgressExecutionMode progressExecutionMode) {
