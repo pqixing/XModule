@@ -47,13 +47,17 @@
             <group class="com.dachen.creator.OpenFile" popup="true" id="file" text="File">
                 <action id="OpenInclude" class="com.dachen.creator.actions.OpenInclude" text="OpenInclude"
                         description="OpenInclude">
-                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt COMMA"/>
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
                 </action>
                 <action id="OpenProperties" class="com.dachen.creator.actions.OpenProperties" text="OpenProperties"
-                        description="OpenProperties"/>
+                        description="OpenProperties">
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt P"/>
+                </action>
 
             </group>
-            <action id="ToMaven" class="com.dachen.creator.actions.ToMaven" text="ToMaven" description="ToMaven"/>
+            <action id="ToMaven" class="com.dachen.creator.actions.ToMaven" text="ToMaven" description="ToMaven">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt T"/>
+            </action>
             <separator/>
             <action id="CreateProject" class="com.dachen.creator.actions.NewProject" text="CreateProject"
                     description="CreateProject"/>

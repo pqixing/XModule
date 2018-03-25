@@ -28,7 +28,7 @@ public class GradleUtils {
 
     public static void runTask(@NotNull Project project, List<String> tasks, @Nullable TaskCallback callback, @NotNull ProgressExecutionMode progressExecutionMode, boolean activateToolWindowBeforeRun) {
         ExternalSystemTaskExecutionSettings settings = new ExternalSystemTaskExecutionSettings();
-        settings.setExecutionName("请勿更新或者构建代码,正在执行:" + tasks);
+        settings.setExecutionName("请勿更新构建代码,正在执行:" + tasks);
         settings.setTaskNames(tasks);
         settings.setExternalSystemIdString(GRADLE.getId());
         settings.setExternalProjectPath(project.getBasePath());

@@ -16,4 +16,9 @@ public class OpenInclude extends OpenFileAction {
     VirtualFile[] getFiles(Project project) {
         return new VirtualFile[]{project.getBaseDir().findChild("include.kt")};
     }
+
+    @Override
+    protected String getPath(int pos) {
+        return "include.kt";
+    }
 }

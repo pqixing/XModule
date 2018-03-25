@@ -15,4 +15,9 @@ public class OpenProperties extends OpenFileAction {
     VirtualFile[] getFiles(Project project) {
         return new VirtualFile[]{project.getBaseDir().findChild("modularization.properties")};
     }
+
+    @Override
+    protected String getPath(int pos) {
+        return "modularization.properties";
+    }
 }
