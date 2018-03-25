@@ -52,12 +52,6 @@ public class TwoStepMultiCheckBoxDialog extends DialogWrapper implements ListCel
     }
 
     @Override
-    public void show() {
-        super.show();
-        updateSize();
-    }
-
-    @Override
     public Component getListCellRendererComponent(JList jList, String value, int i, boolean b, boolean b1) {
         if(getSize().width!=WIDTH) updateSize();
 
@@ -84,7 +78,7 @@ public class TwoStepMultiCheckBoxDialog extends DialogWrapper implements ListCel
         if(defaultItem>=0) checkBoxDialog.selectItems.add(options.get(defaultItem));
         else if(defaultItem == -1) checkBoxDialog.selectItems.addAll(options);
         checkBoxDialog.checkBoxs.setModel(new StringModel(checkBoxDialog.datas));
-//        checkBoxDialog.selectArea.setText(checkBoxDialog.selectItems.toString());
+        checkBoxDialog.selectArea.setText(checkBoxDialog.selectItems.toString());
         checkBoxDialog.show();
         if(checkBoxDialog.getExitCode() == 0) return new Pair<>(checkBoxDialog.stepTwo.isSelected(),checkBoxDialog.selectItems);
         else return null;
