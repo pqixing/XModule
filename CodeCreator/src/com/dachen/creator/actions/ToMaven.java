@@ -38,7 +38,7 @@ public class ToMaven extends AnAction {
             for (Module m : ModuleManager.getInstance(project).getModules()){
                 allModules.add(m.getName());
             }
-            boxDialog =TwoStepMultiCheckBoxDialog.showMultiSelect(project, "ToMave", "请选择需要上传到Maven仓库的模块",allModules,-2);
+           TwoStepMultiCheckBoxDialog.showMultiSelect(project, "ToMave", "请选择需要上传到Maven仓库的模块",allModules,-2);
         }else {
             ArrayList<String> temp = new ArrayList<>();
             ModuleRootManager instance = ModuleRootManager.getInstance(module);

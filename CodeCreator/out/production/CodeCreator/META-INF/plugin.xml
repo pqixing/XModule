@@ -44,7 +44,7 @@
 
             </group>
 
-            <group class="com.dachen.creator.File" popup="true" id="file" text="File">
+            <group class="com.dachen.creator.OpenFile" popup="true" id="file" text="File">
                 <action id="OpenInclude" class="com.dachen.creator.actions.OpenInclude" text="OpenInclude"
                         description="OpenInclude">
                     <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt COMMA"/>
@@ -54,8 +54,10 @@
 
             </group>
             <action id="ToMaven" class="com.dachen.creator.actions.ToMaven" text="ToMaven" description="ToMaven"/>
-
-
+            <separator/>
+            <action id="CreateProject" class="com.dachen.creator.actions.NewProject" text="CreateProject"
+                    description="CreateProject"/>
+            <separator/>
             <action id="DpsAnalyze" class="com.dachen.creator.actions.DpsAnalyze" text="DpsAnalyze"
                     description="DpsAnalyze"/>
             <separator/>
@@ -70,7 +72,5 @@
         <!-- Add your actions here -->
 
 
-        <action id="DpsAnalyze" class="com.dachen.creator.actions.DpsAnalyze" text="DpsAnalyze"
-                description="DpsAnalyze"/>
     </actions>
 </idea-plugin>

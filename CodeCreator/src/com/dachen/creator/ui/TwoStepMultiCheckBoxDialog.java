@@ -2,6 +2,7 @@ package com.dachen.creator.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -71,7 +72,7 @@ public class TwoStepMultiCheckBoxDialog extends DialogWrapper implements ListCel
     }
 
 
-    public static final TwoStepMultiCheckBoxDialog showMultiSelect(@Nullable Project project, String title, String msg, List<String> options,int defaultItem) {
+    public static final Pair<Boolean, List<String>> showMultiSelect(@Nullable Project project, String title, String msg, List<String> options,int defaultItem) {
         if(options == null) options = new ArrayList<>();
         TwoStepMultiCheckBoxDialog checkBoxDialog = new TwoStepMultiCheckBoxDialog(project);
         checkBoxDialog.setTitle(title);
@@ -85,10 +86,11 @@ public class TwoStepMultiCheckBoxDialog extends DialogWrapper implements ListCel
         checkBoxDialog.checkBoxs.setModel(new StringModel(checkBoxDialog.datas));
 //        checkBoxDialog.selectArea.setText(checkBoxDialog.selectItems.toString());
         checkBoxDialog.show();
-        return checkBoxDialog;
+        if(checkBoxDialog.getExitCode() == 0) return new Pair<>(checkBoxDialog.stepTwo.isSelected(),checkBoxDialog.selectItems);
+        else return null;
     }
 
-    public static final TwoStepMultiCheckBoxDialog showTwoStepSelect(@Nullable Project project, String title, String msg,  List<String> options,int defaultItem,String checkTxt, boolean check) {
+    public static final Pair<Boolean, List<String>> showTwoStepSelect(@Nullable Project project, String title, String msg, List<String> options, int defaultItem, String checkTxt, boolean check) {
         if(options == null) options = new ArrayList<>();
 
         TwoStepMultiCheckBoxDialog checkBoxDialog = new TwoStepMultiCheckBoxDialog(project);
@@ -108,7 +110,8 @@ public class TwoStepMultiCheckBoxDialog extends DialogWrapper implements ListCel
             checkBoxDialog.centerPanel.setVisible(false);
         }
         checkBoxDialog.show();
-        return checkBoxDialog;
+        if(checkBoxDialog.getExitCode() == 0) return new Pair<>(checkBoxDialog.stepTwo.isSelected(),checkBoxDialog.selectItems);
+        else return null;
     }
 
     @Override
