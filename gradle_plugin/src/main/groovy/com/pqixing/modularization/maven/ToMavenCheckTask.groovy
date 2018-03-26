@@ -8,6 +8,7 @@ import com.pqixing.modularization.dependent.Dependencies
 import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.GitUtils
+import com.pqixing.modularization.utils.MavenUtils
 import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.wrapper.MetadataWrapper
 import com.pqixing.modularization.wrapper.PomWrapper
@@ -87,14 +88,25 @@ class ToMavenCheckTask extends BaseTask {
      * @return
      */
     String docUpdateLog() {
-        def targetName = GitUtils.getNameFromUrl(GlobalConfig.docGitUrl)
-        def docProject = project.allprojects.find { p ->p.name == targetName }
-        if (docProject == null) return ""
-        def config = ProjectWrapper.with(docProject).getExtends(GitConfig)
-        if (config.branchName != "master") return "Document git current branch is $config.branchName , please checkout to master before upload!!!"
-        def remoteLog = GitUtils.run("git ls-remote", docProject.projectDir).readLines().find { it.endsWith("/master") }
+        def documentDir = MavenUtils.documentDir
+
+        def gitInfo = GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H::%D'", documentDir).trim().split("::")
+        String revisionNum =""
+        String branchName = ""
+        if (gitInfo.length > 0)
+            revisionNum = gitInfo[0]
+        if (gitInfo.length > 1)
+            branchName = gitInfo[1].split(",")[0].replace("HEAD", "").replace("->", "").trim()
+        if ("%D" == branchName) {
+            branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", documentDir).trim()
+        }
+        if (branchName != "master") return "Document git current branch is $config.branchName , please checkout to master before upload!!!"
+
+        def remoteLog = GitUtils.run("git ls-remote ", documentDir).readLines().find { it.endsWith("/master") }
+//        Print.lnf("remoteLog $remoteLog branchName $branchName revisionNum $revisionNum")
+
         if (CheckUtils.isEmpty(remoteLog)) return ""
-        if (remoteLog.split(" ")[0].trim() != config.revisionNum) return "Document git has update , please update before upload!!!"
+        if (remoteLog.split(" ")[0].trim() != revisionNum) return "Document git has update , please update before upload!!!"
         return ""
     }
 
