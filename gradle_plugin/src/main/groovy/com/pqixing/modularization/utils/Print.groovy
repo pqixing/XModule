@@ -1,5 +1,6 @@
 package com.pqixing.modularization.utils
 
+import com.pqixing.modularization.Keys
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.common.GlobalConfig
 
@@ -60,5 +61,12 @@ class Print {
         if (!recordFile.exists()) recordFile.parentFile.mkdirs()
         recordFile.append("${new Date().toLocaleString()} -> $msg\n")
         lnf(msg)
+    }
+    /**
+     * 输出给Ide使用，每次只输出一条记录
+     * @param str
+     */
+    static void lnIde(String str){
+        FileUtils.write(new File(BuildConfig.dirName,"ide.record"),System.currentTimeMillis()+Keys.SEPERATOR+str)
     }
 }

@@ -1,1 +1,1 @@
-include ':gradle_plugin', ':moduleapi', ':compiler', ':annotation'
+include ':gradle_plugin', ':moduleapi', ':compiler', ':annotation' ,":CodeCreator"

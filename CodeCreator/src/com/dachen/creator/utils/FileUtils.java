@@ -48,6 +48,7 @@ public class FileUtils {
             while ((temp = reader.readLine())!=null){
                 sb.append(temp+"\n");
             }
+            result = sb.toString();
             reader.close();
 
         } catch (Exception e) {

@@ -48,12 +48,13 @@ class ToMavenCheckTask extends BaseTask {
 
         PomWrapper pomWrapper = PomWrapper.create(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId, lastRelease)
         if (gitConfig.revisionNum == pomWrapper.revisionNum) {//如果本地的git版本号等于仓库最后一次提交的版本号，则不上传
-            errorMsg = "----->  Not Update : -->     current git num equals maven revision,${gitConfig.revisionNum}"
+            errorMsg = "-> Not Update : -> current git num equals maven revision,${gitConfig.revisionNum}"
         }
 
         if (!CheckUtils.isEmpty(errorMsg)) {
             errorMsg = ":$project.name " + errorMsg
             Print.lnm(errorMsg)
+            Print.lnIde("$project.name${Keys.SEPERATOR}N$Keys.SEPERATOR$errorMsg")
             throw new GradleException(errorMsg)
         }
 
@@ -68,6 +69,7 @@ class ToMavenCheckTask extends BaseTask {
             if (mavenInfo.focusUpload) mavenInfo.pom_version = lastRelease
             else {
                 Print.lnm("pom_version error  cur ${mavenInfo.pom_version} maven : $baseVersion ")
+                Print.lnIde("$project.name${Keys.SEPERATOR}N$Keys.SEPERATOR$errorMsg")
                 throw new GradleException("pom_version error  cur ${mavenInfo.pom_version} maven : $baseVersion ")
             }
         } else {
