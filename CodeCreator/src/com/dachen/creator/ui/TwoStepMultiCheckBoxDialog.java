@@ -42,7 +42,7 @@ public class TwoStepMultiCheckBoxDialog extends DialogWrapper implements ListCel
     }
 
     protected void updateSize(){
-        setSize(WIDTH,60+(stepTwo.isSelected()?Math.min(360,datas.size()*20):0));
+        setSize(WIDTH,100+(stepTwo.isSelected()?Math.min(200,datas.size()*35):0));
     }
     @Nullable
     @Override

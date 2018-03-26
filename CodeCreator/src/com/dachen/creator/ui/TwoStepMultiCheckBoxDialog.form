@@ -42,6 +42,7 @@
       <scrollpane id="8204e" binding="centerPanel">
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="-1" height="200"/>
             <preferred-size width="400" height="-1"/>
             <maximum-size width="-1" height="250"/>
           </grid>
