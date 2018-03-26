@@ -42,9 +42,9 @@ class GlobalConfig {
      */
     public static long netCacheTime = 1000 * 60 * 3
     /**
-     * 是否在同步前，更新一遍版本号,如果为false，间隔两小时更新一次，非常不建议开启
+     * 是否在同步前，更新一遍版本号
      */
-    public static boolean updateBeforeSync = true
+    public static boolean updateBeforeSync = false
     //集成默认的依赖库
     public static List<String> autoImpl = ["dcnet", "dccommon", "dcuser", "router", "mvpbase"]
     /**
@@ -99,6 +99,8 @@ class GlobalConfig {
      */
     static boolean gitLog = true
 
+
+
     /**
      * 初始化配置
      * @return
@@ -116,7 +118,7 @@ class GlobalConfig {
         } else {
             writeGlobal("#", configFile)
         }
-        File buildFile = new File(wrapper.project.buildDir, Keys.GLOBAL_CONFIG_NAME)
+        File buildFile = new File(wrapper.project.rootDir, "$BuildConfig.dirName/$Keys.HIDE_CONFIG_NAME")
         if(buildFile.exists()) updateConfig(buildFile.text)
 
         writeGlobal("", new File(BuildConfig.rootOutDir, Keys.GLOBAL_CONFIG_NAME))

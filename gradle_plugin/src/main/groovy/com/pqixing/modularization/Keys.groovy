@@ -66,6 +66,10 @@ class Keys {
      */
     public static final String GLOBAL_CONFIG_NAME = "modularization.properties"
     /**
+     * 全局隐藏配置名称
+     */
+    public static final String HIDE_CONFIG_NAME = "hide.properties"
+    /**
      * 远程配置gradle
      */
     public static final String REMOTE_GRADLE = "remoteGradle"

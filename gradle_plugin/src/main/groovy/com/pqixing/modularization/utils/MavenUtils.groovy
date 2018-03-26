@@ -43,7 +43,7 @@ class MavenUtils {
         long start = System.currentTimeMillis()
         //如果当前不存在版本号，则从遍历Doc目录创建
         def maps = new Properties()
-        def mapsDir = new File(documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/")
+        def mapsDir = new File(GlobalConfig.updateBeforeSync?upDocumentDir:documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/")
         mapsDir.eachDir { dir ->
             String version = ""
             dir.eachDir {
