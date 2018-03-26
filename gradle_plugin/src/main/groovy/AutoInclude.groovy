@@ -54,7 +54,7 @@ public class AutoInclude {
         readInclude(icTxt, includeFile)
         //读取隐藏配置
         File hideIncludeFile = new File(rootDir, "$AutoConfig.dirName/$AutoConfig.TXT_HIDEINCLUDE")
-        if (hideIncludeFile.exists()) readInclude(icTxt, hideIncludeFile)
+        if (hideIncludeFile.exists()) readInclude(icTxt, hideIncludeFile,false)
 
         gradle.ext.gitUserName = username
         gradle.ext.gitPassword = password
@@ -263,20 +263,18 @@ public class AutoInclude {
         String result = ""
         try {
             def process = cmd.execute(null, dir)
-            if (process == null) return ""
-
-            if (process.waitFor(2, TimeUnit.MINUTES)) {
-                InputStream input = process.exitValue() == 0 ? process.inputStream : process.errorStream
+            if (process.waitFor(30, TimeUnit.SECONDS)) {
+                InputStream input = process.exitValue() == 0 ? process.inputStream : process.errorStream;
                 result = input?.getText("utf-8")
+                try {
+                    process.closeStreams()
+                    process.destroy()
+                } catch (Exception e) {
+                }
             } else {
-                result = "run $cmd : Time Out count :2 MINUTES"
+                result = "run $cmd : Time Out count :1 MINUTES"
+                process.waitForOrKill(1000 * 60)//1分钟后结束
             }
-            process.closeStreams()
-            if (process.alive) {
-                process.destroy()
-            }
-            Thread.sleep(1000)//两秒后关闭
-
         } catch (Exception e) {
         }
         return result

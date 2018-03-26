@@ -14,7 +14,7 @@ class GitUtils {
             def process = cmd.execute(null, dir)
             if (process == null) return ""
 
-            if (process.waitFor(1, TimeUnit.MINUTES)) {
+            if (process.waitFor(30, TimeUnit.SECONDS)) {
                 InputStream input = process.exitValue() == 0 ? process.inputStream : process.errorStream;
                 result = input?.getText(Keys.CHARSET)
                 try {
@@ -27,8 +27,6 @@ class GitUtils {
                 Print.ln(result)
                 process.waitForOrKill(1000 * 60)//1分钟后结束
             }
-            Thread.sleep(1000)//两秒后关闭
-
         } catch (Exception e) {
             Print.lne("GitUtils run ", e)
         }
