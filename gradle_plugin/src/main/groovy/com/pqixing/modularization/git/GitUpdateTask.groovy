@@ -9,6 +9,12 @@ import com.pqixing.modularization.utils.GitUtils
 
 class GitUpdateTask extends GitTask {
     @Override
+    void start() {
+        super.start()
+        excludeGit.clear()
+    }
+
+    @Override
     String onGitProject(String gitName, String gitUrl, File gitDir) {
         if (!gitDir.exists()) return "git do not exists"
         return GitUtils.run("git pull origin", gitDir)

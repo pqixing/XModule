@@ -17,7 +17,7 @@ import org.gradle.api.invocation.Gradle
  */
 
 class GitPlugin extends BasePlugin {
-    public static final String mouldVersion = "//1.5"
+    public static final String mouldVersion = "//1.6"
     /**
      * 设置页面文件
      */
@@ -36,15 +36,15 @@ class GitPlugin extends BasePlugin {
         addMouldGradle()
         addGradleFile()
         if (writeMouldGradle()) {
-            throw new RuntimeException("init setting file, please sync again -- 初始化设置，请重新同步")
+            throw new RuntimeException("设置文件更新，请重新同步 --init setting file, please sync again ")
         }
 
         BaseTask.task(project, GitUpdateTask.class)
         BaseTask.task(project, CheckBranchTask.class)
         BaseTask.task(project, GitCloneAllTask.class)
-        BaseTask.task(project, CheckMasterTask.class)
-        BaseTask.task(project, ModuReleaseTask.class)
-        BaseTask.task(project, DelModuReleaseTask.class)
+//        BaseTask.task(project, CheckMasterTask.class)
+//        BaseTask.task(project, ModuReleaseTask.class)
+//        BaseTask.task(project, DelModuReleaseTask.class)
         BaseTask.task(project, UpdateMavenTask.class)
 
         readGitProject(project.gradle)
