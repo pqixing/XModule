@@ -20,7 +20,7 @@ class ToMavenCheckTask extends BaseTask {
     MavenType mavenInfo
     GitConfig gitConfig
 
-    ToMavenCheckTask(){
+    ToMavenCheckTask() {
         group = ""
     }
 
@@ -35,7 +35,7 @@ class ToMavenCheckTask extends BaseTask {
         if (wrapper.pluginName != Keys.NAME_LIBRARY) {
             errorMsg = "current plugin is ${wrapper.pluginName} ,can not upload to maven !!!!!"
         }
-        if(!GlobalConfig.gitLog){
+        if (!GlobalConfig.gitLog) {
             errorMsg = "gitLog is close ,please open it before upload !!!!!"
         }
 
@@ -57,9 +57,10 @@ class ToMavenCheckTask extends BaseTask {
         }
 
         if (!CheckUtils.isEmpty(errorMsg)) {
+            Print.lnIde("$project.name${Keys.SEPERATOR}N$Keys.SEPERATOR$errorMsg")
+
             errorMsg = ":$project.name " + errorMsg
             Print.lnm(errorMsg)
-            Print.lnIde("$project.name${Keys.SEPERATOR}N$Keys.SEPERATOR$errorMsg")
             throw new GradleException(errorMsg)
         }
 
@@ -85,14 +86,15 @@ class ToMavenCheckTask extends BaseTask {
      * 检查Docment是否需要更新
      * @return
      */
-    String docUpdateLog(){
-        def docProject = project.allprojects.find { p -> p.name == GitUtils.getNameFromUrl(GlobalConfig.docGitUrl) }
-        if(docProject == null) return ""
+    String docUpdateLog() {
+        def targetName = GitUtils.getNameFromUrl(GlobalConfig.docGitUrl)
+        def docProject = project.allprojects.find { p ->p.name == targetName }
+        if (docProject == null) return ""
         def config = ProjectWrapper.with(docProject).getExtends(GitConfig)
-        if(config.branchName != "master") return "Document git current branch is $config.branchName , please checkout to master before upload!!!"
-        def remoteLog = GitUtils.run("git ls-remoter", docProject.projectDir).readLines().find { it.endsWith("/master") }
-        if(CheckUtils.isEmpty(remoteLog)) return ""
-        if(remoteLog.split(" ")[0].trim()!=config.revisionNum) return  "Document git has update , please update before upload!!!"
+        if (config.branchName != "master") return "Document git current branch is $config.branchName , please checkout to master before upload!!!"
+        def remoteLog = GitUtils.run("git ls-remote", docProject.projectDir).readLines().find { it.endsWith("/master") }
+        if (CheckUtils.isEmpty(remoteLog)) return ""
+        if (remoteLog.split(" ")[0].trim() != config.revisionNum) return "Document git has update , please update before upload!!!"
         return ""
     }
 
