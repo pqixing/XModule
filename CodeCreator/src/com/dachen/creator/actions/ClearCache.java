@@ -6,21 +6,19 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.externalSystem.task.TaskCallback;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.Pair;
 
 import java.util.Arrays;
 
-public class Clone extends AnAction {
+public class ClearCache extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
         Project project = e.getProject();
-        int clone = Messages.showOkCancelDialog("是否Clone所有的代码，可能耗时比较长", "Clone", null);
-        if (clone != 0) return;
-
+        int exitCode = Messages.showOkCancelDialog("是否清除所有缓存", "ClearCache", null);
+        if(exitCode!=0) return;
         GradleUtils.addProperties(project);
         GradleUtils.addFocusInclude(project, "empty");
-        GradleUtils.runTask(project, Arrays.asList("GitCloneAll"), new TaskCallback() {
+        GradleUtils.runTask(project, Arrays.asList("CleanCache"), new TaskCallback() {
             @Override
             public void onSuccess() {
                 GradleUtils.clear(project);
@@ -31,5 +29,6 @@ public class Clone extends AnAction {
                 onSuccess();
             }
         });
+
     }
 }
