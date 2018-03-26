@@ -7,10 +7,13 @@ import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.dependent.Dependencies
 import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.utils.CheckUtils
+import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.wrapper.MetadataWrapper
 import com.pqixing.modularization.wrapper.PomWrapper
+import com.pqixing.modularization.wrapper.ProjectWrapper
 import org.gradle.api.GradleException
+import org.gradle.api.Project
 
 class ToMavenCheckTask extends BaseTask {
 
@@ -35,6 +38,8 @@ class ToMavenCheckTask extends BaseTask {
         if(!GlobalConfig.gitLog){
             errorMsg = "gitLog is close ,please open it before upload !!!!!"
         }
+
+        errorMsg += docUpdateLog()
 
         def dependent = wrapper.getExtends(Dependencies.class)
         if (dependent.hasLocalModule) {//如果有本地工程，抛异常
@@ -75,6 +80,20 @@ class ToMavenCheckTask extends BaseTask {
         } else {
             mavenInfo.pom_version = "${mavenInfo.pom_version}.$lastVersion"
         }
+    }
+    /**
+     * 检查Docment是否需要更新
+     * @return
+     */
+    String docUpdateLog(){
+        def docProject = project.allprojects.find { p -> p.name == GitUtils.getNameFromUrl(GlobalConfig.docGitUrl) }
+        if(docProject == null) return ""
+        def config = ProjectWrapper.with(docProject).getExtends(GitConfig)
+        if(config.branchName != "master") return "Document git current branch is $config.branchName , please checkout to master before upload!!!"
+        def remoteLog = GitUtils.run("git ls-remoter", docProject.projectDir).readLines().find { it.endsWith("/master") }
+        if(CheckUtils.isEmpty(remoteLog)) return ""
+        if(remoteLog!=config.revisionNum) return  "Document git has update , please update before upload!!!"
+        return ""
     }
 
     @Override

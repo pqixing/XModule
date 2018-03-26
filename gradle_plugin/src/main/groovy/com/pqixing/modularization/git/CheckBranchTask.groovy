@@ -14,7 +14,7 @@ class CheckBranchTask extends GitTask {
         String result = ""
 //        result += GitUtils.run("git stash save -a 'messeag'", gitDir)
         boolean hasLocalBranch = false
-        GitUtils.run("git branch -vv", gitDir)?.eachLine { line ->
+        GitUtils.run("git branch", gitDir)?.eachLine { line ->
             String realLine = line.replace("*", "").trim()
             if (realLine.startsWith(branchName)) {
                 hasLocalBranch = true

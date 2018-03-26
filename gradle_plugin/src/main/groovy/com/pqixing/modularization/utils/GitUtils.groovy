@@ -2,6 +2,7 @@ package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.git.GitConfig
+import org.apache.tools.ant.util.ProcessUtil
 
 import java.util.concurrent.TimeUnit
 
@@ -13,16 +14,18 @@ class GitUtils {
             def process = cmd.execute(null, dir)
             if (process == null) return ""
 
-            if (process.waitFor(2, TimeUnit.MINUTES)) {
+            if (process.waitFor(1, TimeUnit.MINUTES)) {
                 InputStream input = process.exitValue() == 0 ? process.inputStream : process.errorStream;
                 result = input?.getText(Keys.CHARSET)
+                try {
+                    process.closeStreams()
+                    process.destroy()
+                } catch (Exception e) {
+                }
             } else {
-                result = "run $cmd : Time Out count :2 MINUTES"
+                result = "run $cmd : Time Out count :1 MINUTES"
                 Print.ln(result)
-            }
-            process.closeStreams()
-            if (process.alive){
-                process.destroy()
+                process.waitForOrKill(1000 * 60)//1分钟后结束
             }
             Thread.sleep(1000)//两秒后关闭
 
