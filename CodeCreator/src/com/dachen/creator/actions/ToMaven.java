@@ -125,7 +125,7 @@ public class ToMaven extends AnAction {
             @Override
             public void onSuccess() {
                 Pair<Boolean, String> pair = checkUpload(moduleName);
-                results.add(new Pair<>(moduleName, (pair.getFirst() ? " 成功 -> " : " 失败 -> ") + pair.getSecond()));
+                results.add(new Pair<>(moduleName, (pair.getFirst() ? " 成功 : " : " 失败 : ") + pair.getSecond()));
                 if (pair.getFirst() || pos >= uploadList.size() - 1) {
                     startUp(pos + 1, uploadList, results);
                 } else ApplicationManager.getApplication().invokeLater(() -> {
