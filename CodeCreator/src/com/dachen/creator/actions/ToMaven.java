@@ -6,18 +6,19 @@ import com.dachen.creator.utils.GradleUtils;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataKey;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.externalSystem.task.TaskCallback;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
-import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,7 +63,7 @@ public class ToMaven extends AnAction {
             return;
         }
 
-        GradleUtils.addProperties(project, true, new Pair<>("dependMode", "mavenOnly"));
+        GradleUtils.addProperties(project);
 
         notification = new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "开始上传", "任务执行期间，请勿修改,更新,构建代码", NotificationType.WARNING);
         notification.notify(project);
@@ -77,7 +78,7 @@ public class ToMaven extends AnAction {
      * @param results
      */
     private void onEnd(List<String> uploadList, List<Pair<String, String>> results) {
-        GradleUtils.addProperties(project, true);
+        GradleUtils.clear(project);
         if (notification != null && notification.isExpired()) {
             notification.expire();
         }
@@ -99,7 +100,7 @@ public class ToMaven extends AnAction {
      * @return
      */
     private Pair<Boolean, String> checkUpload(String moduleName) {
-        String[] records = FileUtils.read(new File(project.getBasePath(), ".modularization/ide.record")).split("##");
+        String[] records = FileUtils.readForOne(new File(project.getBasePath(), ".modularization/ide.record")).split("##");
         if (records.length < 3 || System.currentTimeMillis() - Long.parseLong(records[0]) > 1000 * 5 || !moduleName.equals(records[1])) {
             return new Pair<>(false, "未知异常(请查看构建日志)");
         }
@@ -119,11 +120,12 @@ public class ToMaven extends AnAction {
             return;
         }
         final String moduleName = uploadList.get(pos);
+        GradleUtils.addFocusInclude(project,moduleName);
         GradleUtils.runTask(project, Arrays.asList(":" + moduleName + ":clean", ":" + moduleName + ":ToMaven"), new TaskCallback() {
             @Override
             public void onSuccess() {
                 Pair<Boolean, String> pair = checkUpload(moduleName);
-                results.add(new Pair<>(moduleName, (pair.getFirst() ? "成功->" : "失败->") + pair.getSecond()));
+                results.add(new Pair<>(moduleName, (pair.getFirst() ? " 成功 -> " : " 失败 -> ") + pair.getSecond()));
                 if (pair.getFirst() || pos >= uploadList.size() - 1) {
                     startUp(pos + 1, uploadList, results);
                 } else ApplicationManager.getApplication().invokeLater(() -> {

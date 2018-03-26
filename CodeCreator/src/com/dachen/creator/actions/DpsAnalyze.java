@@ -27,9 +27,12 @@ public class DpsAnalyze extends AnAction {
             Messages.showMessageDialog("没有选中模块", "操作失败", null);
             return;
         }
+        GradleUtils.addProperties(project);
+        GradleUtils.addFocusInclude(project,module.getName());
         GradleUtils.runTask(project, Arrays.asList(":" + module.getName() + ":AllInnerDps"), new TaskCallback() {
             @Override
             public void onSuccess() {
+                GradleUtils.clear(project);
                 ApplicationManager.getApplication().invokeLater(() -> {
 
                     VirtualFile dir = module.getModuleFile().getParent();

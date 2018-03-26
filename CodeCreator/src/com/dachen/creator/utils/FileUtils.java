@@ -6,16 +6,16 @@ import java.io.*;
 
 public class FileUtils {
 
-    public static final boolean copyFile(File old, File newFile){
-        if(!old.exists()||newFile.exists()) return false;
+    public static final boolean copyFile(File old, File newFile) {
+        if (!old.exists() || newFile.exists()) return false;
         try {
             FileInputStream reader = new FileInputStream(old);
             FileOutputStream writer = new FileOutputStream(newFile);
             byte[] buffer = new byte[1024];
             int lenght = -1;
 
-            while ((lenght = reader.read(buffer)) >0){
-                writer.write(buffer,0,lenght);
+            while ((lenght = reader.read(buffer)) > 0) {
+                writer.write(buffer, 0, lenght);
             }
             writer.flush();
             writer.close();
@@ -28,25 +28,31 @@ public class FileUtils {
         return false;
     }
 
-    public static final boolean delete(File file){
+    public static final boolean delete(File file) {
         try {
             if (file.exists()) return file.delete();
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
         return false;
     }
 
-    public static final String read(File file){
+    public static final String readForOne(File file) {
+        String read = read(file);
+        delete(file);
+        return read;
+    }
 
-        if(!file.exists()) return "";
+    public static final String read(File file) {
+
+        if (!file.exists()) return "";
         String result = "";
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             StringBuilder sb = new StringBuilder();
             String temp = null;
-            while ((temp = reader.readLine())!=null){
-                sb.append(temp+"\n");
+            while ((temp = reader.readLine()) != null) {
+                sb.append(temp + "\n");
             }
             result = sb.toString();
             reader.close();
@@ -57,9 +63,10 @@ public class FileUtils {
 
         return result;
     }
-    public static final boolean write(String data,File file){
-        if(file.exists()) file.delete();
-        if(!file.getParentFile().exists()) file.getParentFile().mkdirs();
+
+    public static final boolean write(String data, File file) {
+        if (file.exists()) file.delete();
+        if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
         try {
             PrintWriter writer = new PrintWriter(file);
             writer.write(data);

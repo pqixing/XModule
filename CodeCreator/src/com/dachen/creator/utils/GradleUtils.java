@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GradleUtils {
@@ -35,22 +36,48 @@ public class GradleUtils {
         ExternalSystemUtil.runTask(settings, DefaultRunExecutor.EXECUTOR_ID, project, GRADLE, callback, progressExecutionMode, activateToolWindowBeforeRun);
     }
 
+    public static void addProperties(Project project){
+        addProperties(project,getDefaultProperties());
+    }
     /**
      * 添加配置文件
      * @param project
-     * @param reset
      * @param pair
      */
-    public static void addProperties(Project project, boolean reset , Pair<String,Object>...pair){
+    public static void addProperties(Project project,List<Pair<String,Object>> pair){
         File file = new File(project.getBasePath(), ".modularization/hide.properties");
-        if(reset) FileUtils.delete(file);
-        if(pair.length==0)return;
+        FileUtils.delete(file);
+        if(pair.size()==0)return;
         StringBuilder sb = new StringBuilder("#AUTO ADD BY MODULARIZATION \n");
 
         for (Pair<String,Object> p: pair) {
             Object temp = p.getSecond();
             String fix = temp instanceof CharSequence?"'":"";
             sb.append(p.getFirst()+" = "+fix+temp+fix+"\n");
+        }
+        FileUtils.write(sb.toString(),file);
+    }
+
+    public static List<Pair<String,Object>> getDefaultProperties(){
+        ArrayList<Pair<String,Object>> parmas = new ArrayList<>();
+        parmas.add(new Pair<>("dependentModel", "mavenOnly"));
+        parmas.add(new Pair<>("updateBeforeSync", true));
+        parmas.add(new Pair<>("silentLog", false));
+
+        return parmas;
+    }
+
+    public static void clear(Project project){
+        FileUtils.delete(new File(project.getBasePath(), ".modularization/hideInclude.kt"));
+        FileUtils.delete(new File(project.getBasePath(), ".modularization/hide.properties"));
+    }
+
+    public static void addFocusInclude(Project project,String ... modules){
+        File file = new File(project.getBasePath(), ".modularization/hideInclude.kt");
+        StringBuilder sb = new StringBuilder("focusInclude = ");
+
+        for (String module : modules) {
+            sb.append(module).append("+");
         }
         FileUtils.write(sb.toString(),file);
     }
