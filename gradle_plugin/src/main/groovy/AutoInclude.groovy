@@ -23,6 +23,7 @@ public class AutoInclude {
     HashMap<String, String> projectUrls
     HashMap<String, String> localProject = [:]
     Set<String> includes = []
+    Set<String> foucesIncludes = []
     private String baseGitUrl
     private String username
     private String password
@@ -87,6 +88,9 @@ public class AutoInclude {
                 case "include":
                     value?.split(",")?.each { includes += it.trim() }
                     break
+                case "focusInclude":
+                    value?.split(",")?.each { foucesIncludes += it.trim() }
+                    break
                 case "dpsInclude"://批量导入子项目
                     value?.split(",")?.each { readDpsInclude(autoTxt, it.trim()) }
                     break
@@ -121,7 +125,8 @@ public class AutoInclude {
             if (!defaultXml.exists()) {
                 error = run("git clone $AutoConfig.XML_DEFAULT_GIT", rootDir.parentFile)
             }
-            run("git pull ", new File(rootDir.parentFile, docDir))
+            //同步时不更新Document仓库
+//            run("git pull ", new File(rootDir.parentFile, docDir))
             includes += docDir
         }
         if (!defaultXml?.exists() ?: false) {
@@ -192,7 +197,7 @@ public class AutoInclude {
         formatGroup()
 
         Map<String, String> realInclude = [:]
-        includes.each { key ->
+        (foucesIncludes.isEmpty() ? includes : foucesIncludes).each { key ->
             String url = localProject.find { it.key == key }?.value
             //如果本地存在工程目录，直接导入,否则尝试从网络导入
             if (url != null && !url.isEmpty()) {
