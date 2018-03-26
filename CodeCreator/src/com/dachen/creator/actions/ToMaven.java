@@ -20,9 +20,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Pair;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class ToMaven extends AnAction {
     Project project;
@@ -148,14 +146,44 @@ public class ToMaven extends AnAction {
      * @param module
      * @return
      */
-    private List<String> getDps(Module module) {//@TODO
-        List<String> allModule = new ArrayList<>();
-        Module[] modules = ModuleRootManager.getInstance(module).getDependencies();
-        if (modules == null || modules.length == 0) return allModule;
-        for (int i = modules.length - 1; i >= 0; i--) {
-            allModule.add(modules[i].getName());
+    private List<String> getDps(Module module) {
+
+        HashMap<String, Integer> levels = new HashMap<>();
+        loadModuleByLevel(0,module,levels);
+        HashMap<Integer,List<String>> newMaps = new HashMap<>();
+
+        int lastDept = 0;
+        for (Map.Entry<String, Integer> entry: levels.entrySet()){
+            int value = entry.getValue();
+            lastDept = Math.max(lastDept,value);
+            List<String> list = newMaps.get(value);
+            if(list ==null) {
+                list = new ArrayList<>();
+                newMaps.put(value,list);
+            }
+            list.add(entry.getKey());
         }
-        return allModule;
+        List<String> sortModles = new ArrayList<>();
+        for (int i = lastDept; i >=0; i--) {
+            List<String> strings = newMaps.get(i);
+            if(strings!=null) sortModles.addAll(strings);
+        }
+        return sortModles;
+    }
+
+    private void loadModuleByLevel(int dept, Module module, HashMap<String, Integer> levels) {
+        Module[] modules = ModuleRootManager.getInstance(module).getDependencies();
+        if(modules == null|| modules.length == 0) return;
+        for (Module m: modules) {
+            if(m == null) continue;
+            String name = m.getName();
+            int oldDept = levels.containsKey(name)?levels.get(name):0;
+            levels.put(name,Math.max(oldDept,dept));
+        }
+
+        for (Module m: modules) {
+            loadModuleByLevel(dept+1,m,levels);
+        }
     }
 
 
