@@ -42,6 +42,10 @@ public class DpsAnalyze extends AnAction {
                         target = dir;
                         dir = dir.findChild("dependencies");
                     }
+                    if(dir!=null) {
+                        target = dir;
+                        dir = dir.findChild("level.dp");
+                    }
                     if(dir!=null) target = dir;
                     FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, true);
                     VirtualFile[] chooseFiles = FileChooser.chooseFiles(descriptor, project,target);

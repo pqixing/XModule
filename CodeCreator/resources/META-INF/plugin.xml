@@ -43,19 +43,24 @@
 
             </group>
 
-            <group class="com.dachen.creator.OpenFile" popup="true" id="file" text="File">
-                <action id="OpenInclude" class="com.dachen.creator.actions.OpenInclude" text="OpenInclude"
+            <group class="com.dachen.creator.OpenFile" popup="true" id="file" text="OpenFile">
+                <action id="OpenInclude" class="com.dachen.creator.actions.Include" text="OpenInclude"
                         description="OpenInclude">
                     <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
                 </action>
-                <action id="OpenProperties" class="com.dachen.creator.actions.OpenProperties" text="OpenProperties"
+                <action id="OpenProperties" class="com.dachen.creator.actions.Properties" text="OpenProperties"
                         description="OpenProperties">
-                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt P"/>
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift P"/>
+                </action>
+
+                <action id="Dependencies" class="com.dachen.creator.actions.Dependencies" text="Dependencies"
+                        description="Dependencies">
+                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift D"/>
                 </action>
 
             </group>
             <action id="ToMaven" class="com.dachen.creator.actions.ToMaven" text="ToMaven" description="ToMaven">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt T"/>
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift M"/>
             </action>
             <separator/>
             <action id="CreateProject" class="com.dachen.creator.actions.NewProject" text="CreateProject"
@@ -63,6 +68,7 @@
             <separator/>
             <action id="DpsAnalyze" class="com.dachen.creator.actions.DpsAnalyze" text="DpsAnalyze"
                     description="DpsAnalyze"/>
+            <separator/>
             <action id="ClearCache" class="com.dachen.creator.actions.ClearCache" text="ClearCache" description="ClearCache"/>
             <separator/>
 

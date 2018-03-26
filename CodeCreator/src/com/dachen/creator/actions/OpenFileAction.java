@@ -5,15 +5,19 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataKey;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 
 public abstract class OpenFileAction extends AnAction {;
     Project project;
+    Module module;
     @Override
     public void actionPerformed(AnActionEvent anActionEvent) {
         project = anActionEvent.getProject();
+        module = (Module) anActionEvent.getData(DataKey.create("module"));
         int i = 0;
         for (VirtualFile child:getFiles(project)) {
             if(child!=null&&child.exists()){
