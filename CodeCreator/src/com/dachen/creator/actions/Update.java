@@ -5,8 +5,10 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.externalSystem.task.TaskCallback;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pair;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class Update extends AnAction {
 
@@ -14,7 +16,10 @@ public class Update extends AnAction {
     public void actionPerformed(AnActionEvent e) {
         Project project = e.getProject();
 
-        GradleUtils.addProperties(project);
+        List<Pair<String, Object>> properties = GradleUtils.getDefaultProperties();
+        properties.add(new Pair<>("target","all"));
+
+        GradleUtils.addProperties(project,properties);
         GradleUtils.addFocusInclude(project,"empty");
         GradleUtils.runTask(project, Arrays.asList("GitUpdate"), new TaskCallback() {
             @Override
