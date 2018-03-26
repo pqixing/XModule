@@ -92,7 +92,7 @@ class ToMavenCheckTask extends BaseTask {
         if(config.branchName != "master") return "Document git current branch is $config.branchName , please checkout to master before upload!!!"
         def remoteLog = GitUtils.run("git ls-remoter", docProject.projectDir).readLines().find { it.endsWith("/master") }
         if(CheckUtils.isEmpty(remoteLog)) return ""
-        if(remoteLog!=config.revisionNum) return  "Document git has update , please update before upload!!!"
+        if(remoteLog.split(" ")[0].trim()!=config.revisionNum) return  "Document git has update , please update before upload!!!"
         return ""
     }
 
