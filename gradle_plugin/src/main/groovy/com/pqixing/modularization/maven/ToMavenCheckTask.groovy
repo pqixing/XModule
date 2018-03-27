@@ -38,7 +38,7 @@ class ToMavenCheckTask extends BaseTask {
             errorMsg = "gitLog is close ,please open it before upload !!!!!"
         }
 
-       /* errorMsg +=*/ docUpdateLog()
+        errorMsg += docUpdateLog()
 
         def dependent = wrapper.getExtends(Dependencies.class)
         if (dependent.hasLocalModule) {//如果有本地工程，抛异常
@@ -104,8 +104,7 @@ class ToMavenCheckTask extends BaseTask {
 //        Print.lnf("remoteLog $remoteLog branchName $branchName revisionNum $revisionNum")
 
         if (CheckUtils.isEmpty(remoteLog)) return ""
-        def remoteRevisionNum = remoteLog.split(" ")[0].trim()
-        Print.lnf("remoteRevisionNum $remoteRevisionNum revisionNum $revisionNum")
+        def remoteRevisionNum = remoteLog.substring(0,remoteLog.indexOf("\t")).trim()
         if (remoteRevisionNum != revisionNum) return "Document git has update , please update before upload!!!"
         return ""
     }
