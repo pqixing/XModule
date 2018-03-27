@@ -105,8 +105,8 @@ class ToMavenCheckTask extends BaseTask {
 
         if (CheckUtils.isEmpty(remoteLog)) return ""
         def remoteRevisionNum = remoteLog.split(" ")[0].trim()
-        Print.lne("remoteLog $remoteLog revisionNum $revisionNum")
-        if (remoteLog != revisionNum) return "Document git has update , please update before upload!!!"
+        Print.lne("remoteRevisionNum $remoteRevisionNum revisionNum $revisionNum")
+        if (remoteRevisionNum != revisionNum) return "Document git has update , please update before upload!!!"
         return ""
     }
 
