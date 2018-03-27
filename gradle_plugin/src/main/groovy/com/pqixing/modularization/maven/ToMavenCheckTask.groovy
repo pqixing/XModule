@@ -52,7 +52,7 @@ class ToMavenCheckTask extends BaseTask {
 
         PomWrapper pomWrapper = PomWrapper.create(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId, lastRelease)
         if (gitConfig.revisionNum == pomWrapper.revisionNum) {//如果本地的git版本号等于仓库最后一次提交的版本号，则不上传
-            errorMsg = "${Keys.SEPERATOR}NotUpdate${Keys.SEPERATOR} -> revisionNum:${gitConfig.revisionNum}${Keys.SEPERATOR}version:$lastRelease"
+            errorMsg = "::NotUpdate:: -> revisionNum=${gitConfig.revisionNum}::version=$lastRelease"
         }
 
         if (!CheckUtils.isEmpty(errorMsg)) {
