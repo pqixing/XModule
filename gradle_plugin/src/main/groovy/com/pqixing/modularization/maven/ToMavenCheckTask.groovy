@@ -38,7 +38,7 @@ class ToMavenCheckTask extends BaseTask {
             errorMsg = "gitLog is close ,please open it before upload !!!!!"
         }
 
-        errorMsg += docUpdateLog()
+//        errorMsg += docUpdateLog()
 
         def dependent = wrapper.getExtends(Dependencies.class)
         if (dependent.hasLocalModule) {//如果有本地工程，抛异常
@@ -52,7 +52,7 @@ class ToMavenCheckTask extends BaseTask {
 
         PomWrapper pomWrapper = PomWrapper.create(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId, lastRelease)
         if (gitConfig.revisionNum == pomWrapper.revisionNum) {//如果本地的git版本号等于仓库最后一次提交的版本号，则不上传
-            errorMsg = "-> Not Update : -> current git num equals maven revision,${gitConfig.revisionNum}"
+            errorMsg = "${Keys.SEPERATOR}NotUpdate${Keys.SEPERATOR} -> revisionNum:${gitConfig.revisionNum}${Keys.SEPERATOR}version:$lastRelease"
         }
 
         if (!CheckUtils.isEmpty(errorMsg)) {
