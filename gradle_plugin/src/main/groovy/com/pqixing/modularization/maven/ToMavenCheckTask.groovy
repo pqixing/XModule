@@ -12,9 +12,7 @@ import com.pqixing.modularization.utils.MavenUtils
 import com.pqixing.modularization.utils.Print
 import com.pqixing.modularization.wrapper.MetadataWrapper
 import com.pqixing.modularization.wrapper.PomWrapper
-import com.pqixing.modularization.wrapper.ProjectWrapper
 import org.gradle.api.GradleException
-import org.gradle.api.Project
 
 class ToMavenCheckTask extends BaseTask {
 
@@ -40,7 +38,7 @@ class ToMavenCheckTask extends BaseTask {
             errorMsg = "gitLog is close ,please open it before upload !!!!!"
         }
 
-        errorMsg += docUpdateLog()
+       /* errorMsg +=*/ docUpdateLog()
 
         def dependent = wrapper.getExtends(Dependencies.class)
         if (dependent.hasLocalModule) {//如果有本地工程，抛异常
@@ -106,7 +104,9 @@ class ToMavenCheckTask extends BaseTask {
 //        Print.lnf("remoteLog $remoteLog branchName $branchName revisionNum $revisionNum")
 
         if (CheckUtils.isEmpty(remoteLog)) return ""
-        if (remoteLog.split(" ")[0].trim() != revisionNum) return "Document git has update , please update before upload!!!"
+        def remoteRevisionNum = remoteLog.split(" ")[0].trim()
+        Print.lne("remoteLog $remoteLog revisionNum $revisionNum")
+        if (remoteLog != revisionNum) return "Document git has update , please update before upload!!!"
         return ""
     }
 
