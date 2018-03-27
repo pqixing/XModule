@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>com.pqixing.modularization.codeCreator</id>
     <name>CodeCreator</name>
-    <version>1.0</version>
+    <version>1.1</version>
     <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
 
     <description><![CDATA[
@@ -10,7 +10,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      Add change notes here.<br>
+      Fix Task ToMaven For Tag : Not Update <br>
       <em>most HTML tags may be used</em>
     ]]>
     </change-notes>

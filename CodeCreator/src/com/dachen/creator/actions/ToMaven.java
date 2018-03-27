@@ -102,8 +102,13 @@ public class ToMaven extends AnAction {
         if (records.length < 3 || System.currentTimeMillis() - Long.parseLong(records[0]) > 1000 * 5 || !moduleName.equals(records[1])) {
             return new Pair<>(false, "未知异常(请查看构建日志)");
         }
-
-        return new Pair<>("Y".equals(records[2]), records[3]);
+        boolean success = "Y".equals(records[2]);
+        String msg = records[3];
+        if(msg.contains("::NotUpdate::")){
+            success = true;
+            msg = msg.replace("::"," ");
+        }
+        return new Pair<>(success, msg);
     }
 
     /**
