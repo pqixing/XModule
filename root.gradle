@@ -1,0 +1,49 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+//Copy to you target dir and change file to build.gradle , then open this file by Android Studio .
+//Target dir suggest like this /your-target-name/manager/build.gradle(root.gradle)
+apply plugin: 'com.module.git'
+buildscript {
+    boolean debug = false
+    gradle.ext.modulePath = "com.pqixing.android:modularization"
+    gradle.ext.mavenUrl = "http://192.168.3.7:9527/nexus/content/groups/androidgroup/"
+    gradle.ext.snapUrl = "http://192.168.3.7:9527/nexus/content/repositories/androidsnap/"
+    def lastVersion = {
+        String url = "${debug?gradle.snapUrl:gradle.mavenUrl}${gradle.modulePath.toString().replace(".", "/").replace(":", "/")}/maven-metadata.xml"
+        String version = "+";
+
+        def f = file(".modularization/versions/modularization.version")
+//        //15分钟更新一次版本
+//        if(!debug) {
+//            if (f.exists() && System.currentTimeMillis() - f.lastModified() > 1000 * 60 * 15) return f.text
+//        }
+        try {
+            def conn = new URL(url).openConnection()
+            //链接5秒超时
+            conn.connectTimeout = 5
+            version = new XmlParser().parseText(conn.inputStream.text).versioning.release.text()
+            f.parentFile.mkdirs()
+            f.write(version)
+        } catch (Exception e) {
+        }
+        if (version == "+" && f.exists()) version = f.text
+        return version
+    }
+
+    repositories {
+        maven {
+            url gradle.mavenUrl
+        }
+    }
+    dependencies {
+        classpath "$gradle.modulePath:${lastVersion()}"
+        classpath 'com.android.tools.build:gradle:3.0.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.0"
+    }
+}
+allprojects {
+    repositories {
+        maven {
+            url gradle.mavenUrl
+        }
+    }
+}
