@@ -40,7 +40,9 @@
 
                 <action id="Update" class="com.dachen.creator.actions.Update" text="Update" description="Update"/>
                 <action id="Clone" class="com.dachen.creator.actions.Clone" text="Clone" description="Clone"/>
-
+                <separator />
+                <action id="CreateBranch" class="com.dachen.creator.actions.CreateBranch" text="CreateBranch"
+                        description="CreateBranch"/>
             </group>
 
             <group class="com.dachen.creator.OpenFile" popup="true" id="file" text="OpenFile">
@@ -71,15 +73,17 @@
             <separator/>
             <action id="ClearCache" class="com.dachen.creator.actions.ClearCache" text="ClearCache" description="ClearCache"/>
             <separator/>
+            <action id="com.libiao.routercreator" class="com.dachen.creator.actions.PathCreator" text="RouterCreator"
+                    description="router auto create code"/>
 
             <action id="com.libiao.mvpcreator" class="com.dachen.creator.actions.MvpCreator" text="MvpCreator"
                     description="auto create MVP code"/>
-            <action id="com.libiao.routercreator" class="com.dachen.creator.actions.PathCreator" text="RouterCreator"
-                    description="router auto create code"/>
+
             <action id="com.libiao.modelcreator" class="com.dachen.creator.actions.ModelCreator" text="ModelCreator"
                     description="auto create model code"/>
         </group>
         <!-- Add your actions here -->
+
 
 
     </actions>

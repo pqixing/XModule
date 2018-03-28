@@ -6,10 +6,7 @@ import com.dachen.creator.utils.GradleUtils;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataKey;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.externalSystem.task.TaskCallback;
 import com.intellij.openapi.module.Module;
@@ -28,7 +25,7 @@ public class ToMaven extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
         project = e.getData(PlatformDataKeys.PROJECT);
-        Module module = (Module) e.getData(DataKey.create("module"));
+        Module module = e.getData(LangDataKeys.MODULE);
         String moduleName = module == null ? "" : module.getName();
         String projectName = project.getName();
         String place = e.getPlace();
