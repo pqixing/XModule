@@ -24,7 +24,7 @@ class GlobalConfig {
      */
     final
     static List<String> NOTE_target = ["git操作目标范畴", "include:只操作当前导入的代码", "all:影响本地所有存在的代码(仅包含配置在default.xml的工程)"]
-    static String target = "all"
+    static String target = "include"
     /**
      * 分支名称
      */
