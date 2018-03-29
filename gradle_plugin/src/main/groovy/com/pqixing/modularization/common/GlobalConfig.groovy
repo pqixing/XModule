@@ -24,7 +24,7 @@ class GlobalConfig {
      */
     final
     static List<String> NOTE_target = ["git操作目标范畴", "include:只操作当前导入的代码", "all:影响本地所有存在的代码(仅包含配置在default.xml的工程)"]
-    static String target = "include"
+    static String target = "all"
     /**
      * 分支名称
      */
@@ -98,8 +98,14 @@ class GlobalConfig {
      * 是否读取git日志
      */
     static boolean gitLog = true
-
-
+    /**
+     * 指定的版本文件
+     */
+    static String focusVersions = ""
+    /**
+     * 分支名称
+     */
+    final static List<String> NOTE_focusVersions = ["指定的版本号文件"]
 
     /**
      * 初始化配置

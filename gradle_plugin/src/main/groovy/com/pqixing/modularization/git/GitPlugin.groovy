@@ -42,6 +42,8 @@ class GitPlugin extends BasePlugin {
         BaseTask.task(project, GitUpdateTask.class)
         BaseTask.task(project, CheckBranchTask.class)
         BaseTask.task(project, GitCloneAllTask.class)
+        BaseTask.task(project, CreateBranchFocusVersionsTask.class)
+        BaseTask.task(project, CreateBranchTask.class)
 //        BaseTask.task(project, CheckMasterTask.class)
 //        BaseTask.task(project, ModuReleaseTask.class)
 //        BaseTask.task(project, DelModuReleaseTask.class)

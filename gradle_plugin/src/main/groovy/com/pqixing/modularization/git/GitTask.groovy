@@ -63,7 +63,7 @@ abstract class GitTask extends BaseTask {
             String fullUrl = GitUtils.getFullGitUrl(p.gitUrl)
             Print.ln("GitTask $name -> start : $p.name $fullUrl ")
             String result = onGitProject(p.name, fullUrl, new File(project.rootDir.parentFile, p.name))
-            Print.ln("GitTask $name -> result : $result ")
+            Print.ln("GitTask $name -> result : $result |||\n")
         }
     }
 }

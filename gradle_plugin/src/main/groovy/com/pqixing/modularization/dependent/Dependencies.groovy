@@ -6,6 +6,7 @@ import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.common.GlobalConfig
+import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.utils.*
 import com.pqixing.modularization.wrapper.PomWrapper
@@ -76,7 +77,7 @@ class Dependencies extends BaseExtension {
      * @return
      */
     String getLastVersion(String group, String artifactId) {
-       return MavenUtils.getVersion(mavenType.name,artifactId)
+       return MavenUtils.getVersion(mavenType.name,wrapper.getExtends(GitConfig).branchName,artifactId)
 //        String timeStamp = "$artifactId$Keys.SUFFIX_STAMP"
 //        String version = versionMaps.getProperty(artifactId)
 //        long afterLastUpdate = System.currentTimeMillis() - (versionMaps.getProperty(timeStamp)?.toLong() ?: 0L)

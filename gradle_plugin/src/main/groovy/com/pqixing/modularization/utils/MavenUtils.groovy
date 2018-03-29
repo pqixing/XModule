@@ -24,15 +24,60 @@ class MavenUtils {
     static String getDocPomXml(String mavenName, String artifactId, String version) {
         return FileUtils.read(new File(documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$artifactId/$version/pom.xml"))
     }
-
+    /**
+     *输出保存的文件
+     * @param mavenName
+     * @param branchName
+     * @param outFile
+     */
+    static void saveMavenMaps(String mavenName,String branchName,File outFile = getFocusMapsFile(mavenName,branchName)){
+        if(outFile.exists()){
+            Print.lnf("$outFile.path 文件已经存在，请先删除或者重新输入,跳过生成Maps文件")
+        }else {
+            def maps = MavenUtils.getMavenMaps(mavenName)
+            MavenUtils.getFocusMavenMaps(mavenName, branchName).each { maps.put(it.key, it.value) }
+            FileUtils.saveMaps(maps, outFile)
+        }
+    }
     /**
      * 获取最后的版本号
      * @param mavenName
      * @param artifactId
      * @return
      */
-    static String getVersion(String mavenName, String artifactId) {
-        return getMavenMaps(mavenName).get(artifactId)?.toString() ?: "+"
+    static String getVersion(String mavenName,String branchName, String artifactId) {
+        return getFocusMavenMaps(mavenName,branchName)?.get(artifactId)?.toString() ?:
+                (getMavenMaps(mavenName)?.get(artifactId)?.toString() ?: "+")
+    }
+    /**
+     * 获取制定分支的focusMaven配置
+     * @param mavenName
+     * @param branchName
+     * @return
+     */
+    static File getFocusMapsFile(String mavenName,String branchName){
+        return new File(documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$Keys.DIR_VERSIONS/${branchName}.version")
+    }
+    /**
+     * 获取指定版本号
+     * @param mavenName
+     * @param branchName
+     * @return
+     */
+    static Properties getFocusMavenMaps(String mavenName,String branchName) {
+        String mapKey = "$mavenName${branchName}Maps"
+        if (BasePlugin.rootProject.hasProperty(mapKey)) {
+            return BasePlugin.rootProject."$mapKey"
+        }
+
+        Properties properties = new Properties()
+        //加载指定分支的版本
+        def branchVersionFile= getFocusMapsFile(mavenName,branchName)
+        if(branchVersionFile.exists()) properties.load(branchVersionFile.newInputStream())
+        def focusVersionFile = new File(GlobalConfig.focusVersions)
+        if(focusVersionFile.exists()) properties.load(focusVersionFile.newInputStream())
+        BasePlugin.rootProject.ext."$mapKey" = properties
+        return properties
     }
 
     static Properties getMavenMaps(String mavenName) {
@@ -40,16 +85,15 @@ class MavenUtils {
         if (BasePlugin.rootProject.hasProperty(mapKey)) {
             return BasePlugin.rootProject."$mapKey"
         }
-        long start = System.currentTimeMillis()
+//        long start = System.currentTimeMillis()
         //如果当前不存在版本号，则从遍历Doc目录创建
         def maps = new Properties()
-        def mapsDir = new File(GlobalConfig.updateBeforeSync?upDocumentDir:documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/")
-        mapsDir.eachDir { dir ->
+        def mapsDir = new File(GlobalConfig.updateBeforeSync ? upDocumentDir : documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/")
+        if(mapsDir.exists()) mapsDir.eachDir { dir ->
             String version = ""
             dir.eachDir {
                 String newVersion = it.name.trim()
-                int len = newVersion.length() - version.length()
-                if (len == 0 && newVersion > version || len > 0) version = newVersion
+                if(TextUtils.compareVersion(newVersion,version)>0) version = newVersion
             }
             maps.put(dir.name, version)
         }

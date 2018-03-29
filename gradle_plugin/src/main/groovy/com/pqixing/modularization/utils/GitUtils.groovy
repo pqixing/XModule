@@ -2,12 +2,11 @@ package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.git.GitConfig
-import org.apache.tools.ant.util.ProcessUtil
 
 import java.util.concurrent.TimeUnit
 
 class GitUtils {
-    static String run(String cmd, File dir) {
+    static String run(String cmd, File dir,boolean printLog = true) {
         String result = ""
 
         try {
@@ -23,14 +22,13 @@ class GitUtils {
                 } catch (Exception e) {
                 }
             } else {
-                result = "run $cmd : Time Out count :1 MINUTES"
-                Print.ln(result)
+                result = "Time Out count :1 MINUTES"
                 process.waitForOrKill(1000 * 60)//1分钟后结束
             }
         } catch (Exception e) {
             Print.lne("GitUtils run ", e)
         }
-        Print.ln("run: $cmd in $dir.name   ->   $result")
+        if(printLog) Print.ln("run: $cmd in $dir.name   ->   $result")
         return result
     }
     /**

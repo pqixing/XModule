@@ -4,6 +4,7 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
+import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.MavenUtils
@@ -28,7 +29,7 @@ class DependentPrintTask extends BaseTask {
         buildConfig = wrapper.getExtends(BuildConfig.class)
         outDir = new File(buildConfig.outDir, Keys.DIR_DEPENDENT)
         mavenType = wrapper.getExtends(ModuleConfig).mavenType
-        File androidDp =new File(wrapper.getExtends(BuildConfig).outDir, "$Keys.DIR_DEPENDENT/$Keys.FILE_ANDROID_DP")
+        File androidDp = new File(wrapper.getExtends(BuildConfig).outDir, "$Keys.DIR_DEPENDENT/$Keys.FILE_ANDROID_DP")
         def strList = new LinkedList<String>()
         androidDp.eachLine {
             if (it.startsWith("No dependencies")) {
@@ -43,8 +44,7 @@ class DependentPrintTask extends BaseTask {
 
     @Override
     void runTask() {
-        MavenUtils.getMavenMaps(mavenType.name)?.store(new File(outDir, Keys.FILE_VERSION_DP).newPrintWriter(),Keys.CHARSET)
-
+        MavenUtils.saveMavenMaps(mavenType.name, wrapper.getExtends(GitConfig).branchName, new File(outDir, Keys.FILE_VERSION_DP))
         StringBuilder sb = new StringBuilder()
         //输出批量上传脚本以及依赖排序
         wrapper.getExtends(Dependencies).modules.each {

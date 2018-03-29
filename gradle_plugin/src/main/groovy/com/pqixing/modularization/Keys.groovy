@@ -116,6 +116,10 @@ class Keys {
      */
     public static final String FILE_VERSION_DP = "version.dp"
     /**
+     * 版本号控制
+     */
+    public static final String DIR_VERSIONS = "versions"
+    /**
      * 排序过后的以来关系
      */
     public static final String FILE_SORT_DP = "level.dp"
