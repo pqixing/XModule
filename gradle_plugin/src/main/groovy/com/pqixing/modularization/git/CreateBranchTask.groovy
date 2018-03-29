@@ -38,7 +38,7 @@ class CreateBranchTask extends GitTask {
         }
         if(isCurBranch) return "current branch is $branchName"
         if(hasLocal) return GitUtils.run("git checkout $branchName", gitDir)
-        if(hasRemote) return GitUtils.run("git checkout -b $branchName /origin/$branchName", gitDir)
+        if(hasRemote) return GitUtils.run("git checkout -b $branchName origin/$branchName", gitDir)
         return GitUtils.run("git checkout -b $branchName", gitDir)+"\n"+GitUtils.run("git push origin $branchName", gitDir)
     }
 }

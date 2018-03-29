@@ -25,7 +25,7 @@ class CheckBranchTask extends GitTask {
         if (isCurBranch) return "current branch is $branchName"
         if (hasLocal) return GitUtils.run("git checkout $branchName", gitDir)
 
-        return GitUtils.run("git checkout -b $branchName /origin/$branchName", gitDir)
+        return GitUtils.run("git checkout -b $branchName origin/$branchName", gitDir)
         +"\nAfter ->" + GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir)
     }
 }
