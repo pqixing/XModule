@@ -14,9 +14,9 @@ class CreateBranchFocusVersionsTask extends GitTask {
     }
     @Override
     void end() {
-//        MavenUtils.upDocumentDir
+        MavenUtils.upDocumentDir
         GlobalConfig.preMavenUrl.each {   MavenUtils.saveMavenMaps(it.key,branchName) }
-//        MavenUtils.pushMaven()
+        MavenUtils.pushMaven()
     }
 
     @Override
