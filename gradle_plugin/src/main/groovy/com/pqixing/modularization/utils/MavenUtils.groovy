@@ -25,15 +25,15 @@ class MavenUtils {
         return FileUtils.read(new File(documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$artifactId/$version/pom.xml"))
     }
     /**
-     *输出保存的文件
+     * 输出保存的文件
      * @param mavenName
      * @param branchName
      * @param outFile
      */
-    static void saveMavenMaps(String mavenName,String branchName,File outFile = getFocusMapsFile(mavenName,branchName)){
-        if(outFile.exists()){
+    static void saveMavenMaps(String mavenName, String branchName, File outFile = getFocusMapsFile(mavenName, branchName)) {
+        if (outFile.exists()) {
             Print.lnf("$outFile.path 文件已经存在，请先删除或者重新输入,跳过生成Maps文件")
-        }else {
+        } else {
             def maps = MavenUtils.getMavenMaps(mavenName)
             MavenUtils.getFocusMavenMaps(mavenName, branchName).each { maps.put(it.key, it.value) }
             FileUtils.saveMaps(maps, outFile)
@@ -45,8 +45,8 @@ class MavenUtils {
      * @param artifactId
      * @return
      */
-    static String getVersion(String mavenName,String branchName, String artifactId) {
-        return getFocusMavenMaps(mavenName,branchName)?.get(artifactId)?.toString() ?:
+    static String getVersion(String mavenName, String branchName, String artifactId) {
+        return getFocusMavenMaps(mavenName, branchName)?.get(artifactId)?.toString() ?:
                 (getMavenMaps(mavenName)?.get(artifactId)?.toString() ?: "+")
     }
     /**
@@ -55,7 +55,7 @@ class MavenUtils {
      * @param branchName
      * @return
      */
-    static File getFocusMapsFile(String mavenName,String branchName){
+    static File getFocusMapsFile(String mavenName, String branchName) {
         return new File(documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/$Keys.DIR_VERSIONS/${branchName}.version")
     }
     /**
@@ -64,7 +64,7 @@ class MavenUtils {
      * @param branchName
      * @return
      */
-    static Properties getFocusMavenMaps(String mavenName,String branchName) {
+    static Properties getFocusMavenMaps(String mavenName, String branchName) {
         String mapKey = "$mavenName${branchName}Maps"
         if (BasePlugin.rootProject.hasProperty(mapKey)) {
             return BasePlugin.rootProject."$mapKey"
@@ -72,10 +72,10 @@ class MavenUtils {
 
         Properties properties = new Properties()
         //加载指定分支的版本
-        def branchVersionFile= getFocusMapsFile(mavenName,branchName)
-        if(branchVersionFile.exists()) properties.load(branchVersionFile.newInputStream())
+        def branchVersionFile = getFocusMapsFile(mavenName, branchName)
+        if (branchVersionFile.exists()) properties.load(branchVersionFile.newInputStream())
         def focusVersionFile = new File(GlobalConfig.focusVersions)
-        if(focusVersionFile.exists()) properties.load(focusVersionFile.newInputStream())
+        if (focusVersionFile.exists()) properties.load(focusVersionFile.newInputStream())
         BasePlugin.rootProject.ext."$mapKey" = properties
         return properties
     }
@@ -89,15 +89,17 @@ class MavenUtils {
         //如果当前不存在版本号，则从遍历Doc目录创建
         def maps = new Properties()
         def mapsDir = new File(GlobalConfig.updateBeforeSync ? upDocumentDir : documentDir, "$Keys.MODURIZATION/$Keys.MAVEN/$mavenName/")
-        if(mapsDir.exists()) mapsDir.eachDir { dir ->
+        if (mapsDir.exists()) mapsDir.eachDir { dir ->
             String version = ""
-            dir.eachDir {
+            def metaFile = new File(dir, "meta.xml")
+            if (metaFile.exists()) {
+                version = new MetadataWrapper(FileUtils.read(metaFile)).release
+            } else dir.eachDir {
                 String newVersion = it.name.trim()
-                if(TextUtils.compareVersion(newVersion,version)>0) version = newVersion
+                if (TextUtils.compareVersion(newVersion, version) > 0) version = newVersion
             }
             maps.put(dir.name, version)
         }
-
         BasePlugin.rootProject.ext."$mapKey" = maps
 //        Print.lnf("getMavenMaps cout:${System.currentTimeMillis() - start} -> $maps")
 //        FileUtils.createIfNotExist(mapFile)
