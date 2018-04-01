@@ -1,9 +1,9 @@
 ##  Gradle组件化gradle插件 -- modularization 2。0
 ### 零. 插件使用说明   
 随着项目的庞大，组件化开发变的非常有必要，在业务节藕拆分之外，为了实现代码的拆分隔离，多git的代码更加方便管理，modularization插件应声而生,其中包含gradle插件，注解插件，intelij 搭配使用   
->  自动导入和管理开发代码   [gif](imgs/importcode.gif)   
->  依赖方式在maven和local代码之间轻松切换。 模块独立运行调试更加简单  [gif](imgs/dependent.gif)    
->  上传代码到Maven仓库   [gif](imgs/tomaven.gif)     
+>  自动导入和管理开发代码   ![gif](imgs/importcode.gif)   
+>  依赖方式在maven和local代码之间轻松切换。 模块独立运行调试更加简单  ![gif](imgs/dependent.gif)    
+>  上传代码到Maven仓库   ![gif](imgs/tomaven.gif)     
 
 
 ###  一. Android插件说明
