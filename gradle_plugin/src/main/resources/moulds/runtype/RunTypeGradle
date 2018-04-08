@@ -11,4 +11,12 @@ android{
         versionName '#1{versionName}'
         versionCode #1{versionCode}
     }
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'x86', 'armeabi-v7a'
+            universalApk true
+        }
+     }
 }

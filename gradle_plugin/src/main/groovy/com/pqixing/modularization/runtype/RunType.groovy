@@ -5,6 +5,7 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.ModuleConfig
 import com.pqixing.modularization.base.BaseContainer
 import com.pqixing.modularization.common.BuildConfig
+import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.TextUtils
@@ -23,7 +24,7 @@ class RunType extends BaseContainer {
     String app_name
     String app_theme
     //版本号
-    String versionCode
+    Integer versionCode
     //版本名称
     String versionName
 
@@ -44,9 +45,9 @@ class RunType extends BaseContainer {
             app_name = wrapper.artifactId
             app_theme = "@android:style/Theme.Light.NoTitleBar"
             versionName = new SimpleDateFormat("MM.dd.HH.mm").format(new Date())
-            versionCode = versionName.replace(".", "")
+            versionCode = versionName.replace(".", "").toInteger()
             applicationId = "${wrapper.getExtends(BuildConfig.class).packageName}.${TextUtils.numOrLetter(wrapper.artifactId)}"
-            applicationName = "com.pqixing.moduleapi.VirtualApplication"
+            applicationName = GlobalConfig.groupName.contains("dachen")?"com.dachen.common.DaChenApplication":"com.pqixing.moduleapi.VirtualApplication"
         }
     }
 
