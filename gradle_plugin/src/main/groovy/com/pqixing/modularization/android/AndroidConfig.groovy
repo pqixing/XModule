@@ -15,9 +15,9 @@ import org.gradle.api.Project
 
 class AndroidConfig extends BaseExtension {
 
-    String buildToolsVersion = '26.0.2'
+    String buildToolsVersion = '27.0.3'
     String compileSdkVersion = '26'
-    String minSdkVersion = '16'
+    String minSdkVersion = '17'
     String targetSdkVersion = '21'
     String versionCode
     String versionName
