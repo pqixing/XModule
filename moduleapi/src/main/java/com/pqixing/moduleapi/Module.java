@@ -13,7 +13,7 @@ import java.util.Set;
 public class Module {
     public static HashMap<String, IApplicationLike> likeHashMap = new HashMap<>();
     public static final String ENTER_CLASS = "auto.com.pqixing.configs.Enter";
-    public static boolean loadAppLike = false;
+    public static boolean isLoadAppLike = false;
 
     /**
      * 安装运行AppLike
@@ -71,7 +71,7 @@ public class Module {
                 appinit.quit();
             }
         });
-        loadAppLike = true;
+        isLoadAppLike = true;
         return likes;
     }
 
