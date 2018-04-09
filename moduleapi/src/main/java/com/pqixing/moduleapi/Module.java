@@ -13,6 +13,7 @@ import java.util.Set;
 public class Module {
     public static HashMap<String, IApplicationLike> likeHashMap = new HashMap<>();
     public static final String ENTER_CLASS = "auto.com.pqixing.configs.Enter";
+    public static boolean loadAppLike = false;
 
     /**
      * 安装运行AppLike
@@ -45,19 +46,19 @@ public class Module {
      *
      * @param app
      */
-    public static final List<IApplicationLike> installAppLilke(Application app) {
-        Set<String> applikes = new HashSet<>();
-        loadAppLike(applikes, TextUtils.getStringFields(ENTER_CLASS, "CONFIG"));
+    public static final synchronized List<IApplicationLike> installAppLilke(Application app) {
+        Set<String> appLikes = new HashSet<>();
+        loadAppLike(appLikes, TextUtils.getStringFields(ENTER_CLASS, "CONFIG"),new HashSet<String>());
 
         List<IApplicationLike> likes = new ArrayList<>();
-        if (applikes.isEmpty()) return likes;
+        if (appLikes.isEmpty()) return likes;
 
         final Handler uiHandler = new Handler(Looper.getMainLooper());
         final HandlerThread appinit = new HandlerThread("appinit");
         appinit.start();
         Handler handler = new Handler(appinit.getLooper());
 
-        for (String likeName : applikes) {
+        for (String likeName : appLikes) {
             IApplicationLike like = initLike(uiHandler,handler, app, likeName);
             if (like != null) {
                 likes.add(like);
@@ -70,6 +71,7 @@ public class Module {
                 appinit.quit();
             }
         });
+        loadAppLike = true;
         return likes;
     }
 
@@ -106,18 +108,22 @@ public class Module {
      * @param applikeSets
      * @param configClass
      */
-    public static final void loadAppLike(Set<String> applikeSets, String configClass) {
+    public static final void loadAppLike(Set<String> applikeSets, String configClass,Set<String> hadLoadClass) {
+
+        if(configClass == null ||hadLoadClass.contains(configClass)) return;
+        hadLoadClass.add(configClass);
+
         String launchClass = TextUtils.getStringFields(configClass, "LAUNCH_CONFIG");
 
-        String applikes = TextUtils.getStringFields(launchClass, "LAUNCH_APPLIKE");
-        if (!TextUtils.empty(applikes)) for (String like : applikes.split(",")) {
+        String appLikes = TextUtils.getStringFields(launchClass, "LAUNCH_APPLIKE");
+        if (!TextUtils.empty(appLikes)) for (String like : appLikes.split(",")) {
             if (TextUtils.empty(like)) continue;
             applikeSets.add(like);
         }
         String childConfigClass = TextUtils.getStringFields(configClass, "DP_CONFIGS_NAMES");
         if (!TextUtils.empty(childConfigClass)) for (String child : childConfigClass.split(",")) {
             if (TextUtils.empty(child)) continue;
-            loadAppLike(applikeSets, child);
+            loadAppLike(applikeSets, child,hadLoadClass);
         }
     }
 }
