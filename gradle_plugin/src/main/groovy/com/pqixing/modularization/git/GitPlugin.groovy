@@ -82,7 +82,7 @@ class GitPlugin extends BasePlugin {
      */
     void readGitProject(Gradle gradle) {
         GitConfig.allGitProjects.clear()
-        GitConfig.email = gradle.gitEmail
+//        GitConfig.email = gradle.ext.gitEmail
         GitConfig.baseGitUrl = gradle.ext.baseGitUrl
         GitConfig.userName = gradle.ext.gitUserName
         GitConfig.password = gradle.ext.gitPassword
