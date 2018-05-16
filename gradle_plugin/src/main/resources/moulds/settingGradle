@@ -3,8 +3,8 @@ File outIncludeFile = new File(rootDir,".modularization/include.gradle")
 //try{
 File targetBuild = new File(rootDir,".modularization/buildDir.lock")
 if(targetBuild.exists()){
-    gradle.beforeProjegradle.beforeProject { p->
-        p.buildDir = "${rootProject.projectDir.absolutePath}/build/build_${p.name.toUpperCase()}"
+    gradle.beforeProject { p->
+        p.buildDir = "${rootProject.projectDir.absolutePath}/build/build_$p.name"
     }
 }
 
