@@ -96,7 +96,7 @@ public class ToMaven extends AnAction {
      */
     private Pair<Boolean, String> checkUpload(String moduleName) {
         String[] records = FileUtils.readForOne(new File(project.getBasePath(), ".modularization/ide.record")).split("##");
-        if (records.length < 3 || System.currentTimeMillis() - Long.parseLong(records[0]) > 1000 * 5 || !moduleName.equals(records[1])) {
+        if (records.length < 3 || System.currentTimeMillis() - Long.parseLong(records[0]) > 1000 * 60 || !moduleName.equals(records[1])) {
             return new Pair<>(false, "未知异常(请查看构建日志)");
         }
         boolean success = "Y".equals(records[2]);

@@ -99,6 +99,8 @@ public class RouterCodeFactory {
                 + "\n");
         codeSb.append(StringUtils.formatSingleLine(4, "public static final String THIS = \""+fieldVal+"\";")
                 + "\n");
+        codeSb.append(StringUtils.formatSingleLine(4, "public static final String THIS2 = THIS+\"2\";")
+                + "\n");
         codeSb.append(StringUtils.formatSingleLine(4, "private android.os.Bundle bundle = null;")
                 + "\n");
 
@@ -147,6 +149,17 @@ public class RouterCodeFactory {
                 "\t\t\t\t\t\treturn new "+fieldName+"(bundle) ;\n" +
                 "\t\t\t\t}")
                 + "\n");
+        codeSb.append(StringUtils.formatSingleLine(4,
+                "public static "+fieldName+" with(android.content.Intent intent) {\n" +
+                        "\t\t\t\t\t\treturn with (intent==null?null:intent.getExtras()) ;\n" +
+                        "\t\t\t\t}")
+                + "\n");
+        codeSb.append(StringUtils.formatSingleLine(4,
+                "public static "+fieldName+" with(android.app.Activity activity) {\n" +
+                        "\t\t\t\t\t\treturn with (activity==null?null:activity.getIntent()) ;\n" +
+                        "\t\t\t\t}")
+                + "\n");
+
         codeSb.append(StringUtils.formatSingleLine(4,
                 "public final com.alibaba.android.arouter.facade.Postcard build() {\n" +
                 "\t\t\t\t\t\treturn com.dachen.router.DcRouter.build(THIS).with(bundle);\n" +
@@ -247,25 +260,25 @@ public class RouterCodeFactory {
 
     private static String returnType(String type){
         String rType = null;
-        if("Type.STRING".equals(type)){
+        if("Type.STRING".equalsIgnoreCase(type)){
             rType = "String#bundle.putString#bundle.getString";
-        }else if("Type.INT".equals(type)){
+        }else if("Type.INT".equalsIgnoreCase(type)){
             rType = "int#bundle.putInt#bundle.getInt";
-        }else if("Type.PARCELABLE".equals(type)){
+        }else if("Type.PARCELABLE".equalsIgnoreCase(type)){
             rType = "android.os.Parcelable#bundle.putParcelable#bundle.getParcelable";
-        }else if("Type.BOOLEAN".equals(type)){
+        }else if("Type.BOOLEAN".equalsIgnoreCase(type)){
             rType = "boolean#bundle.putBoolean#bundle.getBoolean";
-        }else if("Type.FLOAT".equals(type)){
+        }else if("Type.FLOAT".equalsIgnoreCase(type)){
             rType = "float#bundle.putFloat#bundle.getFloat";
-        }else if("Type.LONG".equals(type)){
+        }else if("Type.LONG".equalsIgnoreCase(type)){
             rType = "long#bundle.putLong#bundle.getLong";
-        }else if("Type.SHORT".equals(type)){
+        }else if("Type.SHORT".equalsIgnoreCase(type)){
             rType = "short#bundle.putShort#bundle.getShort";
-        }else if("Type.SERIALIZABLE".equals(type)){
+        }else if("Type.SERIALIZABLE".equalsIgnoreCase(type)){
             rType = "java.io.Serializable#bundle.putSerializable#bundle.getSerializable";
-        }else if("Type.BUNDLE".equals(type)){
+        }else if("Type.BUNDLE".equalsIgnoreCase(type)){
             rType = "android.os.Bundle#bundle.putBundle#bundle.getBundle";
-        }else if("Type.DOUBLE".equals(type)){
+        }else if("Type.DOUBLE".equalsIgnoreCase(type)){
             rType = "double#bundle.putDouble#bundle.getDouble";
         }
         return rType;
