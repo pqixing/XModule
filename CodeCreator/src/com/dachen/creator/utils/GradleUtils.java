@@ -70,6 +70,7 @@ public class GradleUtils {
     public static void clear(Project project){
         FileUtils.delete(new File(project.getBasePath(), ".modularization/hideInclude.kt"));
         FileUtils.delete(new File(project.getBasePath(), ".modularization/hide.properties"));
+        FileUtils.delete(new File(project.getBasePath(), ".modularization/buildDir.lock"));
     }
 
     public static void addFocusInclude(Project project,String ... modules){
@@ -80,5 +81,7 @@ public class GradleUtils {
             sb.append(module).append("+");
         }
         FileUtils.write(sb.toString(),file);
+        FileUtils.write("",new File(project.getBasePath(), ".modularization/buildDir.lock"));
     }
+
 }
