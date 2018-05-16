@@ -17,7 +17,7 @@ import org.gradle.api.invocation.Gradle
  */
 
 class GitPlugin extends BasePlugin {
-    public static final String mouldVersion = "//1.6"
+    public static final String mouldVersion = "//1.8"
     /**
      * 设置页面文件
      */
@@ -120,9 +120,6 @@ class GitPlugin extends BasePlugin {
         moulds.params += ["defaultXmlGitUrl": GlobalConfig.docGitUrl]
         moulds.params += ["AutoInclude": moulds.autoInclude]
         FileUtils.write(mouldFile, "$mouldVersion\n$moulds.settingGradle")
-        new File(project.rootDir, "include.txt").delete()
-        new File(project.rootDir, "hideInclude.txt").delete()
-        new File(project.rootDir, "hideInclude.kt").delete()
 
         return true
     }
