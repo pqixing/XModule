@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class GradleUtils {
@@ -33,6 +34,11 @@ public class GradleUtils {
         settings.setTaskNames(tasks);
         settings.setExternalSystemIdString(GRADLE.getId());
         settings.setExternalProjectPath(project.getBasePath());
+        settings.setScriptParameters("-PrunType=ide3333333333 -DrunType=id22");
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("runType2","ide22222222");
+        settings.setEnv(map);
         ExternalSystemUtil.runTask(settings, DefaultRunExecutor.EXECUTOR_ID, project, GRADLE, callback, progressExecutionMode, activateToolWindowBeforeRun);
     }
 
@@ -81,7 +87,7 @@ public class GradleUtils {
             sb.append(module).append("+");
         }
         FileUtils.write(sb.toString(),file);
-        FileUtils.write("",new File(project.getBasePath(), ".modularization/buildDir.lock"));
+        FileUtils.write("lock",new File(project.getBasePath(), ".modularization/buildDir.lock"));
     }
 
 }

@@ -11,7 +11,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:2.3.0'
     }
 } //
-
+gradle.getStartParameter()
 allprojects {
     repositories {
         maven {
@@ -23,5 +23,5 @@ allprojects {
 }
 
 //project.ext.mavenUrl=uri("/home/pqixing/.repo")
-ext.mavenUrl ="http://192.168.3.7:9527/nexus/content/repositories/releases/"
-//ext.mavenUrl ="http://192.168.3.7:9527/nexus/content/repositories/androidsnap/"
+//ext.mavenUrl ="http://192.168.3.7:9527/nexus/content/repositories/releases/"
+ext.mavenUrl ="http://192.168.3.7:9527/nexus/content/repositories/androidsnap/"

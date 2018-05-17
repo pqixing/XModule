@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>com.pqixing.modularization.codeCreator</id>
     <name>CodeCreator</name>
-    <version>1.1</version>
+    <version>1.2</version>
     <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
 
     <description><![CDATA[

@@ -1,5 +1,6 @@
 package com.dachen.creator.actions;
 
+import com.dachen.creator.GroovyTest;
 import com.dachen.creator.utils.GradleUtils;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -14,7 +15,7 @@ public class ClearCache extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
         Project project = e.getProject();
-        int exitCode = Messages.showOkCancelDialog("是否清除所有缓存", "ClearCache", null);
+        int exitCode = Messages.showOkCancelDialog("是否清除所有缓存"+ GroovyTest.test(), "ClearCache", null);
         if(exitCode!=0) return;
         GradleUtils.addProperties(project);
         GradleUtils.addFocusInclude(project, "empty");
@@ -29,6 +30,7 @@ public class ClearCache extends AnAction {
                 onSuccess();
             }
         });
+
 
     }
 }
