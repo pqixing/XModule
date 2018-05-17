@@ -6,5 +6,5 @@ package com.pqixing.annotation;
 public @interface LaunchActivity {
     String name() default "";
     String group() default "";
-    String intent() default "";
+    ItValue[] intent() default {};
 }

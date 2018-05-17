@@ -8,7 +8,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class VirtualActivity extends Activity implements AdapterView.OnItemClickListener {
     List<Class> launchClass;
@@ -19,7 +21,11 @@ public class VirtualActivity extends Activity implements AdapterView.OnItemClick
         setContentView(R.layout.activity_launch);
         ListView lvLaunch = (ListView) findViewById(R.id.lv_launch);
         lvLaunch.setOnItemClickListener(this);
-        launchClass = Module.installActivity();
+
+        launchClass = new ArrayList<>();
+        for (Set<Class> clazz : Module.installActivity().values()) {
+            launchClass.addAll(clazz);
+        }
         lvLaunch.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, launchClass));
     }
 

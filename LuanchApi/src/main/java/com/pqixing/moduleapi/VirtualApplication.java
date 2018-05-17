@@ -10,7 +10,8 @@ public class VirtualApplication extends Application {
     public void onCreate() {
         super.onCreate();
         Toast.makeText(this, "run as virtual app!!!", Toast.LENGTH_LONG).show();
-        for (IApplicationLike like : Module.installAppLilke(this)) {
+        Module.openDebug();
+        for (IApplicationLike like : Module.installAppLike(this)) {
             like.onVirtualCreate(this);
         }
         Log.i("VirtualApplication", "all application like : " + Module.likeHashMap.keySet());
