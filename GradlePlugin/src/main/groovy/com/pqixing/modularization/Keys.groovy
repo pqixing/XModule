@@ -196,4 +196,8 @@ class Keys {
      * gradle.properteis文件
      */
     public static final String  NAME_PRO_GRADLE= "gradle.properties"
+    /**
+     * 编译的缓存目录
+     */
+    public static final String  ENV_BUILD_DIR= "buildDir"
 }

@@ -45,6 +45,9 @@ class BuildConfig extends BaseExtension {
         super(project)
         projectName = TextUtils.numOrLetter(project.name).toLowerCase()
         outDir = FileUtils.urls(project.projectDir.path, dirName).replace("\\","/")
+        def buildCode = TextUtils.getSystemEnv(Keys.ENV_BUILD_DIR)?.hashCode()
+        if (buildCode != null) outDir = FileUtils.urls(outDir,buildCode.toString())
+
         docDir = FileUtils.urls(project.projectDir.path, GlobalConfig.docDirName).replace("\\","/")
 
         cacheDir = FileUtils.urls(outDir, ".cache")

@@ -34,7 +34,7 @@ public class GradleUtils {
         settings.setTaskNames(tasks);
         settings.setExternalSystemIdString(GRADLE.getId());
         settings.setExternalProjectPath(project.getBasePath());
-        settings.setScriptParameters("-PrunType=ide3333333333 -DrunType=id22");
+        settings.setScriptParameters("-DdependentModel=mavenOnly -DfoucesIncludes=dCommonLibrary+router");
 
         HashMap<String, String> map = new HashMap<>();
         map.put("runType2","ide22222222");
@@ -51,17 +51,17 @@ public class GradleUtils {
      * @param pair
      */
     public static void addProperties(Project project,List<Pair<String,Object>> pair){
-        File file = new File(project.getBasePath(), ".modularization/hide.properties");
-        FileUtils.delete(file);
-        if(pair.size()==0)return;
-        StringBuilder sb = new StringBuilder("#AUTO ADD BY MODULARIZATION \n");
-
-        for (Pair<String,Object> p: pair) {
-            Object temp = p.getSecond();
-            String fix = temp instanceof CharSequence?"'":"";
-            sb.append(p.getFirst()+" = "+fix+temp+fix+"\n");
-        }
-        FileUtils.write(sb.toString(),file);
+//        File file = new File(project.getBasePath(), ".modularization/hide.properties");
+//        FileUtils.delete(file);
+//        if(pair.size()==0)return;
+//        StringBuilder sb = new StringBuilder("#AUTO ADD BY MODULARIZATION \n");
+//
+//        for (Pair<String,Object> p: pair) {
+//            Object temp = p.getSecond();
+//            String fix = temp instanceof CharSequence?"'":"";
+//            sb.append(p.getFirst()+" = "+fix+temp+fix+"\n");
+//        }
+//        FileUtils.write(sb.toString(),file);
     }
 
     public static List<Pair<String,Object>> getDefaultProperties(){

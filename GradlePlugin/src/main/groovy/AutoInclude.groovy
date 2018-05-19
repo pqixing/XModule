@@ -44,6 +44,29 @@ public class AutoInclude {
                 this.branchName = branchName.replaceAll("[^0-9a-zA-Z]", "")
             }
         }
+
+        readFromEnv()
+    }
+
+    static String getSystemEnv(String key) {
+        String v = null
+        try {
+            v = System.getProperty(key)
+        } catch (Exception e) {
+        }
+        return v
+    }
+
+    void readFromEnv() {
+        def env_include = getSystemEnv(AutoConfig.ENV_INCLUDE)
+        if (env_include != null) {
+            env_include.replace("+", ",").trim().split(",")?.each { foucesIncludes += it.trim() }
+        }
+        def buildCode = getSystemEnv(AutoConfig.ENV_BUILD_DIR)?.hashCode()
+        if (buildCode == null) return
+
+        gradle.beforeProject { it.buildDir = "$it.buildDir/$buildCode" }
+
     }
     /**
      * 解析本地需要导入的工程
@@ -54,7 +77,7 @@ public class AutoInclude {
         readInclude(icTxt, includeFile)
         //读取隐藏配置
         File hideIncludeFile = new File(rootDir, "$AutoConfig.dirName/$AutoConfig.TXT_HIDEINCLUDE")
-        if (hideIncludeFile.exists()) readInclude(icTxt, hideIncludeFile,false)
+        if (hideIncludeFile.exists()) readInclude(icTxt, hideIncludeFile, false)
 
         gradle.ext.gitUserName = username
         gradle.ext.gitPassword = password
@@ -284,7 +307,11 @@ public class AutoInclude {
 class AutoConfig {
 
     static final String TAG_AUTO_ADD = "Auto Add By Modularization"
-
+    /**
+     * 强制导入设置
+     */
+    static final String ENV_INCLUDE = "foucesIncludes"
+    static final String ENV_BUILD_DIR = "buildDir"
     /**
      * 默认的defaultxml路径
      */

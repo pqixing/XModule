@@ -5,6 +5,7 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
+import com.pqixing.modularization.utils.TextUtils
 import com.pqixing.modularization.wrapper.ProjectWrapper
 
 /**
@@ -126,8 +127,14 @@ class GlobalConfig {
         }
         File buildFile = new File(wrapper.project.rootDir, "$BuildConfig.dirName/$Keys.HIDE_CONFIG_NAME")
         if(buildFile.exists()) updateConfig(buildFile.text)
-
+        updateConfigFromEnv()
         writeGlobal("", new File(BuildConfig.rootOutDir, Keys.GLOBAL_CONFIG_NAME))
+    }
+
+    public static void updateConfigFromEnv(){
+        GlobalConfig.staticProperties.each { p ->
+            updateKeyByValue(p.key, TextUtils.getSystemEnv(p.key))
+        }
     }
     /**
      * 输出模板Global文件
@@ -189,14 +196,17 @@ class GlobalConfig {
             updateKey(p.key, config)
         }
     }
+    private static void updateKeyByValue(String key,Object value){
+        if(value == null) return
+        try {
+            GlobalConfig."$key" = new GroovyShell().evaluate(value)
+        } catch (Exception e) {
 
+        }
+    }
     private static void updateKey(String key, Properties config) {
         if (config.containsKey(key)) {
-            try {
-                GlobalConfig."$key" = new GroovyShell().evaluate(config.getProperty(key))
-            } catch (Exception e) {
-
-            }
+            updateKeyByValue(key,config.getProperty(key))
         }
     }
 }

@@ -27,7 +27,8 @@ class TextUtils {
         if (source == null) return ""
         return "${source.substring(0, 1).toUpperCase()}${source.substring(1)}"
     }
-    static String className(String source){
+
+    static String className(String source) {
         return firstUp(numOrLetter(source))
     }
     /**
@@ -37,7 +38,7 @@ class TextUtils {
      * @return
      */
     public static int compareVersion(String version1, String version2) {
-        if (version1 == null || version2 == null)  return 0
+        if (version1 == null || version2 == null) return 0
 
         String[] versionArray1 = version1.trim().split("\\.")//注意此处为正则匹配，不能用"."；
         String[] versionArray2 = version2.trim().split("\\.")
@@ -77,7 +78,20 @@ class TextUtils {
         return sb.toString()
     }
 
-    static String getUrl(String pkg){
-        return pkg.replace(".","/")
+    static String getUrl(String pkg) {
+        return pkg.replace(".", "/")
+    }
+    /**
+     * 获取系统变量
+     * @param key
+     * @return
+     */
+    static String getSystemEnv(String key) {
+        String v = null
+        try {
+            v = System.getProperty(key)
+        }catch (Exception e){}
+        Print.ln("getSystemEnv $key : $v")
+        return v
     }
 }

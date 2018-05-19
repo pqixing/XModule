@@ -1,13 +1,6 @@
 File rootDir = settings.rootDir
 File outIncludeFile = new File(rootDir,".modularization/include.gradle")
 //try{
-File targetBuild = new File(rootDir,".modularization/buildDir.lock")
-if(targetBuild.exists()){
-    gradle.beforeProject { p->
-        p.buildDir = "${rootProject.projectDir.absolutePath}/build/build_$p.name"
-    }
-}
-
     new AutoInclude(gradle,rootDir,outIncludeFile).save()
     apply from: outIncludeFile.path
 //}catch (Exception e){//if fail delete self
