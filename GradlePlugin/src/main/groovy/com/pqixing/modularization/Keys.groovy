@@ -200,4 +200,24 @@ class Keys {
      * 编译的缓存目录
      */
     public static final String  ENV_BUILD_DIR= "buildDir"
+    /**
+     * 待操作的git名称
+     */
+    static String ENV_GIT_NAMES = "gitNames"
+    /**
+     * git目标处理
+     */
+    static String ENV_GIT_TARGET = "target"
+    /**
+     * git不存在的提示
+     */
+    static String TIP_GIT_NOT_EXISTS = "Git Not Exists"
+    /**
+     * 分支不存在
+     */
+    static String TIP_BRANCH_NOT_EXISTS = "Branch Not Exists"
+    /**
+     * 运行Id
+     */
+    static String ENV_RUN_ID = "runId"
 }

@@ -42,17 +42,20 @@ class ToMavenCheckTask extends BaseTask {
 
         def dependent = wrapper.getExtends(Dependencies.class)
         if (dependent.hasLocalModule) {//如果有本地工程，抛异常
-            errorMsg = "current dependencies contain local project, please remove before upload : ${dependent.localDependency.toString()}"
+            errorMsg = "Contain local project, please remove before upload : ${dependent.localDependency.toString()}"
         }
         if (!CheckUtils.isEmpty(dependent.dependentLose)) {
-            errorMsg = "some dependencies lose, please import before upload : ${dependent.dependentLose.toString()}"
+            errorMsg = "Lose dependency, please import them before upload : ${dependent.dependentLose.toString()}"
         }
         String lastRelease = MetadataWrapper.create(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId).release.trim()
         if (CheckUtils.isEmpty(lastRelease)) lastRelease = Keys.VERSION_DEFAULT //如果仓库没有版本，默认使用1.0.0
 
         PomWrapper pomWrapper = PomWrapper.create(mavenInfo.maven_url, mavenInfo.groupName, mavenInfo.artifactId, lastRelease)
         if (gitConfig.revisionNum == pomWrapper.revisionNum) {//如果本地的git版本号等于仓库最后一次提交的版本号，则不上传
-            errorMsg = "::NotUpdate:: -> revisionNum=${gitConfig.revisionNum}::version=$lastRelease"
+            errorMsg = "::Not Update:: -> revisionNum=${gitConfig.revisionNum}::version=$lastRelease"
+        }
+        if (CheckUtils.isEmpty(errorMsg) && hasUpdate()) {
+            errorMsg = "Local code is different from remote,Please update your code or Check whether it needs to be push"
         }
 
         if (!CheckUtils.isEmpty(errorMsg)) {
@@ -73,13 +76,21 @@ class ToMavenCheckTask extends BaseTask {
         if (mavenInfo.pom_version < baseVersion) {
             if (mavenInfo.focusUpload) mavenInfo.pom_version = lastRelease
             else {
-                Print.lnm("pom_version error  cur ${mavenInfo.pom_version} maven : $baseVersion ")
+                Print.lnm("Pom_version error  cur ${mavenInfo.pom_version} maven : $baseVersion ")
                 Print.lnIde("$project.name${Keys.SEPERATOR}N$Keys.SEPERATOR$errorMsg")
                 throw new GradleException("pom_version error  cur ${mavenInfo.pom_version} maven : $baseVersion ")
             }
         } else {
             mavenInfo.pom_version = "${mavenInfo.pom_version}.$lastVersion"
         }
+    }
+    /**
+     * 判断当前代码于远程代码是否一致
+     * @return
+     */
+    boolean hasUpdate() {
+
+        return gitConfig.revisionNum != GitUtils.run("git log -1 --pretty=format:'%H' origin/${gitConfig.branchName} ${gitConfig.rootForGit ? '' : (project.name + '/')}", gitConfig.gitDir)
     }
     /**
      * 检查Docment是否需要更新
@@ -89,7 +100,7 @@ class ToMavenCheckTask extends BaseTask {
         def documentDir = MavenUtils.documentDir
 
         def gitInfo = GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H::%D'", documentDir).trim().split("::")
-        String revisionNum =""
+        String revisionNum = ""
         String branchName = ""
         if (gitInfo.length > 0)
             revisionNum = gitInfo[0]
@@ -104,7 +115,7 @@ class ToMavenCheckTask extends BaseTask {
 //        Print.lnf("remoteLog $remoteLog branchName $branchName revisionNum $revisionNum")
 
         if (CheckUtils.isEmpty(remoteLog)) return ""
-        def remoteRevisionNum = remoteLog.substring(0,remoteLog.indexOf("\t")).trim()
+        def remoteRevisionNum = remoteLog.substring(0, remoteLog.indexOf("\t")).trim()
         if (remoteRevisionNum != revisionNum) return "Document git has update , please update before upload!!!"
         return ""
     }

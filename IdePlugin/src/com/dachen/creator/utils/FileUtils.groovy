@@ -38,43 +38,21 @@ public class FileUtils {
     }
 
     public static final String readForOne(File file) {
+
         String read = read(file);
-        delete(file);
+//        delete(file);
         return read;
     }
 
     public static final String read(File file) {
 
         if (!file.exists()) return "";
-        String result = "";
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            StringBuilder sb = new StringBuilder();
-            String temp = null;
-            while ((temp = reader.readLine()) != null) {
-                sb.append(temp + "\n");
-            }
-            result = sb.toString();
-            reader.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return result;
+        return file.text
     }
 
     public static final boolean write(String data, File file) {
         if (file.exists()) file.delete();
         if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
-        try {
-            PrintWriter writer = new PrintWriter(file);
-            writer.write(data);
-            writer.flush();
-            writer.close();
-            return true;
-        } catch (FileNotFoundException e) {
-            return false;
-        }
+        file.write(data)
     }
 }

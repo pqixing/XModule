@@ -28,22 +28,27 @@ public class AutoInclude {
     private String username
     private String password
     private String email
-    private String branchName = "master"
+    private String branchName = null
 
 
     AutoInclude(Gradle gradle, File rootDir, File outIncludeFile) {
         this.gradle = gradle
         this.rootDir = rootDir
         this.outIncludeFile = outIncludeFile
-        def globalConfig = new File(rootDir, ".modularization/global.properties")
-        if (globalConfig.exists()) {
-            def gp = new Properties()
-            gp.load(globalConfig.newInputStream())
-            String branchName = gp.getProperty("branchName")
-            if (branchName != null && !branchName.isEmpty()) {
-                this.branchName = branchName.replaceAll("[^0-9a-zA-Z]", "")
+        branchName = getSystemEnv("branchName")
+        if(branchName == null){
+            def globalConfig = new File(rootDir, ".modularization/global.properties")
+            if (globalConfig.exists()) {
+                def gp = new Properties()
+                gp.load(globalConfig.newInputStream())
+                String branchName = gp.getProperty("branchName")
+                if (branchName != null && !branchName.isEmpty()) {
+                    this.branchName = branchName.replaceAll("[^0-9a-zA-Z]", "")
+                }
             }
         }
+        if(branchName == null ) branchName = "master"
+
 
         readFromEnv()
     }

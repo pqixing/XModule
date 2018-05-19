@@ -17,19 +17,5 @@ public class Clone extends AnAction {
         Project project = e.getProject();
         int clone = Messages.showOkCancelDialog("是否Clone所有的代码，可能耗时比较长", "Clone", null);
         if (clone != 0) return;
-
-        GradleUtils.addProperties(project);
-        GradleUtils.addFocusInclude(project, "empty");
-        GradleUtils.runTask(project, Arrays.asList("GitCloneAll"), new TaskCallback() {
-            @Override
-            public void onSuccess() {
-                GradleUtils.clear(project);
-            }
-
-            @Override
-            public void onFailure() {
-                onSuccess();
-            }
-        });
     }
 }

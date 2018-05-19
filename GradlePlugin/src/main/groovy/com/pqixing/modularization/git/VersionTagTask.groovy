@@ -8,14 +8,17 @@ import com.pqixing.modularization.utils.MavenUtils
  * 创建分支的依赖tag
  */
 
-class CreateBranchFocusVersionsTask extends GitTask {
-    CreateBranchFocusVersionsTask(){
+class VersionTagTask extends GitTask {
+    VersionTagTask() {
         group = "other"
     }
+
     @Override
     void end() {
         MavenUtils.upDocumentDir
-        GlobalConfig.preMavenUrl.each {   MavenUtils.saveMavenMaps(it.key,branchName) }
+        GlobalConfig.preMavenUrl.each {
+            MavenUtils.saveMavenMaps(it.key, branchName, target == "all" ? "all" : branchName)
+        }
         MavenUtils.pushMaven()
     }
 

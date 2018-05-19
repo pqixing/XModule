@@ -25,7 +25,7 @@ class GlobalConfig {
      */
     final
     static List<String> NOTE_target = ["git操作目标范畴", "include:只操作当前导入的代码", "all:影响本地所有存在的代码(仅包含配置在default.xml的工程)"]
-    static String target = "include"
+    static String target = "all"
     /**
      * 分支名称
      */
@@ -45,7 +45,7 @@ class GlobalConfig {
     /**
      * 是否在同步前，更新一遍版本号
      */
-    public static boolean updateBeforeSync = false
+    public static boolean updateBeforeSync = true
     //集成默认的依赖库
     public static List<String> autoImpl = ["dcnet", "dccommon", "dcuser", "router", "mvpbase"]
     /**
@@ -126,14 +126,27 @@ class GlobalConfig {
             writeGlobal("#", configFile)
         }
         File buildFile = new File(wrapper.project.rootDir, "$BuildConfig.dirName/$Keys.HIDE_CONFIG_NAME")
-        if(buildFile.exists()) updateConfig(buildFile.text)
+        if (buildFile.exists()) updateConfig(buildFile.text)
         updateConfigFromEnv()
         writeGlobal("", new File(BuildConfig.rootOutDir, Keys.GLOBAL_CONFIG_NAME))
     }
 
-    public static void updateConfigFromEnv(){
-        GlobalConfig.staticProperties.each { p ->
-            updateKeyByValue(p.key, TextUtils.getSystemEnv(p.key))
+    public static void updateConfigFromEnv() {
+        def shell = new GroovyShell()
+        GlobalConfig.class.getDeclaredFields().each {
+            if (it == null) return
+            try {
+                String p = TextUtils.getSystemEnv(it.getName())
+                if (p == null) return
+                it.setAccessible(true)
+                if (it.type == String.class) {
+                    it.set(null, p)
+                } else {
+                    it.set(null, shell.evaluate(p))
+                }
+
+            } catch (Exception e) {
+            }
         }
     }
     /**
@@ -196,17 +209,19 @@ class GlobalConfig {
             updateKey(p.key, config)
         }
     }
-    private static void updateKeyByValue(String key,Object value){
-        if(value == null) return
+
+    private static void updateKeyByValue(String key, Object value) {
+        if (value == null) return
         try {
             GlobalConfig."$key" = new GroovyShell().evaluate(value)
         } catch (Exception e) {
 
         }
     }
+
     private static void updateKey(String key, Properties config) {
         if (config.containsKey(key)) {
-            updateKeyByValue(key,config.getProperty(key))
+            updateKeyByValue(key, config.getProperty(key))
         }
     }
 }

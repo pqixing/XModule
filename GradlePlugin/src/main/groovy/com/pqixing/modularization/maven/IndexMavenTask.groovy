@@ -6,7 +6,7 @@ import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.utils.MavenUtils
 import com.pqixing.modularization.utils.TextUtils
 
-class UpdateMavenTask extends BaseTask {
+class IndexMavenTask extends BaseTask {
     @Override
     void start() {
         String groupUrl = TextUtils.getUrl(GlobalConfig.groupName)

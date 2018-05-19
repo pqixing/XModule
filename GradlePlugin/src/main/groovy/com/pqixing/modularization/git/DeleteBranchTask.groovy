@@ -8,11 +8,14 @@ import com.pqixing.modularization.utils.GitUtils
  * 同步文档的任务
  */
 
-class CreateBranchTask extends GitTask {
-
+class DeleteBranchTask extends GitTask {
+    public DeleteBranchTask(){
+        group = "others"
+    }
     @Override
     String onGitProject(String gitName, String gitUrl, File gitDir) {
         if (!gitDir.exists()) return Keys.TIP_GIT_NOT_EXISTS
+        if ("master" == branchName) return "-----"
         boolean hasRemote = false
         boolean hasLocal = false
         boolean isCurBranch = false
@@ -26,9 +29,15 @@ class CreateBranchTask extends GitTask {
                 isCurBranch = line != branchName
             }
         }
-        if (isCurBranch) return "current branch is $branchName"
-        if (hasLocal) return GitUtils.run("git checkout $branchName", gitDir)
-        if (hasRemote) return GitUtils.run("git checkout -b $branchName origin/$branchName", gitDir)
-        return GitUtils.run("git checkout origin/master -b $branchName", gitDir) +"\n" + GitUtils.run("git push origin $branchName", gitDir) +"\n" + GitUtils.run("git branch --set-upstream-to=origin/$branchName", gitDir)
+        String result = ""
+        if (isCurBranch) {
+            result += GitUtils.run("git checkout master", gitDir)
+        } else if (hasLocal || hasRemote) {
+            result += GitUtils.run("git branch -d ${hasLocal ? "" : "origin/"}${branchName}", gitDir)
+            if (hasRemote) result += GitUtils.run("git push origin :${branchName}", gitDir)
+        } else {
+            result += Keys.TIP_BRANCH_NOT_EXISTS
+        }
+        return result
     }
 }

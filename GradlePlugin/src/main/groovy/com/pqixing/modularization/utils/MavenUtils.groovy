@@ -30,12 +30,26 @@ class MavenUtils {
      * @param branchName
      * @param outFile
      */
-    static void saveMavenMaps(String mavenName, String branchName, File outFile = getFocusMapsFile(mavenName, branchName)) {
+    static void saveMavenMaps(String mavenName, String branchName, String filterBranch = "all", File outFile = getFocusMapsFile(mavenName, branchName)) {
         if (outFile.exists()) {
             Print.lnf("$outFile.path 文件已经存在，请先删除或者重新输入,跳过生成Maps文件")
+            Print.lnIde("fileExist=$outFile.path")
         } else {
             def maps = MavenUtils.getMavenMaps(mavenName)
             MavenUtils.getFocusMavenMaps(mavenName, branchName).each { maps.put(it.key, it.value) }
+
+            if ("all" != filterBranch) {
+                def m = maps
+                maps = new Properties()
+                def master = "master" == filterBranch
+                m.each {
+                    def name = it.key.toString()
+                    if ((master && !name.contains(Keys.BRANCH_TAG)) || name.contains(filterBranch)) {
+                        maps.put(name, it.value)
+                    }
+                }
+            }
+
             FileUtils.saveMaps(maps, outFile)
         }
     }

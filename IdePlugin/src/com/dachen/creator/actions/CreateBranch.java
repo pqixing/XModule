@@ -29,29 +29,29 @@ public class CreateBranch extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-        Project project = e.getProject();
-        String branchName = Messages.showInputDialog(project, "请输入待创建的的分支名称", "新建分支", null, "master", null);
-        if(branchName == null) return;
-        int i = Messages.showOkCancelDialog("请确认本地是最新的（没有未push的代码），此操作会Clone所有代码批量创建，请内心等待", "创建" + branchName + "分支", null);
-        if(i!=0) return;
-
-        List<Pair<String, Object>> properties = GradleUtils.getDefaultProperties();
-        properties.add(new Pair<>("branchName",branchName));
-        properties.add(new Pair<>("target","all"));
-        GradleUtils.addFocusInclude(project,"empty");
-
-        GradleUtils.addProperties(project,properties);
-        GradleUtils.runTask(project, Arrays.asList("CreateBranch"), new TaskCallback() {
-            @Override
-            public void onSuccess() {
-                GradleUtils.clear(project);
-            }
-
-            @Override
-            public void onFailure() {
-                onSuccess();
-            }
-        },ProgressExecutionMode.START_IN_FOREGROUND_ASYNC);
+//        Project project = e.getProject();
+//        String branchName = Messages.showInputDialog(project, "请输入待创建的的分支名称", "新建分支", null, "master", null);
+//        if(branchName == null) return;
+//        int i = Messages.showOkCancelDialog("请确认本地是最新的（没有未push的代码），此操作会Clone所有代码批量创建，请内心等待", "创建" + branchName + "分支", null);
+//        if(i!=0) return;
+//
+//        List<Pair<String, Object>> properties = GradleUtils.getDefaultProperties();
+//        properties.add(new Pair<>("branchName",branchName));
+//        properties.add(new Pair<>("target","all"));
+//        GradleUtils.addFocusInclude(project,"empty");
+//
+//        GradleUtils.addProperties(project,properties);
+//        GradleUtils.runTask(project, Arrays.asList("CreateBranch"), new TaskCallback() {
+//            @Override
+//            public void onSuccess() {
+//                GradleUtils.clear(project);
+//            }
+//
+//            @Override
+//            public void onFailure() {
+//                onSuccess();
+//            }
+//        },ProgressExecutionMode.START_IN_FOREGROUND_ASYNC);
 
     }
 }

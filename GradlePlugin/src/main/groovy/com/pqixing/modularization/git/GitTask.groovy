@@ -1,10 +1,14 @@
 package com.pqixing.modularization.git
 
+import com.alibaba.fastjson.JSON
+import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.Print
+import com.pqixing.modularization.utils.TextUtils
+
 
 /**
  * Created by pqixing on 17-12-20.
@@ -22,7 +26,9 @@ abstract class GitTask extends BaseTask {
 
     @Override
     void start() {
-        target = GlobalConfig.target
+        target = TextUtils.getSystemEnv(Keys.ENV_GIT_TARGET)
+        if (CheckUtils.isEmpty(target)) target = GlobalConfig.target
+
         branchName = GlobalConfig.branchName
         excludeGit += GlobalConfig.excludeGit
 
@@ -35,7 +41,7 @@ abstract class GitTask extends BaseTask {
             case "all":
                 targetGits.addAll(GitConfig.allGitProjects)
                 break
-            default:
+            case "include":
                 Set<String> gitDirNames = new HashSet<>()
                 project.rootProject.allprojects.each { p ->
                     String gitName = GitUtils.findGitDir(p.projectDir)?.name
@@ -46,6 +52,14 @@ abstract class GitTask extends BaseTask {
                     if (gitDirNames.contains(p.name)) targetGits.add(p)
                 }
                 break
+            case "system":
+                Set<String> gitDirNames = new HashSet<>()
+                def names = TextUtils.getSystemEnv(Keys.ENV_GIT_NAMES)?.split(",")
+                if (names != null) gitDirNames.addAll(names)
+
+                GitConfig.allGitProjects.each { if (gitDirNames.contains(it.name)) targetGits.add(it) }
+                break
+            default: break
         }
     }
     /**
@@ -58,12 +72,19 @@ abstract class GitTask extends BaseTask {
 
     @Override
     void end() {
+        Map<String, String> handleResult = new HashMap<>()
         targetGits.each { p ->
             if (excludeGit.contains(p.name)) return
             String fullUrl = GitUtils.getFullGitUrl(p.gitUrl)
             Print.ln("GitTask $name -> start : $p.name $fullUrl ")
             String result = onGitProject(p.name, fullUrl, new File(project.rootDir.parentFile, p.name))
-            Print.ln("GitTask $name -> result : $result |||\n")
+            if (Keys.TIP_GIT_NOT_EXISTS == result || Keys.TIP_BRANCH_NOT_EXISTS == result) {
+                handleResult.put(p.name, result)
+            } else {
+                handleResult.put(p.name, "ok")
+            }
+            Print.ln("result -> : $result ")
         }
+        Print.lnIde("${JSON.toJSONString(handleResult)}")
     }
 }

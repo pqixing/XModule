@@ -12,42 +12,41 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TwoStepMultiCheckBoxDialog extends DialogWrapper implements ListCellRenderer<String>, ListSelectionListener {
+public class MultiCheckBoxDialog extends DialogWrapper implements ListCellRenderer<String>, ListSelectionListener {
     JPanel jComponent;
     private final static int WIDTH = 400;
     private JPanel topContent;
-    private JList checkBoxs;
-    private JCheckBox stepTwo;
-    private JScrollPane centerPanel;
-    private JLabel topMsg;
-    private JTextArea selectArea;
+    private JList cbItems;
+    private JScrollPane centerContent;
+    private JLabel tvMsg;
+    private JTextArea tvItemSelect;
+    private JTextField tvInput;
+    private JCheckBox cbSelectAll;
 
     private List<String> datas = new ArrayList<>();
 
     private List<String> selectItems = new ArrayList<>();
 
-    public TwoStepMultiCheckBoxDialog(@Nullable Project project) {
+    public MultiCheckBoxDialog(@Nullable Project project) {
         super(project, true);
         init();
         setTitle("啊哈哈哈");
-        checkBoxs.setCellRenderer(this);
-        stepTwo.addChangeListener(changeEvent -> {
-//            centerPanel.setSize(-1, stepTwo.isSelected() ? 20*datas.size() : 0);
-            centerPanel.setVisible(stepTwo.isSelected());
-            selectArea.setVisible(stepTwo.isSelected());
+        cbItems.setCellRenderer(this);
+        cbSelectAll.addChangeListener(changeEvent -> {
+//            centerContent.setSize(-1, cbSelectAll.isSelected() ? 20*datas.size() : 0);
+            centerContent.setVisible(cbSelectAll.isSelected());
+            tvItemSelect.setVisible(cbSelectAll.isSelected());
             updateSize();
         });
         setLocation(0,0);
-        checkBoxs.addListSelectionListener(this);
+        cbItems.addListSelectionListener(this);
     }
 
     protected void updateSize(){
-        setSize(WIDTH,100+(stepTwo.isSelected()?Math.min(200,datas.size()*35):0));
     }
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
-        updateSize();
         return jComponent;
     }
 
@@ -68,58 +67,61 @@ public class TwoStepMultiCheckBoxDialog extends DialogWrapper implements ListCel
 
     public static final Pair<Boolean, List<String>> showMultiSelect(@Nullable Project project, String title, String msg, List<String> options,int defaultItem) {
         if(options == null) options = new ArrayList<>();
-        TwoStepMultiCheckBoxDialog checkBoxDialog = new TwoStepMultiCheckBoxDialog(project);
+        MultiCheckBoxDialog checkBoxDialog = new MultiCheckBoxDialog(project);
         checkBoxDialog.setTitle(title);
-        checkBoxDialog.topMsg.setText(msg);
-        checkBoxDialog.stepTwo.setVisible(false);
-        checkBoxDialog.stepTwo.setSize(0, 0);
+        checkBoxDialog.tvMsg.setText(msg);
+        checkBoxDialog.cbSelectAll.setVisible(false);
+        checkBoxDialog.cbSelectAll.setSize(0, 0);
         checkBoxDialog.datas.addAll(options);
 
         if(defaultItem>=0) checkBoxDialog.selectItems.add(options.get(defaultItem));
         else if(defaultItem == -1) checkBoxDialog.selectItems.addAll(options);
-        checkBoxDialog.checkBoxs.setModel(new StringModel(checkBoxDialog.datas));
-        checkBoxDialog.selectArea.setText(checkBoxDialog.selectItems.toString());
+        checkBoxDialog.cbItems.setModel(new StringModel(checkBoxDialog.datas));
+        checkBoxDialog.tvItemSelect.setText(checkBoxDialog.selectItems.toString());
         checkBoxDialog.show();
-        if(checkBoxDialog.getExitCode() == 0) return new Pair<>(checkBoxDialog.stepTwo.isSelected(),checkBoxDialog.selectItems);
+        if(checkBoxDialog.getExitCode() == 0) return new Pair<>(checkBoxDialog.cbSelectAll.isSelected(),checkBoxDialog.selectItems);
         else return null;
     }
 
     public static final Pair<Boolean, List<String>> showTwoStepSelect(@Nullable Project project, String title, String msg, List<String> options, int defaultItem, String checkTxt, boolean check) {
         if(options == null) options = new ArrayList<>();
 
-        TwoStepMultiCheckBoxDialog checkBoxDialog = new TwoStepMultiCheckBoxDialog(project);
+        MultiCheckBoxDialog checkBoxDialog = new MultiCheckBoxDialog(project);
         checkBoxDialog.setTitle(title);
-        checkBoxDialog.topMsg.setText(msg);
-        checkBoxDialog.stepTwo.setText(checkTxt);
-        checkBoxDialog.stepTwo.setSelected(check);
+        checkBoxDialog.tvMsg.setText(msg);
+        checkBoxDialog.cbSelectAll.setText(checkTxt);
+        checkBoxDialog.cbSelectAll.setSelected(check);
         checkBoxDialog.datas.addAll(options);
 
         if(defaultItem>=0) checkBoxDialog.selectItems.add(options.get(defaultItem));
         else if(defaultItem == -1) checkBoxDialog.selectItems.addAll(options);
 
 
-        checkBoxDialog.selectArea.setText(checkBoxDialog.selectItems.toString());
-        checkBoxDialog.checkBoxs.setModel(new StringModel(checkBoxDialog.datas));
+        checkBoxDialog.tvItemSelect.setText(checkBoxDialog.selectItems.toString());
+        checkBoxDialog.cbItems.setModel(new StringModel(checkBoxDialog.datas));
         if (!check) {
-            checkBoxDialog.centerPanel.setVisible(false);
+            checkBoxDialog.centerContent.setVisible(false);
         }
         checkBoxDialog.show();
-        if(checkBoxDialog.getExitCode() == 0) return new Pair<>(checkBoxDialog.stepTwo.isSelected(),checkBoxDialog.selectItems);
+        if(checkBoxDialog.getExitCode() == 0) return new Pair<>(checkBoxDialog.cbSelectAll.isSelected(),checkBoxDialog.selectItems);
         else return null;
     }
 
     @Override
     public void valueChanged(ListSelectionEvent listSelectionEvent) {
-        String value = (String) checkBoxs.getSelectedValue();
+        String value = (String) cbItems.getSelectedValue();
         if(listSelectionEvent.getValueIsAdjusting()||value == null) return;
 
 
-        checkBoxs.clearSelection();
+        cbItems.clearSelection();
 
         if (!selectItems.remove(value)) {
             selectItems.add(value);
         }
 
-        selectArea.setText(selectItems.toString());
+        tvItemSelect.setText(selectItems.toString());
+    }
+
+    private void createUIComponents() {
     }
 }

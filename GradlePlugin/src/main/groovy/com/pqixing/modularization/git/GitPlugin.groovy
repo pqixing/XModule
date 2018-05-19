@@ -6,7 +6,7 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.common.GlobalConfig
-import com.pqixing.modularization.maven.UpdateMavenTask
+import com.pqixing.modularization.maven.IndexMavenTask
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.GitUtils
 import org.gradle.api.Project
@@ -39,15 +39,14 @@ class GitPlugin extends BasePlugin {
             throw new RuntimeException("设置文件更新，请重新同步 --init setting file, please sync again ")
         }
 
-        BaseTask.task(project, GitUpdateTask.class)
-        BaseTask.task(project, CheckBranchTask.class)
-        BaseTask.task(project, GitCloneAllTask.class)
-        BaseTask.task(project, CreateBranchFocusVersionsTask.class)
+        BaseTask.task(project, UpdateCodeTask.class)
+        BaseTask.task(project, CheckOutTask.class)
+        BaseTask.task(project, CloneAllTask.class)
+        BaseTask.task(project, VersionTagTask.class)
         BaseTask.task(project, CreateBranchTask.class)
-//        BaseTask.task(project, CheckMasterTask.class)
-//        BaseTask.task(project, ModuReleaseTask.class)
-//        BaseTask.task(project, DelModuReleaseTask.class)
-        BaseTask.task(project, UpdateMavenTask.class)
+        BaseTask.task(project, DeleteBranchTask.class)
+        BaseTask.task(project, IndexMavenTask.class)
+        BaseTask.task(project, LogAllGitTask.class)
 
         readGitProject(project.gradle)
         applyDefaultGradle()

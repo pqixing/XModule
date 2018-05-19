@@ -60,13 +60,11 @@ class FileUtils {
      * @return
      */
     static String urls(String[] urls) {
-        StringBuilder newUrl = new StringBuilder()
-        for (String url : urls) {
-            newUrl.append(url).append("/")
-        }
-
-        return newUrl.substring(0, newUrl.size() - 1)
+        return TextUtils.append("/",urls)
     }
+
+
+
 
     static Properties readMaps(File file) {
         Properties p = new Properties()

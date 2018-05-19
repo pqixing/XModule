@@ -24,7 +24,7 @@ class TextUtils {
     }
 
     static String firstUp(String source) {
-        if (source == null) return ""
+        if (CheckUtils.isEmpty(source)) return ""
         return "${source.substring(0, 1).toUpperCase()}${source.substring(1)}"
     }
 
@@ -90,8 +90,24 @@ class TextUtils {
         String v = null
         try {
             v = System.getProperty(key)
-        }catch (Exception e){}
-        Print.ln("getSystemEnv $key : $v")
+        } catch (Exception e) {
+        }
         return v
+    }
+
+    /**
+     * 拼接url
+     * @param urls
+     * @return
+     */
+    static String append( String s,String[] urls) {
+        StringBuilder newUrl = new StringBuilder()
+        for (String url : urls) {
+            if (CheckUtils.isEmpty(url)) continue
+            newUrl.append(url).append(s)
+        }
+        if (newUrl.size() > 0)
+            return newUrl.substring(0, newUrl.size() - s.size())
+        else return ""
     }
 }

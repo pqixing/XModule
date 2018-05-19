@@ -16,6 +16,8 @@ class GitConfig extends BaseExtension {
     final String branchName
     final String revisionNum
     final String lastLog
+    final boolean rootForGit
+    final File gitDir
 
     /**
      * git用户名
@@ -38,7 +40,7 @@ class GitConfig extends BaseExtension {
 
     GitConfig(Project project) {
         super(project)
-        File gitDir = GitUtils.findGitDir(project.projectDir)
+        gitDir = GitUtils.findGitDir(project.projectDir)
         if (gitDir == null || !GlobalConfig.gitLog) {
             branchName = ""
             revisionNum = ""
@@ -55,11 +57,11 @@ class GitConfig extends BaseExtension {
         }
         if (gitInfo.length > 2)
             lastLog = gitInfo[2]
-
+        rootForGit = gitDir.absolutePath == project.projectDir.absolutePath
 //        branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", project.projectDir).trim()
 //        revisionNum = GitUtils.run("git rev-parse HEAD", project.projectDir).trim()
 //        lastLog = GitUtils.run("git log -1 --oneline ${revisionNum}", project.projectDir).trim()
-        if (gitDir.absolutePath != project.projectDir.absolutePath) {
+        if (!rootForGit) {
             String dirLog = GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H' ${project.name}/", gitDir).trim()
             //如果当前工程不是单独一个git，则使用目录的版本号作为最后的版本号
             if (!CheckUtils.isEmpty(dirLog)) {

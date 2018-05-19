@@ -27,39 +27,36 @@ public class DpsAnalyze extends AnAction {
             Messages.showMessageDialog("没有选中模块", "操作失败", null);
             return;
         }
-        GradleUtils.addProperties(project);
-        GradleUtils.addFocusInclude(project,module.getName());
-        GradleUtils.runTask(project, Arrays.asList(":" + module.getName() + ":AllInnerDps"), new TaskCallback() {
-            @Override
-            public void onSuccess() {
-                GradleUtils.clear(project);
-                ApplicationManager.getApplication().invokeLater(() -> {
-
-                    VirtualFile dir = module.getModuleFile().getParent();
-                    VirtualFile target = dir;
-                    dir = dir.findChild(".modularization");
-                    if (dir != null) {
-                        target = dir;
-                        dir = dir.findChild("dependencies");
-                    }
-                    if(dir!=null) {
-                        target = dir;
-                        dir = dir.findChild("level.dp");
-                    }
-                    if(dir!=null) target = dir;
-                    FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, true);
-                    VirtualFile[] chooseFiles = FileChooser.chooseFiles(descriptor, project,target);
-                    if (chooseFiles.length > 0) for (VirtualFile file : chooseFiles) {
-                        FileEditorManager.getInstance(project).openFile(file, false);
-                    }
-
-                });
-            }
-
-            @Override
-            public void onFailure() {
-                onSuccess();
-            }
-        }, ProgressExecutionMode.START_IN_FOREGROUND_ASYNC);
+//        GradleUtils.runTask(project, Arrays.asList(":" + module.getName() + ":AllInnerDps"), new TaskCallback() {
+//            @Override
+//            public void onSuccess() {
+//                ApplicationManager.getApplication().invokeLater(() -> {
+//
+//                    VirtualFile dir = module.getModuleFile().getParent();
+//                    VirtualFile target = dir;
+//                    dir = dir.findChild(".modularization");
+//                    if (dir != null) {
+//                        target = dir;
+//                        dir = dir.findChild("dependencies");
+//                    }
+//                    if(dir!=null) {
+//                        target = dir;
+//                        dir = dir.findChild("level.dp");
+//                    }
+//                    if(dir!=null) target = dir;
+//                    FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, true);
+//                    VirtualFile[] chooseFiles = FileChooser.chooseFiles(descriptor, project,target);
+//                    if (chooseFiles.length > 0) for (VirtualFile file : chooseFiles) {
+//                        FileEditorManager.getInstance(project).openFile(file, false);
+//                    }
+//
+//                });
+//            }
+//
+//            @Override
+//            public void onFailure() {
+//                onSuccess();
+//            }
+//        }, ProgressExecutionMode.START_IN_FOREGROUND_ASYNC);
     }
 }

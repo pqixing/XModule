@@ -12,6 +12,7 @@ import com.pqixing.modularization.dependent.AllInnerDpsTask
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.maven.ToMavenCheckTask
 import com.pqixing.modularization.maven.ToMavenTask
+import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.runtype.RunType
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
@@ -60,6 +61,8 @@ abstract class AndroidPlugin extends BasePlugin {
             project.afterEvaluate {
                 BaseTask.task(project, ToMavenTask)
                 BaseTask.task(project, ToMavenCheckTask)
+                BaseTask.taskByName(project, "BuildFirstDebug", BuildFirstTask).buildType = "Debug"
+                BaseTask.taskByName(project, "BuildFirstRelease", BuildFirstTask).buildType = "Release"
             }
         }
     }

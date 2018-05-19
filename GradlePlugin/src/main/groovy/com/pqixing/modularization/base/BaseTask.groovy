@@ -32,7 +32,10 @@ public abstract class BaseTask extends DefaultTask {
     }
 
     static <T extends DefaultTask> T task(Project project, Class<T> tClass) {
-        return project.task(getTaskName(tClass), type: tClass)
+        return taskByName(project,getTaskName(tClass), tClass)
+    }
+    static <T extends DefaultTask> T taskByName(Project project,String taskName, Class<T> tClass) {
+        return project.task(taskName, type: tClass)
     }
 
     static String getTaskName(Class tClass){
