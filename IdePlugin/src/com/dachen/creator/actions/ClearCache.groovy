@@ -14,6 +14,6 @@ public class ClearCache extends AnAction {
         Project project = e.getProject();
         int exitCode = Messages.showOkCancelDialog("是否清除所有缓存", "ClearCache", null);
         if(exitCode!=0) return
-        GradleUtils.runTask(project, Arrays.asList("CleanCache"),null, GradleUtils.getPro(["$Conts.ENV_FOCUS_INCLUDES": ",test,"]))
+        GradleUtils.runTask(project, ["CleanCache"])
     }
 }

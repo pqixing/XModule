@@ -5,6 +5,7 @@ import com.dachen.creator.GradleCallBack
 import com.dachen.creator.ui.MultiBoxDialog
 import com.dachen.creator.utils.GitUtils
 import com.dachen.creator.utils.GradleUtils
+import com.dachen.creator.utils.StringUtils
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
@@ -59,12 +60,9 @@ public class CheckOut extends AnAction implements GradleCallBack {
                     new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "输入错误", "分支名不能为空", NotificationType.WARNING).notify(project)
                     return
                 }
-                def map = ["$Conts.ENV_FOCUS_INCLUDES"   : "empty", "$Conts.ENV_GIT_BRANCH": branchName
-                           , "$Conts.ENV_DEPENDENT_MODEL": "mavenOnly"
-                           , "$Conts.ENV_GIT_TARGET"     : "all", "$Conts.ENV_RUN_ID": ID_CHECKOUT]
-                def pro = GradleUtils.getPro(map)
+                def map = ["$Conts.ENV_GIT_BRANCH": branchName, "$Conts.ENV_GIT_TARGET": "all", "$Conts.ENV_RUN_ID": ID_CHECKOUT]
 
-                GradleUtils.runTask(project, ["CheckOut"], CheckOut.this, pro)
+                GradleUtils.runTask(project, ["CheckOut"], CheckOut.this, map)
 
             }
 
@@ -94,31 +92,36 @@ public class CheckOut extends AnAction implements GradleCallBack {
         }
 
         if (ID_CREATE == id) {
-
+            String msg = unCheckList.isEmpty() ? "创建$branchName 分支完成" : "以下工程创建分支失败\n ${StringUtils.listString(unCheckList)}"
+            ApplicationManager.getApplication().invokeLater {
+                Messages.showInfoMessage(msg, "创建$branchName 分支完成")
+            }
+            return
         } else if (ID_CHECKOUT == id) {
-            if (unCheckList.isEmpty() && unCloneList.isEmpty()) {
+            if (unCheckList.isEmpty()) {
                 ApplicationManager.getApplication().invokeLater {
-                    Messages.showInfoMessage("所有工程已切换分支\n ${checkList.toListString()}", "切换分支完成")
+                    Messages.showInfoMessage("已切换分支$branchName", "切换分支完成")
                 }
                 return
             }
             StringBuilder sb = new StringBuilder()
-            sb.append("以下工程已切换分支\n").append(checkList)
-                    .append("\n以下工程缺少${branchName}分支\n").append(unCheckList)
-                    .append("\n一下工程暂未下载到本地,请先下在代码后再进行切换 \n").append(unCloneList)
+            sb.append("已切换分支: \n").append("-->$checkList")
+            if (!unCloneList.isEmpty()) {
+                sb.append("\n未下载工程,请下载代码后再进行切换: \n").append("-->$unCloneList")
+            }
+            sb.append("\n缺少${branchName}分支: \n")
+                    .append(StringUtils.listString(unCheckList))
                     .append("\n是否创建新分支???")
 
             ApplicationManager.getApplication().invokeLater {
-                def exitCode = Messages.showYesNoCancelDialog(sb.toString(), "切换分支完成", null)
+                def exitCode = Messages.showYesNoCancelDialog(sb.toString(), "创建分支$branchName", null)
 
                 if (exitCode != 0) return
 
                 sb = new StringBuilder(",")
                 unCheckList.each { sb.append(it).append(",") }
                 sb.append(",")
-                def pro = GradleUtils.getPro(["$Conts.ENV_FOCUS_INCLUDES"   : "empty", "$Conts.ENV_GIT_BRANCH": branchName
-                                              , "$Conts.ENV_DEPENDENT_MODEL": "mavenOnly"
-                                              , "$Conts.ENV_GIT_TARGET"     : "system", "$Conts.ENV_RUN_ID": ID_CREATE, "$Conts.ENV_GIT_NAMES": sb.toString()])
+                def pro = ["$Conts.ENV_GIT_BRANCH": branchName, "$Conts.ENV_GIT_TARGET": "system", "$Conts.ENV_RUN_ID": ID_CREATE, "$Conts.ENV_GIT_NAMES": sb.toString()]
 
                 GradleUtils.runTask(project, ["CreateBranch"], this, pro)
             }

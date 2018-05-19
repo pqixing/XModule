@@ -1,5 +1,6 @@
 package com.dachen.creator.utils;
 
+import java.util.List;
 import java.util.Locale;
 
 public class StringUtils {
@@ -54,5 +55,9 @@ public class StringUtils {
 		}
 
 		return sb.toString();
+	}
+
+	public static String listString(List<String> s){
+		return "-->${s.toString().replace(",","\n-->")}"
 	}
 }

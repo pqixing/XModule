@@ -13,21 +13,23 @@ import org.jetbrains.annotations.NotNull
 
 public class GradleUtils {
 
-    public static ProjectSystemId GRADLE = new ProjectSystemId("GRADLE");
+    public static ProjectSystemId GRADLE = new ProjectSystemId("GRADLE")
 
 
     public static void runTask(@NotNull Project project,
                                List<String> tasks,
                                GradleCallBack callback = null,
-                               String scriptParameters = "",
+                               Map<String, Object> scriptParameters = [:],
                                ProgressExecutionMode progressExecutionMode = ProgressExecutionMode.IN_BACKGROUND_ASYNC,
                                boolean activateToolWindowBeforeRun = true) {
-        ExternalSystemTaskExecutionSettings settings = new ExternalSystemTaskExecutionSettings();
-        settings.setExecutionName("请勿更新构建代码,正在执行:" + tasks)
+        ExternalSystemTaskExecutionSettings settings = new ExternalSystemTaskExecutionSettings()
+        settings.setExecutionName("请勿更新代码,正在执行:" + tasks)
         settings.setTaskNames(tasks)
         settings.setExternalSystemIdString(GRADLE.getId())
         settings.setExternalProjectPath(project.getBasePath())
-        settings.setScriptParameters("${scriptParameters} ${getPro(["$Conts.ENV_RUN_TYPE": "ide", "$Conts.ENV_UPDATE_BEFORE_SYNC": true, "$Conts.ENV_SILENT_LOG": false])}")
+        def pro = ["$Conts.ENV_DEPENDENT_MODEL": "mavenOnly", "$Conts.ENV_FOCUS_INCLUDES": "empty", "$Conts.ENV_RUN_TYPE": "ide", "$Conts.ENV_UPDATE_BEFORE_SYNC": true, "$Conts.ENV_SILENT_LOG": false, "$Conts.ENV_BUILD_DIR": "ide"] + scriptParameters
+
+        settings.setScriptParameters(getPro(pro))
 
         ExternalSystemUtil.runTask(settings, DefaultRunExecutor.EXECUTOR_ID, project, GRADLE, new TaskCallback() {
             @Override
@@ -35,8 +37,8 @@ public class GradleUtils {
                 String[] records = FileUtils.readForOne(new File(project.getBasePath(), ".modularization/ide.record")).split("##")
                 int l = records.length
                 long logTime = l > 0 ? Long.parseLong(records[0]) : -1
-                if (logTime-System.currentTimeMillis() > 1000 * 60) logTime = -1
-                String id = l > 1 ? records[1].replace("\"","") : ""
+                if (logTime - System.currentTimeMillis() > 1000 * 60) logTime = -1
+                String id = l > 1 ? records[1].replace("\"", "") : ""
                 String msg = l > 2 ? records[2] : ""
 
                 callback?.onFinish(logTime, id, msg)
