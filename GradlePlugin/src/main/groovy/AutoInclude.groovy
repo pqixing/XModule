@@ -36,7 +36,7 @@ public class AutoInclude {
         this.rootDir = rootDir
         this.outIncludeFile = outIncludeFile
         branchName = getSystemEnv("branchName")
-        if(branchName == null){
+        if (branchName == null) {
             def globalConfig = new File(rootDir, ".modularization/global.properties")
             if (globalConfig.exists()) {
                 def gp = new Properties()
@@ -47,7 +47,7 @@ public class AutoInclude {
                 }
             }
         }
-        if(branchName == null ) branchName = "master"
+        if (branchName == null) branchName = "master"
 
 
         readFromEnv()
@@ -153,9 +153,10 @@ public class AutoInclude {
             if (!defaultXml.exists()) {
                 error = run("git clone $AutoConfig.XML_DEFAULT_GIT", rootDir.parentFile)
             }
+            updateBuildGradle(new File(rootDir.parentFile, "$docDir/$AutoConfig.FILE_ROOT_GRADLE"))
             //同步时不更新Document仓库
 //            run("git pull ", new File(rootDir.parentFile, docDir))
-            includes += docDir
+//            includes += docDir
         }
         if (!defaultXml?.exists() ?: false) {
             defaultXml = new File(rootDir, AutoConfig.XML_DEFAULT_NAME)
@@ -234,9 +235,23 @@ public class AutoInclude {
         }
         saveToFile(realInclude)
         gradle.ext.localProject = localProject
+
         //让save不显示灰色
         if (false) save()
     }
+    /**
+     * 更新build.gradle文件
+     * @param targetGradle
+     */
+    void updateBuildGradle(File targetGradle) {
+        def p = new Properties()
+        p.load(new File(rootDir, "gradle.properties").newInputStream())
+        if ("N" == p.getProperty("updateBuildGradle")) return
+
+        File f = new File(rootDir, "build.gradle")
+        if (f.text != targetGradle.text) f.write(targetGradle.text)
+    }
+
     /**
      * 从git中自动下载依赖
      */
@@ -329,6 +344,10 @@ class AutoConfig {
      * gitxml路径解析
      */
     static final String XML_DEFAULT_NAME = "default.xml"
+    /**
+     * 跟目录
+     */
+    static final String FILE_ROOT_GRADLE = "root.gradle"
     /**
      * 本地配置文件路径
      */
