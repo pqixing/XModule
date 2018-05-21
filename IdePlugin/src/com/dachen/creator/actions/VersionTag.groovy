@@ -40,7 +40,7 @@ public class VersionTag extends AnAction implements GradleCallBack {
                             return
                         }
                         Pair<String, Boolean> result = Messages.showInputDialogWithCheckBox("确认为$branchName 创建版本tag(冻结maven版本号)", "创建版本Tag", "只冻结master的分支版本号", true, true,null,branchName, null)
-                        if(result == null||result.getSecond() == null) return
+                        if(result.first == null||result.getSecond() == null) return
                         branchName = result.getFirst()
                         boolean onlyMaster = result.getSecond()
                         if(branchName==null||branchName.isEmpty()){

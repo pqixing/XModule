@@ -32,13 +32,13 @@ class BuildFirstTask extends BaseTask {
         def path = FileUtils.urls("outputs", "apk", flavorName, type.toLowerCase())
         def name = TextUtils.append("-", project.name, flavorName, type.toLowerCase()) + ".apk"
         def buildFile = new File(project.buildDir, "$path/$name")
-
         //重命名文件
         if (buildFile.exists()) {
-            def outFile = new File(project.buildDir, "$appName-${type}.apk")
-            buildFile.renameTo(outFile)
-            Print.lnIde("buildApk=${outFile.absolutePath}")
+            def temp = buildFile
+            buildFile = new File(project.buildDir, "$appName-${type}.apk")
+            temp.renameTo(buildFile)
         }
+        Print.lnIde("buildApk=${buildFile.absolutePath}")
     }
 
     @Override

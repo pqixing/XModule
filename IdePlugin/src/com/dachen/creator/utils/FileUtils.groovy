@@ -1,6 +1,5 @@
 package com.dachen.creator.utils;
 
-import com.dachen.creator.OpenFile;
 
 import java.io.*;
 

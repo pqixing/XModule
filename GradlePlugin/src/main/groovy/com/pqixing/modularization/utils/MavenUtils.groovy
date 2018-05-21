@@ -31,12 +31,12 @@ class MavenUtils {
      * @param outFile
      */
     static void saveMavenMaps(String mavenName, String branchName, String filterBranch = "all", File outFile = getFocusMapsFile(mavenName, branchName)) {
-        String result =""
+        String result = ""
         if (outFile.exists()) {
             String sourcePath = outFile.absolutePath
             def targetFile = new File(outFile.getParent(), outFile.name + ".bak")
             outFile.renameTo(targetFile)
-            result+="fileExist=$targetFile.absolutePath&"
+            result += "fileExist=$targetFile.absolutePath&"
             outFile = new File(sourcePath)
         }
 
@@ -56,7 +56,7 @@ class MavenUtils {
         }
 
         FileUtils.saveMaps(maps, outFile)
-        result+= "file=$outFile.absolutePath"
+        result += "file=$outFile.absolutePath"
         Print.lnIde(result)
     }
     /**
@@ -187,7 +187,7 @@ class MavenUtils {
     static void pushMaven() {
         File docDir = getUpDocumentDir()
         GitUtils.run("git add $Keys.MODURIZATION/*", docDir)
-        GitUtils.run("git commit -m update", docDir)
+        GitUtils.run("git commit -m update-${new Date().toLocaleString()}", docDir)
         GitUtils.run("git push", docDir)
     }
 }

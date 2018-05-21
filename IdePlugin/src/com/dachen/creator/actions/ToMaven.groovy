@@ -120,7 +120,7 @@ public class ToMaven extends AnAction {
                 }
 
             }
-        }, ["$Conts.ENV_FOCUS_INCLUDES": ",${moduleName},", "$Conts.ENV_RUN_ID": moduleName])
+        }, ["$Conts.ENV_FOCUS_INCLUDES": moduleName, "$Conts.ENV_RUN_ID": moduleName])
     }
 
     private List<String> getModules() {

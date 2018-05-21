@@ -9,6 +9,7 @@ import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.maven.IndexMavenTask
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.GitUtils
+import com.pqixing.modularization.utils.MavenUtils
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
 
@@ -48,6 +49,9 @@ class GitPlugin extends BasePlugin {
         BaseTask.task(project, IndexMavenTask.class)
         BaseTask.task(project, LogAllGitTask.class)
         BaseTask.task(project, FastMergeTask.class)
+        project.task("PushDocument").doFirst {
+            MavenUtils.pushMaven()
+        }
 
         readGitProject(project.gradle)
         applyDefaultGradle()

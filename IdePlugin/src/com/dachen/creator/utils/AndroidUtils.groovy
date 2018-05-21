@@ -1,5 +1,11 @@
-package com.dachen.creator.utils;
+package com.dachen.creator.utils
 
+import com.dachen.creator.Conts
+import com.dachen.creator.ui.MultiBoxDialog
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -51,12 +57,12 @@ public class AndroidUtils {
     }
 
     @Nullable
-    public static VirtualFile getPackageByName(PsiClass clazz, String className,String pkgName) {
+    public static VirtualFile getPackageByName(PsiClass clazz, String className, String pkgName) {
         // app包名根目录 ...\app\src\main\java\PACKAGE_NAME\
         VirtualFile pkgDir = AndroidUtils.getAppPackageBySimpleClass(clazz, className);
         // 判断根目录下是否有对应包名文件夹
         VirtualFile realDir = pkgDir.findChild(pkgName);
-        if(realDir == null) {
+        if (realDir == null) {
             // 没有就创建一个
             try {
                 realDir = pkgDir.createChildDirectory(null, pkgName);
@@ -68,15 +74,13 @@ public class AndroidUtils {
     }
 
 
-
-
     public static PsiFile getManifestFile(Project project, String modulePath) {
         String path = modulePath + File.separator +
                 "src" + File.separator +
                 "main" + File.separator +
                 "AndroidManifest.xml";
         VirtualFile virtualFile = LocalFileSystem.getInstance().findFileByPath(path);
-        if(virtualFile == null) return null;
+        if (virtualFile == null) return null;
         return PsiManager.getInstance(project).findFile(virtualFile);
     }
 
@@ -87,7 +91,7 @@ public class AndroidUtils {
     }
 
     public static String getFilePackageName(VirtualFile dir) {
-        if(!dir.isDirectory()) {
+        if (!dir.isDirectory()) {
             // 非目录的取所在文件夹路径
             dir = dir.getParent();
         }
@@ -98,4 +102,46 @@ public class AndroidUtils {
         return path;
     }
 
+    /**
+     * 安装应用
+     * @param apk
+     * @return
+     */
+    public static void installApk(Project project, File apk) {
+        List<String> devices = new ArrayList<>()
+        String result = GitUtils.run("/Tools/linux-sdk/platform-tools/adb install -r $apk.absolutePath", apk.parentFile)
+//        String s = null;
+//        GitUtils.run("/Tools/linux-sdk/platform-tools/adb devices -l",apk.parentFile).eachLine { l->
+//            if(l.contains("*")||l.startsWith("List")) return
+//            devices.add(l)
+//
+//        }
+//        GitUtils.run("/Tools/linux-sdk/platform-tools/adb devices -l",apk.parentFile)
+        String s = devices.toString()
+//        MultiBoxDialog.builder(project)
+//                .setMode(false, true, true)
+//                .setMsg("切换分支", "此操作会批量对本地所有分支进行切换")
+//                .setInput("master")
+//                .setItems(branchs)
+//                .setHint("请输入或者勾选需要切换的分支")
+//                .setListener(new MultiBoxDialog.Listener() {
+//            @Override
+//            void onOk(String input, List<String> items, boolean check) {
+//                branchName = input
+//                if (branchName.isEmpty()) {
+//                    new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "输入错误", "分支名不能为空", NotificationType.WARNING).notify(project)
+//                    return
+//                }
+//                def map = ["$Conts.ENV_GIT_BRANCH": branchName, "$Conts.ENV_GIT_TARGET": "all", "$Conts.ENV_RUN_ID": ID_CHECKOUT]
+//
+//                GradleUtils.runTask(project, ["CheckOut"], CheckOut.this, map)
+//
+//            }
+//
+//            @Override
+//            void onCancel() {
+//
+//            }
+//        }).show()
+    }
 }
