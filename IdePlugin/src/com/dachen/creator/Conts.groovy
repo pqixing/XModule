@@ -37,4 +37,13 @@ class Conts {
      * 运行Id
      */
     static String ENV_RUN_ID = "runId"
+
+    /**
+     *git操作失败
+     */
+    static String TIP_GIT_MERGE_FAIL = "Git MERGE FAIL"
+    /**
+     * 模块的运行类型  app or library
+     */
+    static String ENV_BUILD_APP_TYPE = "appRunType"
 }

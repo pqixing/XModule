@@ -34,14 +34,27 @@
             <add-to-group group-id="BuildMenu" anchor="first"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+            <action id="ToMaven" class="com.dachen.creator.actions.ToMaven" text="ToMaven" description="ToMaven">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift M"/>
+            </action>
+            <separator/>
+
+            <action id="RunModule" class="com.dachen.creator.actions.RunModule" text="RunModule" description="RunModule"/>
+            <action id="BuildModule" class="com.dachen.creator.actions.BuildModule" text="BuildModule" description="BuildModule"/>
+
             <group class="com.dachen.creator.Git" popup="true" id="git" text="Git">
 
-                <action id="CheckOut" class="com.dachen.creator.actions.CheckOut" text="CheckOut" description="CheckOut"/>
+                <action id="CheckOut" class="com.dachen.creator.actions.CheckOut" text="CheckOut"
+                        description="CheckOut"/>
 
-                <action id="Update" class="com.dachen.creator.actions.Update" text="Update" description="Update"/>
-                <action id="Clone" class="com.dachen.creator.actions.Clone" text="Clone" description="Clone"/>
-                <separator />
-                <action id="CreateBranch" class="com.dachen.creator.actions.CreateBranch" text="CreateBranch"
+                <action id="Update" class="com.dachen.creator.actions.UpdateCode" text="UpdateCode"
+                        description="UpdateCode"/>
+                <action id="Clone" class="com.dachen.creator.actions.VersionTag" text="VersionTag"
+                        description="VersionTag"/>
+                <action id="FastMerge" class="com.dachen.creator.actions.FastMerge" text="FastMerge"
+                        description="FastMerge"/>
+                <separator/>
+                <action id="CreateBranch" class="com.dachen.creator.actions.DeleteBranch" text="DeleteBranch"
                         description="CreateBranch"/>
             </group>
 
@@ -61,17 +74,13 @@
                 </action>
 
             </group>
-            <action id="ToMaven" class="com.dachen.creator.actions.ToMaven" text="ToMaven" description="ToMaven">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift M"/>
-            </action>
-            <separator/>
-            <action id="CreateProject" class="com.dachen.creator.actions.NewProject" text="CreateProject"
-                    description="CreateProject"/>
-            <separator/>
+
+            <action id="newProject" class="com.dachen.creator.actions.NewProject" text="newProject"
+                    description="newProject"/>
             <action id="DpsAnalyze" class="com.dachen.creator.actions.DpsAnalyze" text="DpsAnalyze"
                     description="DpsAnalyze"/>
-            <separator/>
-            <action id="ClearCache" class="com.dachen.creator.actions.ClearCache" text="ClearCache" description="ClearCache"/>
+            <action id="ClearCache" class="com.dachen.creator.actions.ClearCache" text="ClearCache"
+                    description="ClearCache"/>
             <separator/>
             <action id="com.libiao.routercreator" class="com.dachen.creator.actions.PathCreator" text="RouterCreator"
                     description="router auto create code"/>
@@ -83,8 +92,6 @@
                     description="auto create model code"/>
         </group>
         <!-- Add your actions here -->
-
-
 
     </actions>
 </idea-plugin>

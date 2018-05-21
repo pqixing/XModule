@@ -10,12 +10,6 @@ import com.pqixing.modularization.utils.GitUtils
 class CloneAllTask extends GitTask {
 
     @Override
-    void start() {
-        super.start()
-        target = "all"
-    }
-
-    @Override
     String onGitProject(String gitName, String gitUrl, File gitDir) {
         if (gitDir.exists()) return "already exists"
         String result = GitUtils.run("git clone $gitUrl", gitDir.parentFile)

@@ -31,27 +31,33 @@ class MavenUtils {
      * @param outFile
      */
     static void saveMavenMaps(String mavenName, String branchName, String filterBranch = "all", File outFile = getFocusMapsFile(mavenName, branchName)) {
+        String result =""
         if (outFile.exists()) {
-            Print.lnf("$outFile.path 文件已经存在，请先删除或者重新输入,跳过生成Maps文件")
-            Print.lnIde("fileExist=$outFile.path")
-        } else {
-            def maps = MavenUtils.getMavenMaps(mavenName)
-            MavenUtils.getFocusMavenMaps(mavenName, branchName).each { maps.put(it.key, it.value) }
+            String sourcePath = outFile.absolutePath
+            def targetFile = new File(outFile.getParent(), outFile.name + ".bak")
+            outFile.renameTo(targetFile)
+            result+="fileExist=$targetFile.absolutePath&"
+            outFile = new File(sourcePath)
+        }
 
-            if ("all" != filterBranch) {
-                def m = maps
-                maps = new Properties()
-                def master = "master" == filterBranch
-                m.each {
-                    def name = it.key.toString()
-                    if ((master && !name.contains(Keys.BRANCH_TAG)) || name.contains(filterBranch)) {
-                        maps.put(name, it.value)
-                    }
+        def maps = MavenUtils.getMavenMaps(mavenName)
+        MavenUtils.getFocusMavenMaps(mavenName, branchName).each { maps.put(it.key, it.value) }
+
+        if ("all" != filterBranch) {
+            def m = maps
+            maps = new Properties()
+            def master = "master" == filterBranch
+            m.each {
+                def name = it.key.toString()
+                if ((master && !name.contains(Keys.BRANCH_TAG)) || name.contains(filterBranch)) {
+                    maps.put(name, it.value)
                 }
             }
-
-            FileUtils.saveMaps(maps, outFile)
         }
+
+        FileUtils.saveMaps(maps, outFile)
+        result+= "file=$outFile.absolutePath"
+        Print.lnIde(result)
     }
     /**
      * 获取最后的版本号

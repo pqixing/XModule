@@ -8,14 +8,11 @@ import com.pqixing.modularization.utils.GitUtils
  * 同步文档的任务
  */
 
-class DeleteBranchTask extends GitTask {
-    public DeleteBranchTask(){
-        group = "others"
-    }
+class FastMergeTask extends GitTask {
+
     @Override
     String onGitProject(String gitName, String gitUrl, File gitDir) {
         if (!gitDir.exists()) return Keys.TIP_GIT_NOT_EXISTS
-        if ("master" == branchName) return "-----"
         boolean hasRemote = false
         boolean hasLocal = false
         boolean isCurBranch = false
@@ -29,17 +26,12 @@ class DeleteBranchTask extends GitTask {
                 isCurBranch = line != branchName
             }
         }
-        String result = ""
+        if (isCurBranch) return "current branch is $branchName"
+        if (!hasRemote) return Keys.TIP_BRANCH_NOT_EXISTS
+        GitUtils.run("git pull", gitDir)
+        def mergeResult = GitUtils.run("git merge origin/$branchName  --ff-only", gitDir)?.trim() ?: ""
+        if (mergeResult.startsWith("fatal:")) return Keys.TIP_GIT_MERGE_FAIL
+        return GitUtils.run("git push", gitDir)
 
-        if (hasLocal || hasRemote) {
-            if (isCurBranch) {
-                result += GitUtils.run("git checkout master", gitDir)
-            }
-            result += GitUtils.run("git branch -d ${hasLocal ? "" : "origin/"}${branchName}", gitDir)
-            if (hasRemote) result += GitUtils.run("git push origin :${branchName}", gitDir)
-        } else {
-            result += Keys.TIP_BRANCH_NOT_EXISTS
-        }
-        return result
     }
 }

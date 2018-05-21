@@ -28,7 +28,7 @@ public class MultiBoxDialog extends DialogWrapper implements ListCellRenderer<St
     private JPanel jpInput;
     private JPanel buttomContent;
 
-    private boolean multi, inputText, associateInputAndItem, check;
+    private boolean multi, inputText, associateInputAndItem, check,inputAble = true;
     private String inputTxt, hint, checkTxt, msg;
     private List<String> items = new ArrayList<>();
     private List<String> selectItems = new ArrayList<>();
@@ -47,6 +47,10 @@ public class MultiBoxDialog extends DialogWrapper implements ListCellRenderer<St
         return this;
     }
 
+    public MultiBoxDialog setInputAble(boolean inputAble) {
+        this.inputAble = inputAble;
+        return this;
+    }
     public MultiBoxDialog setItems(Collection<String> items) {
         if (items != null) {
             this.items.clear();
@@ -135,6 +139,7 @@ public class MultiBoxDialog extends DialogWrapper implements ListCellRenderer<St
         buttomContent.setVisible(false);
         jpInput.setVisible(inputText);
         tvInput.setText(inputTxt);
+        tvInput.setEnabled(inputAble);
         cbForAll.setVisible(multi);
         cbForAll.setSelected(check);
         lbMsg.setText(msg);
@@ -170,7 +175,8 @@ public class MultiBoxDialog extends DialogWrapper implements ListCellRenderer<St
         selectItems.clear();
         if (all) selectItems.addAll(items);
 
-        jlItems.clearSelection();
+        jlItems.setModel(new StringModel(items));
+        result.setText(selectItems.isEmpty() ? hint : selectItems.toString());
     }
 
     @Override

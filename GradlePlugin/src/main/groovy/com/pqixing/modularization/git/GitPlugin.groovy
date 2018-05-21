@@ -47,6 +47,7 @@ class GitPlugin extends BasePlugin {
         BaseTask.task(project, DeleteBranchTask.class)
         BaseTask.task(project, IndexMavenTask.class)
         BaseTask.task(project, LogAllGitTask.class)
+        BaseTask.task(project, FastMergeTask.class)
 
         readGitProject(project.gradle)
         applyDefaultGradle()

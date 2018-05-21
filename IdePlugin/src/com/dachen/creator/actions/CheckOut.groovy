@@ -14,11 +14,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.intellij.openapi.util.Pair
-import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
 public class CheckOut extends AnAction implements GradleCallBack {
@@ -30,21 +27,10 @@ public class CheckOut extends AnAction implements GradleCallBack {
     @Override
     void actionPerformed(AnActionEvent e) {
         project = e.getProject()
+
         Module module = e.getData(LangDataKeys.MODULE)
 //        if(module == null) module = ModuleManager.getInstance(project).getModules()[0]
-        Set<String> branchs = new HashSet<>();
-        def dir = module == null ? null : GitUtils.findGitDir(new File(module.moduleFilePath))
-        if (dir != null) {
-            GitUtils.run("git branch -a", dir)?.eachLine { l ->
-                l = l.replace("*", "")
-                def i = l.lastIndexOf("/")
-                if (i < 0) {
-                    branchs.add(l.trim())
-                } else {
-                    branchs.add(l.substring(i + 1).trim())
-                }
-            }
-        }
+        Set<String> branchs = GitUtils.findBranchs(module?.moduleFilePath)
 
         MultiBoxDialog.builder(project)
                 .setMode(false, true, true)
@@ -93,38 +79,32 @@ public class CheckOut extends AnAction implements GradleCallBack {
 
         if (ID_CREATE == id) {
             String msg = unCheckList.isEmpty() ? "创建$branchName 分支完成" : "以下工程创建分支失败\n ${StringUtils.listString(unCheckList)}"
-            ApplicationManager.getApplication().invokeLater {
-                Messages.showInfoMessage(msg, "创建$branchName 分支完成")
-            }
+            Messages.showInfoMessage(msg + "\n 请注意是否需要重新创建版本标签!!!", "创建$branchName 分支完成")
             return
         } else if (ID_CHECKOUT == id) {
             if (unCheckList.isEmpty()) {
-                ApplicationManager.getApplication().invokeLater {
-                    Messages.showInfoMessage("已切换分支$branchName", "切换分支完成")
-                }
+                Messages.showInfoMessage("已切换分支$branchName \n ${unCloneList.isEmpty() ? "" : "以下工程未下载:" + StringUtils.listString(unCloneList)}", "切换分支完成")
                 return
             }
             StringBuilder sb = new StringBuilder()
             sb.append("已切换分支: \n").append("-->$checkList")
             if (!unCloneList.isEmpty()) {
-                sb.append("\n未下载工程,请下载代码后再进行切换: \n").append("-->$unCloneList")
+                sb.append("\n未下载工程,请下载代码后再进行切换: \n").append("-->${StringUtils.listString(unCloneList)}")
             }
             sb.append("\n缺少${branchName}分支: \n")
                     .append(StringUtils.listString(unCheckList))
                     .append("\n是否创建新分支???")
 
-            ApplicationManager.getApplication().invokeLater {
-                def exitCode = Messages.showYesNoCancelDialog(sb.toString(), "创建分支$branchName", null)
+            def exitCode = Messages.showYesNoCancelDialog(sb.toString(), "创建分支$branchName", null)
 
-                if (exitCode != 0) return
+            if (exitCode != 0) return
 
-                sb = new StringBuilder(",")
-                unCheckList.each { sb.append(it).append(",") }
-                sb.append(",")
-                def pro = ["$Conts.ENV_GIT_BRANCH": branchName, "$Conts.ENV_GIT_TARGET": "system", "$Conts.ENV_RUN_ID": ID_CREATE, "$Conts.ENV_GIT_NAMES": sb.toString()]
+            sb = new StringBuilder(",")
+            unCheckList.each { sb.append(it).append(",") }
+            sb.append(",")
+            def pro = ["$Conts.ENV_GIT_BRANCH": branchName, "$Conts.ENV_GIT_TARGET": "system", "$Conts.ENV_RUN_ID": ID_CREATE, "$Conts.ENV_GIT_NAMES": sb.toString()]
 
-                GradleUtils.runTask(project, ["CreateBranch"], this, pro)
-            }
+            GradleUtils.runTask(project, ["DeleteBranch"], this, pro)
         }
     }
 }

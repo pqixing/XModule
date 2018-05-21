@@ -26,6 +26,27 @@ class GitUtils {
         }
         return result
     }
+    /**
+     * 查找所有的分支
+     * @param dir
+     * @return
+     */
+    static Set<String> findBranchs(String dir) {
+        if (dir == null) return []
+        def gitDir = GitUtils.findGitDir(new File(dir))
+        if (gitDir == null) return []
+        def set = new HashSet<String>()
+        GitUtils.run("git branch -a", gitDir)?.eachLine { l ->
+            l = l.replace("*", "")
+            def i = l.lastIndexOf("/")
+            if (i < 0) {
+                set.add(l.trim())
+            } else {
+                set.add(l.substring(i + 1).trim())
+            }
+        }
+        return set
+    }
 
     /**
      * 查找出对应的git根目录

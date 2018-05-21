@@ -69,5 +69,6 @@ class Print {
     static void lnIde(String str){
         String id = TextUtils.getSystemEnv(Keys.ENV_RUN_ID)?:"task"
         FileUtils.write(new File(BuildConfig.dirName,"ide.record"),System.currentTimeMillis()+Keys.SEPERATOR+id+Keys.SEPERATOR+str)
+        ln(str)
     }
 }

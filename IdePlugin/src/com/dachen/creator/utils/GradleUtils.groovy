@@ -3,6 +3,7 @@ package com.dachen.creator.utils
 import com.dachen.creator.Conts
 import com.dachen.creator.GradleCallBack
 import com.intellij.execution.executors.DefaultRunExecutor
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.externalSystem.model.ProjectSystemId
 import com.intellij.openapi.externalSystem.model.execution.ExternalSystemTaskExecutionSettings
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode
@@ -34,14 +35,17 @@ public class GradleUtils {
         ExternalSystemUtil.runTask(settings, DefaultRunExecutor.EXECUTOR_ID, project, GRADLE, new TaskCallback() {
             @Override
             void onSuccess() {
-                String[] records = FileUtils.readForOne(new File(project.getBasePath(), ".modularization/ide.record")).split("##")
+                String result = FileUtils.readForOne(new File(project.getBasePath(), ".modularization/ide.record"))
+                String[] records = result.split("##")
                 int l = records.length
                 long logTime = l > 0 ? Long.parseLong(records[0]) : -1
                 if (logTime - System.currentTimeMillis() > 1000 * 60) logTime = -1
                 String id = l > 1 ? records[1].replace("\"", "") : ""
-                String msg = l > 2 ? records[2] : ""
-
-                callback?.onFinish(logTime, id, msg)
+                String sKey = "##$id##"
+                String msg = l > 2 ? result.substring(result.indexOf(sKey) + sKey.length()) : ""
+                ApplicationManager.getApplication().invokeLater {
+                    callback?.onFinish(logTime, id, msg)
+                }
             }
 
             @Override
@@ -60,5 +64,9 @@ public class GradleUtils {
             sb.append(" -D${m.key}=$m.value ")
         }
         return sb.toString()
+    }
+
+    static boolean checkResult(long time, String taskId, String resultId) {
+        return time > 0 && taskId == resultId
     }
 }

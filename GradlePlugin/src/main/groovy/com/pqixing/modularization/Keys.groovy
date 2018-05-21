@@ -216,8 +216,21 @@ class Keys {
      * 分支不存在
      */
     static String TIP_BRANCH_NOT_EXISTS = "Branch Not Exists"
+
+    /**
+     *git操作失败
+     */
+    static String TIP_GIT_MERGE_FAIL = "Git MERGE FAIL"
     /**
      * 运行Id
      */
     static String ENV_RUN_ID = "runId"
+    /**
+     * 模块的运行类型  app or library
+     */
+    static String ENV_BUILD_APP_TYPE = "appRunType"
+    /**
+     * App编译后的名称
+     */
+    static String ENV_BUILD_APP_NAME = "appBuildName"
 }

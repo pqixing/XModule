@@ -6,6 +6,8 @@ import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.dependent.Dependencies
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.runtype.RunType
+import com.pqixing.modularization.utils.CheckUtils
+import com.pqixing.modularization.utils.TextUtils
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 
@@ -73,6 +75,10 @@ class ModuleConfig extends BaseExtension {
         LinkedList<String> files = []
         files += androidConfig.outFiles
         files += mavenType?.outFiles
+        String type = TextUtils.getSystemEnv(Keys.ENV_BUILD_APP_TYPE)
+        if(!CheckUtils.isEmpty()){
+            runType = runTypes.getByName(type)
+        }
         files += runType?.outFiles
         files += dependModules.outFiles
         files += writeConfig?.outFiles

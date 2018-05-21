@@ -46,7 +46,7 @@ public class NewProject extends AnAction {
             new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "创建Project失败", "请选择代码存放目录!!!", NotificationType.WARNING).notify(project);
             return;
         }
-        File newCodeDir = new File(rootPath, rootName+"/"+project.getName());
+        File newCodeDir = new File(rootPath, rootName+"$rootName/${rootName}Root");
         if(newCodeDir.exists()) {
             new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "创建Project失败", "目录已经存在，请重新选择: "+newCodeDir.getPath(), NotificationType.WARNING).notify(project);
             return;

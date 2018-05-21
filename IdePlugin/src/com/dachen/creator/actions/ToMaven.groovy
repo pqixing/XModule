@@ -2,6 +2,7 @@ package com.dachen.creator.actions
 
 import com.dachen.creator.Conts
 import com.dachen.creator.GradleCallBack
+import com.dachen.creator.ui.MultiBoxDialog
 import com.dachen.creator.ui.MultiCheckBoxDialog
 import com.dachen.creator.utils.GradleUtils
 import com.intellij.notification.Notification
@@ -27,42 +28,31 @@ public class ToMaven extends AnAction {
         project = e.getData(PlatformDataKeys.PROJECT)
         Module module = e.getData(LangDataKeys.MODULE)
         String moduleName = module == null ? "" : module.getName()
-        String projectName = project.getName()
         String place = e.getPlace()
 
-        boolean projectMode = /*"ProjectViewPopup".equals(place)||*/ "MainMenu".equals(place) || module == null || moduleName == project.getName()
+        boolean projectMode = /*"ProjectViewPopup".equals(place)||*/ "MainMenu" == place || module == null || moduleName == project.getName()
 
-        Pair<Boolean, List<String>> result
-        //进入Module多选页面
-        if (projectMode) {
-            List<String> allModules = new ArrayList<>()
-            for (Module m : ModuleManager.getInstance(project).modules) {
-                if (projectName != m.name) {
-                    allModules.add(m.name)
-                }
+        MultiBoxDialog.builder(project)
+                .setMode(true, true, false)
+                .setMsg("ToMaven", "请选择需要上传的模块")
+                .setInputAble(false)
+                .setInput(projectMode ? "" : moduleName)
+                .setItems(projectMode ? getModules() : getDps(module))
+                .setHint("")
+                .setListener(new MultiBoxDialog.Listener() {
+            @Override
+            void onOk(String input, List<String> items, boolean check) {
+                if (!input.isEmpty()) items.add(input)
+                new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "开始上传", "任务执行期间，请勿修改,更新代码", NotificationType.WARNING).notify(project)
+                startUp(0, items, new ArrayList<Pair<String, String>>())
             }
-            int selectItem = module == null || project.name == module.name ? -2 : allModules.indexOf(module.name)
-            result = MultiCheckBoxDialog.showMultiSelect(project, "ToMaven", "请选择需要上传到Maven仓库的模块", allModules, selectItem)
-        } else {
 
-            result = MultiCheckBoxDialog.showTwoStepSelect(project, "ToMaven", "准备上传: " + module.getName(), getDps(module), -1, "上传前先上传依赖模块", false)
-            if (result != null) {
-                if (!result.getFirst()) result.getSecond().clear()
-                result.getSecond().add(module.getName())
+            @Override
+            void onCancel() {
+
             }
-        }
-        if (result == null) return
-        List<String> uploadList = result.getSecond()
-        if (uploadList.isEmpty()) {
-            Messages.showMessageDialog("没有选中模块，请先选择模块", "ToMaven", null)
-            return
-        }
-        notification = new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "开始上传", "任务执行期间，请勿修改,更新,构建代码", NotificationType.WARNING)
-        notification.notify(project)
-        startUp(0, uploadList, new ArrayList<>())
+        }).show()
     }
-
-    Notification notification
 
     /**
      * 上传结束
@@ -70,17 +60,12 @@ public class ToMaven extends AnAction {
      * @param results
      */
     private void onEnd(List<String> uploadList, List<Pair<String, String>> results) {
-        if (notification != null && notification.isExpired()) {
-            notification.expire()
-        }
         StringBuilder msg = new StringBuilder("全部上传任务" + uploadList.size() + "条:\n" + uploadList)
         msg.append("\n 实际上传" + results.size() + "条:\n")
         for (Pair<String, String> p : results) {
             msg.append(p.getFirst() + " : " + p.getSecond()).append("\n")
         }
-        ApplicationManager.getApplication().invokeLater {
-            Messages.showInfoMessage(msg.toString(), "ToMaven执行完成")
-        }
+        Messages.showInfoMessage(msg.toString(), "ToMaven执行完成")
 
     }
 
@@ -95,10 +80,10 @@ public class ToMaven extends AnAction {
         if (records.length < 3) return new Pair<Boolean, String>(false, "未知异常")
         boolean success = "Y" == records[1]
         String realMsg = records[2]
-
-        if (realMsg.contains("::NotUpdate::")) {
+        def key = "::Not Update::"
+        if (realMsg.contains(key)) {
             success = true
-            realMsg = realMsg.replace("::", " ")
+            realMsg = realMsg.replace(key, "")
         }
         return new Pair<>(success, realMsg)
     }
@@ -114,28 +99,40 @@ public class ToMaven extends AnAction {
             onEnd(uploadList, results)
             return
         }
-        final String moduleName = uploadList.get(pos)
+        final String moduleName = uploadList[pos]
+
+
         GradleUtils.runTask(project, [":" + moduleName + ":clean", ":" + moduleName + ":ToMaven"], new GradleCallBack() {
             @Override
             void onFinish(long time, String id, String result) {
                 def upload = checkUpload(result)
-                upload.first = upload.first && time != -1 && id.contains(moduleName)
-                results.add(new Pair<>(moduleName, (upload.getFirst() ? " 成功 : " : " 失败 : ") + upload.getSecond()))
+                boolean success = upload.first && time != -1 && id == moduleName
+                results.add(new Pair<>(moduleName, (success? " 成功 : " : " 失败 : ") + upload.second))
 
-                if (!upload.getFirst()) ApplicationManager.getApplication().invokeLater {
+                if (success) {
+                    startUp(pos + 1, uploadList, results)
+                } else {
                     int exitCode = Messages.showOkCancelDialog(moduleName
                             + "在ToMaven过程中发生异常，是否继续上传其余模块???\n error:->" + upload.getSecond()
                             + "\n下个模块:" + uploadList.get(pos + 1), "上传失败:" + moduleName, null)
                     if (exitCode == 0) startUp(pos + 1, uploadList, results)
                     else onEnd(uploadList, results)
-                } else {
-                    startUp(pos + 1, uploadList, results)
                 }
 
             }
-        }, GradleUtils.getPro(["$Conts.ENV_FOCUS_INCLUDES": ",${moduleName},", "$Conts.ENV_RUN_ID": moduleName]))
+        }, ["$Conts.ENV_FOCUS_INCLUDES": ",${moduleName},", "$Conts.ENV_RUN_ID": moduleName])
     }
 
+    private List<String> getModules() {
+        List<String> allModules = new ArrayList<>()
+        for (Module m : ModuleManager.getInstance(project).modules) {
+            if (project.name != m.name) {
+                allModules.add(m.name)
+            }
+        }
+
+        return allModules
+    }
     /**
      * 获取依赖的模块名称
      *
