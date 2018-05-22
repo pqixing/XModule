@@ -127,19 +127,24 @@ public class AndroidUtils {
     public static List<String> getDevices(Project project) {
         try {
             Set<String> devices = new HashSet<>()
-            GitUtils.run("${FileUtils.readConfig("adb", "adb")} devices -l", new File(project.getBasePath()))?.eachLine { l ->
-                if (l.contains("*") || l.startsWith("List") || l.trim().isEmpty()) return
+            String cmd = "${FileUtils.readConfig("adb", "adb")} devices -l"
+            GitUtils.run(cmd, new File(project.getBasePath()))?.eachLine { l ->
+                if (l == null || l.contains("*") || l.startsWith("List") || l.trim().isEmpty()) return
 
                 def split = l.trim().split(" ")
                 String num = split[0]
-                String d = l.split(" ").find { it.trim().startsWith("model:") }.trim().replace("model:", "")
+
+                String d = split.find { "offline" == it }
+                if (d == null) {
+                    d = split.find { it.trim().startsWith("model:") }?.trim()?.replace("model:", "") ?: "error"
+                }
 
                 String r = "$num    $d"
                 devices.add(r)
             }
             return devices.toList()
         } catch (Exception e) {
-            return null
+            return new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Finish", e.toString(), NotificationType.INFORMATION).notify(project)
         }
     }
     /**
@@ -152,16 +157,15 @@ public class AndroidUtils {
             @Override
             void run(@NotNull ProgressIndicator progressIndicator) {
                 progressIndicator.start()
-                progressIndicator.setText("安装中")
-                StringBuilder resutStr = new StringBuilder()
+                StringBuilder resultStr = new StringBuilder()
                 for (String s : devices) {
                     progressIndicator.setText("Install to $s")
-                    def run = GitUtils.run("/Tools/linux-sdk/platform-tools/adb install -r $apk.absolutePath", new File(project.getBasePath()))
-                    resutStr.append("$s : $run   ->  ")
+                    def run = GitUtils.run("${FileUtils.readConfig("adb", "adb")} -s ${s.split(" ")[0]} install -r $apk.absolutePath", new File(project.getBasePath()))
+                    resultStr.append("$s : $run   ->  ")
                 }
                 progressIndicator.setText("Install Finish")
                 progressIndicator.cancel()
-                new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Finish", resutStr.toString(), NotificationType.INFORMATION).notify(project)
+                new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Finish", resultStr.toString(), NotificationType.INFORMATION).notify(project)
             }
         }
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(install, new BackgroundableProcessIndicator(install))
@@ -194,7 +198,7 @@ public class AndroidUtils {
             devices = getDevices(project)
         }
         if (devices == null) {
-            Messages.showOkCancelDialog("请检查adb工具是否正常", "adb命令异常", null)
+            Messages.showOkCancelDialog("请检查adb工具是否正常 ${}", "adb命令异常", null)
             return
         }
 
