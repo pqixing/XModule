@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>com.pqixing.modularization.codeCreator</id>
     <name>CodeCreator</name>
-    <version>1.2</version>
+    <version>2.0</version>
     <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
 
     <description><![CDATA[
@@ -37,15 +37,8 @@
             <action id="ToMaven" class="com.dachen.creator.actions.ToMaven" text="ToMaven" description="ToMaven">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt COMMA"/>
             </action>
-            <action id="RunModule" class="com.dachen.creator.actions.RunModule" text="RunModule"
-                    description="RunModule"/>
-            <action id="BuildModule" class="com.dachen.creator.actions.BuildModule" text="BuildModule"
-                    description="BuildModule"/>
-
-            <action id="InstallApp" class="com.dachen.creator.actions.InstallApp" text="InstallApp"
-                    description="InstallApp"/>
-
             <separator/>
+
             <group class="com.dachen.creator.Code" popup="true" id="Code" text="Code">
 
                 <action id="CheckOut" class="com.dachen.creator.actions.CheckOut" text="CheckOut"
@@ -72,7 +65,6 @@
                         description="PushDocument"/>
 
             </group>
-
             <group class="com.dachen.creator.OpenFile" popup="true" id="file" text="OpenFile">
                 <action id="OpenInclude" class="com.dachen.creator.actions.Include" text="Include"
                         description="OpenInclude">
@@ -86,6 +78,15 @@
                 <action id="ModuleConfig" class="com.dachen.creator.actions.ModuleConfig" text="ModuleConfig"
                         description="ModuleConfig"/>
             </group>
+            <separator/>
+            <action id="RunApp" class="com.dachen.creator.actions.RunModule" text="RunApp"
+                    description="RunModule"/>
+            <action id="BuildApp" class="com.dachen.creator.actions.BuildModule" text="BuildApp"
+                    description="BuildModule"/>
+
+            <action id="InstallApp" class="com.dachen.creator.actions.InstallApp" text="InstallApp"
+                    description="InstallApp"/>
+
             <separator/>
             <action id="DpsAnalyze" class="com.dachen.creator.actions.DpsAnalyze" text="DpsAnalyze"
                     description="DpsAnalyze"/>
