@@ -28,7 +28,7 @@ class AndroidConfig extends BaseExtension {
     boolean compatAppache = true
 
     boolean kotlinEnable = true
-    String kotlin_version = "1.2.0"
+    String kotlin_version = "1.2.41"
     FlavorConfig flavor
 
     void flavor(Closure closure) {
