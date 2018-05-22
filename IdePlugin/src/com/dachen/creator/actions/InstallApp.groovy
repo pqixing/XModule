@@ -28,10 +28,11 @@ public class InstallApp extends AnAction {
     public void actionPerformed(AnActionEvent e) {
         project = e.getProject();
 
+
         List<String> item = new ArrayList<>()
         String update = ""
 
-        String updateTag = "更新:"
+        String updateTag = "<div class=\"desc\">"
         String downloadTag = "downloadUrl="
         try {
             def conn = new URL(baseUrl).openConnection()
@@ -43,12 +44,13 @@ public class InstallApp extends AnAction {
             })
             String page = conn.inputStream.text
             page.eachLine { l ->
-                if (l.contains(updateTag)) {
-                    update = l.substring(l.indexOf(updateTag), l.lastIndexOf("<"))
+                def updateIndex = l.indexOf(updateTag)
+                if (updateIndex > 0) {
+                    update = l.substring(l.indexOf(":") + 1, l.lastIndexOf("</div>"))
                 } else if (l.contains(downloadTag)) {
                     String apkUrl = l.substring(l.indexOf(downloadTag) + downloadTag.size() + 1)
                     apkUrl = apkUrl.substring(0, apkUrl.indexOf("\""))
-                    String t = "remote$apkUrl?$update"
+                    String t = "remote$apkUrl    ${update.trim()}"
                     item.add(t)
                 }
             }
@@ -66,7 +68,7 @@ public class InstallApp extends AnAction {
             void onOk(String input, List<String> items, boolean check) {
                 input = input.trim()
                 if (input.startsWith("remote")) {
-                    downloadApk(input.replace("remote", baseUrl.replace("/android","")))
+                    downloadApk(input.replace("remote", baseUrl.replace("/android", "")))
                 } else AndroidUtils.installApk(project, new File(input))
             }
 
@@ -78,8 +80,7 @@ public class InstallApp extends AnAction {
     }
 
     private void downloadApk(String url) {
-        int last = url.lastIndexOf("?")
-        if (last > 0) url = url.substring(0, last)
+        url = url.split(" ")[0].trim()
         apkFile = new File(project.getBasePath(), "build/apk/${url.substring(url.lastIndexOf("/") + 1)}")
         if (!apkFile.exists()) apkFile.getParentFile().mkdirs()
         def download = new Task.Backgroundable(project, "Start Download", true) {
@@ -123,7 +124,8 @@ public class InstallApp extends AnAction {
 
                 }
                 ApplicationManager.getApplication().invokeLater {
-                    if (total>0 && apkFile.size()==total) {
+                    if (total > 0 && apkFile.size() == total) {
+                        new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "下载完成", "文件存放于:$apkFile.absolutePath", NotificationType.INFORMATION).notify(project)
                         AndroidUtils.installApk(project, apkFile)
                     } else {
                         new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "下载文件异常", "下载文件失败", NotificationType.INFORMATION).notify(project)

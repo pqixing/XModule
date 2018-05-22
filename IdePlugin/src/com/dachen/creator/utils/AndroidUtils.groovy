@@ -144,7 +144,7 @@ public class AndroidUtils {
             }
             return devices.toList()
         } catch (Exception e) {
-            return new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Finish", e.toString(), NotificationType.INFORMATION).notify(project)
+            return new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Error", e.toString(), NotificationType.INFORMATION).notify(project)
         }
     }
     /**
@@ -183,19 +183,23 @@ public class AndroidUtils {
         }
         def devices = getDevices(project)
         if (devices == null) {
-            int exitCode = Messages.showOkCancelDialog("adb 命令执行失败,请先选择adb目录", "选择adb工具", null)
+            int exitCode = Messages.showOkCancelDialog("adb 命令执行失败,请先选择adb目录"+System.getenv(), "选择adb工具", null)
             if (exitCode != 0) return
 
             FileChooserDescriptor descriptor = new FileChooserDescriptor(false, true, false, false, false, false);
             VirtualFile[] chooseFiles = FileChooser.chooseFiles(descriptor, project, null)
             if (chooseFiles.length <= 0) return
-            File adb = new File(chooseFiles[0].getPath(), "adb")
-            if (!adb.exists()) {
-                new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Choose Fail", "该目录没有不包含adb工具,请重新选择", NotificationType.WARNING).notify(project)
+            def dir = chooseFiles[0].getPath()
+
+            if (new File(dir, "adb").exists() || new File(dir, "adb.exe").exists()) {
+
+                FileUtils.saveConfig("adb", "$dir/adb")
+                devices = getDevices(project)
+            } else {
+                new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Choose Fail", "该目录没有不包含adb工具,请重新选择$dir", NotificationType.WARNING).notify(project)
                 return
             }
-            FileUtils.saveConfig("adb", adb.absolutePath)
-            devices = getDevices(project)
+
         }
         if (devices == null) {
             Messages.showOkCancelDialog("请检查adb工具是否正常 ${}", "adb命令异常", null)
@@ -211,10 +215,10 @@ public class AndroidUtils {
                 .setListener(new MultiBoxDialog.Listener() {
             @Override
             void onOk(String input, List<String> items, boolean check) {
-                input = input.trim()
-                if (!input.isEmpty() && !items.contains(input)) {
-                    items.add(input, 0)
+                if (!items.contains(input)) {
+                    items.add(0,input)
                 }
+                items.remove("")
                 if (items.isEmpty()) {
                     new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Fail", "没有选中的设备", NotificationType.WARNING).notify(project)
                     return

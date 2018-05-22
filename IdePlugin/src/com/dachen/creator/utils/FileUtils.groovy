@@ -78,6 +78,10 @@ public class FileUtils {
     }
 
     public static final File getConfigFile() {
-        return new File(System.getenv("HOME"), ".ide.config")
+        String dir = System.getenv("HOME")
+        if(dir==null) dir = System.getenv("LOCALAPPDATA")
+        if(dir==null) dir = System.getenv("APPDATA")
+        if(dir==null) dir = System.getenv("TEMP")
+        return new File(dir, ".ide.config")
     }
 }

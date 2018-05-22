@@ -65,8 +65,11 @@ public class StringUtils {
      */
     public static String ls(List<String> s) {
         if (s == null || s.isEmpty()) return ""
-        def str = s.toString()
-        return str.substring(1, str.length() - 1)
+        StringBuilder sb = new StringBuilder()
+        for (String str:s){
+            sb.append(str).append(",")
+        }
+        return sb.substring(0,sb.length()-1)
     }
 
     public static String listString(List<String> s) {
