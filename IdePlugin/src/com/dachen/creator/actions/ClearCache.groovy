@@ -13,9 +13,8 @@ public class ClearCache extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
         Project project = e.getProject();
-//        int exitCode = Messages.showOkCancelDialog("是否清除所有缓存", "ClearCache", null);
-//        if(exitCode!=0) return
-//        GradleUtils.runTask(project, ["CleanCache"])
-        AndroidUtils.installApk(project,null)
+        int exitCode = Messages.showOkCancelDialog("是否清除所有缓存", "ClearCache", null);
+        if(exitCode!=0) return
+        GradleUtils.runTask(project, ["CleanCache"])
     }
 }

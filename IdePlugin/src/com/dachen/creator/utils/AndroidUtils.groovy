@@ -157,7 +157,7 @@ public class AndroidUtils {
                 for (String s : devices) {
                     progressIndicator.setText("Install to $s")
                     def run = GitUtils.run("/Tools/linux-sdk/platform-tools/adb install -r $apk.absolutePath", new File(project.getBasePath()))
-                    resutStr.append("$s : $run &&")
+                    resutStr.append("$s : $run   ->  ")
                 }
                 progressIndicator.setText("Install Finish")
                 progressIndicator.cancel()
@@ -173,7 +173,7 @@ public class AndroidUtils {
      * @return
      */
     public static void installApk(Project project, File apk) {
-        if (apk.exists()) {
+        if (!apk.exists()) {
             new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Fail", "apk not exits $apk.absolutePath", NotificationType.WARNING).notify(project)
             return
         }
