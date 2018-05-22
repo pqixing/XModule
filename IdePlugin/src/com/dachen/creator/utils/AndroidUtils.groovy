@@ -2,17 +2,36 @@ package com.dachen.creator.utils
 
 import com.dachen.creator.Conts
 import com.dachen.creator.ui.MultiBoxDialog
+import com.intellij.codeInsight.navigation.BackgroundUpdaterTask
+import com.intellij.codeInsight.navigation.ListBackgroundUpdaterTask
+import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.configurations.JavaCommandLineState
+import com.intellij.execution.filters.TextConsoleBuilderFactory
+import com.intellij.execution.process.OSProcessHandler
+import com.intellij.ide.ui.EditorOptionsTopHitProvider.Ex
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.project.Project;
+import com.intellij.openapi.application.Application
+import com.intellij.openapi.externalSystem.util.ExternalSystemSettingsControl
+import com.intellij.openapi.fileChooser.FileChooser
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.progress.PerformInBackgroundOption
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
+import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import com.intellij.psi.xml.XmlDocument;
+import com.intellij.psi.xml.XmlDocument
+import com.intellij.util.EnvironmentUtil
+import org.jetbrains.annotations.Nls
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -101,6 +120,52 @@ public class AndroidUtils {
         path = path.substring(preIndex);
         return path;
     }
+    /**
+     * 获取所有的设备信息
+     * @return
+     */
+    public static List<String> getDevices(Project project) {
+        try {
+            Set<String> devices = new HashSet<>()
+            GitUtils.run("${FileUtils.readConfig("adb", "adb")} devices -l", new File(project.getBasePath()))?.eachLine { l ->
+                if (l.contains("*") || l.startsWith("List") || l.trim().isEmpty()) return
+
+                def split = l.trim().split(" ")
+                String num = split[0]
+                String d = l.split(" ").find { it.trim().startsWith("model:") }.trim().replace("model:", "")
+
+                String r = "$num    $d"
+                devices.add(r)
+            }
+            return devices.toList()
+        } catch (Exception e) {
+            return null
+        }
+    }
+    /**
+     * 安装设备
+     * @param devices
+     * @param apk
+     */
+    public static void adbInstall(Project project, List<String> devices, File apk) {
+        def install = new Task.Backgroundable(project, "Start Install", true) {
+            @Override
+            void run(@NotNull ProgressIndicator progressIndicator) {
+                progressIndicator.start()
+                progressIndicator.setText("安装中")
+                StringBuilder resutStr = new StringBuilder()
+                for (String s : devices) {
+                    progressIndicator.setText("Install to $s")
+                    def run = GitUtils.run("/Tools/linux-sdk/platform-tools/adb install -r $apk.absolutePath", new File(project.getBasePath()))
+                    resutStr.append("$s : $run &&")
+                }
+                progressIndicator.setText("Install Finish")
+                progressIndicator.cancel()
+                new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Finish", resutStr.toString(), NotificationType.INFORMATION).notify(project)
+            }
+        }
+        ProgressManager.getInstance().runProcessWithProgressAsynchronously(install, new BackgroundableProcessIndicator(install))
+    }
 
     /**
      * 安装应用
@@ -108,40 +173,56 @@ public class AndroidUtils {
      * @return
      */
     public static void installApk(Project project, File apk) {
-        List<String> devices = new ArrayList<>()
-        String result = GitUtils.run("/Tools/linux-sdk/platform-tools/adb install -r $apk.absolutePath", apk.parentFile)
-//        String s = null;
-//        GitUtils.run("/Tools/linux-sdk/platform-tools/adb devices -l",apk.parentFile).eachLine { l->
-//            if(l.contains("*")||l.startsWith("List")) return
-//            devices.add(l)
-//
-//        }
-//        GitUtils.run("/Tools/linux-sdk/platform-tools/adb devices -l",apk.parentFile)
-        String s = devices.toString()
-//        MultiBoxDialog.builder(project)
-//                .setMode(false, true, true)
-//                .setMsg("切换分支", "此操作会批量对本地所有分支进行切换")
-//                .setInput("master")
-//                .setItems(branchs)
-//                .setHint("请输入或者勾选需要切换的分支")
-//                .setListener(new MultiBoxDialog.Listener() {
-//            @Override
-//            void onOk(String input, List<String> items, boolean check) {
-//                branchName = input
-//                if (branchName.isEmpty()) {
-//                    new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "输入错误", "分支名不能为空", NotificationType.WARNING).notify(project)
-//                    return
-//                }
-//                def map = ["$Conts.ENV_GIT_BRANCH": branchName, "$Conts.ENV_GIT_TARGET": "all", "$Conts.ENV_RUN_ID": ID_CHECKOUT]
-//
-//                GradleUtils.runTask(project, ["CheckOut"], CheckOut.this, map)
-//
-//            }
-//
-//            @Override
-//            void onCancel() {
-//
-//            }
-//        }).show()
+        if (apk.exists()) {
+            new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Fail", "apk not exits $apk.absolutePath", NotificationType.WARNING).notify(project)
+            return
+        }
+        def devices = getDevices(project)
+        if (devices == null) {
+            int exitCode = Messages.showOkCancelDialog("adb 命令执行失败,请先选择adb目录", "选择adb工具", null)
+            if (exitCode != 0) return
+
+            FileChooserDescriptor descriptor = new FileChooserDescriptor(false, true, false, false, false, false);
+            VirtualFile[] chooseFiles = FileChooser.chooseFiles(descriptor, project, null)
+            if (chooseFiles.length <= 0) return
+            File adb = new File(chooseFiles[0].getPath(), "adb")
+            if (!adb.exists()) {
+                new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Choose Fail", "该目录没有不包含adb工具,请重新选择", NotificationType.WARNING).notify(project)
+                return
+            }
+            FileUtils.saveConfig("adb", adb.absolutePath)
+            devices = getDevices(project)
+        }
+        if (devices == null) {
+            Messages.showOkCancelDialog("请检查adb工具是否正常", "adb命令异常", null)
+            return
+        }
+
+        MultiBoxDialog.builder(project)
+                .setMode(true, true, false)
+                .setMsg("选择设备", "请选择需要安装的设备")
+                .setInput(devices[0])
+                .setItems(devices)
+                .setHint("请勾选需要安装的设备")
+                .setListener(new MultiBoxDialog.Listener() {
+            @Override
+            void onOk(String input, List<String> items, boolean check) {
+                input = input.trim()
+                if (!input.isEmpty() && !items.contains(input)) {
+                    items.add(input, 0)
+                }
+                if (items.isEmpty()) {
+                    new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Fail", "没有选中的设备", NotificationType.WARNING).notify(project)
+                    return
+                }
+                new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Start Install", "正在安装应用到${items.size()}台设备", NotificationType.INFORMATION).notify(project)
+                adbInstall(project, items, apk)
+            }
+
+            @Override
+            void onCancel() {
+
+            }
+        }).show()
     }
 }

@@ -1,7 +1,14 @@
 package com.dachen.creator.ui;
 
+import com.dachen.creator.utils.AndroidUtils;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
+import com.intellij.openapi.fileChooser.FileChooser;
+import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -11,11 +18,13 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class MultiBoxDialog extends DialogWrapper implements ListCellRenderer<String>, ChangeListener, ListSelectionListener {
+    Project project;
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -27,9 +36,10 @@ public class MultiBoxDialog extends DialogWrapper implements ListCellRenderer<St
     private JScrollPane jpSroll;
     private JPanel jpInput;
     private JPanel buttomContent;
+    private JButton btnInput;
 
-    private boolean multi, inputText, associateInputAndItem, check,inputAble = true;
-    private String inputTxt, hint, checkTxt, msg;
+    private boolean multi, inputText, associateInputAndItem, check, inputAble = true, btnInputAble;
+    private String inputTxt, hint, checkTxt, msg, btnInputTxt;
     private List<String> items = new ArrayList<>();
     private List<String> selectItems = new ArrayList<>();
     private Listener listener;
@@ -47,10 +57,17 @@ public class MultiBoxDialog extends DialogWrapper implements ListCellRenderer<St
         return this;
     }
 
+    public MultiBoxDialog setInputButton(String txt, boolean visible) {
+        this.btnInputTxt = txt;
+        this.btnInputAble = visible;
+        return this;
+    }
+
     public MultiBoxDialog setInputAble(boolean inputAble) {
         this.inputAble = inputAble;
         return this;
     }
+
     public MultiBoxDialog setItems(Collection<String> items) {
         if (items != null) {
             this.items.clear();
@@ -85,6 +102,7 @@ public class MultiBoxDialog extends DialogWrapper implements ListCellRenderer<St
         super(project, true);
 //        setContentPane(contentPane);
         setModal(true);
+        this.project = project;
         getRootPane().setDefaultButton(buttonOK);
 
         buttonOK.addActionListener(e -> onOK());
@@ -145,12 +163,24 @@ public class MultiBoxDialog extends DialogWrapper implements ListCellRenderer<St
         lbMsg.setText(msg);
 
         cbForAll.addChangeListener(this);
+        btnInput.setVisible(btnInputAble);
+        if(btnInputTxt!=null)
+            btnInput.setText(btnInputTxt);
+        btnInput.addActionListener(e -> onInput());
         result.setText(hint);
 
         if (multi && check) selectItems.addAll(items);
         jlItems.setCellRenderer(this);
         jlItems.setModel(new StringModel(items));
         jlItems.addListSelectionListener(this);
+    }
+
+    private void onInput() {
+        FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false);
+        VirtualFile[] chooseFiles = FileChooser.chooseFiles(descriptor, project, project.getProjectFile().getParent());
+        if (chooseFiles.length > 0) {
+            tvInput.setText(chooseFiles[0].getPath());
+        }
     }
 
     public static final MultiBoxDialog builder(Project project) {

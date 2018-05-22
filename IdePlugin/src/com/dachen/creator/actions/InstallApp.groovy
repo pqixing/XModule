@@ -20,6 +20,7 @@ public class InstallApp extends AnAction {
         Project project = e.getProject();
         Module module = e.getData(LangDataKeys.MODULE);
 
+
         VirtualFile dir = module == null ? project.baseDir : module.moduleFile.parent;
         VirtualFile target = dir;
         dir = dir.findChild("build");

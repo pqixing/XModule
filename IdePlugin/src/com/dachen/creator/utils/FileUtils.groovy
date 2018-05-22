@@ -1,5 +1,6 @@
-package com.dachen.creator.utils;
+package com.dachen.creator.utils
 
+import com.intellij.openapi.vfs.VirtualFile;
 
 import java.io.*;
 
@@ -53,5 +54,30 @@ public class FileUtils {
         if (file.exists()) file.delete();
         if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
         file.write(data)
+    }
+
+    public static final boolean saveConfig(String key, String value) {
+        def f = getConfigFile()
+        def p = new Properties()
+        if (f.exists()) {
+            p.load(f.newInputStream())
+        }
+        p.put(key, value)
+        p.store(f.newOutputStream(),"utf-8")
+    }
+
+    public static final String readConfig(String key, String value) {
+        def f = getConfigFile()
+        if (f.exists()) {
+            def p = new Properties()
+            p.load(f.newInputStream())
+            def v = p.getProperty(key)
+            if (v != null) return v
+        }
+        return value
+    }
+
+    public static final File getConfigFile() {
+        return new File(System.getenv("HOME"), ".ide.config")
     }
 }

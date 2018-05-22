@@ -24,6 +24,7 @@ class GitUtils {
             }
         } catch (Exception e) {
         }
+        print("run:$cmd file:$dir result:$result")
         return result
     }
     /**
