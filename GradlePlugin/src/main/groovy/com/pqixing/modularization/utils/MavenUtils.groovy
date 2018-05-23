@@ -66,8 +66,7 @@ class MavenUtils {
      * @return
      */
     static String getVersion(String mavenName, String branchName, String artifactId) {
-        return getFocusMavenMaps(mavenName, branchName)?.get(artifactId)?.toString() ?:
-                (getMavenMaps(mavenName)?.get(artifactId)?.toString() ?: "+")
+        return getFocusMavenMaps(mavenName, branchName)?.get(artifactId)?.toString() ?: (getMavenMaps(mavenName)?.get(artifactId)?.toString() ?: "+")
     }
     /**
      * 获取制定分支的focusMaven配置
@@ -104,7 +103,8 @@ class MavenUtils {
     static Properties getMavenMaps(String mavenName) {
         String mapKey = "${mavenName}Maps"
         if (BasePlugin.rootProject.hasProperty(mapKey)) {
-            return BasePlugin.rootProject."$mapKey"
+            Properties cacheMap = BasePlugin.rootProject."$mapKey"
+            if(cacheMap!=null && !cacheMap.isEmpty()) return cacheMap
         }
 //        long start = System.currentTimeMillis()
         //如果当前不存在版本号，则从遍历Doc目录创建

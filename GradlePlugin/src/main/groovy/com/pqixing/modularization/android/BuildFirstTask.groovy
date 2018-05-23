@@ -18,7 +18,7 @@ class BuildFirstTask extends BaseTask {
             if (flavorName.isEmpty()) flavorName = it.name
             if ("preTest" == it.name) flavorName = it.name
         }
-        appName = TextUtils.getSystemEnv(Keys.ENV_BUILD_APP_NAME)?:project.name
+        appName = TextUtils.getSystemEnv(Keys.ENV_BUILD_APP_NAME) ?: project.name
         this.dependsOn "assemble${TextUtils.firstUp(flavorName)}$type"
     }
 
@@ -35,7 +35,7 @@ class BuildFirstTask extends BaseTask {
         //重命名文件
         if (buildFile.exists()) {
             def temp = buildFile
-            buildFile = new File(project.buildDir, "$appName-${type}.apk")
+            buildFile = new File(project.rootProject.buildDir, "$appName-${type}.apk")
             temp.renameTo(buildFile)
         }
         Print.lnIde("buildApk=${buildFile.absolutePath}")

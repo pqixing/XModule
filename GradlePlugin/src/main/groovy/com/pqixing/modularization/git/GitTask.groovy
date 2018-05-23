@@ -54,20 +54,33 @@ abstract class GitTask extends BaseTask {
                 break
             case "system":
                 Set<String> gitDirNames = new HashSet<>()
-                def names = TextUtils.getSystemEnv(Keys.ENV_GIT_NAMES)?.split(",")
-                if (names != null) gitDirNames.addAll(names)
+                TextUtils.getSystemEnv(Keys.ENV_GIT_NAMES)?.split(",")?.each {
+                    if (it != null && !it.trim().isEmpty()) {
+                        gitDirNames.add(it)
+                    }
+                }
+                GitConfig.allGitProjects.each { p ->
+                    boolean isGit = gitDirNames.contains(p.name)
+                    if (!isGit) p.submodules.each {
+                        it.each { sub ->
+                            String sName = sub.toString().split("###")[0]
 
-                GitConfig.allGitProjects.each { if (gitDirNames.contains(it.name)) targetGits.add(it) }
+                            if (gitDirNames.contains(sName)) isGit = true
+                        }
+                    }
+                    if (isGit) targetGits.add(p)
+                }
                 break
             default: break
         }
     }
-    /**
-     * 执行git命令的方法
-     * @param gitName
-     * @param gitUrl
-     * @param gitDir
-     */
+
+/**
+ * 执行git命令的方法
+ * @param gitName
+ * @param gitUrl
+ * @param gitDir
+ */
     abstract String onGitProject(String gitName, String gitUrl, File gitDir)
 
     @Override
@@ -87,4 +100,5 @@ abstract class GitTask extends BaseTask {
         }
         Print.lnIde("${JSON.toJSONString(handleResult)}")
     }
+
 }

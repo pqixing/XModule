@@ -77,7 +77,9 @@ class Dependencies extends BaseExtension {
      * @return
      */
     String getLastVersion(String group, String artifactId) {
-       return MavenUtils.getVersion(mavenType.name,wrapper.getExtends(GitConfig).branchName,artifactId)
+       String version =  MavenUtils.getVersion(mavenType.name,wrapper.getExtends(GitConfig).branchName,artifactId.trim())
+//        Print.ln("getLastVersion $artifactId  $version")
+        return version
 //        String timeStamp = "$artifactId$Keys.SUFFIX_STAMP"
 //        String version = versionMaps.getProperty(artifactId)
 //        long afterLastUpdate = System.currentTimeMillis() - (versionMaps.getProperty(timeStamp)?.toLong() ?: 0L)

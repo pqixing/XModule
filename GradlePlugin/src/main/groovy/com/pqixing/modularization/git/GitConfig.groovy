@@ -42,7 +42,7 @@ class GitConfig extends BaseExtension {
     GitConfig(Project project) {
         super(project)
         gitDir = GitUtils.findGitDir(project.projectDir)
-        if (gitDir == null || !GlobalConfig.gitLog) {
+        if (project == project.rootProject || gitDir == null || !GlobalConfig.gitLog) {
             branchName = ""
             revisionNum = ""
             lastLog = ""
