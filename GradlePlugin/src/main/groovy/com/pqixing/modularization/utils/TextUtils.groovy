@@ -110,4 +110,9 @@ class TextUtils {
             return newUrl.substring(0, newUrl.size() - s.size())
         else return ""
     }
+
+    static String removeMark(String s){
+        if(s == null) return ""
+        return s.replace("\"","").replace("'","")
+    }
 }

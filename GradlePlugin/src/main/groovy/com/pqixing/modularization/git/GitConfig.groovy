@@ -6,6 +6,7 @@ import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.Print
+import com.pqixing.modularization.utils.TextUtils
 import org.gradle.api.Project
 
 /**
@@ -47,13 +48,13 @@ class GitConfig extends BaseExtension {
             lastLog = ""
             return
         }
-        def gitInfo = GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H::%D::%s'", gitDir).trim().split("::")
+        def gitInfo = TextUtils.removeMark(GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H::%D::%s'", gitDir)).split("::")
         if (gitInfo.length > 0)
-            revisionNum = gitInfo[0]
+            revisionNum = gitInfo[0].trim()
         if (gitInfo.length > 1)
             branchName = gitInfo[1].split(",")[0].replace("HEAD", "").replace("->", "").trim()
         if ("%D" == branchName) {
-            branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir).trim()
+            branchName = TextUtils.removeMark(GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir))
         }
         if (gitInfo.length > 2)
             lastLog = gitInfo[2]
@@ -62,7 +63,7 @@ class GitConfig extends BaseExtension {
 //        revisionNum = GitUtils.run("git rev-parse HEAD", project.projectDir).trim()
 //        lastLog = GitUtils.run("git log -1 --oneline ${revisionNum}", project.projectDir).trim()
         if (!rootForGit) {
-            String dirLog = GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H' ${project.name}/", gitDir).trim()
+            String dirLog = TextUtils.removeMark(GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H' ${project.name}/", gitDir))
             //如果当前工程不是单独一个git，则使用目录的版本号作为最后的版本号
             if (!CheckUtils.isEmpty(dirLog)) {
                 lastLog += " root revision:$revisionNum"

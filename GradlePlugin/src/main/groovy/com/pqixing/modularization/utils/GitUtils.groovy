@@ -62,6 +62,7 @@ class GitUtils {
      * @return
      */
     static String getNameFromUrl(String url) {
-        return url.substring(url.lastIndexOf("/") + 1).replace(".git", "")
+        if(url == null) return ""
+        return url.substring(url.lastIndexOf("/") + 1).replace(".git", "").trim()
     }
 }

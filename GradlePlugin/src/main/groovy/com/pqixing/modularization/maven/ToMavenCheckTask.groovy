@@ -10,6 +10,7 @@ import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.MavenUtils
 import com.pqixing.modularization.utils.Print
+import com.pqixing.modularization.utils.TextUtils
 import com.pqixing.modularization.wrapper.MetadataWrapper
 import com.pqixing.modularization.wrapper.PomWrapper
 import org.gradle.api.GradleException
@@ -90,7 +91,7 @@ class ToMavenCheckTask extends BaseTask {
      */
     boolean hasUpdate() {
 
-        return gitConfig.revisionNum != GitUtils.run("git log -1 --pretty=format:'%H' origin/${gitConfig.branchName} ${gitConfig.rootForGit ? '' : (project.name + '/')}", gitConfig.gitDir)
+        return gitConfig.revisionNum != TextUtils.removeMark(GitUtils.run("git log -1 --pretty=format:'%H' origin/${gitConfig.branchName} ${gitConfig.rootForGit ? '' : (project.name + '/')}", gitConfig.gitDir))
     }
     /**
      * 检查Docment是否需要更新
