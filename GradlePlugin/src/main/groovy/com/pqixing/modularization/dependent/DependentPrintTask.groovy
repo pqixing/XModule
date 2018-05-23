@@ -44,7 +44,7 @@ class DependentPrintTask extends BaseTask {
 
     @Override
     void runTask() {
-        MavenUtils.saveMavenMaps(mavenType.name, wrapper.getExtends(GitConfig).branchName, new File(outDir, Keys.FILE_VERSION_DP))
+        MavenUtils.saveMavenMaps(mavenType.name, wrapper.getExtends(GitConfig).branchName,"all", new File(outDir, Keys.FILE_VERSION_DP))
         StringBuilder sb = new StringBuilder()
         //输出批量上传脚本以及依赖排序
         wrapper.getExtends(Dependencies).modules.each {
