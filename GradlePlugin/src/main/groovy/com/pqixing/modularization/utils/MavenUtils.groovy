@@ -187,7 +187,7 @@ class MavenUtils {
     static void pushMaven() {
         File docDir = getUpDocumentDir()
         GitUtils.run("git add $Keys.MODURIZATION/*", docDir)
-        GitUtils.run("git commit -m update-${new Date().toLocaleString()}", docDir)
+        GitUtils.run("git commit -m update", docDir)
         GitUtils.run("git push", docDir)
     }
 }
