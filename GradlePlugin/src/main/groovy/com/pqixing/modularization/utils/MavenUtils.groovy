@@ -97,6 +97,7 @@ class MavenUtils {
         def focusVersionFile = new File(GlobalConfig.focusVersions)
         if (focusVersionFile.exists()) properties.load(focusVersionFile.newInputStream())
         BasePlugin.rootProject.ext."$mapKey" = properties
+//        Print.ln("getFocusMavenMaps mavenName $mavenName :$branchName -> $properties")
         return properties
     }
 
@@ -121,7 +122,7 @@ class MavenUtils {
             maps.put(dir.name, version)
         }
         BasePlugin.rootProject.ext."$mapKey" = maps
-//        Print.lnf("getMavenMaps cout:${System.currentTimeMillis() - start} -> $maps")
+//        Print.ln("getMavenMaps mavenName $mavenName -> $maps")
 //        FileUtils.createIfNotExist(mapFile)
         return BasePlugin.rootProject."$mapKey"
     }
