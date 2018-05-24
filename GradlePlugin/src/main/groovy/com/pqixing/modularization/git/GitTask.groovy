@@ -91,7 +91,7 @@ abstract class GitTask extends BaseTask {
             String fullUrl = GitUtils.getFullGitUrl(p.gitUrl)
             Print.ln("GitTask $name -> start : $p.name $fullUrl ")
             String result = onGitProject(p.name, fullUrl, new File(project.rootDir.parentFile, p.name))
-            if (Keys.TIP_GIT_NOT_EXISTS == result || Keys.TIP_BRANCH_NOT_EXISTS == result) {
+            if (Keys.TIP_GIT_NOT_EXISTS == result || Keys.TIP_BRANCH_NOT_EXISTS == result||Keys.TIP_GIT_MERGE_FAIL) {
                 handleResult.put(p.name, result)
             } else {
                 handleResult.put(p.name, "ok")
