@@ -30,8 +30,9 @@ public class CheckOut extends AnAction implements GradleCallBack {
         project = e.getProject()
 
         Module module = e.getData(LangDataKeys.MODULE)
-        if (module == null) module = ModuleManager.getInstance(project).getModules()[0]
-
+        try {
+            if (module == null) module = ModuleManager.getInstance(project).getModules()[0]
+        }catch (Exception e1){}
         Set<String> branchs = GitUtils.findBranchs(module?.moduleFilePath)
 
         MultiBoxDialog.builder(project)
