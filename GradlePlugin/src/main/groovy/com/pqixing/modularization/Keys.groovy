@@ -233,4 +233,8 @@ class Keys {
      * App编译后的名称
      */
     static String ENV_BUILD_APP_NAME = "appBuildName"
+    /**
+     * 运行类型
+     */
+    static String ENV_RUN_TYPE = "runType"
 }

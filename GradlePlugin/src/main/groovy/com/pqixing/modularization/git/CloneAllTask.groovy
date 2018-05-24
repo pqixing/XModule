@@ -13,7 +13,7 @@ class CloneAllTask extends GitTask {
     String onGitProject(String gitName, String gitUrl, File gitDir) {
         if (gitDir.exists()) return "already exists"
         String result = GitUtils.run("git clone $gitUrl", gitDir.parentFile)
-        result += GitUtils.run("git checkout -b ${branchName} origin/${branchName}", gitDir)
+//        result += GitUtils.run("git checkout -b ${branchName} origin/${branchName}", gitDir)
         return result
     }
 }

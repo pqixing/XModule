@@ -69,7 +69,7 @@ public class RunModule extends AnAction {
                 if(apk.exists()) AndroidUtils.installApk(project,apk)
                 else new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "安装失败", "安装包不存在", NotificationType.WARNING).notify(project)
             }
-        }, ["$Conts.ENV_FOCUS_INCLUDES": module.name, "$Conts.ENV_RUN_ID": module.name, "$Conts.ENV_BUILD_APP_TYPE": "test", "$Conts.ENV_DEPENDENT_MODEL": "localFirst"])
+        }, ["$Conts.ENV_FOCUS_INCLUDES": module.name, "$Conts.ENV_RUN_ID": module.name, "$Conts.ENV_BUILD_APP_TYPE": "test", "$Conts.ENV_DEPENDENT_MODEL": result.second ? "MavenOnly" : "localFirst"])
 
     }
 

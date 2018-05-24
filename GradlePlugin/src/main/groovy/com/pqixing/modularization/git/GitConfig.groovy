@@ -48,13 +48,13 @@ class GitConfig extends BaseExtension {
             lastLog = ""
             return
         }
-        def gitInfo = TextUtils.removeMark(GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H::%D::%s'", gitDir)).split("::")
+        def gitInfo = TextUtils.removeLineAndMark(GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H::%D::%s'", gitDir)).split("::")
         if (gitInfo.length > 0)
             revisionNum = gitInfo[0].trim()
         if (gitInfo.length > 1)
             branchName = gitInfo[1].split(",")[0].replace("HEAD", "").replace("->", "").trim()
         if ("%D" == branchName) {
-            branchName = TextUtils.removeMark(GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir))
+            branchName = TextUtils.removeLineAndMark(GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir))
         }
         if (gitInfo.length > 2)
             lastLog = gitInfo[2]
@@ -63,7 +63,7 @@ class GitConfig extends BaseExtension {
 //        revisionNum = GitUtils.run("git rev-parse HEAD", project.projectDir).trim()
 //        lastLog = GitUtils.run("git log -1 --oneline ${revisionNum}", project.projectDir).trim()
         if (!rootForGit) {
-            String dirLog = TextUtils.removeMark(GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H' ${project.name}/", gitDir))
+            String dirLog = TextUtils.removeLineAndMark(GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H' ${project.name}/", gitDir))
             //如果当前工程不是单独一个git，则使用目录的版本号作为最后的版本号
             if (!CheckUtils.isEmpty(dirLog)) {
                 lastLog += " root revision:$revisionNum"

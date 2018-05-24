@@ -49,6 +49,13 @@ class GitUtils {
         return set
     }
 
+    static String findBranchName(String dir) {
+        if (dir == null) return ""
+        def gitDir = GitUtils.findGitDir(new File(dir))
+        if (gitDir == null) return ""
+        return GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir)
+    }
+
     /**
      * 查找出对应的git根目录
      * @param dir

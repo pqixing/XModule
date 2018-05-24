@@ -3,6 +3,8 @@ package com.pqixing.modularization.dependent
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
+import com.pqixing.modularization.utils.TextUtils
+
 /**
  * Created by pqixing on 17-12-25.
  */
@@ -63,8 +65,9 @@ class Module extends BaseExtension {
 
 
     String getArtifactId() {
-        if (CheckUtils.isEmpty(artifactId)) return moduleName
-        return artifactId
+        String a = artifactId
+        if (CheckUtils.isEmpty(a)) a= moduleName
+        return TextUtils.removeLineAndMark(a)
     }
 
     @Override

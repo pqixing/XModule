@@ -115,4 +115,8 @@ class TextUtils {
         if(s == null) return ""
         return s.replace("\"","").replace("'","")
     }
+
+    static String removeLineAndMark(String s){
+        return removeMark(s.replaceAll("\r|\n",""))
+    }
 }

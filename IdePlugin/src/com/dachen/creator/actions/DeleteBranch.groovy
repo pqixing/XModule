@@ -19,10 +19,16 @@ public class DeleteBranch extends AnAction implements GradleCallBack {
     private String ID = "Delete"
     private Project project
     private List<String> delItems = []
+    private String psw = "yes"
 
     @Override
     public void actionPerformed(AnActionEvent e) {
         project = e.getProject()
+        if (psw != Messages.showInputDialog(project, "请输入删除密码!!!", "删除分支校验",null)) {
+            new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "输入错误", "密码错误", NotificationType.WARNING).notify(project)
+            return
+        }
+
         Module module = e.getData(LangDataKeys.MODULE);
         Set<String> branchs = GitUtils.findBranchs(module?.moduleFilePath)
         MultiBoxDialog.builder(project)

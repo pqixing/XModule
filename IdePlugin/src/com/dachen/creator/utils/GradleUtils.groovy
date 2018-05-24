@@ -10,9 +10,12 @@ import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMo
 import com.intellij.openapi.externalSystem.task.TaskCallback
 import com.intellij.openapi.externalSystem.util.ExternalSystemUtil
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
 import org.jetbrains.annotations.NotNull
 
 public class GradleUtils {
+
+    public static final String runType = "ide:2.1"
 
     public static ProjectSystemId GRADLE = new ProjectSystemId("GRADLE")
 
@@ -28,7 +31,7 @@ public class GradleUtils {
         settings.setTaskNames(tasks)
         settings.setExternalSystemIdString(GRADLE.getId())
         settings.setExternalProjectPath(project.getBasePath())
-        def pro = ["$Conts.ENV_DEPENDENT_MODEL": "mavenOnly", "$Conts.ENV_FOCUS_INCLUDES": "empty", "$Conts.ENV_RUN_TYPE": "ide", "$Conts.ENV_UPDATE_BEFORE_SYNC": true, "$Conts.ENV_SILENT_LOG": false, "$Conts.ENV_BUILD_DIR": "ide"] + scriptParameters
+        def pro = ["$Conts.ENV_DEPENDENT_MODEL": "mavenOnly", "$Conts.ENV_FOCUS_INCLUDES": "empty", "$Conts.ENV_RUN_TYPE": runType, "$Conts.ENV_UPDATE_BEFORE_SYNC": true, "$Conts.ENV_SILENT_LOG": false, "$Conts.ENV_BUILD_DIR": "ide"] + scriptParameters
 
         settings.setScriptParameters(getPro(pro))
 
@@ -44,7 +47,9 @@ public class GradleUtils {
                 String sKey = "##$id##"
                 String msg = l > 2 ? result.substring(result.indexOf(sKey) + sKey.length()) : ""
                 ApplicationManager.getApplication().invokeLater {
-                    callback?.onFinish(logTime, id, msg)
+                    if (logTime > 0 && msg.toString().contains("Ide Plugin Update")) {
+                        Messages.showInfoMessage("插件版本过低,请更新:"+msg.replace("Ide Plugin Update",""), "任务执行失败")
+                    } else callback?.onFinish(logTime, id, msg)
                 }
             }
 

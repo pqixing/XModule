@@ -14,6 +14,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import groovy.json.JsonSlurper
@@ -29,13 +30,14 @@ public class CheckOut extends AnAction implements GradleCallBack {
         project = e.getProject()
 
         Module module = e.getData(LangDataKeys.MODULE)
-//        if(module == null) module = ModuleManager.getInstance(project).getModules()[0]
+        if (module == null) module = ModuleManager.getInstance(project).getModules()[0]
+
         Set<String> branchs = GitUtils.findBranchs(module?.moduleFilePath)
 
         MultiBoxDialog.builder(project)
                 .setMode(false, true, true)
                 .setMsg("切换分支", "此操作会批量对本地所有分支进行切换")
-                .setInput("master")
+                .setInput(GitUtils.findBranchName(module?.moduleFilePath))
                 .setItems(branchs)
                 .setHint("请输入或者勾选需要切换的分支")
                 .setListener(new MultiBoxDialog.Listener() {
@@ -104,7 +106,7 @@ public class CheckOut extends AnAction implements GradleCallBack {
             sb.append(",")
             def pro = ["$Conts.ENV_GIT_BRANCH": branchName, "$Conts.ENV_GIT_TARGET": "system", "$Conts.ENV_RUN_ID": ID_CREATE, "$Conts.ENV_GIT_NAMES": sb.toString()]
 
-            GradleUtils.runTask(project, ["DeleteBranch"], this, pro)
+            GradleUtils.runTask(project, ["CreateBranch"], this, pro)
         }
     }
 }

@@ -25,7 +25,7 @@ public class BuildModule extends AnAction {
         project = e.getProject()
 
         module = e.getData(LangDataKeys.MODULE)
-        if (module == null||module.name == project.name) selectModule()
+        if (module == null || module.name == project.name) selectModule()
         else build()
     }
 
@@ -56,15 +56,15 @@ public class BuildModule extends AnAction {
     }
 
     private void build() {
-        Pair<String, Boolean> result = Messages.showInputDialogWithCheckBox("请输入模块构建信息", "构建模块$module.name", "Release", true, true, null, module.name, null)
+        Pair<String, Boolean> result = Messages.showInputDialogWithCheckBox("请输入模块构建信息", "构建模块$module.name", "MavenOnly", true, true, null, module.name, null)
         if (result.first == null || result.second == null) return
         String moduleName = module.name
-        GradleUtils.runTask(project, [":" + moduleName + ":${result.second ? "BuildFirstRelease" : "BuildFirstDebug"}"], new GradleCallBack() {
+        GradleUtils.runTask(project, [":" + moduleName + ":BuildFirstRelease"], new GradleCallBack() {
             @Override
             void onFinish(long time, String id, String resultStr) {
                 new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "构建完成", resultStr, NotificationType.WARNING).notify(project)
             }
-        }, ["$Conts.ENV_FOCUS_INCLUDES": module.name, "$Conts.ENV_RUN_ID": module.name, "$Conts.ENV_BUILD_APP_TYPE": "test", "$Conts.ENV_DEPENDENT_MODEL": "localFirst"])
+        }, ["$Conts.ENV_FOCUS_INCLUDES": module.name, "$Conts.ENV_RUN_ID": module.name, "$Conts.ENV_BUILD_APP_TYPE": "test", "$Conts.ENV_DEPENDENT_MODEL": result.second ? "MavenOnly" : "localFirst"])
 
     }
 
