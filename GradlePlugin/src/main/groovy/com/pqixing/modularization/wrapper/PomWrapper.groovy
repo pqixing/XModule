@@ -24,7 +24,7 @@ class PomWrapper extends XmlWrapper {
      * http://192.168.3.7:9527/nexus/content/repositories/androidtest/com/dachen/android/router/0.1.7/router-0.1.7.pom
      */
     static String getPomUrl(String envUrl, String group, String moduleName, String version) {
-        return "$envUrl/${TextUtils.getUrl(group)}/$moduleName/$version/${moduleName}-${version}.pom"
+        return "$envUrl/${TextUtils.getUrl(group)}/$moduleName/$version/${moduleName}-${version}.pom".replaceAll("\r|\n","")
     }
 
 
@@ -35,6 +35,7 @@ class PomWrapper extends XmlWrapper {
     }
 
     public static PomWrapper create(String url) {
+        url = url.replaceAll("\r|\n","")
         return new PomWrapper(Net.get(url, true))
     }
 
