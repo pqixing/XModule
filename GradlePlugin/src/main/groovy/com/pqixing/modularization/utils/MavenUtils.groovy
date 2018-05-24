@@ -169,16 +169,16 @@ class MavenUtils {
 
         //缓存meta 文件
         FileUtils.write(new File(mavenDir, "$artifactId/meta.xml"), metaWrapper.xmlString)
-//        def versions = metaWrapper.versions
-//        Print.ln("updateMavenRecord $mavenName $artifactId:- >$versions")
-//        //缓存所有版本的pom 文件
-//        versions.each { v ->
-//            File pomFile = new File(mavenDir, "$artifactId/$v/pom.xml")
-//            if (!pomFile.exists()) {
-//                String pomXml = Net.get(PomWrapper.getPomUrl(mavenUrl, GlobalConfig.groupName, artifactId, v), true)
-//                if (!CheckUtils.isEmpty(pomXml)) FileUtils.write(pomFile, pomXml)
-//            }
-//        }
+        def versions = metaWrapper.versions
+        Print.ln("updateMavenRecord $mavenName $artifactId:- >$versions")
+        //缓存所有版本的pom 文件
+        versions.each { v ->
+            File pomFile = new File(mavenDir, "$artifactId/$v/pom.xml")
+            if (!pomFile.exists()) {
+                String pomXml = Net.get(PomWrapper.getPomUrl(mavenUrl, GlobalConfig.groupName, artifactId, v), true)
+                if (!CheckUtils.isEmpty(pomXml)) FileUtils.write(pomFile, pomXml)
+            }
+        }
         if (push) pushMaven()
         return true
     }
