@@ -6,13 +6,12 @@ import com.pqixing.modularization.base.BaseTask
  * Created by pqixing on 17-12-22.
  */
 class CleanCacheTask extends BaseTask {
+    public CleanCacheTask(){
+        this.dependsOn "clean"
+    }
 
     @Override
     void start() {
-        try {
-            project.clean.execute()
-        } catch (Exception e) {
-        }
     }
 
     @Override
