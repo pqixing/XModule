@@ -17,7 +17,10 @@ class ToMavenTask extends BaseTask {
     ToMavenTask() {
         this.dependsOn "uploadArchives"
         this.dependsOn "ToMavenCheck"
-        project.uploadArchives.mustRunAfter "ToMavenCheck"
+        this.dependsOn "clean"
+
+        project.clean.mustRunAfter "ToMavenCheck"
+        project.uploadArchives.mustRunAfter "clean"
     }
 
     @Override
