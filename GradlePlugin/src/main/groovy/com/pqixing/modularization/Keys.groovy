@@ -209,6 +209,10 @@ class Keys {
      */
     static String ENV_GIT_TARGET = "target"
     /**
+     * 基础分支名称
+     */
+    static String ENV_GIT_BASE_BRANCH = "baseBranchName"
+    /**
      * git不存在的提示
      */
     static String TIP_GIT_NOT_EXISTS = "Git Not Exists"
