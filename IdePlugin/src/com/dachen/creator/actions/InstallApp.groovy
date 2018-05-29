@@ -86,7 +86,6 @@ public class InstallApp extends AnAction {
         def download = new Task.Backgroundable(project, "Start Download", true) {
             @Override
             void run(@NotNull ProgressIndicator progressIndicator) {
-                progressIndicator.start()
                 progressIndicator.setText("正在下载Apk:")
                 apkFile.delete()
                 apkFile.createNewFile()
@@ -112,6 +111,7 @@ public class InstallApp extends AnAction {
                         allDown += len
                         int progress = allDown * 100 / total
                         progressIndicator.setText("download:${progress}%")
+                        progressIndicator.setFraction(progress.toDouble()/100)
                     }
                     output.flush()
                     try {

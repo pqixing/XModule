@@ -17,6 +17,10 @@ class Conts {
      * git分支名称
      */
     static String ENV_GIT_BRANCH = "branchName"
+    /**
+     * baseBranchName
+     */
+    static String ENV_GIT_BASE_BRANCH = "baseBranchName"
     static String ENV_SILENT_LOG = "silentLog"
     static String ENV_UPDATE_BEFORE_SYNC = "updateBeforeSync"
     static String ENV_FOCUS_INCLUDES = "foucesIncludes"

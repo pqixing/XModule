@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>com.pqixing.modularization.codeCreator</id>
     <name>CodeCreator</name>
-    <version>2.1</version>
+    <version>2.2</version>
     <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
 
     <description><![CDATA[
@@ -88,7 +88,7 @@
                     description="InstallApp"/>
 
             <separator/>
-            <action id="DpsAnalyze" class="com.dachen.creator.actions.DpsAnalyze" text="DpsAnalyze"
+            <action id="DpsAnalyze" class="com.dachen.creator.actions.DependentList" text="DependentList"
                     description="DpsAnalyze"/>
             <action id="ClearCache" class="com.dachen.creator.actions.ClearCache" text="ClearCache"
                     description="ClearCache"/>

@@ -3,25 +3,31 @@ package com.dachen.creator.utils
 import java.util.concurrent.TimeUnit
 
 class GitUtils {
-    static String run(String cmd, File dir) {
-        String result = ""
+
+
+    static List<String> run(String cmd, File dir, Closure<String> eachLine = null) {
+        List<String> result = []
 
         try {
             def process = cmd.execute(null, dir)
             if (process == null) return ""
-
-            if (process.waitFor(30, TimeUnit.SECONDS)) {
-                InputStream input = process.exitValue() == 0 ? process.inputStream : process.errorStream;
-                result = input?.getText("utf-8")
-                try {
-                    process.closeStreams()
-                    process.destroy()
-                } catch (Exception e) {
+//            if (process.waitFor(30, TimeUnit.SECONDS)) {
+//                InputStream input = process.exitValue() == 0 ? process.inputStream : process.errorStream;
+            InputStream input = process.inputStream
+            try {
+                input.eachLine("utf-8") { line ->
+                    result += line
+                    eachLine?.call(line)
                 }
-            } else {
-                result = "Time Out count :1 MINUTES"
-                process.waitForOrKill(1000 * 60)//1分钟后结束
+                process.closeStreams()
+                process.destroy()
+            } catch (Exception e) {
+                result += "Exception ${e.toString()}"
             }
+//            } else {
+//                result += "Time Out count :1 MINUTES"
+//                process.waitForOrKill(1000 * 60)//1分钟后结束
+//            }
         } catch (Exception e) {
         }
         print("run:$cmd file:$dir result:$result")
@@ -37,8 +43,8 @@ class GitUtils {
         def gitDir = GitUtils.findGitDir(new File(dir))
         if (gitDir == null) return []
         def set = new HashSet<String>()
-        GitUtils.run("git branch -a", gitDir)?.eachLine { l ->
-            l = l.replace("*", "")
+        GitUtils.run("git branch -a", gitDir) {
+            String l = it.replace("*", "")
             def i = l.lastIndexOf("/")
             if (i < 0) {
                 set.add(l.trim())
@@ -53,7 +59,7 @@ class GitUtils {
         if (dir == null) return ""
         def gitDir = GitUtils.findGitDir(new File(dir))
         if (gitDir == null) return ""
-        return GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir)
+        return GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir)?.last()
     }
 
     /**

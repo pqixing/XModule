@@ -102,7 +102,7 @@ public class ToMaven extends AnAction {
         final String moduleName = uploadList[pos]
 
 
-        GradleUtils.runTask(project, [":" + moduleName + ":clean", ":" + moduleName + ":ToMaven"], new GradleCallBack() {
+        GradleUtils.runTask(project, [":" + moduleName + ":ToMaven"], new GradleCallBack() {
             @Override
             void onFinish(long time, String id, String result) {
                 def upload = checkUpload(result)

@@ -1,41 +1,25 @@
 package com.dachen.creator.utils
 
-import com.dachen.creator.Conts
 import com.dachen.creator.ui.MultiBoxDialog
-import com.intellij.codeInsight.navigation.BackgroundUpdaterTask
-import com.intellij.codeInsight.navigation.ListBackgroundUpdaterTask
-import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.configurations.JavaCommandLineState
-import com.intellij.execution.filters.TextConsoleBuilderFactory
-import com.intellij.execution.process.OSProcessHandler
-import com.intellij.ide.ui.EditorOptionsTopHitProvider.Ex
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.application.Application
-import com.intellij.openapi.externalSystem.util.ExternalSystemSettingsControl
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
-import com.intellij.openapi.progress.PerformInBackgroundOption
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
-import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator;
+import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
+import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
 import com.intellij.psi.xml.XmlDocument
-import com.intellij.util.EnvironmentUtil
-import org.jetbrains.annotations.Nls
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.io.IOException;
+import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.Nullable
 
 public class AndroidUtils {
 
@@ -128,7 +112,7 @@ public class AndroidUtils {
         try {
             Set<String> devices = new HashSet<>()
             String cmd = "${FileUtils.readConfig("adb", "adb")} devices -l"
-            GitUtils.run(cmd, new File(project.getBasePath()))?.eachLine { l ->
+            GitUtils.run(cmd, new File(project.getBasePath())){ l ->
                 if (l == null || l.contains("*") || l.startsWith("List") || l.trim().isEmpty()) return
 
                 def split = l.trim().split(" ")
@@ -156,12 +140,15 @@ public class AndroidUtils {
         def install = new Task.Backgroundable(project, "Start Install", true) {
             @Override
             void run(@NotNull ProgressIndicator progressIndicator) {
-                progressIndicator.start()
                 StringBuilder resultStr = new StringBuilder()
+                String tag = "Install to"
                 for (String s : devices) {
-                    progressIndicator.setText("Install to $s")
-                    def run = GitUtils.run("${FileUtils.readConfig("adb", "adb")} -s ${s.split(" ")[0]} install -r $apk.absolutePath", new File(project.getBasePath()))
-                    resultStr.append("$s : $run   ->  ")
+
+                    progressIndicator.setText("$tag $s")
+                    def run = GitUtils.run("${FileUtils.readConfig("adb", "adb")} -s ${s.split(" ")[0]} install -r $apk.absolutePath", new File(project.getBasePath())){
+                        progressIndicator.setText("$tag $s   $it")
+                    }
+                    resultStr.append("$s : ${run.last()}   ->  ")
                 }
                 progressIndicator.setText("Install Finish")
                 progressIndicator.cancel()
@@ -207,7 +194,7 @@ public class AndroidUtils {
         }
 
         MultiBoxDialog.builder(project)
-                .setMode(true, true, false)
+                .setMode(true, true, true)
                 .setMsg("选择设备", "请选择需要安装的设备")
                 .setInput(devices[0])
                 .setItems(devices)
