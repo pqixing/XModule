@@ -14,7 +14,7 @@ class BuildFlavorsTask extends BaseTask {
 
     BuildFlavorsTask() {
         this.dependsOn "DependentPrint"
-//        this.dependsOn "assembleRelease"
+        this.dependsOn "assembleRelease"
         project.tasks.each { t ->
             if (t.name == "assemblePreTestRelease") t.enabled = false
             else if (t.name.matches("assemble.*Release")) builds.add(t.name)
