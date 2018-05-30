@@ -52,9 +52,6 @@ abstract class AndroidPlugin extends BasePlugin {
             }
             BaseTask.task(project, DocSyncTask.class)
             BaseTask.task(project, AllInnerDpsTask.class)
-            //添加分析的任务
-//            BaseTask.task(wrapper.project, wrapper.getExtends(GitConfig.class)
-//                    .branchName == "master" ? MavenMergerTask.class : BranchMergerTask.class)
 
             project.ext.printPros = { pro -> Print.lnPro(pro) }
 
@@ -63,6 +60,9 @@ abstract class AndroidPlugin extends BasePlugin {
                 BaseTask.task(project, ToMavenCheckTask)
                 BaseTask.taskByName(project, "BuildFirstDebug", BuildFirstTask).buildType = "Debug"
                 BaseTask.taskByName(project, "BuildFirstRelease", BuildFirstTask).buildType = "Release"
+                if (wrapper.pluginName == Keys.NAME_APP) {
+                    BaseTask.task(project, BuildFlavorsTask)
+                }
             }
         }
     }

@@ -2,13 +2,14 @@ package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.common.BuildConfig
+import org.gradle.internal.impldep.com.google.common.io.Files
+
 /**
  * Created by pqixing on 17-11-30.
  */
 
 class FileUtils {
 //    private static HashMap<String, Long> cacheTime = new HashMap<>()
-
 
     /**
      * 根据包名获取路径
@@ -60,10 +61,8 @@ class FileUtils {
      * @return
      */
     static String urls(String[] urls) {
-        return TextUtils.append("/",urls)
+        return TextUtils.append("/", urls)
     }
-
-
 
 
     static Properties readMaps(File file) {
@@ -116,4 +115,17 @@ class FileUtils {
     static InputStream coverStream(String coverStr) {
         return new File(write(new File(BuildConfig.rootOutDir, "cover/${TextUtils.onlyName}"), coverStr)).newInputStream()
     }
+
+    static void copy(File from, File to) {
+        if (from.isDirectory()) {
+            from.eachFile { f ->
+                copy(f, new File(to, "$from.name/$f.name"))
+            }
+        } else {
+            to.parentFile.mkdirs()
+            to.setBytes(from.getBytes())
+        }
+    }
+
+
 }

@@ -205,6 +205,10 @@ class Keys {
      */
     static String ENV_GIT_NAMES = "gitNames"
     /**
+     * 对外输出路径
+     */
+    static String ENV_OUT_DIR = "outputDir"
+    /**
      * git目标处理
      */
     static String ENV_GIT_TARGET = "target"
