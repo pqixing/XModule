@@ -286,8 +286,9 @@ public class AutoInclude {
             String error = ""
             if (!localDir.exists()) {
                 println("clone .... $urlWitUser")
-                error += run("git clone ${urlWitUser}", rootDir.parentFile)
-                error += run("git checkout -b ${branchName} origin/${branchName}", localDir)
+                String c = run("git clone -b ${branchName} ${urlWitUser}", rootDir.parentFile)
+                if(c.startsWith("fatal:")) c = run("git clone ${urlWitUser}", rootDir.parentFile)
+                error += c
                 println("clone end.... $urlWitUser")
             }
             if (!localDir.exists()) throw new RuntimeException("clone faile please check url: $urlWitUser error : $error")
