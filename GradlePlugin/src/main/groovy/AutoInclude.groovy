@@ -35,22 +35,23 @@ public class AutoInclude {
         this.gradle = gradle
         this.rootDir = rootDir
         this.outIncludeFile = outIncludeFile
+
         branchName = getSystemEnv("branchName")
-        if (branchName == null) {
-            def globalConfig = new File(rootDir, ".modularization/global.properties")
-            if (globalConfig.exists()) {
-                def gp = new Properties()
-                gp.load(globalConfig.newInputStream())
-                String branchName = gp.getProperty("branchName")
-                if (branchName != null && !branchName.isEmpty()) {
-                    this.branchName = branchName.replaceAll("\r|\n|\"|'","")
-                }
-            }
-        }
+        if (branchName == null) branchName = readBranch()
         if (branchName == null) branchName = "master"
 
-
+        branchName = branchName.replaceAll("\\\"|'", "").trim()
         readFromEnv()
+    }
+
+    String readBranch() {
+        def globalConfig = new File(rootDir, ".modularization/global.properties")
+        if (globalConfig.exists()) {
+            def gp = new Properties()
+            gp.load(globalConfig.newInputStream())
+            return gp.getProperty("branchName")
+        }
+        return "master"
     }
 
     static String getSystemEnv(String key) {
@@ -88,8 +89,8 @@ public class AutoInclude {
         if (t != null) username = t
         t = getSystemEnv("gitPassword")
         if (t != null) password = t
-        t = getSystemEnv("gitEmail")
-        if (t != null) email = t
+        t = getSystemEnv("gitPassword")
+        if (t != null) password = t
 
         gradle.ext.gitUserName = username
         gradle.ext.gitPassword = password
@@ -285,7 +286,8 @@ public class AutoInclude {
             String error = ""
             if (!localDir.exists()) {
                 println("clone .... $urlWitUser")
-                error += run("git clone -b ${branchName} ${urlWitUser}", rootDir.parentFile)
+                error += run("git clone ${urlWitUser}", rootDir.parentFile)
+                error += run("git checkout -b ${branchName} origin/${branchName}", localDir)
                 println("clone end.... $urlWitUser")
             }
             if (!localDir.exists()) throw new RuntimeException("clone faile please check url: $urlWitUser error : $error")

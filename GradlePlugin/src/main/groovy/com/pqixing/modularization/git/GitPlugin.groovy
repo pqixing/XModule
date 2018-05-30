@@ -18,7 +18,7 @@ import org.gradle.api.invocation.Gradle
  */
 
 class GitPlugin extends BasePlugin {
-    public static final String mouldVersion = "//2.1"
+    public static final String mouldVersion = "//2.4"
     /**
      * 设置页面文件
      */
