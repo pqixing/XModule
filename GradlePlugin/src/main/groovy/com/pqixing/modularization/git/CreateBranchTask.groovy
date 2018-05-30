@@ -29,7 +29,6 @@ class CreateBranchTask extends GitTask {
         if (isCurBranch) return "current branch is $branchName"
         if (hasLocal) return GitUtils.run("git checkout $branchName", gitDir)
         if (hasRemote) return GitUtils.run("git checkout -b $branchName origin/$branchName", gitDir)
-        String baseRemote = baseBranchName== branchName?"":"origin/$baseBranchName"
-        return GitUtils.run("git checkout $baseRemote -b $branchName", gitDir) +"\n" + GitUtils.run("git push origin $branchName", gitDir) +"\n" + GitUtils.run("git branch --set-upstream-to=origin/$branchName", gitDir)
+        return GitUtils.run("git checkout origin/$baseBranchName -b $branchName", gitDir) +"\n" + GitUtils.run("git push origin $branchName", gitDir) +"\n" + GitUtils.run("git branch --set-upstream-to=origin/$branchName", gitDir)
     }
 }

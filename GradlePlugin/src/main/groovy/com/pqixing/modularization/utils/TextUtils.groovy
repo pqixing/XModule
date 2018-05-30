@@ -113,7 +113,7 @@ class TextUtils {
 
     static String removeMark(String s){
         if(s == null) return ""
-        return s.replace("\"","").replace("'","")
+        return s.replaceAll("\"|'","")
     }
 
     static String removeLineAndMark(String s){

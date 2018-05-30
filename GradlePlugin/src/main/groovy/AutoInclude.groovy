@@ -43,7 +43,7 @@ public class AutoInclude {
                 gp.load(globalConfig.newInputStream())
                 String branchName = gp.getProperty("branchName")
                 if (branchName != null && !branchName.isEmpty()) {
-                    this.branchName = branchName.replaceAll("[^0-9a-zA-Z]", "")
+                    this.branchName = branchName.replaceAll("\r|\n|\"|'","")
                 }
             }
         }
@@ -83,6 +83,13 @@ public class AutoInclude {
         //读取隐藏配置
         File hideIncludeFile = new File(rootDir, "$AutoConfig.dirName/$AutoConfig.TXT_HIDEINCLUDE")
         if (hideIncludeFile.exists()) readInclude(icTxt, hideIncludeFile, false)
+
+        String t = getSystemEnv("gitUserName")
+        if (t != null) username = t
+        t = getSystemEnv("gitPassword")
+        if (t != null) password = t
+        t = getSystemEnv("gitEmail")
+        if (t != null) email = t
 
         gradle.ext.gitUserName = username
         gradle.ext.gitPassword = password
@@ -278,8 +285,7 @@ public class AutoInclude {
             String error = ""
             if (!localDir.exists()) {
                 println("clone .... $urlWitUser")
-                error += run("git clone ${urlWitUser}", rootDir.parentFile)
-                error += run("git checkout -b ${branchName} origin/${branchName}", localDir)
+                error += run("git clone -b ${branchName} ${urlWitUser}", rootDir.parentFile)
                 println("clone end.... $urlWitUser")
             }
             if (!localDir.exists()) throw new RuntimeException("clone faile please check url: $urlWitUser error : $error")

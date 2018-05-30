@@ -35,7 +35,7 @@ abstract class GitTask extends BaseTask {
 
         targetGits = new HashSet<>()
         baseBranchName = TextUtils.getSystemEnv(Keys.ENV_GIT_BASE_BRANCH)
-        if (CheckUtils.isEmpty(baseBranchName)) baseBranchName = branchName
+        if (CheckUtils.isEmpty(baseBranchName)) baseBranchName = "master"
 
     }
 
