@@ -39,7 +39,7 @@ class Dependencies extends BaseExtension {
     void allExclude(Map<String, String> exclude) {
         def key = exclude.toString()
         def contains = allExcludes.containsKey(key)
-        Print.ln("allExclude $contains $key")
+//        Print.ln("allExclude $contains $key")
         if (!contains) {
             allExcludes.put(key, exclude)
         }
