@@ -40,7 +40,7 @@ class Dependencies extends BaseExtension {
         def key = exclude.toString()
         def contains = allExcludes.containsKey(key)
         Print.ln("allExclude $contains $key")
-        if(!contains) {
+        if (!contains) {
             allExcludes.put(key, exclude)
         }
     }
@@ -171,9 +171,36 @@ class Dependencies extends BaseExtension {
         dependentLose += module
     }
 
+    void loadLoadExclude() {
+        def ps = new HashSet<String>()
+        localDependency.forEach { ps.add(it.moduleName) }
+        //对应all*.exclude
+        //对应all*.exclude
+        HashMap<String, Map<String, String>> allExs = new HashMap<>()
+
+        def sb = new StringBuilder("configurations { \n")
+        project.rootProject.allprojects { p ->
+            if (ps.contains(p)) {
+                def aoe = ProjectWrapper.with(p)?.getExtends(Dependencies)?.allExcludes
+                if (!CheckUtils.isEmpty(aoe)) {
+                    allExs.putAll(aoe)
+                }
+            }
+        }
+        sb.append("${excludeStr("all*.exclude", allExcludes.values())}}")
+        wrapper.apply from: FileUtils.write(new File(wrapper.getExtends(BuildConfig).cacheDir, "configurations.gradle"), sb.toString())
+    }
+
+
     @Override
     LinkedList<String> getOutFiles() {
         init()
+        if (wrapper.pluginName == Keys.NAME_APP) {
+            wrapper.project.afterEvaluate {
+                loadLoadExclude()
+            }
+        }
+
         Print.ln("onDp out -> $project.name")
         StringBuilder sb = new StringBuilder("dependencies { \n")
         modules.each { model ->
@@ -215,12 +242,14 @@ class Dependencies extends BaseExtension {
                 allExclude([group: model.groupId, module: TextUtils.getBranchArtifactId(model.moduleName, wrapper)])
             }
         }
-        if(masterExclude.isEmpty()) masterExclude.add(Keys.TAG_EMPTY)
+        if (masterExclude.isEmpty()) masterExclude.add(Keys.TAG_EMPTY)
         allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)}")
         sb.append("${excludeStr("all*.exclude", allExcludes.values())}} \n")
 //        saveVersionMap()
 
         if (!CheckUtils.isEmpty(dependentLose)) Print.lnf("$project.name dependentLose : ${JSON.toJSONString(dependentLose)}")
+
+
         return [FileUtils.write(new File(wrapper.getExtends(BuildConfig).cacheDir, "dependencies.gradle"), sb.toString())];
     }
     /**
