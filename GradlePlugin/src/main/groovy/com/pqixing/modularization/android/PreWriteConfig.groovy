@@ -42,9 +42,9 @@ class PreWriteConfig extends BaseExtension {
         if (dpNames.length() > 1) dpNames.deleteCharAt(dpNames.length() - 1)
         String launchClass = "${buildConfig.javaPackage}.${TextUtils.className(project.name)}Launch"
 
-        addConfig("NAME": buildConfig.projectName, "DP_CONFIGS_NAMES": dpNames.toString())
+        addConfig("NAME": buildConfig.projectName/*, "DP_CONFIGS_NAMES": dpNames.toString()*/)
         addConfig("LAUNCH_CONFIG": launchClass)
-        addConfig("DEPENDENCIES": JSON.toJSONString(dependent.modules).replace("\"", ""))
+//        addConfig("DEPENDENCIES": JSON.toJSONString(dependent.modules).replace("\"", ""))
 
         addConfig(["BUILD_TIME": System.currentTimeMillis().toString(), "BUILD_TIME_STR": new Date().toLocaleString()])
         addConfig(["GIT_COMMIT_LOG": gitConfig.lastLog, "GIT_COMMIT_NUM": gitConfig.revisionNum])
