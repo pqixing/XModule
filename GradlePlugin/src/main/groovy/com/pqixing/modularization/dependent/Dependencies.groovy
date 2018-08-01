@@ -179,15 +179,16 @@ class Dependencies extends BaseExtension {
         HashMap<String, Map<String, String>> allExs = new HashMap<>()
 
         def sb = new StringBuilder("configurations { \n")
-        project.rootProject.allprojects { p ->
-            if (ps.contains(p)) {
+        project.rootProject.allprojects.forEach { p ->
+            if (ps.find {it == p.name}!=null) {
                 def aoe = ProjectWrapper.with(p)?.getExtends(Dependencies)?.allExcludes
+//                Print.ln("loadLoadExclude $p.name -> $aoe")
                 if (!CheckUtils.isEmpty(aoe)) {
                     allExs.putAll(aoe)
                 }
             }
         }
-        sb.append("${excludeStr("all*.exclude", allExcludes.values())}}")
+        sb.append("${excludeStr("all*.exclude", allExs.values())}}")
         wrapper.apply from: FileUtils.write(new File(wrapper.getExtends(BuildConfig).cacheDir, "configurations.gradle"), sb.toString())
     }
 
@@ -196,7 +197,7 @@ class Dependencies extends BaseExtension {
     LinkedList<String> getOutFiles() {
         init()
         if (wrapper.pluginName == Keys.NAME_APP) {
-            wrapper.project.afterEvaluate {
+            project.gradle.afterProject {
                 loadLoadExclude()
             }
         }
