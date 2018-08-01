@@ -10,7 +10,9 @@ import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.utils.*
 import com.pqixing.modularization.wrapper.PomWrapper
+import com.pqixing.modularization.wrapper.ProjectWrapper
 import org.gradle.api.Project
+
 /**
  * Created by pqixing on 17-12-25.
  */
@@ -27,8 +29,6 @@ class Dependencies extends BaseExtension {
     Set<Module> localDependency
     Set<String> localImportModules
 
-//    File versionFile
-//    Properties versionMaps
     MavenType mavenType
 
     boolean autoImpl = true
@@ -37,7 +37,12 @@ class Dependencies extends BaseExtension {
      * @param exclude
      */
     void allExclude(Map<String, String> exclude) {
-        allExcludes.put(exclude.toString(), exclude)
+        def key = exclude.toString()
+        def contains = allExcludes.containsKey(key)
+        Print.ln("allExclude $contains $key")
+        if(!contains) {
+            allExcludes.put(key, exclude)
+        }
     }
 
     Dependencies(Project project) {
@@ -77,32 +82,13 @@ class Dependencies extends BaseExtension {
      * @return
      */
     String getLastVersion(String group, String artifactId) {
-       String version =  MavenUtils.getVersion(mavenType.name,wrapper.getExtends(GitConfig).branchName,artifactId.trim())
-//        Print.ln("getLastVersion $artifactId  $version")
+        String version = MavenUtils.getVersion(mavenType.name, wrapper.getExtends(GitConfig).branchName, artifactId.trim())
         return version
-//        String timeStamp = "$artifactId$Keys.SUFFIX_STAMP"
-//        String version = versionMaps.getProperty(artifactId)
-//        long afterLastUpdate = System.currentTimeMillis() - (versionMaps.getProperty(timeStamp)?.toLong() ?: 0L)
-//        //更新版本的时间差
-//        long updateGap = GlobalConfig.netCacheTime
-//        if (!GlobalConfig.updateBeforeSync) updateGap *= 20
-//
-//        //一分钟秒内,不更新相同的组件版本,避免不停的爬取相同的接口
-//        if (afterLastUpdate > updateGap) {
-//            String release = MetadataWrapper.create(mavenType.maven_url, group, artifactId).release
-//            if (CheckUtils.isVersionCode(release)) {
-//                version = release
-//                versionMaps.put(timeStamp, System.currentTimeMillis().toString())
-//                versionMaps.put(artifactId, release)
-//            }
-//        }
-//        return CheckUtils.isEmpty(version) ? "+" : version
+
     }
 
     void init() {
         mavenType = wrapper.getExtends(ModuleConfig.class).mavenType
-//        versionFile = new File(BuildConfig.versionDir, "$mavenType.name/$Keys.FILE_VERSION")
-//        versionMaps = FileUtils.readMaps(versionFile)
         localImportModules = new HashSet<>()
         project.rootProject.allprojects.each { localImportModules += it.name }
         localDependency = new HashSet<>()
@@ -111,13 +97,6 @@ class Dependencies extends BaseExtension {
         }
     }
 
-//    void saveVersionMap() {
-//        versionFile.parentFile.mkdirs()
-//        versionFile.createNewFile()
-//        versionMaps?.store(versionFile.newOutputStream(), Keys.CHARSET)
-//        versionMaps?.clear()
-//        versionMaps = null
-//    }
     /**
      * 添加依赖去除
      * @param sb
@@ -175,8 +154,11 @@ class Dependencies extends BaseExtension {
 
         //如果依赖的是分支，获取该依赖中传递的master仓库依赖去除
         if (module.artifactId.contains(Keys.BRANCH_TAG)) {
-            masterExclude.addAll(PomWrapper.create(mavenType.maven_url, module.groupId, module.artifactId, module.version).masterExclude)
+            def wrapper = PomWrapper.create(mavenType.maven_url, module.groupId, module.artifactId, module.version)
+            wrapper.loadModule(module)
+            masterExclude.addAll(wrapper.masterExclude)
             masterExclude.add(module.moduleName)
+//            module.excludes.each { m -> allExclude(m) }
         }
         return true
     }
@@ -192,7 +174,7 @@ class Dependencies extends BaseExtension {
     @Override
     LinkedList<String> getOutFiles() {
         init()
-
+        Print.ln("onDp out -> $project.name")
         StringBuilder sb = new StringBuilder("dependencies { \n")
         modules.each { model ->
             if (model.moduleName == project.name) return
@@ -233,7 +215,8 @@ class Dependencies extends BaseExtension {
                 allExclude([group: model.groupId, module: TextUtils.getBranchArtifactId(model.moduleName, wrapper)])
             }
         }
-        allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)}${Keys.SEPERATOR}$Keys.TAG_EMPTY")
+        if(masterExclude.isEmpty()) masterExclude.add(Keys.TAG_EMPTY)
+        allExclude(group: Keys.GROUP_MASTER, module: "${TextUtils.collection2Str(masterExclude)}")
         sb.append("${excludeStr("all*.exclude", allExcludes.values())}} \n")
 //        saveVersionMap()
 
