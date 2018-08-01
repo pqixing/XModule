@@ -42,7 +42,7 @@ class PreWriteConfig extends BaseExtension {
         if (dpNames.length() > 1) dpNames.deleteCharAt(dpNames.length() - 1)
         String launchClass = "${buildConfig.javaPackage}.${TextUtils.className(project.name)}Launch"
 
-        addConfig("NAME": buildConfig.projectName/*, "DP_CONFIGS_NAMES": dpNames.toString()*/)
+        addConfig("NAME": buildConfig.projectName, "DP_CONFIGS_NAMES": dpNames.toString())
         addConfig("LAUNCH_CONFIG": launchClass)
 //        addConfig("DEPENDENCIES": JSON.toJSONString(dependent.modules).replace("\"", ""))
 
