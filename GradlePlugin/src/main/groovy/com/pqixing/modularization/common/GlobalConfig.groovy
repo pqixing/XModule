@@ -99,6 +99,11 @@ class GlobalConfig {
      * 是否读取git日志
      */
     static boolean gitLog = true
+
+    /**
+     * ToMaven前是否检查代码更新
+     */
+    static boolean checkCodeUpdate = true
     /**
      * 指定的版本文件
      */

@@ -90,6 +90,8 @@ class ToMavenCheckTask extends BaseTask {
      * @return
      */
     boolean hasUpdate() {
+        //如果配置了不检查代码更新,则不读取版本号
+        if(!GlobalConfig.checkCodeUpdate) return false
 
         return gitConfig.revisionNum != TextUtils.removeMark(GitUtils.run("git log -1 --pretty=format:'%H' origin/${gitConfig.branchName} ${gitConfig.rootForGit ? '' : (project.name + '/')}", gitConfig.gitDir))
     }
