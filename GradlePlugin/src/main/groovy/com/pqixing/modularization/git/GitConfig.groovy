@@ -56,6 +56,9 @@ class GitConfig extends BaseExtension {
         if ("%D" == branchName) {
             branchName = TextUtils.removeLineAndMark(GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir))
         }
+        if(CheckUtils.isEmpty(branchName)){
+            branchName = "master"
+        }
         if (gitInfo.length > 2)
             lastLog = gitInfo[2]
         rootForGit = gitDir.absolutePath == project.projectDir.absolutePath
