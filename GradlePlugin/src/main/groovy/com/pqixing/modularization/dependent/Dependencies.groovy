@@ -137,11 +137,16 @@ class Dependencies extends BaseExtension {
      * @return
      */
     boolean onMavenCompile(StringBuilder sb, Module module) {
-        String lastVersion = getLastVersion(module.groupId, TextUtils.getBranchArtifactId(module.moduleName, wrapper))
-        if (!CheckUtils.isVersionCode(lastVersion)) {
+        String lastVersion = ""
+        if (module.focusMaster) {
             lastVersion = getLastVersion(module.groupId, module.moduleName)
-        } else module.artifactId = TextUtils.getBranchArtifactId(module.moduleName, wrapper)
+        } else {
+            lastVersion = getLastVersion(module.groupId, TextUtils.getBranchArtifactId(module.moduleName, wrapper))
+            if (!CheckUtils.isVersionCode(lastVersion)) {
+                lastVersion = getLastVersion(module.groupId, module.moduleName)
+            } else module.artifactId = TextUtils.getBranchArtifactId(module.moduleName, wrapper)
 
+        }
         if (!CheckUtils.isVersionCode(lastVersion)) return false//如果分支和master都没有依赖，则仓库依赖失败
 
         //如果配置中没有配置指定版本号，用最新版本好，否则，强制使用配置中的版本号mvpbase
@@ -180,7 +185,7 @@ class Dependencies extends BaseExtension {
 
         def sb = new StringBuilder("configurations { \n")
         project.rootProject.allprojects.forEach { p ->
-            if (ps.find {it == p.name}!=null) {
+            if (ps.find { it == p.name } != null) {
                 def aoe = ProjectWrapper.with(p)?.getExtends(Dependencies)?.allExcludes
 //                Print.ln("loadLoadExclude $p.name -> $aoe")
                 if (!CheckUtils.isEmpty(aoe)) {

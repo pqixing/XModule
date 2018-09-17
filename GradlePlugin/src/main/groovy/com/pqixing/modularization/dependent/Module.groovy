@@ -14,7 +14,8 @@ class Module extends BaseExtension {
     public static final String SCOP_RUNTIME = "runtimeOnly"
     public static final String SCOP_COMPILEONLY = "compileOnly"
     public static final String SCOP_IMPL = "implementation"
-
+    //强制使用master分支
+    boolean focusMaster = false
     /**
      * 当前模块是否使用了本地依赖
      */
