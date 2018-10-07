@@ -1,11 +1,11 @@
 apply plugin: 'com.android.library'
 apply plugin: "maven"
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.2"
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 22
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         javaCompileOptions {
@@ -17,7 +17,11 @@ android {
 }
 
 dependencies {
-    compile 'com.pqixing.android:annotation:0.6'
+    if(localMode == "Y"){
+        implementation project(':Annotation')
+    }else{
+        implementation 'com.pqixing.android:annotation:0.6'
+    }
 }
 project.ext.artifactId = "moduleapi"
 apply from :"../upload.gradle"

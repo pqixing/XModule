@@ -49,9 +49,9 @@ String forGet(String name) {
 }
 // 添加依赖
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
-    compile "com.alibaba:fastjson:1.2.44"
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation "com.alibaba:fastjson:1.2.44"
 }
 
 // 代码仓库

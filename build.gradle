@@ -1,27 +1,16 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     repositories {
-//        jcenter()
-//        google()
-        maven {
-            url "http://192.168.3.7:9527/nexus/content/groups/androidgroup/"
-        }
+        jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0'
+        classpath 'com.android.tools.build:gradle:3.2.0'
     }
 } //
-gradle.getStartParameter()
 allprojects {
     repositories {
-        maven {
-            url "http://192.168.3.7:9527/nexus/content/groups/androidgroup/"
-        }
-//        jcenter()
-//        google()
+        jcenter()
+        google()
     }
 }
-
-//project.ext.mavenUrl=uri("/home/pqixing/.repo")
-ext.mavenUrl ="http://192.168.3.7:9527/nexus/content/repositories/releases/"
-//ext.mavenUrl ="http://192.168.3.7:9527/nexus/content/repositories/androidsnap/"
