@@ -1,7 +1,9 @@
 apply plugin: 'java-library'
-
+apply plugin: "groovy"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation gradleApi()
+    implementation localGroovy()
 }
 
 sourceCompatibility = "8"
