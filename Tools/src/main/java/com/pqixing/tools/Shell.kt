@@ -9,30 +9,41 @@ import java.util.concurrent.TimeUnit
 
 object Shell {
     var logger: Logger? = null
-    private val END = "-------- Shell execute end -> "
-    private val START = "-------- Shell execute start -> "
+    private val END = "-------- END SHELL -> "
+    private val START = "-------- START SHELL -> "
 
     private val pool = ThreadPoolExecutor(4, 4, 30L, TimeUnit.SECONDS, LinkedBlockingQueue())
 
+
     @JvmStatic
-    fun testRun(cm: String) {
-        logger?.log(cm)
+    fun runSync(cmd: List<String>) {
+        cmd.forEach { runSync(it, null, null) }
+    }
+
+    @JvmStatic
+    fun runSync(cmd: String): LinkedList<String> {
+        return runSync(cmd, null, null)
     }
 
     @JvmStatic
     fun runSync(cmd: String, dir: File? = null, callBack: ShellCallBack? = null): LinkedList<String> {
-        val process = Runtime.getRuntime().exec(cmd, arrayOf(), dir)
-
-        return handleResult(cmd, process, callBack)
-    }
-
-    fun runASync(cmd: String, dir: File? = null, callBack: ShellCallBack? = null) {
-        val process = Runtime.getRuntime().exec(cmd, arrayOf(), dir)
-        pool.execute { handleResult(cmd, process, callBack) }
-    }
-
-    private fun handleResult(cmd: String, process: Process, callBack: ShellCallBack?): LinkedList<String> {
         logger?.log(START + cmd)
+        val r = LinkedList<String>()
+        cmd.split("&").forEach {
+            if (it.isNotEmpty()) {
+                val c = it.trim()
+                val process = Runtime.getRuntime().exec(c, arrayOf(), dir)
+                r += handleResult(process, callBack)
+            }
+        }
+        return r
+    }
+
+    fun runASync(cmd: String, dir: File? = null, callBack: ShellCallBack? = null) = pool.execute {
+        runSync(cmd, dir, callBack)
+    }
+
+    private fun handleResult(process: Process, callBack: ShellCallBack?): LinkedList<String> {
         val resultCache = LinkedBlockingQueue<String>()
         val streamIn = process.inputStream.bufferedReader()
         val streamErr = process.errorStream.bufferedReader()
@@ -83,7 +94,6 @@ object Shell {
         try {
             process.destroy()
         } finally {
-            logger?.log(END + cmd)
         }
         return result
     }

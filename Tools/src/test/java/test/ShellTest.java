@@ -19,8 +19,13 @@ public class ShellTest {
                 System.out.println(l);
             }
         });
-        Object result = Shell.runSync("git clone https://github.com/pqixing/modularization.git  --progress module",new File("/Users/pqixing/Desktop"),null);
-//        String result = Shell.runSync("echo test",new File("/Users/pqixing/Desktop"),null);
-        System.out.println(result);
+//        Object result = Shell.runSync("git clone https://github.com/pqixing/modularization.git  --progress module",new File("/Users/pqixing/Desktop"),null);
+//        Object result = Shell.runSync("adb install -r -t -p /Users/Dev/Code/MyApplication/app/build/outputs/apk/debug/app-debug.apk",null,null);
+//        String name = System.currentTimeMillis()+".apk";
+//         Shell.runSync("adb push -p /Users/Dev/Code/MyApplication/app/build/outputs/apk/debug/app-debug.apk  /data/local/tmp/"+name,null,null);
+//         Shell.runSync("adb shell pm  install -r -t /data/local/tmp/"+name,null,null);
+//         Shell.runSync("adb shell rm /data/local/tmp/"+name,null,null);
+        Shell.runSync("adb  devices & echo test2");
+        System.out.println("end");
     }
 }
