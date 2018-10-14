@@ -1,5 +1,5 @@
 package com.pqixing.tools;
 
 public interface Logger {
-    void log(String l)
+    fun log(l:String)
 }
