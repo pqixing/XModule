@@ -1,5 +1,8 @@
 package com.pqixing.moduleapi;
 
+import com.pqixing.tools.Shell;
+import com.pqixing.tools.ShellCallBack;
+
 public class TextUtils {
     /**
      * 只保留数字和字母
@@ -9,6 +12,12 @@ public class TextUtils {
      */
     static String numOrLetter(String str) {
         if (str == null) return "";
+        Shell.run("", null, false, new ShellCallBack() {
+            @Override
+            public void call(int status, String line) {
+
+            }
+        });
         return str.trim().replaceAll("[^0-9a-zA-Z]", "");
     }
 

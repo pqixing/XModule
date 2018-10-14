@@ -17,11 +17,8 @@ android {
 }
 
 dependencies {
-    if(localMode == "Y"){
-        implementation project(':Annotation')
-    }else{
-        implementation 'com.pqixing.android:annotation:0.6'
-    }
+    compileOnly project(':Annotation')
+    implementation project(":Tools")
 }
 project.ext.artifactId = "moduleapi"
 apply from :"../upload.gradle"
