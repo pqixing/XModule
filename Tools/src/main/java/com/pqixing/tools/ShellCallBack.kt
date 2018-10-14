@@ -1,5 +1,5 @@
 package com.pqixing.tools
 
 interface ShellCallBack {
-    fun call( status:Int, line:String)
+    fun call(line:String)
 }
