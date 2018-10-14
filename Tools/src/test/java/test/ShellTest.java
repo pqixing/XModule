@@ -19,7 +19,7 @@ public class ShellTest {
                 System.out.println(l);
             }
         });
-        String result = Shell.runSync("git clone https://github.com/pqixing/modularization.git  --progress module",new File("/Users/pqixing/Desktop"),null);
+        Object result = Shell.runSync("git clone https://github.com/pqixing/modularization.git  --progress module",new File("/Users/pqixing/Desktop"),null);
 //        String result = Shell.runSync("echo test",new File("/Users/pqixing/Desktop"),null);
         System.out.println(result);
     }

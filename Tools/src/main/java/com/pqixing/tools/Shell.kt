@@ -2,6 +2,7 @@ package com.pqixing.tools
 
 import java.io.Closeable
 import java.io.File
+import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -19,7 +20,7 @@ object Shell {
     }
 
     @JvmStatic
-    fun runSync(cmd: String, dir: File? = null, callBack: ShellCallBack? = null): String {
+    fun runSync(cmd: String, dir: File? = null, callBack: ShellCallBack? = null): LinkedList<String> {
         val process = Runtime.getRuntime().exec(cmd, arrayOf(), dir)
 
         return handleResult(cmd, process, callBack)
@@ -30,7 +31,7 @@ object Shell {
         pool.execute { handleResult(cmd, process, callBack) }
     }
 
-    private fun handleResult(cmd: String, process: Process, callBack: ShellCallBack?): String {
+    private fun handleResult(cmd: String, process: Process, callBack: ShellCallBack?): LinkedList<String> {
         logger?.log(START + cmd)
         val resultCache = LinkedBlockingQueue<String>()
         val streamIn = process.inputStream.bufferedReader()
@@ -57,7 +58,7 @@ object Shell {
         pool.execute(readErr)
 
         var line: String?
-        val sb = StringBuilder()
+        val result = LinkedList<String>()
         var lastLineTime = System.currentTimeMillis()
         while (true) {
             line = resultCache.poll()
@@ -73,8 +74,7 @@ object Shell {
                 lastLineTime = System.currentTimeMillis()
                 logger?.log(line)
                 callBack?.call(line)
-                if (sb.isNotEmpty()) sb.append("\n")
-                sb.append(line)
+                result += line
             }
         }
 
@@ -85,7 +85,7 @@ object Shell {
         } finally {
             logger?.log(END + cmd)
         }
-        return sb.toString()
+        return result
     }
 
     private fun closeQuite(stream: Closeable) {
