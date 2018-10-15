@@ -1,7 +1,7 @@
 package com.pqixing.moduleapi;
 
-import com.pqixing.tools.Shell;
-import com.pqixing.tools.ShellCallBack;
+import com.pqixing.shell.Shell;
+import com.pqixing.shell.ShellCallBack;
 
 public class TextUtils {
     /**

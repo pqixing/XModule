@@ -1,5 +1,6 @@
-package com.pqixing.tools
+package com.pqixing.shell
 
+import com.pqixing.interfaces.Logger
 import java.io.Closeable
 import java.io.File
 import java.util.*
@@ -47,6 +48,10 @@ object Shell {
         val resultCache = LinkedBlockingQueue<String>()
         val streamIn = process.inputStream.bufferedReader()
         val streamErr = process.errorStream.bufferedReader()
+        val writer = process.outputStream.bufferedWriter()
+        writer.write("pengqixing\n")
+        writer.write("pengqixing\n")
+        writer.flush()
         val afterRun = arrayOf(false, false)
         val readIn = Runnable {
             var str: String? = null

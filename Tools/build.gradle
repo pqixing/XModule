@@ -7,6 +7,11 @@ dependencies {
     implementation localGroovy()
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     testImplementation 'junit:junit:4.12'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:+'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
+    implementation 'com.github.vidstige:jadb:+'
+    
+    
 }
 
 sourceCompatibility = "8"
