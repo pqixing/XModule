@@ -1,0 +1,15 @@
+apply plugin: 'kotlin'
+apply plugin: 'java-library'
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    testImplementation 'junit:junit:4.12'
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"
+repositories {
+    mavenCentral()
+}

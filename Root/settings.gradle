@@ -1,5 +1,5 @@
 //addInclude ':GradlePg', ':Luanch', ':AnnotationProcess', ':Annotation',
-addInclude "Tools"
+addInclude "Tools","IntellijPg","Annotation","GradlePg"
 
 
 def addInclude(String...projectPaths) {
