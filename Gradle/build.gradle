@@ -60,7 +60,7 @@ repositories {
     jcenter()
 }
 project.ext.artifactId = "modularization"
-apply from :"../upload.gradle"
+//apply from :"../upload.gradle"
 
 uploadArchives.dependsOn "clean"
 uploadArchives.dependsOn "auto"
