@@ -1,3 +1,4 @@
+
 apply plugin: 'kotlin'
 
 apply plugin: 'java-library'
@@ -10,7 +11,7 @@ dependencies {
     implementation 'org.eclipse.jgit:org.eclipse.jgit:+'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
     implementation 'com.github.vidstige:jadb:+'
-    
+    implementation "com.alibaba:fastjson:1.2.44"
     
 }
 

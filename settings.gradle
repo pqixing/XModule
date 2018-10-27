@@ -1,1 +1,10 @@
-include ':GradlePg', ':Luanch', ':AnnotationProcess', ':Annotation', ':Tools'
+//include ':GradlePg', ':Luanch', ':AnnotationProcess', ':Annotation',
+
+addInclude "Tools"
+
+
+def addInclude(String...projectPaths) {
+    projectPaths.foreach{ projectName->
+        include ":$projectName"; project(":$projectName").projectDir = file("../projectName")
+    }
+}
