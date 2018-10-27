@@ -1,0 +1,53 @@
+//project.ext.key = "${mavenUrl.toString()}$artifactId"
+//project.ext.localFile = new File(project.rootDir,"version.properties")
+//
+//// 上传到本地代码库
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            repository(url: project.mavenUrl) {
+//                authentication(userName: mavenUserName, password: mavenUserPsw)
+//            }
+//            pom.groupId = groupId // 组名
+//            pom.artifactId = artifactId// 插件名
+//            pom.version = getLastVersion(key) // 版本号
+//        }
+//    }
+//}
+//uploadArchives.doLast {
+//    updateLastVersion(key)
+//}
+//project.ext.lastVersion = { key ->
+//    return getLastVersion(key)
+//}
+///**
+// * 获取该组件的最后版本号
+// * @param url
+// * @return
+// */
+//String getLastVersion(String key) {
+//    if (!localFile.exists()) return "0.1"
+//    return loadProperties(localFile).getProperty(key.toString())?.toString() ?: "0.1"
+//}
+///**
+// * 自动更新该版本号
+// * @param key
+// * @return
+// */
+//String updateLastVersion(String key) {
+//    String oldVersion = getLastVersion(key)
+//    int lastSplit = oldVersion.lastIndexOf(".") + 1
+//    String newVersion = oldVersion.substring(0, lastSplit) + (oldVersion.substring(lastSplit).toInteger() + 1).toString()
+//    if (!localFile.exists()) localFile.createNewFile()
+//    Properties localConfig = loadProperties(localFile)
+//    localConfig.put(key, newVersion.toString())
+//    localConfig.store(localFile.newDataOutputStream(), "UTF-8")
+//    println("updateLastVersion key:$key version : $newVersion")
+//    return newVersion
+//}
+//
+//Properties loadProperties(File file) {
+//    def configs = new Properties()
+//    configs.load(file.newInputStream())
+//    return configs
+//}
