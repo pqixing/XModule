@@ -25,6 +25,6 @@ public class ClearCache extends AnAction {
         }
         Object result = Shell.runSync("adb install -r /Users/Dev/Code/MyApplication/app/build/outputs/apk/debug/app-debug.apk",null,null)
         System.out.println("result $result")
-       Shell.testRun("this is test log")
+       Shell.testRun("this is test println")
     }
 }

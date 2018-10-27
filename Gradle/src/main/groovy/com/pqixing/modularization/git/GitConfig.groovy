@@ -48,7 +48,7 @@ class GitConfig extends BaseExtension {
             lastLog = ""
             return
         }
-        def gitInfo = TextUtils.removeLineAndMark(GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H::%D::%s'", gitDir)).split("::")
+        def gitInfo = TextUtils.removeLineAndMark(GitUtils.run("git println -1 HEAD --oneline --pretty=format:'%H::%D::%s'", gitDir)).split("::")
         if (gitInfo.length > 0)
             revisionNum = gitInfo[0].trim()
         if (gitInfo.length > 1)
@@ -64,9 +64,9 @@ class GitConfig extends BaseExtension {
         rootForGit = gitDir.absolutePath == project.projectDir.absolutePath
 //        branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", project.projectDir).trim()
 //        revisionNum = GitUtils.run("git rev-parse HEAD", project.projectDir).trim()
-//        lastLog = GitUtils.run("git log -1 --oneline ${revisionNum}", project.projectDir).trim()
+//        lastLog = GitUtils.run("git println -1 --oneline ${revisionNum}", project.projectDir).trim()
         if (!rootForGit) {
-            String dirLog = TextUtils.removeLineAndMark(GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H' ${project.name}/", gitDir))
+            String dirLog = TextUtils.removeLineAndMark(GitUtils.run("git println -1 HEAD --oneline --pretty=format:'%H' ${project.name}/", gitDir))
             //如果当前工程不是单独一个git，则使用目录的版本号作为最后的版本号
             if (!CheckUtils.isEmpty(dirLog)) {
                 lastLog += " root revision:$revisionNum"
@@ -80,7 +80,7 @@ class GitConfig extends BaseExtension {
     List<String> log(int num = 5) {
         List<String> logs = new LinkedList<>()
         StringBuilder item = null
-        "git log -$num".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.eachLine { line ->
+        "git println -$num".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.eachLine { line ->
             if (line.startsWith("commit ")) {
                 if (item != null) logs += item.toString()
                 item = new StringBuilder()

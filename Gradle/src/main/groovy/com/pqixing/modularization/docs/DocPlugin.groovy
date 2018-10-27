@@ -18,7 +18,7 @@ class DocPlugin extends BasePlugin {
 //            envs = ["test": Default.maven_url_test, "release": Default.maven_url_release,"debug":Default.maven_url_debug]
 //        }
 //        com.pqixing.modularization.docs.UpdateLog.findModules(project.file("readme")).each {
-//            project.task("log-$it", type: com.pqixing.modularization.docs.UpdateDetail) {
+//            project.task("println-$it", type: com.pqixing.modularization.docs.UpdateDetail) {
 //                compileGroup = Default.groupName
 //                envs = ["test": Default.maven_url_test, "release": Default.maven_url_release,"debug":Default.maven_url_debug]
 //                moduleName = "router"

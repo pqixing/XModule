@@ -1,77 +1,85 @@
 package com.pqixing.shell
 
-import com.pqixing.interfaces.Logger
+import com.pqixing.Init
+import com.pqixing.interfaces.ILog
 import java.io.Closeable
 import java.io.File
+import java.io.IOException
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 object Shell {
-    var logger: Logger? = null
     private val END = "-------- END SHELL -> "
     private val START = "-------- START SHELL -> "
 
-    private val pool = ThreadPoolExecutor(4, 4, 30L, TimeUnit.SECONDS, LinkedBlockingQueue())
+    private val pool = ThreadPoolExecutor(2, 2, 10L, TimeUnit.SECONDS, LinkedBlockingQueue())
 
 
     @JvmStatic
     fun runSync(cmd: List<String>) {
-        cmd.forEach { runSync(it, null, null) }
+        cmd.forEach { runSync(it, null) }
     }
 
     @JvmStatic
     fun runSync(cmd: String): LinkedList<String> {
-        return runSync(cmd, null, null)
+        return runSync(cmd, null)
     }
 
     @JvmStatic
-    fun runSync(cmd: String, dir: File? = null, callBack: ShellCallBack? = null): LinkedList<String> {
-        logger?.log(START + cmd)
+    fun runSync(cmd: String, dir: File? = null): LinkedList<String> {
+        Init.logger?.println(START + cmd)
         val r = LinkedList<String>()
         cmd.split("&").forEach {
             if (it.isNotEmpty()) {
                 val c = it.trim()
-                val process = Runtime.getRuntime().exec(c, arrayOf(), dir)
-                r += handleResult(process, callBack)
+                try {
+                    val process = Runtime.getRuntime().exec(c, arrayOf(), dir)
+                    r += handleResult(process)
+                } catch (e: Exception) {
+                    Init.logger?.println(e.toString())
+                }
             }
         }
         return r
     }
 
-    fun runASync(cmd: String, dir: File? = null, callBack: ShellCallBack? = null) = pool.execute {
-        runSync(cmd, dir, callBack)
+    fun runASync(cmd: String, dir: File? = null) = pool.execute {
+        runSync(cmd, dir)
     }
 
-    private fun handleResult(process: Process, callBack: ShellCallBack?): LinkedList<String> {
+    private fun handleResult(process: Process): LinkedList<String> {
         val resultCache = LinkedBlockingQueue<String>()
         val streamIn = process.inputStream.bufferedReader()
         val streamErr = process.errorStream.bufferedReader()
-        val writer = process.outputStream.bufferedWriter()
-        writer.write("pengqixing\n")
-        writer.write("pengqixing\n")
-        writer.flush()
         val afterRun = arrayOf(false, false)
-        val readIn = Runnable {
+
+        Thread {
             var str: String? = null
             do {
-                str = streamIn.readLine()
+                try {
+                    str = streamIn.readLine()
+                } catch (e: Exception) {
+                    Init.logger.println(e.toString())
+                }
                 if (str != null) resultCache.put(str)
             } while (str != null)
             afterRun[0] = true
-        }
-        val readErr = Runnable {
+        }.start()
+        Thread {
             var str: String? = null
             do {
-                str = streamErr.readLine()
+                try {
+                    str = streamErr.readLine()
+                } catch (e: Exception) {
+                    Init.logger.println(e.toString())
+                }
                 if (str != null) resultCache.put(str)
             } while (str != null)
             afterRun[1] = true
-        }
+        }.start()
 
-        pool.execute(readIn)
-        pool.execute(readErr)
 
         var line: String?
         val result = LinkedList<String>()
@@ -79,17 +87,16 @@ object Shell {
         while (true) {
             line = resultCache.poll()
             if (line == null) {
-                if (!process.isAlive || (afterRun[0] && afterRun[1])) {
+                if (afterRun[0] && afterRun[1]) {
                     break
                 }
                 if (System.currentTimeMillis() - lastLineTime > 1000 * 15) {
-                    logger?.log("process exit by time out")
+                    Init.logger?.println("process exit by time out")
                 }
                 continue
             } else {
                 lastLineTime = System.currentTimeMillis()
-                logger?.log(line)
-                callBack?.call(line)
+                Init.logger?.println(line)
                 result += line
             }
         }

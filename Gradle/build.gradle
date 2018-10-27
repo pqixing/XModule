@@ -1,52 +1,8 @@
 // 应用插件
 apply plugin: "groovy"
 apply plugin: "maven"
-ext.autoDir = new File(projectDir, "src/main/java/auto")
 
-sourceSets {
-    main.groovy.srcDirs += autoDir.parent // 指定源码目录
-}
-task("auto") {
-    group = "build"
-    doFirst {
-        autoDir.mkdirs()
-        writeMoulds(new File(projectDir, "src/main/resources/moulds"))
-        String clsName = "Plugin"
-        String url = project.uploadArchives.repositories.mavenDeployer.repository.url
-        StringBuilder cls = new StringBuilder("package auto \n")
-                .append("public class ").append(clsName).append(" {\n")
-                .append("static String URL = '$url' \n")
-                .append("static String VERSION = '${lastVersion(key)}' \n")
-                .append("\n }")
-        new File(autoDir, "${clsName}.groovy").write(cls.toString())
-    }
-}
 
-file("src/main/resources/moulds/AutoInclude").write(file("src/main/groovy/AutoInclude.groovy").text)
-
-void writeMoulds(File dir) {
-    if (!dir.isDirectory()) return
-    String clsName = forGet(dir.name).substring(3)
-
-    StringBuilder cls = new StringBuilder("package auto \n")
-            .append("import com.pqixing.modularization.base.* \n")
-            .append("public class ").append(clsName).append(" extends BaseString{\n")
-//            .append("   return instance \n}\n")
-
-    dir.listFiles().each { f ->
-        if (f.isFile()) {
-            cls.append("public String ").append(forGet(f.name)).append("() { return get('''").append(f.text).append("''')}\n")
-        } else if (f.isDirectory()) {
-            writeMoulds(f)
-        }
-    }
-    cls.append("} \n")
-    new File(autoDir, "${clsName}.groovy").write(cls.toString())
-}
-
-String forGet(String name) {
-    return "get${name.substring(0, 1).toUpperCase()}${name.substring(1)}"
-}
 // 添加依赖
 dependencies {
     implementation gradleApi()
@@ -59,8 +15,3 @@ dependencies {
 repositories {
     jcenter()
 }
-project.ext.artifactId = "modularization"
-//apply from :"../upload.gradle"
-
-uploadArchives.dependsOn "clean"
-uploadArchives.dependsOn "auto"

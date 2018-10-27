@@ -1,11 +1,11 @@
 package com.pqixing.git
 
-import com.pqixing.interfaces.Logger
+import com.pqixing.interfaces.ILog
 
 import org.eclipse.jgit.lib.ProgressMonitor
 import java.text.DecimalFormat
 
-class PercentProgress @JvmOverloads constructor(private val logger: Logger?, val space: Float = 1f) : ProgressMonitor {
+class PercentProgress @JvmOverloads constructor(private val logger: ILog?, val space: Float = 1f) : ProgressMonitor {
     private var title: String? = null
     private var last: Int = 0
     private var total: Int = 0
@@ -22,7 +22,7 @@ class PercentProgress @JvmOverloads constructor(private val logger: Logger?, val
         this.total = totalWork
         last = 0
         lastLogPercent = 0f
-        logger?.log("$title -> $totalWork")
+        logger?.println("$title -> $totalWork")
     }
 
     override fun update(completed: Int) {
@@ -30,7 +30,7 @@ class PercentProgress @JvmOverloads constructor(private val logger: Logger?, val
         val newPercent = last * 100F / total
 
         if (newPercent - lastLogPercent >= space) {
-            logger?.log("$title -> [$last/$total ${d.format(newPercent)}%]")
+            logger?.println("$title -> [$last/$total ${d.format(newPercent)}%]")
             lastLogPercent = newPercent
         }
     }

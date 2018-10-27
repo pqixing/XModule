@@ -93,7 +93,7 @@ class ToMavenCheckTask extends BaseTask {
         //如果配置了不检查代码更新,则不读取版本号
         if(!GlobalConfig.checkCodeUpdate) return false
 
-        return gitConfig.revisionNum != TextUtils.removeMark(GitUtils.run("git log -1 --pretty=format:'%H' origin/${gitConfig.branchName} ${gitConfig.rootForGit ? '' : (project.name + '/')}", gitConfig.gitDir))
+        return gitConfig.revisionNum != TextUtils.removeMark(GitUtils.run("git println -1 --pretty=format:'%H' origin/${gitConfig.branchName} ${gitConfig.rootForGit ? '' : (project.name + '/')}", gitConfig.gitDir))
     }
     /**
      * 检查Docment是否需要更新
@@ -102,7 +102,7 @@ class ToMavenCheckTask extends BaseTask {
     String docUpdateLog() {
         def documentDir = MavenUtils.documentDir
 
-        def gitInfo = GitUtils.run("git log -1 HEAD --oneline --pretty=format:'%H::%D'", documentDir).trim().split("::")
+        def gitInfo = GitUtils.run("git println -1 HEAD --oneline --pretty=format:'%H::%D'", documentDir).trim().split("::")
         String revisionNum = ""
         String branchName = ""
         if (gitInfo.length > 0)

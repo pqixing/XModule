@@ -29,7 +29,7 @@ class Print {
     static File outputFile
 
     static void write(String str) {
-        if (outputFile == null) outputFile = new File("$BuildConfig.dirName/print.log")
+        if (outputFile == null) outputFile = new File("$BuildConfig.dirName/print.println")
         //如果日志文件大于10M 删除
         if (outputFile.exists() && outputFile.length() >= 1024 * 1024 * 10) outputFile.delete()
         if (!outputFile.exists()) {
