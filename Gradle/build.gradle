@@ -9,6 +9,7 @@ dependencies {
     implementation localGroovy()
     implementation "com.alibaba:fastjson:1.2.44"
     implementation project(":Tools")
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 // 代码仓库
