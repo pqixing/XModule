@@ -8,6 +8,7 @@ dependencies {
     implementation gradleApi()
     implementation localGroovy()
     implementation "com.alibaba:fastjson:1.2.44"
+    implementation "com.android.tools.build:gradle:3.1.2"
     implementation project(":Tools")
 }
 
@@ -15,3 +16,25 @@ dependencies {
 repositories {
     jcenter()
 }
+ext.mainDir = new File(projectDir, "src/main")
+ext.resourceDir = new File(mainDir, "resources")
+ext.javaFileDir = new File(mainDir, "groovy/com/pqixing/modularization/gradle")
+task("copyClass") {
+    group = "build"
+    doFirst {
+        File classDir = new File(resourceDir, "class")
+        if (!classDir.exists()) {
+            classDir.mkdirs()
+        }
+
+        ["ProjectInfo.groovy"].forEach {
+            def writer = new File(classDir, it).newWriter()
+            writer.write(new File(javaFileDir, it).text)
+            writer.flush()
+            writer.close()
+        }
+    }
+}
+
+uploadArchives.dependsOn "clean"
+uploadArchives.dependsOn "auto"
