@@ -21,7 +21,7 @@ import java.util.List;
 
 public class NewProject extends AnAction {
 
-    private List<String> copyFiles = Arrays.asList("build.gradle","include.kt","modularization.properties");
+    private List<String> copyFiles = Arrays.asList("build.gradle","setting.kt","modularization.properties");
     FileChooserDescriptor dirs = null;
     @Override
     public void actionPerformed(AnActionEvent e) {

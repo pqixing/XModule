@@ -9,7 +9,7 @@ public class Dependencies extends OpenFileAction {
     VirtualFile[] getFiles(Project project) {
         if(module == null) {
             VirtualFile child = project.getBaseDir().findChild(".modularization");
-            if(child!=null) child = child.findChild("include.gradle");
+            if(child!=null) child = child.findChild("setting.gradle");
             return new VirtualFile[]{child};
         }
 

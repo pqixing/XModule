@@ -1,7 +1,6 @@
 //addInclude ':GradlePg', ':Luanch', ':AnnotationProcess', ':Annotation',
 addInclude "Tools","Intellij","Annotation","Gradle"
 
-
 def addInclude(String...projectPaths) {
     for (String projectName:projectPaths){
         include ":$projectName"; project(":$projectName").projectDir = file("../$projectName")

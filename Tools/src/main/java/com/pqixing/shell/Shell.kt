@@ -1,10 +1,8 @@
 package com.pqixing.shell
 
-import com.pqixing.Init
-import com.pqixing.interfaces.ILog
+import com.pqixing.Tools
 import java.io.Closeable
 import java.io.File
-import java.io.IOException
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -29,7 +27,7 @@ object Shell {
 
     @JvmStatic
     fun runSync(cmd: String, dir: File? = null): LinkedList<String> {
-        Init.logger?.println(START + cmd)
+        Tools.logger?.println(START + cmd)
         val r = LinkedList<String>()
         cmd.split("&").forEach {
             if (it.isNotEmpty()) {
@@ -38,7 +36,7 @@ object Shell {
                     val process = Runtime.getRuntime().exec(c, arrayOf(), dir)
                     r += handleResult(process)
                 } catch (e: Exception) {
-                    Init.logger?.println(e.toString())
+                    Tools.logger?.println(e.toString())
                 }
             }
         }
@@ -61,7 +59,7 @@ object Shell {
                 try {
                     str = streamIn.readLine()
                 } catch (e: Exception) {
-                    Init.logger.println(e.toString())
+                    Tools.logger.println(e.toString())
                 }
                 if (str != null) resultCache.put(str)
             } while (str != null)
@@ -73,7 +71,7 @@ object Shell {
                 try {
                     str = streamErr.readLine()
                 } catch (e: Exception) {
-                    Init.logger.println(e.toString())
+                    Tools.logger.println(e.toString())
                 }
                 if (str != null) resultCache.put(str)
             } while (str != null)
@@ -91,12 +89,12 @@ object Shell {
                     break
                 }
                 if (System.currentTimeMillis() - lastLineTime > 1000 * 15) {
-                    Init.logger?.println("process exit by time out")
+                    Tools.logger?.println("process exit by time out")
                 }
                 continue
             } else {
                 lastLineTime = System.currentTimeMillis()
-                Init.logger?.println(line)
+                Tools.logger?.println(line)
                 result += line
             }
         }

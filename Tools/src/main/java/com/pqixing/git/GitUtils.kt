@@ -1,6 +1,6 @@
 package com.pqixing.git
 
-import com.pqixing.Init
+import com.pqixing.Tools
 import com.pqixing.interfaces.ICredential
 import com.pqixing.interfaces.ILog
 import org.eclipse.jgit.api.Git
@@ -15,10 +15,10 @@ object GitUtils {
     }
 
     @JvmStatic
-    fun clone(gitUrl: String, dirPath: String) = clone(gitUrl, dirPath, "master", Init.logger)
+    fun clone(gitUrl: String, dirPath: String) = clone(gitUrl, dirPath, "master", Tools.logger)
 
     @JvmStatic
-    fun clone(gitUrl: String, dirPath: String, branchName: String) = clone(gitUrl, dirPath, branchName, Init.logger)
+    fun clone(gitUrl: String, dirPath: String, branchName: String) = clone(gitUrl, dirPath, branchName, Tools.logger)
 
     @JvmStatic
     fun clone(gitUrl: String, dirPath: String, logger: ILog) = clone(gitUrl, dirPath, "master", logger)

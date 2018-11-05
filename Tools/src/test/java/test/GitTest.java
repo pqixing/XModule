@@ -1,16 +1,13 @@
 package test;
 
-import com.pqixing.Init;
+import com.pqixing.Tools;
 import com.pqixing.git.GitUtils;
-import com.pqixing.git.PercentProgress;
 
 import com.pqixing.interfaces.ICredential;
 import com.pqixing.interfaces.ILog;
 import com.pqixing.shell.Shell;
-import com.pqixing.shell.ShellCallBack;
-import org.eclipse.jgit.api.Git;
+
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
@@ -31,7 +28,7 @@ public class GitTest {
     }
 
     private void init() {
-        Init.init(new ILog() {
+        Tools.init(new ILog() {
             @Override
             public void println(@Nullable String l) {
                 System.out.println(l);

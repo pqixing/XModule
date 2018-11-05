@@ -1,23 +1,12 @@
-package com.pqixing.modularization.gradle
+package com.pqixing.modularization.gradle.forOut
+
+import com.pqixing.Tools
 
 /**
  * 工程配置文件
- * 所有模块，以：加模块名称 extc include = ":dComm"+":dcNet"
+ * 所有模块，以：加模块名称 extc setting = ":dComm"+":dcNet"
  */
-class ProjectInfo{
-    /** 需要导入的工程，使用 ,或这+号分割 **/
-    String include = null
-
-    /**  填入不需要导入的工程名称 */
-    String exclude = ""
-
-    /** 快速导入该工程所有依赖的内部工程*/
-    String dpsInclude = null
-    /** 快速导入该工程所有依赖的内部工程*/
-    String dpsExclude = null
-
-    /** 代码存放的根目录**/
-    String codeRootDir = "../"
+class ProjectInfo {
 
     /**  git 的用户名称*/
     def gitUserName = null
@@ -25,13 +14,6 @@ class ProjectInfo{
     /**  git 密码 */
     def gitPassWord = null
 
-    /**
-     * git操作目标范畴
-     include : 只操作当前导入的代码
-     all :
-     影响本地所有存在的代码(仅包含配置在default.xml的工程)
-     **/
-    def target = "all"
 
     /**  当前分支名称*/
     def curBranch = "master"
@@ -58,4 +40,19 @@ class ProjectInfo{
 
     /** 指定一个版本号的map文件 ， 则会优先使用该文件中的信息进行版本号管理 **/
     def versionFile = ""
+
+
+    public static ProjectInfo getInstans(Class aClass) {
+        def info = new ProjectInfo()
+        if (aClass != null) {
+            aClass.newInstance().getProperties().each { MapEntry m ->
+                try {
+                    info.setProperty(m.key, m.value)
+                } catch (Exception e) {
+                    Init.logger.println(e.toString())
+                }
+            }
+        }
+        return info
+    }
 }

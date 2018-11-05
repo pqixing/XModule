@@ -18,7 +18,7 @@ repositories {
 }
 ext.mainDir = new File(projectDir, "src/main")
 ext.resourceDir = new File(mainDir, "resources")
-ext.javaFileDir = new File(mainDir, "groovy/com/pqixing/modularization/gradle")
+ext.javaFileDir = new File(mainDir, "groovy/com/pqixing/modularization/gradle/forOut")
 task("copyClass") {
     group = "build"
     doFirst {
@@ -26,10 +26,13 @@ task("copyClass") {
         if (!classDir.exists()) {
             classDir.mkdirs()
         }
+        javaFileDir.listFiles().each { f ->
 
-        ["ProjectInfo.groovy"].forEach {
-            def writer = new File(classDir, it).newWriter()
-            writer.write(new File(javaFileDir, it).text)
+            def names = f.name.split("\\.")
+            def out = new File(classDir, "${names[1]}/${names[0]}")
+            out.parentFile.mkdirs()
+            def writer =out.newWriter()
+            writer.write(f.text)
             writer.flush()
             writer.close()
         }
