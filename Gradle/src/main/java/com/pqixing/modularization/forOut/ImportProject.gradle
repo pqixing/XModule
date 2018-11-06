@@ -1,0 +1,165 @@
+//2.4
+
+package com.pqixing.modularization.forOut
+/**
+ *
+ * Created by pqixing on 18-2-3.
+ * this class will run on setting.gradle,so can not import any other class
+ */
+public class ImportProject {
+
+    final String includeKt = "setting.kt"
+    final String defaultXmlPath = "Document/default.xml"
+
+    File rootDir
+
+    /**
+     * 解析xml后，存放入待解析的工程路径
+     */
+    HashMap<String, String> projectPaths = new HashMap<>()
+
+    HashSet<String> includes = new HashSet<>()
+    HashSet<String> focusIncludes = new HashSet<>()
+    HashSet<String> excludes = new HashSet<>()
+    HashSet<String> dpsExcludes = new HashSet<>()
+    HashSet<String> dpsIncludes = new HashSet<>()
+    String codeRoot
+    File codeRootDir
+
+    ImportProject(File rootDir) {
+        this.rootDir = rootDir
+    }
+
+    void readFromEnv() {
+        System.getProperties().each { it ->
+            parseValue(it.key.toString(), it.value.toString())
+        }
+    }
+    /**
+     * 解析本地需要导入的工程
+     */
+    void formatInclude(File includeFile) {
+        if (f == null || !f.exists() || !f.isFile()) return
+        for (String line in includeFile.readLines()) {
+            if (line.trim().startsWith("//END")) return
+            def map = line.replaceAll("//.*", "").split("=")
+            if (map.length < 2) continue
+            parseValue(map[0], map[1])
+        }
+    }
+
+    private void parseValue(String k, String v) {
+        String key = k.replace("var ", "").replace("val ", "").trim()
+        String value = v.replace("+", ",").trim()
+        switch (key) {
+            case "targetInclude": formatInclude(new File(value))
+                break
+            case "include":
+                value?.split(",")?.each { includes.add(it.trim()) }
+                break
+            case "focusInclude":
+                value?.split(",")?.each { focusIncludes.add(it.trim()) }
+                break
+            case "dpsInclude"://批量导入子项目
+                value?.split(",")?.each { dpsIncludes.add(it.trim()) }
+                break
+            case "dpsExclude"://批量忽略子项目
+                value?.split(",")?.each { dpsExcludes.add(it.trim()) }
+                break
+            case "exclude":
+                value?.split(",")?.each { excludes.add(it.trim()) }
+                break
+            case "codeRoot":
+                if (!value.isEmpty())
+                    codeRoot = value
+                break
+        }
+    }
+
+
+    void readDps(String type, String dpsName) {
+        String url = projectPaths.find { it.key == dpsName }?.value
+        if (url == null || url.isEmpty()) return
+        def f = new File(codeRootDir, url)
+        if (!f.exists()) return
+        String[] map = line.replaceAll("//.*", "").split("=")
+        parseValue(type, map[map.length - 1])
+    }
+
+    /**
+     * 解析default xml 加载所有的git信息
+     */
+    void formatXml() {
+        File defaultXml = new File(rootDir, defaultXmlPath)
+        Node gitNode = new XmlParser().parse(defaultXml)
+        gitNode.project.each { Node p ->
+            String name = p.@name
+            String url = p.@url
+            List<String> subLists = []
+            def childens = p.submodule
+            if (childens.size() > 0) childens.each { Node s ->
+                String s_name = s.@name
+                projectPaths.put(name, "$name/$s_name")
+            } else projectPaths.put(name, name)
+        }
+    }
+
+    String makeIncludeTxt() {
+        HashSet<String> resultInclude = HashSet()
+        focusIncludes.each { key ->
+            if (!key.isEmpty()) resultInclude.add(key)
+        }
+        if (resultInclude.isEmpty()) {
+            includes.each { key ->
+                if (!key.isEmpty()) resultInclude.add(key)
+            }
+            excludes.each { key ->
+                if (!key.isEmpty()) resultInclude.remove(key)
+            }
+        }
+
+        StringBuilder sb = new StringBuilder("// $codeRootDir.absolutePath \n")
+        resultInclude.each { map ->
+            sb.append("\nsetting (':$map.key') \n")
+                    .append("project(':$map.key').projectDir = new File('${map.value.replace("\\", "/")}')")
+        }
+
+        return sb.toString()
+    }
+
+    public void formatDps() {
+        dpsIncludes.each { readDps("include", it) }
+        dpsExcludes.each { readDps("exclude", it) }
+    }
+
+    String save() {
+        formatXml(icTxt)
+        formatInclude(new File(rootDir, includeKt))
+        readFromEnv()
+        formatCodeRoot()
+        formatDps()
+        return makeIncludeTxt()
+    }
+
+    private void formatCodeRoot() {
+        if (codeRoot.isEmpty()) {
+            codeRoot = "../"
+        }
+        codeRootDir = codeRoot == "../" ? new File(rootDir, codeRoot) : new File(codeRoot)
+    }
+
+}
+
+File rootDir = settings.rootDir
+File outDir = new File(rootDir, ".modularization")
+if (!outDir.exists()) outDir.mkdirs()
+try {
+    String text = new ImportProject(rootDir).save()
+    File outFile = new File(outDir, "setting.gradle")
+    outFile.parentFile.mkdirs()
+    outFile.write(text)
+    apply from: outFile.path
+} catch (Exception e) {//if fail delete self
+    new File(outDir, "ImportProject.gradle").deleteOnExit()
+    throw new RuntimeException(e)
+}
