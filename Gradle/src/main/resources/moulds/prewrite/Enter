@@ -1,0 +1,8 @@
+package auto.com.pqixing.configs;
+
+public class Enter {
+
+   public static final String CONFIG = "#{configClass}";
+   public static final String LAUNCH = "#{launchClass}";
+
+}

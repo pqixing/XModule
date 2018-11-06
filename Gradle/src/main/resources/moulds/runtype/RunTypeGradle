@@ -1,0 +1,22 @@
+android{
+    sourceSets {
+        //在main目录中
+        main {
+            java.srcDirs +=  "#{cacheJavaDir}"
+            manifest.srcFile '#{cacheDir}/AndroidManifest.xml'
+        }
+    }
+    defaultConfig {
+        applicationId '#1{applicationId}'
+        versionName '#1{versionName}'
+        versionCode #1{versionCode}
+    }
+    splits {
+        abi {
+            enable false
+            reset()
+            include 'x86', 'armeabi-v7a'
+            universalApk true
+        }
+     }
+}
