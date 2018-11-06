@@ -1,7 +1,6 @@
-package com.pqixing.modularization.git
+package com.pqixing.modularization.manager.tasks
 
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.utils.GitUtils
 
 /**
  * Created by pqixing on 17-12-20.
@@ -19,7 +18,7 @@ class DeleteBranchTask extends GitTask {
         boolean hasRemote = false
         boolean hasLocal = false
         boolean isCurBranch = false
-        com.pqixing.modularization.gradle.utils.GitUtils.run("git branch -a ", gitDir, false)?.eachLine { line ->
+        com.pqixing.modularization.gradle.utils.GitUtils.run("manager branch -a ", gitDir, false)?.eachLine { line ->
             line = line.trim()
             if (line.contains("/origin/$branchName")) {
                 hasRemote = true
@@ -33,10 +32,10 @@ class DeleteBranchTask extends GitTask {
 
         if (hasLocal || hasRemote) {
             if (isCurBranch) {
-                result += com.pqixing.modularization.gradle.utils.GitUtils.run("git checkout master", gitDir)
+                result += com.pqixing.modularization.gradle.utils.GitUtils.run("manager checkout master", gitDir)
             }
-            result += com.pqixing.modularization.gradle.utils.GitUtils.run("git branch -d ${hasLocal ? "" : "origin/"}${branchName}", gitDir)
-            if (hasRemote) result += com.pqixing.modularization.gradle.utils.GitUtils.run("git push origin :${branchName}", gitDir)
+            result += com.pqixing.modularization.gradle.utils.GitUtils.run("manager branch -d ${hasLocal ? "" : "origin/"}${branchName}", gitDir)
+            if (hasRemote) result += com.pqixing.modularization.gradle.utils.GitUtils.run("manager push origin :${branchName}", gitDir)
         } else {
             result += Keys.TIP_BRANCH_NOT_EXISTS
         }

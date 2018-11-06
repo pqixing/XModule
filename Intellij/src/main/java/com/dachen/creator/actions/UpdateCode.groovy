@@ -59,7 +59,7 @@ public class UpdateCode extends AnAction {
 
                 def dir = module == null ? null : GitUtils.findGitDir(new File(module.moduleFilePath))
                 if (dir != null) {
-                    map.put(Conts.ENV_GIT_BRANCH, GitUtils.run("git rev-parse --abbrev-ref HEAD", dir)?.last())
+                    map.put(Conts.ENV_GIT_BRANCH, GitUtils.run("manager rev-parse --abbrev-ref HEAD", dir)?.last())
                 }
                 cloneCode(map)
             }

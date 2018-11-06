@@ -11,8 +11,6 @@ import org.gradle.api.Project
 abstract class BaseExtension {
     public Project project
     public ProjectWrapper wrapper
-    BaseExtension(){
-    }
     BaseExtension(Project project) {
         setProject(project)
     }

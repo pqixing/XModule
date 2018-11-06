@@ -10,6 +10,7 @@ object FileUtils {
         this.cacheDir = "$baseDir/.files"
     }
 
+    @JvmStatic
     fun getTextFromResource(name: String): String {
         val reader = this.javaClass.getResourceAsStream("/$name").bufferedReader()
         val text = reader.readText()
@@ -20,6 +21,7 @@ object FileUtils {
     /**
      * @param checkChange 检查是否有变化，如果没有变化，则不写入
      */
+    @JvmStatic
     fun writeText(file: File, text: String): String {
         if (file.readText() == text) return file.path
         file.parentFile.mkdirs()

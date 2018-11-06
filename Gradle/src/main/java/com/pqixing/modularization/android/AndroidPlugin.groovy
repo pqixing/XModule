@@ -7,8 +7,6 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.docs.DocSyncTask
 import com.pqixing.modularization.forOut.ProjectInfo
-import com.pqixing.modularization.dependent.AllInnerDpsTask
-import com.pqixing.modularization.dependent.DependentPrintTask
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.maven.ToMavenCheckTask
 import com.pqixing.modularization.maven.ToMavenTask
@@ -17,7 +15,7 @@ import com.pqixing.modularization.runtype.RunType
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print
-import com.pqixing.modularization.utils.TextUtils
+import com.pqixing.tools.TextUtils
 import org.gradle.api.Project
 
 /**

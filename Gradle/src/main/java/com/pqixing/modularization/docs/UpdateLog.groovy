@@ -3,7 +3,7 @@ package com.pqixing.modularization.docs
 //
 //import com.pqixing.modularization.Default
 //import com.pqixing.modularization.utils.FileUtils
-//import com.pqixing.modularization.utils.TextUtils
+//import com.pqixing.tools.TextUtils
 //import org.gradle.api.DefaultTask
 //import org.gradle.api.tasks.TaskAction
 //

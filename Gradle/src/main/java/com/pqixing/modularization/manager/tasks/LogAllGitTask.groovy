@@ -1,7 +1,6 @@
-package com.pqixing.modularization.git
+package com.pqixing.modularization.manager.tasks
 
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.utils.GitUtils
 
 /**
  * Created by pqixing on 17-12-20.

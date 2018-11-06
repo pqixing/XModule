@@ -1,11 +1,8 @@
 package com.pqixing.modularization.maven
 
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.gradle.common.GlobalConfig
 import com.pqixing.modularization.net.Net
-import com.pqixing.modularization.utils.MavenUtils
-import com.pqixing.modularization.utils.TextUtils
 
 class IndexMavenTask extends BaseTask {
     @Override

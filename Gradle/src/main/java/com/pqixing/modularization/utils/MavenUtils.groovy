@@ -7,6 +7,7 @@ import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.wrapper.MetadataWrapper
 import com.pqixing.modularization.wrapper.PomWrapper
 import com.pqixing.modularization.wrapper.ProjectWrapper
+import com.pqixing.tools.TextUtils
 
 class MavenUtils {
     static String getNameByUrl(String mavenUrl) {
@@ -136,8 +137,8 @@ class MavenUtils {
     static File getUpDocumentDir() {
         File docDir = documentDir
         if (CheckUtils.isEmpty(docDir)) {//如果文档库还不存在
-            GitUtils.run("git clone $GlobalConfig.docGitUrl", docDir.parentFile)
-        } else GitUtils.run("git pull", docDir)
+            GitUtils.run("manager clone $GlobalConfig.docGitUrl", docDir.parentFile)
+        } else GitUtils.run("manager pull", docDir)
 
         return docDir
     }
@@ -187,8 +188,8 @@ class MavenUtils {
      */
     static void pushMaven() {
         File docDir = getUpDocumentDir()
-        GitUtils.run("git add $Keys.MODURIZATION/*", docDir)
-        GitUtils.run("git commit -m update", docDir)
-        GitUtils.run("git push", docDir)
+        GitUtils.run("manager add $Keys.MODURIZATION/*", docDir)
+        GitUtils.run("manager commit -m update", docDir)
+        GitUtils.run("manager push", docDir)
     }
 }

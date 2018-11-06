@@ -1,10 +1,9 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.common.BuildConfig
-import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.gradle.common.BuildConfig
 import com.pqixing.modularization.gradle.common.GlobalConfig
+import com.pqixing.tools.TextUtils
 
 class Print {
 

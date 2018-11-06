@@ -62,8 +62,8 @@ object GitUtils {
         return null
     }
 
-    internal inline fun isGitDir(dir: File): Boolean {
-        val g = File(dir, ".git")
+    inline fun isGitDir(dir: File): Boolean {
+        val g = File(dir, ".manager")
         return g.isDirectory && g.exists()
     }
 

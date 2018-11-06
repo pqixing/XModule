@@ -1,8 +1,7 @@
-package com.pqixing.modularization.git
+package com.pqixing.modularization.manager.tasks
 
-import com.pqixing.modularization.common.GlobalConfig
+
 import com.pqixing.modularization.gradle.common.GlobalConfig
-import com.pqixing.modularization.utils.MavenUtils
 
 /**
  * Created by pqixing on 17-12-20.

@@ -1,14 +1,8 @@
-package com.pqixing.modularization.git
+package com.pqixing.modularization.manager
 
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.base.BaseExtension
-import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.gradle.base.BaseExtension
 import com.pqixing.modularization.gradle.common.GlobalConfig
-import com.pqixing.modularization.utils.CheckUtils
-import com.pqixing.modularization.utils.GitUtils
-import com.pqixing.modularization.utils.Print
-import com.pqixing.modularization.utils.TextUtils
 import org.gradle.api.Project
 
 /**
@@ -31,7 +25,7 @@ class GitConfig extends BaseExtension {
      */
     static String password
     /**
-     * git email信息
+     * manager email信息
      */
     static String email
     static String baseGitUrl
@@ -50,13 +44,13 @@ class GitConfig extends BaseExtension {
             lastLog = ""
             return
         }
-        def gitInfo = com.pqixing.modularization.gradle.utils.TextUtils.removeLineAndMark(com.pqixing.modularization.gradle.utils.GitUtils.run("git println -1 HEAD --oneline --pretty=format:'%H::%D::%s'", gitDir)).split("::")
+        def gitInfo = com.pqixing.modularization.gradle.utils.TextUtils.removeLineAndMark(com.pqixing.modularization.gradle.utils.GitUtils.run("manager println -1 HEAD --oneline --pretty=format:'%H::%D::%s'", gitDir)).split("::")
         if (gitInfo.length > 0)
             revisionNum = gitInfo[0].trim()
         if (gitInfo.length > 1)
             branchName = gitInfo[1].split(",")[0].replace("HEAD", "").replace("->", "").trim()
         if ("%D" == branchName) {
-            branchName = com.pqixing.modularization.gradle.utils.TextUtils.removeLineAndMark(com.pqixing.modularization.gradle.utils.GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir))
+            branchName = com.pqixing.modularization.gradle.utils.TextUtils.removeLineAndMark(com.pqixing.modularization.gradle.utils.GitUtils.run("manager rev-parse --abbrev-ref HEAD", gitDir))
         }
         if(com.pqixing.modularization.gradle.utils.CheckUtils.isEmpty(branchName)){
             branchName = "master"
@@ -64,11 +58,11 @@ class GitConfig extends BaseExtension {
         if (gitInfo.length > 2)
             lastLog = gitInfo[2]
         rootForGit = gitDir.absolutePath == project.projectDir.absolutePath
-//        branchName = GitUtils.run("git rev-parse --abbrev-ref HEAD", project.projectDir).trim()
-//        revisionNum = GitUtils.run("git rev-parse HEAD", project.projectDir).trim()
-//        lastLog = GitUtils.run("git println -1 --oneline ${revisionNum}", project.projectDir).trim()
+//        branchName = GitUtils.run("manager rev-parse --abbrev-ref HEAD", project.projectDir).trim()
+//        revisionNum = GitUtils.run("manager rev-parse HEAD", project.projectDir).trim()
+//        lastLog = GitUtils.run("manager println -1 --oneline ${revisionNum}", project.projectDir).trim()
         if (!rootForGit) {
-            String dirLog = com.pqixing.modularization.gradle.utils.TextUtils.removeLineAndMark(com.pqixing.modularization.gradle.utils.GitUtils.run("git println -1 HEAD --oneline --pretty=format:'%H' ${project.name}/", gitDir))
+            String dirLog = com.pqixing.modularization.gradle.utils.TextUtils.removeLineAndMark(com.pqixing.modularization.gradle.utils.GitUtils.run("manager println -1 HEAD --oneline --pretty=format:'%H' ${project.name}/", gitDir))
             //如果当前工程不是单独一个git，则使用目录的版本号作为最后的版本号
             if (!com.pqixing.modularization.gradle.utils.CheckUtils.isEmpty(dirLog)) {
                 lastLog += " root revision:$revisionNum"
@@ -82,7 +76,7 @@ class GitConfig extends BaseExtension {
     List<String> log(int num = 5) {
         List<String> logs = new LinkedList<>()
         StringBuilder item = null
-        "git println -$num".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.eachLine { line ->
+        "manager println -$num".execute(null, project.projectDir)?.in?.getText(Keys.CHARSET)?.eachLine { line ->
             if (line.startsWith("commit ")) {
                 if (item != null) logs += item.toString()
                 item = new StringBuilder()

@@ -86,7 +86,7 @@ class ToMavenCheckTask extends BaseTask {
         //如果配置了不检查代码更新,则不读取版本号
         if(!GlobalConfig.checkCodeUpdate) return false
 
-        return gitConfig.revisionNum != com.pqixing.modularization.gradle.utils.TextUtils.removeMark(com.pqixing.modularization.gradle.utils.GitUtils.run("git println -1 --pretty=format:'%H' origin/${gitConfig.branchName} ${gitConfig.rootForGit ? '' : (project.name + '/')}", gitConfig.gitDir))
+        return gitConfig.revisionNum != com.pqixing.modularization.gradle.utils.TextUtils.removeMark(com.pqixing.modularization.gradle.utils.GitUtils.run("manager println -1 --pretty=format:'%H' origin/${gitConfig.branchName} ${gitConfig.rootForGit ? '' : (project.name + '/')}", gitConfig.gitDir))
     }
     /**
      * 检查Docment是否需要更新
@@ -95,7 +95,7 @@ class ToMavenCheckTask extends BaseTask {
     String docUpdateLog() {
         def documentDir = com.pqixing.modularization.gradle.utils.MavenUtils.documentDir
 
-        def gitInfo = com.pqixing.modularization.gradle.utils.GitUtils.run("git println -1 HEAD --oneline --pretty=format:'%H::%D'", documentDir).trim().split("::")
+        def gitInfo = com.pqixing.modularization.gradle.utils.GitUtils.run("manager println -1 HEAD --oneline --pretty=format:'%H::%D'", documentDir).trim().split("::")
         String revisionNum = ""
         String branchName = ""
         if (gitInfo.length > 0)
@@ -103,16 +103,16 @@ class ToMavenCheckTask extends BaseTask {
         if (gitInfo.length > 1)
             branchName = gitInfo[1].split(",")[0].replace("HEAD", "").replace("->", "").trim()
         if ("%D" == branchName) {
-            branchName = com.pqixing.modularization.gradle.utils.GitUtils.run("git rev-parse --abbrev-ref HEAD", documentDir).trim()
+            branchName = com.pqixing.modularization.gradle.utils.GitUtils.run("manager rev-parse --abbrev-ref HEAD", documentDir).trim()
         }
-        if (branchName != "master") return "Document git current branch is $config.branchName , please checkout to master before upload!!!"
+        if (branchName != "master") return "Document manager current branch is $config.branchName , please checkout to master before upload!!!"
 
-        def remoteLog = com.pqixing.modularization.gradle.utils.GitUtils.run("git ls-remote ", documentDir).readLines().find { it.endsWith("/master") }
+        def remoteLog = com.pqixing.modularization.gradle.utils.GitUtils.run("manager ls-remote ", documentDir).readLines().find { it.endsWith("/master") }
 //        Print.lnf("remoteLog $remoteLog branchName $branchName revisionNum $revisionNum")
 
         if (com.pqixing.modularization.gradle.utils.CheckUtils.isEmpty(remoteLog)) return ""
         def remoteRevisionNum = remoteLog.substring(0, remoteLog.indexOf("\t")).trim()
-        if (remoteRevisionNum != revisionNum) return "Document git has update , please update before upload!!!"
+        if (remoteRevisionNum != revisionNum) return "Document manager has update , please update before upload!!!"
         return ""
     }
 

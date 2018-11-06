@@ -1,11 +1,4 @@
-package com.pqixing.modularization.git
-
-
-import com.pqixing.modularization.base.BaseExtension
-import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.gradle.base.BaseExtension
-import com.pqixing.modularization.gradle.base.BasePlugin
-
+package com.pqixing.modularization.manager
 /**
  * Created by pqixing on 17-12-7.
  */

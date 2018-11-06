@@ -39,7 +39,7 @@ class GitUtils {
      * @return
      */
     static String getFullGitUrl(String gitUrl) {
-        if (!gitUrl.endsWith(".git")) gitUrl += ".git"
+        if (!gitUrl.endsWith(".manager")) gitUrl += ".manager"
         if (!gitUrl.contains("@")) gitUrl = gitUrl.replace("//", "//$GitConfig.userName:$GitConfig.password@")
         return gitUrl
     }
@@ -50,7 +50,7 @@ class GitUtils {
      */
     static File findGitDir(File dir) {
         while (dir != null) {
-            File gitDir = new File(dir, ".git")
+            File gitDir = new File(dir, ".manager")
             if (gitDir.exists() && gitDir.isDirectory()) return dir
             dir = dir.parentFile
         }
@@ -63,6 +63,6 @@ class GitUtils {
      */
     static String getNameFromUrl(String url) {
         if(url == null) return ""
-        return url.substring(url.lastIndexOf("/") + 1).replace(".git", "").trim()
+        return url.substring(url.lastIndexOf("/") + 1).replace(".manager", "").trim()
     }
 }

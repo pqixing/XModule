@@ -1,64 +1,128 @@
 package com.pqixing.modularization.base
 
+import com.alibaba.fastjson.JSON
 import com.pqixing.Tools
 import com.pqixing.interfaces.ILog
+import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.common.BuildConfig
-import com.pqixing.modularization.common.CleanCacheTask
-import com.pqixing.modularization.git.GitConfig
-import com.pqixing.modularization.common.BuildConfig
-import com.pqixing.modularization.common.CleanCacheTask
-import com.pqixing.modularization.git.GitCredential
+import com.pqixing.modularization.forOut.ProjectInfo
+import com.pqixing.modularization.manager.GitCredential
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.wrapper.ProjectWrapper
-import com.sun.org.apache.xml.internal.security.Init
+import com.pqixing.tools.CheckUtils
+import com.pqixing.tools.TextUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.jetbrains.annotations.Nullable
+import org.gradle.api.Task
 
 /**
  * Created by pqixing on 17-12-20.
  */
 
-abstract class BasePlugin implements Plugin<Project> {
+abstract class BasePlugin implements Plugin<Project>, IPlugin {
     Project project
-    ProjectWrapper wrapper
+    private static final HashMap<String, Plugin> pluginCache = new HashMap<>()
+
+    private final HashMap<String, Task> tasks = new HashMap<>();
+
+    private static ProjectInfo info;
 
     @Override
     void apply(Project project) {
+        initProject(project)
+    }
+
+    public static final <T> T getPlugin(Class<T> pluginClass) {
+        return pluginCache.get(pluginClass.name)
+    }
+
+    public final void setPlugin() {
+        pluginCache.put(this.class.name, this)
+    }
+
+    private static void initTools(Project project) {
         if (!Tools.init) Tools.init(new ILog() {
             @Override
-            void println(@Nullable String l) {
-
+            void println(String l) {
+                System.out.println(l)
             }
-        }, project.rootDir.absolutePath, new GitCredential())
-        initProject(project)
-        addIgnoreFile()
-
-        Init.init()
-        new GitConfig(project)//生成git相关信息
-        new BuildConfig(project)//生成一个Build配置信息
-
-        BaseTask.task(project, CleanCacheTask.class)
+        }, project.rootDir.absolutePath, new GitCredential(project))
     }
 
     protected void initProject(Project project) {
-        this.rootProject = project.rootProject
         this.project = project
-        project.ext."$Keys.NAME_PUGLIN" = pluginName
-        wrapper = ProjectWrapper.with(project)
+        setPlugin()
+        initTools(project)
+        createIgnoreFile()
+        linkTask()?.each { onTaskCreate(it, BaseTask.task(project, it)) }
     }
 
-    void addIgnoreFile() {
+    protected void onTaskCreate(Class taskClass, Task task) {
+
+    }
+    @Override
+    ProjectInfo getProjectInfo() {
+        if (info == null) {
+            String infoJsonStr = getJsonFromEnv()
+            if (CheckUtils.isEmpty(infoStr)) {
+                try {
+                    Class parseClass = new GroovyClassLoader().parseClass(new File(getRootDir(), FileNames.PROJECT_INFO))
+                    infoStr = JSON.toJSONString(parseClass.newInstance())
+                } catch (Exception e) {
+
+                }
+            }
+            if (!CheckUtils.isEmpty(infoStr)) {
+                try {
+                    info = JSON.parseObject(infoJsonStr, ProjectInfo.class)
+                } catch (Exception e) {
+                }
+            }
+
+            if (info == null) info = new ProjectInfo()
+        }
+        return info
+    }
+
+    private String getJsonFromEnv() {
+        String str = TextUtils.getSystemEnv("ProjectInfo")
+        return str ?: new String(Base64.decoder.decode(infoStr.getBytes(Keys.CHARSET)), Keys.CHARSET)
+    }
+
+    @Override
+    String getRootDir() {
+        return project.rootDir.absolutePath
+    }
+
+    @Override
+    String getBuildDir() {
+        return project.buildDir.absolutePath
+    }
+
+    @Override
+    String getCacheDir() {
+        return project.projectDir.absolutePath + "/" + BuildConfig.dirName
+    }
+
+    @Override
+    Set<? extends Task> getTask(Class<? extends Task> taskClass) {
+        return project.getTasksByName(BaseTask.getTaskName(taskClass))
+    }
+
+    void createIgnoreFile() {
         File ignoreFile = project.file(Keys.GIT_IGNORE)
-        StringBuilder sb = new StringBuilder(FileUtils.read(ignoreFile))
         Set<String> defSets = ["build", 'hideInclude.txt', Keys.GLOBAL_CONFIG_NAME, Keys.FOCUS_GRADLE, BuildConfig.dirName, "*.iml", Keys.TXT_HIDE_INCLUDE] + ignoreFields
 
-        defSets.each { if (!sb.contains(it)) sb.append("\n$it\n") }
+        String old = FileUtils.read(ignoreFile)
+        old.eachLine { line ->
+            defSets.remove(line.trim())
+        }
+        if (defSets.isEmpty())
+            return
+
+        StringBuilder txt = new StringBuilder(old)
+        defSets.each {
+            txt.append("\n$it")
+        }
         FileUtils.write(ignoreFile, sb.toString())
     }
-
-    abstract String getPluginName()
-
-    abstract Set<String> getIgnoreFields()
 }

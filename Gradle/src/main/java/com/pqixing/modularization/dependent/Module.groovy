@@ -3,7 +3,7 @@ package com.pqixing.modularization.dependent
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.utils.CheckUtils
-import com.pqixing.modularization.utils.TextUtils
+import com.pqixing.tools.TextUtils
 
 /**
  * Created by pqixing on 17-12-25.

@@ -6,7 +6,7 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print
-import com.pqixing.modularization.utils.TextUtils
+import com.pqixing.tools.TextUtils
 
 class BuildFlavorsTask extends BaseTask {
     String outDir

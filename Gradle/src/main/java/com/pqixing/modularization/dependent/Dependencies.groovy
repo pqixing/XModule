@@ -11,6 +11,7 @@ import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.utils.*
 import com.pqixing.modularization.wrapper.PomWrapper
 import com.pqixing.modularization.wrapper.ProjectWrapper
+import com.pqixing.tools.TextUtils
 import org.gradle.api.Project
 
 /**

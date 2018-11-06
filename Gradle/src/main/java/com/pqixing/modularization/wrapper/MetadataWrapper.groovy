@@ -1,7 +1,7 @@
 package com.pqixing.modularization.wrapper
 
 import com.pqixing.modularization.net.Net
-import com.pqixing.modularization.utils.TextUtils
+import com.pqixing.tools.TextUtils
 /**
  * 头信息包裹类
  */

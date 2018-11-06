@@ -8,7 +8,7 @@ import com.pqixing.modularization.git.GitConfig
 import com.pqixing.modularization.forOut.ProjectInfo
 import com.pqixing.modularization.dependent.Dependencies
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.TextUtils
+import com.pqixing.tools.TextUtils
 import org.gradle.api.Project
 
 /**

@@ -1,7 +1,6 @@
-package com.pqixing.modularization.git
+package com.pqixing.modularization.manager.tasks
 
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.utils.GitUtils
 
 /**
  * Created by pqixing on 17-12-20.
@@ -16,7 +15,7 @@ class CheckOutTask extends GitTask {
         boolean hasRemote = false
         boolean hasLocal = false
         boolean isCurBranch = false
-        com.pqixing.modularization.gradle.utils.GitUtils.run("git branch -a ", gitDir, false)?.eachLine { line ->
+        com.pqixing.modularization.gradle.utils.GitUtils.run("manager branch -a ", gitDir, false)?.eachLine { line ->
             line = line.trim()
             if (line.contains("/origin/$branchName")) {
                 hasRemote = true
@@ -27,8 +26,8 @@ class CheckOutTask extends GitTask {
             }
         }
         if (isCurBranch) return "current branch is $branchName"
-        if (hasLocal) return com.pqixing.modularization.gradle.utils.GitUtils.run("git checkout $branchName", gitDir)
-        if (hasRemote) return com.pqixing.modularization.gradle.utils.GitUtils.run("git checkout -b $branchName origin/$branchName", gitDir)
+        if (hasLocal) return com.pqixing.modularization.gradle.utils.GitUtils.run("manager checkout $branchName", gitDir)
+        if (hasRemote) return com.pqixing.modularization.gradle.utils.GitUtils.run("manager checkout -b $branchName origin/$branchName", gitDir)
 
         return Keys.TIP_BRANCH_NOT_EXISTS
     }

@@ -19,3 +19,11 @@ allprojects {
         }
     }
 }
+
+gradle.beforeProject {
+    println("befor $it.name")
+}
+afterEvaluate {
+    println("after $name")
+}
+println("now $name")

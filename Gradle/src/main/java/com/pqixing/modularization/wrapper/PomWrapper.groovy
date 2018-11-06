@@ -2,13 +2,11 @@ package com.pqixing.modularization.wrapper
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.common.GlobalConfig
-import com.pqixing.modularization.dependent.Module
-import com.pqixing.modularization.gradle.dependent.Module
 import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.MavenUtils
 import com.pqixing.modularization.utils.Print
-import com.pqixing.modularization.utils.TextUtils
+import com.pqixing.tools.TextUtils
 
 /**
  * Pom解析包裹类

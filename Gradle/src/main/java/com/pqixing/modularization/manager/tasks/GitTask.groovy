@@ -1,16 +1,10 @@
-package com.pqixing.modularization.git
+package com.pqixing.modularization.manager.tasks
 
 import com.alibaba.fastjson.JSON
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.common.GlobalConfig
-import com.pqixing.modularization.gradle.base.BaseTask
 import com.pqixing.modularization.gradle.common.GlobalConfig
-import com.pqixing.modularization.utils.CheckUtils
-import com.pqixing.modularization.utils.GitUtils
-import com.pqixing.modularization.utils.Print
-import com.pqixing.modularization.utils.TextUtils
-
+import com.pqixing.modularization.manager.GitConfig
+import com.pqixing.modularization.manager.GitProject
 
 /**
  * Created by pqixing on 17-12-20.

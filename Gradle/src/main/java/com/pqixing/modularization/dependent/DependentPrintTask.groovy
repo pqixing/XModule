@@ -8,7 +8,7 @@ import com.pqixing.modularization.forOut.ProjectInfo
 import com.pqixing.modularization.maven.MavenType
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.MavenUtils
-import com.pqixing.modularization.utils.TextUtils
+import com.pqixing.tools.TextUtils
 import com.pqixing.modularization.wrapper.PomWrapper
 import com.pqixing.modularization.wrapper.ProjectWrapper
 import org.gradle.api.Project

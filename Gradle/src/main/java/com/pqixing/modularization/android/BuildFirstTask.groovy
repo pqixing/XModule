@@ -4,8 +4,7 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print
-import com.pqixing.modularization.utils.TextUtils
-import org.gradle.internal.impldep.com.google.common.io.Files
+import com.pqixing.tools.TextUtils
 
 class BuildFirstTask extends BaseTask {
     String type = "Debug"

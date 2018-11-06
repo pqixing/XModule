@@ -1,7 +1,6 @@
-package com.pqixing.modularization.git
+package com.pqixing.modularization.manager.tasks
 
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.utils.GitUtils
 
 /**
  * Created by pqixing on 17-12-20.
@@ -18,6 +17,6 @@ class UpdateCodeTask extends GitTask {
     @Override
     String onGitProject(String gitName, String gitUrl, File gitDir) {
         if (!gitDir.exists()) return Keys.TIP_GIT_NOT_EXISTS
-        return com.pqixing.modularization.gradle.utils.GitUtils.run("git pull origin", gitDir)
+        return com.pqixing.modularization.gradle.utils.GitUtils.run("manager pull origin", gitDir)
     }
 }

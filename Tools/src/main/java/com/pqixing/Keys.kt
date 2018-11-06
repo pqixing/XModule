@@ -36,7 +36,7 @@ internal object Keys {
     /**
      * git插件名称
      */
-    val NAME_GIT = "git"
+    val NAME_GIT = "manager"
     /**
      * 插件名称获取
      */

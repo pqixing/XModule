@@ -4,7 +4,7 @@ package com.pqixing.modularization.analysis
 //import com.alibaba.fastjson.JSON
 //import com.pqixing.modularization.base.BaseTask
 //import com.pqixing.modularization.dependent.Dependencies
-//import com.pqixing.modularization.git.GitConfig
+//import com.pqixing.modularization.manager.GitConfig
 //import com.pqixing.modularization.maven.MavenType
 //import com.pqixing.modularization.ModuleConfig
 //import com.pqixing.modularization.utils.FileUtils

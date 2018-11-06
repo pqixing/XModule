@@ -47,7 +47,7 @@ public class DocSyncTask extends BaseTask {
     }
 
     void updateDocGit() {
-        new File(project.buildDir, "updateGit").write("cd $docGitPath \ngit pull \necho update git,path :$docGitPath")
+        new File(project.buildDir, "updateGit").write("cd $docGitPath \nmanager pull \necho update manager,path :$docGitPath")
         project.task("${tempTaskName}${tempTaskCount++}", type: Exec) {
             if (winOs) {
                 commandLine 'cmd', '/c', 'build\\updateGit'
@@ -65,8 +65,8 @@ public class DocSyncTask extends BaseTask {
     }
 
     void pushFile() {
-        def txt = new StringBuilder().append("cd $docGitPath \n").append("git add ").append("$docGitPath/readme/$project.name/* \n")
-                .append("git commit -m '$updateDesc' \n").append("git push \n")
+        def txt = new StringBuilder().append("cd $docGitPath \n").append("manager add ").append("$docGitPath/readme/$project.name/* \n")
+                .append("manager commit -m '$updateDesc' \n").append("manager push \n")
         new File(project.buildDir, "pushGit").write(txt.toString())
         project.task("${tempTaskName}${tempTaskCount++}", type: Exec) {
             if (winOs) {
@@ -89,6 +89,6 @@ public class DocSyncTask extends BaseTask {
             if (f.exists() && f.isDirectory()) return f.absolutePath
             dir = dir.parentFile
         }
-        throw new RuntimeException("sync document fail ,can't find document git project")
+        throw new RuntimeException("sync document fail ,can't find document manager project")
     }
 }

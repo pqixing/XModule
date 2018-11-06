@@ -1,15 +1,8 @@
 package com.pqixing.modularization.net
 
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.common.BuildConfig
-import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.gradle.common.BuildConfig
 import com.pqixing.modularization.gradle.common.GlobalConfig
-import com.pqixing.modularization.maven.MavenType
-import com.pqixing.modularization.utils.CheckUtils
-import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.Print
-import com.pqixing.modularization.utils.TextUtils
 
 class Net {
 

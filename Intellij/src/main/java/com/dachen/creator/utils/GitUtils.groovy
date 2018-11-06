@@ -43,7 +43,7 @@ class GitUtils {
         def gitDir = GitUtils.findGitDir(new File(dir))
         if (gitDir == null) return []
         def set = new HashSet<String>()
-        GitUtils.run("git branch -a", gitDir) {
+        GitUtils.run("manager branch -a", gitDir) {
             String l = it.replace("*", "")
             def i = l.lastIndexOf("/")
             if (i < 0) {
@@ -59,7 +59,7 @@ class GitUtils {
         if (dir == null) return ""
         def gitDir = GitUtils.findGitDir(new File(dir))
         if (gitDir == null) return ""
-        return GitUtils.run("git rev-parse --abbrev-ref HEAD", gitDir)?.last()
+        return GitUtils.run("manager rev-parse --abbrev-ref HEAD", gitDir)?.last()
     }
 
     /**
@@ -69,7 +69,7 @@ class GitUtils {
      */
     static File findGitDir(File dir) {
         while (dir != null) {
-            File gitDir = new File(dir, ".git")
+            File gitDir = new File(dir, ".manager")
             if (gitDir.exists() && gitDir.isDirectory()) return dir
             dir = dir.parentFile
         }
@@ -81,6 +81,6 @@ class GitUtils {
      * @return
      */
     static String getNameFromUrl(String url) {
-        return url.substring(url.lastIndexOf("/") + 1).replace(".git", "")
+        return url.substring(url.lastIndexOf("/") + 1).replace(".manager", "")
     }
 }

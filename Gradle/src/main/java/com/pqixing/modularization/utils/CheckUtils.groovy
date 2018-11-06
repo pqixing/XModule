@@ -36,7 +36,7 @@ class CheckUtils {
     static boolean isGit(String path) {
         File f = new File(path)
         while (f != null) {
-            if (new File(f, ",git").exists()) return true
+            if (new File(f, ",manager").exists()) return true
             f = f.parentFile
         }
         return false

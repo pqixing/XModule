@@ -1,8 +1,7 @@
-package com.pqixing.modularization.utils
+package com.pqixing.tools
 
-import com.pqixing.modularization.Keys
-import com.pqixing.modularization.git.GitConfig
-import com.pqixing.modularization.wrapper.ProjectWrapper
+import com.pqixing.Keys
+
 
 class TextUtils {
     static int count = 0
@@ -19,9 +18,6 @@ class TextUtils {
         return "${System.currentTimeMillis()}${count++}"
     }
 
-    static String getBranchArtifactId(String name, ProjectWrapper wrapper) {
-        return wrapper.master ? name : "$name$Keys.BRANCH_TAG${wrapper.getExtends(GitConfig.class).branchName}"
-    }
 
     static String firstUp(String source) {
         if (CheckUtils.isEmpty(source)) return ""

@@ -1,9 +1,8 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.gradle.common.BuildConfig
-import org.gradle.internal.impldep.com.google.common.io.Files
+import com.pqixing.tools.TextUtils
 
 /**
  * Created by pqixing on 17-11-30.

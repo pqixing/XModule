@@ -8,7 +8,7 @@ import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.gradle.forOut.ProjectInfo
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
-import com.pqixing.modularization.utils.TextUtils
+import com.pqixing.tools.TextUtils
 import com.pqixing.modularization.wrapper.ManifestWrapper
 import com.pqixing.modularization.wrapper.XmlWrapper
 import org.gradle.api.Project

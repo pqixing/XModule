@@ -2,7 +2,7 @@ package com.pqixing.modularization.base
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.utils.Print
-import com.pqixing.modularization.utils.TextUtils
+import com.pqixing.tools.TextUtils
 import com.pqixing.modularization.wrapper.ProjectWrapper
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
