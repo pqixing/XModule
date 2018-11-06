@@ -1,2 +1,0 @@
-org.gradle.jvmargs=-Xmx4608M
-org.gradle.parallel=true

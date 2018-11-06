@@ -1,7 +1,0 @@
-package #{javaPackage};
-
-public class #{className} {
-
-    #{preConfigs}
-
-}
