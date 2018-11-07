@@ -1,6 +1,9 @@
 package com.pqixing.modularization;
 
 public class Keys {
+
+    public static final String TAG = "//START.*?//END";
+
     /**
      * 一个tab空格
      */

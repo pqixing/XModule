@@ -51,4 +51,6 @@ public class FileNames {
      * 配置文件
      */
     public static final String SETTINGS_GRADLE = "settings.gradle";
+    public static final String IMPORTPROJECT_GRADLE = "ImportProject.gradle";
+    public static final String DOCUMENT = "Document";
 }

@@ -1,11 +1,15 @@
 package com.pqixing.modularization.manager
 
+import com.pqixing.Tools.logger
 import com.pqixing.git.GitUtils
+import com.pqixing.git.PercentProgress
 import com.pqixing.modularization.FileNames
-import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.forOut.ProjectInfo
 import com.pqixing.tools.FileUtils
+import com.pqixing.tools.FileUtils.cacheDir
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import org.gradle.api.Project
 import java.io.File
 
@@ -15,11 +19,12 @@ import java.io.File
  */
 
 class ManagerPlugin : BasePlugin() {
-    override fun getIgnoreFields() = setOf(FileNames.PROJECT_INFO, FileNames.INCLUDE_KT)
+    override fun getIgnoreFields() = setOf(FileNames.PROJECT_INFO, FileNames.INCLUDE_KT, FileNames.DOCUMENT)
 
     @Override
     override fun linkTask() = listOf(AllCleanTask::class.java)
 
+    var error: String = ""
     override fun apply(project: Project) {
         super.apply(project)
         project.extensions.create("Manager", ManagerExtends::class.java, project)
@@ -31,6 +36,9 @@ class ManagerPlugin : BasePlugin() {
         }
         project.afterEvaluate {
             checkDocument()
+            if (error.isNotEmpty()) {
+                ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, error)
+            }
         }
     }
 
@@ -40,6 +48,23 @@ class ManagerPlugin : BasePlugin() {
      */
     private fun checkDocument() {
         val manager = getExtends(ManagerExtends::class.java)
+        if (manager.docGitUrl.isEmpty()) {
+            ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "doc git can not be empty!!")
+        }
+        val docRoot = File(rootDir, FileNames.DOCUMENT)
+        if (docRoot.exists() && !GitUtils.isGitDir(docRoot)) {
+            FileUtils.delete(docRoot)
+        }
+        val git = if (docRoot.exists()) {
+            Git.open(docRoot).apply { pull().call() }
+        } else {
+            Git.cloneRepository()
+                    .setCredentialsProvider(UsernamePasswordCredentialsProvider(GitUtils.credentials.getUserName(), GitUtils.credentials.getPassWord()))
+                    .setURI(manager.docGitUrl).setDirectory(docRoot).setBranch("master")
+                    .setProgressMonitor(PercentProgress())
+                    .call()
+        }
+
 
     }
 
@@ -84,13 +109,20 @@ class ManagerPlugin : BasePlugin() {
         }
 
         with(File(FileNames.SETTINGS_GRADLE)) {
+            var e = "setting change"
             if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource("setting/settings.gradle"))
             else if (!readText().matches(Regex("//START.*//END"))) {
                 appendText(FileUtils.getTextFromResource("setting/settings.gradle"))
+            } else {
+                e = ""
             }
+            error += e
             Unit
         }
-
-
+        with(File(cacheDir, FileNames.IMPORTPROJECT_GRADLE)) {
+            val importProject = FileUtils.getTextFromResource("setting/ImportProject.gradle")
+            FileUtils.writeText(this, importProject, true)
+            error += "ImportProject.gradle has update!! try sync again"
+        }
     }
 }

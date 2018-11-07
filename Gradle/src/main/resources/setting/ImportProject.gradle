@@ -8,7 +8,7 @@
 public class ImportProject {
 
     final String includeKt = "include.kt"
-    final String defaultXmlPath = "ProjectInfo/project.xml"
+    final String defaultXmlPath = "Document/ProjectInfo/project.xml"
 
     File rootDir
 
@@ -154,14 +154,14 @@ public class ImportProject {
 }
 
 File rootDir = settings.rootDir
-File outDir = new File(rootDir, ".modularization")
+File outDir = new File(rootDir, "build/.modularization")
 if (!outDir.exists()) outDir.mkdirs()
 try {
     String text = new ImportProject(gradle, rootDir).save()
-    File outFile = new File(outDir, "setting.gradle")
+    File outFile = new File(outDir, "include.gradle")
     outFile.parentFile.mkdirs()
     outFile.write(text)
-    apply from: outFile.path
+    apply from: outFile.absolutePath
 } catch (Exception e) {//if fail delete self
     new File(outDir, "ImportProject.gradle").deleteOnExit()
     throw new RuntimeException(e)

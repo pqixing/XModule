@@ -22,8 +22,8 @@ object FileUtils {
      * @param checkChange 检查是否有变化，如果没有变化，则不写入
      */
     @JvmStatic
-    fun writeText(file: File, text: String): String {
-        if (file.readText() == text) return file.path
+    fun writeText(file: File, text: String, checkChange: Boolean = false): String {
+        if (checkChange && file.readText() == text) return file.path
         file.parentFile.mkdirs()
         with(file.writer()) {
             write(text)
@@ -31,5 +31,13 @@ object FileUtils {
             close()
         }
         return file.path
+    }
+
+    @JvmStatic
+    fun delete(f: File): Boolean {
+        if (!f.exists()) return false
+        if (f.isDirectory) f.listFiles().forEach { delete(it) }
+        f.deleteOnExit()
+        return true
     }
 }

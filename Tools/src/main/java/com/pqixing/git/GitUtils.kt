@@ -31,8 +31,7 @@ object GitUtils {
      */
     @JvmStatic
     fun clone(gitUrl: String, dirPath: String, branchName: String, logger: ILog): Boolean {
-        val name = getGitNameFromUrl(gitUrl)
-        val gitDir = File(dirPath, name)
+        val gitDir = File(dirPath)
         return try {
             Git.cloneRepository()
                     .setCredentialsProvider(UsernamePasswordCredentialsProvider(credentials.getUserName(), credentials.getPassWord()))
