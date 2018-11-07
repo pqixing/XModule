@@ -24,7 +24,7 @@ object FileUtils {
     @JvmStatic
     fun writeText(file: File, text: String, checkChange: Boolean = false): String {
         if (checkChange && file.readText() == text) return file.path
-        file.parentFile.mkdirs()
+        if (!file.parentFile.exists()) file.parentFile.mkdirs()
         with(file.writer()) {
             write(text)
             flush()

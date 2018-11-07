@@ -7,7 +7,6 @@ import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.forOut.ProjectInfo
 import com.pqixing.modularization.manager.GitCredential
-import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.tools.CheckUtils
 import com.pqixing.tools.TextUtils
 import org.gradle.api.Plugin
@@ -64,6 +63,7 @@ abstract class BasePlugin implements Plugin<Project>, IPlugin {
     <T> T getExtends(Class<T> tClass) {
         return project.extensions.getByType(tClass)
     }
+
 
     @Override
     ProjectInfo getProjectInfo() {

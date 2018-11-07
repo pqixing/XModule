@@ -29,11 +29,31 @@ task("copyClass") {
         javaFileDir.listFiles().each { f ->
             def out = new File(classDir, f.name)
             out.parentFile.mkdirs()
-            def writer =out.newWriter()
-            writer.write("//"+f.text)
+            def writer = out.newWriter()
+            writer.write("//" + f.text)
             writer.flush()
             writer.close()
         }
+
+        StringBuilder sb = new StringBuilder('''package com.pqixing.modularization
+object ProjectInfoFiles {
+    val files = listOf(''')
+        def dir = new File(resourceDir, "ProjectInfo")
+        def prefix = dir.name
+        dir.listFiles().each { f1 ->
+            if (f1.isDirectory()) {
+                def prefix2 = f1.name
+                f1.listFiles().each { f2 ->
+                    sb.append("\n\"$prefix/$prefix2/$f2.name\",")
+                }
+            } else sb.append("\n\"$prefix/$f1.name\",")
+
+        }
+        sb.deleteCharAt(sb.length() - 1).append(" ) }")
+        def writer = new File(javaFileDir.parentFile, "ProjectInfoFiles.kt").newWriter()
+        writer.write(sb.toString())
+        writer.flush()
+        writer.close()
     }
 }
 

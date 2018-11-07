@@ -2,6 +2,7 @@ package com.pqixing.modularization.base;
 
 import com.pqixing.modularization.forOut.ProjectInfo;
 
+import org.gradle.api.Project;
 import org.gradle.api.Task;
 
 import java.io.File;
@@ -17,6 +18,7 @@ public interface IPlugin {
     Set<? extends Task> getTask(Class<? extends Task> taskClass);
     List<Class<? extends Task>> linkTask();
 
+    Project getProject();
     ProjectInfo getProjectInfo();
 
     <T> T getExtends(Class<T> tClass);

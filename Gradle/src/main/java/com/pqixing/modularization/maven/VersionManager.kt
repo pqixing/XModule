@@ -5,13 +5,14 @@ import java.util.*
 object VersionManager {
 
     private val versions = HashMap<String, String>()
-    internal var hasInit = false
+    private var hasInit = false
 
     fun getVersion(module: String, branch: String): String {
+        checkInit()
         return ""
     }
 
-    fun checkInit() {
+    private fun checkInit() {
         if (hasInit) return
         collectVersions()
         hasInit = true
