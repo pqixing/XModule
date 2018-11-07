@@ -22,7 +22,7 @@ ext.javaFileDir = new File(mainDir, "java/com/pqixing/modularization")
 task("copyClass") {
     group = "build"
     doFirst {
-        writeFile(new File(javaFileDir,"ProjectInfo.groovy").text, new File(resourceDir, "setting/ProjectInfo.groovy"))
+        writeFile("//"+new File(javaFileDir,"ProjectInfo.groovy").text, new File(resourceDir, "setting/ProjectInfo.groovy"))
 
         StringBuilder sb = new StringBuilder('''package com.pqixing.modularization
 object ProjectInfoFiles {

@@ -1,4 +1,4 @@
-package com.pqixing.modularization
+//package com.pqixing.modularization
 /**
  * 工程配置文件
  * 所有模块，以：加模块名称 extc setting = ":dComm"+":dcNet"
