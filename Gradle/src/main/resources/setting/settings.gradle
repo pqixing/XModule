@@ -1,1 +1,3 @@
-file('.modularization/ImportProject.gradle').with { if (exists()) apply from: path }/**ADD*/
+//START
+file('build/.modularization/ImportProject.gradle').with { if (exists()) apply from: path }
+//END

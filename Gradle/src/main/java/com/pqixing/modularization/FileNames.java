@@ -43,4 +43,12 @@ public class FileNames {
      * 配置文件
      */
     public static final String PROJECT_INFO = "ProjectInfo.groovy";
+    /**
+     * 配置文件
+     */
+    public static final String INCLUDE_KT = "include.kt";
+    /**
+     * 配置文件
+     */
+    public static final String SETTINGS_GRADLE = "settings.gradle";
 }

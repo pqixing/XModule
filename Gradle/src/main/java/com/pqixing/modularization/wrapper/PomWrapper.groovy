@@ -1,6 +1,7 @@
 package com.pqixing.modularization.wrapper
 
 import com.pqixing.modularization.Keys
+import com.pqixing.modularization.android.dps.Module
 import com.pqixing.modularization.common.GlobalConfig
 import com.pqixing.modularization.net.Net
 import com.pqixing.modularization.utils.CheckUtils
@@ -90,7 +91,7 @@ class PomWrapper extends XmlWrapper {
         return "-----------"
     }
 
-    com.pqixing.modularization.dependent.Module loadModule(com.pqixing.modularization.dependent.Module m) {
+    Module loadModule(Module m) {
         m.artifactId = artifactId
         m.groupId = groupId
         m.version = version
@@ -101,7 +102,7 @@ class PomWrapper extends XmlWrapper {
             String artifactId = d.artifactId.text()
             //不是内部依赖，则不处理
             if (groupId != GlobalConfig.groupName || artifactId == "dcannotation") return
-            com.pqixing.modularization.dependent.Module dm = new com.pqixing.modularization.dependent.Module()
+            Module dm = new Module()
             dm.artifactId = d.artifactId.text()
             dm.groupId = d.groupId.text()
             dm.version = d.version.text()

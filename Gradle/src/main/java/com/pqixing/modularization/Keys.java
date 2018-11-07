@@ -24,11 +24,11 @@ public class Keys {
     /**
      * App插件名称
      */
-    public static final String NAME_APP = "application";
+    public static final String NAME_APP = "con.android.application";
     /**
      * library插件名称
      */
-    public static final String NAME_LIBRARY = "library";
+    public static final String NAME_LIBRARY = "con.android.library";
     /**
      * git插件名称
      */
@@ -77,6 +77,10 @@ public class Keys {
      * 模块配置
      */
     public static final String CONFIG_MODULE = "moduleConfig";
+    /**
+     * 模块配置
+     */
+    public static final String CONFIG_DPS = "innerDps";
 
     /**
      * 模块配置
@@ -143,10 +147,6 @@ public class Keys {
      * 合并依赖到release分支
      */
     public static final String BATH_RELEASE = "batch_release";
-    /**
-     * 隐藏的导入文件，批量上传时使用
-     */
-    static final String TXT_HIDE_INCLUDE = "hideInclude.kt";
 
     /**
      * 上传日志记录

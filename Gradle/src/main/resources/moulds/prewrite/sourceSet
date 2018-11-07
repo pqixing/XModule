@@ -1,8 +1,0 @@
-android{
- sourceSets {
-        //在main目录中
-        main {
-            java.srcDirs += "#{javaDir}"
-        }
-    }
-}

@@ -1,27 +1,22 @@
 package com.pqixing.modularization.android
 
+
 import com.pqixing.modularization.Keys
-import org.gradle.api.Project
-import org.gradle.api.Task;
+import org.gradle.api.Task
 
 /**
  * Created by pqixing on 17-12-7.
  */
 
-class LibraryPlugin extends AndroidPlugin {
-    @Override
-    void apply(Project project) {
-        super.apply(project)
-    }
-
+class ApplicationPlugin extends AndroidPlugin {
     @Override
     protected String getAndroidPlugin() {
-        return Keys.NAME_LIBRARY
+        return Keys.NAME_APP
     }
 
     @Override
     Set<String> getIgnoreFields() {
-        return ["scr/dev"]
+        return null
     }
 
     @Override

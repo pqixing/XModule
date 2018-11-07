@@ -59,6 +59,12 @@ abstract class BasePlugin implements Plugin<Project>, IPlugin {
     protected void onTaskCreate(Class taskClass, Task task) {
 
     }
+
+    @Override
+    <T> T getExtends(Class<T> tClass) {
+        return project.extensions.getByType(tClass)
+    }
+
     @Override
     ProjectInfo getProjectInfo() {
         if (info == null) {
@@ -89,18 +95,23 @@ abstract class BasePlugin implements Plugin<Project>, IPlugin {
     }
 
     @Override
-    String getRootDir() {
-        return project.rootDir.absolutePath
+    File getRootDir() {
+        return project.rootDir
     }
 
     @Override
-    String getBuildDir() {
-        return project.buildDir.absolutePath
+    File getProjectDir() {
+        return project.projectDir
     }
 
     @Override
-    String getCacheDir() {
-        return project.projectDir.absolutePath + "/" + BuildConfig.dirName
+    File getBuildDir() {
+        return project.buildDir
+    }
+
+    @Override
+    File getCacheDir() {
+        return new File(buildDir, FileNames.MODULARIZATION)
     }
 
     @Override
@@ -110,7 +121,7 @@ abstract class BasePlugin implements Plugin<Project>, IPlugin {
 
     void createIgnoreFile() {
         File ignoreFile = project.file(Keys.GIT_IGNORE)
-        Set<String> defSets = ["build", 'hideInclude.txt', Keys.GLOBAL_CONFIG_NAME, Keys.FOCUS_GRADLE, BuildConfig.dirName, "*.iml", Keys.TXT_HIDE_INCLUDE] + ignoreFields
+        Set<String> defSets = ["build", Keys.FOCUS_GRADLE, FileNames.MODULARIZATION, "*.iml"] + ignoreFields
 
         String old = FileUtils.read(ignoreFile)
         old.eachLine { line ->

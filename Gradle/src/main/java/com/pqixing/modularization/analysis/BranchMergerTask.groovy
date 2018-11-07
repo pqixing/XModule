@@ -1,7 +1,7 @@
 package com.pqixing.modularization.analysis
 //package com.pqixing.modularization.analysis
 //
-//import com.pqixing.modularization.dependent.Dependencies
+//import com.pqixing.modularization.android.dps.Dependencies
 //import org.gradle.api.tasks.TaskAction
 ///**
 // * Created by pqixing on 17-12-20.
