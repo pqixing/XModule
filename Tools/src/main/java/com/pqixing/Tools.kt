@@ -5,7 +5,11 @@ import com.pqixing.interfaces.ICredential
 import com.pqixing.interfaces.ILog
 
 
-object Tools {
+object Tools :ILog {
+    override fun println(l: String?) {
+        logger?.println(l)
+    }
+
     lateinit var rootDir: String
     lateinit var logger: ILog
     var init = false

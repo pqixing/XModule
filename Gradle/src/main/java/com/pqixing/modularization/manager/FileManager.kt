@@ -67,8 +67,14 @@ object FileManager {
         val git = if (docRoot.exists()) {
             Git.open(docRoot).apply { pull().call() }
         } else {
+            val extends = plugin.getExtends(ManagerExtends::class.java)
+            val info = plugin.projectInfo
+            var user = extends.gitUserName
+            var psw = extends.gitPassWord
+            if (user.isEmpty()) user = info.gitUserName
+            if (psw.isEmpty()) psw = info.gitPassWord
             Git.cloneRepository()
-                    .setCredentialsProvider(UsernamePasswordCredentialsProvider(GitUtils.credentials.getUserName(), GitUtils.credentials.getPassWord()))
+                    .setCredentialsProvider(UsernamePasswordCredentialsProvider(user, psw))
                     .setURI(manager.docGitUrl).setDirectory(docRoot).setBranch("master")
                     .setProgressMonitor(PercentProgress())
                     .call()

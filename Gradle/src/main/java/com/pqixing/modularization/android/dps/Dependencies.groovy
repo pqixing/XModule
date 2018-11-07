@@ -5,7 +5,7 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.common.BuildConfig
 import com.pqixing.modularization.common.GlobalConfig
-import com.pqixing.modularization.forOut.ProjectInfo
+import com.pqixing.modularization.ProjectInfo
 import com.pqixing.modularization.utils.CheckUtils
 import com.pqixing.modularization.utils.FileUtils
 import com.pqixing.modularization.utils.Print

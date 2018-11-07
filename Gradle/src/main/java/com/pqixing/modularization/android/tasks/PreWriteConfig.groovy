@@ -5,7 +5,7 @@
 //import com.pqixing.modularization.base.BaseExtension
 //import com.pqixing.modularization.common.BuildConfig
 //import com.pqixing.modularization.git.GitConfig
-//import com.pqixing.modularization.forOut.ProjectInfo
+//import com.pqixing.modularization.ProjectInfo
 //import com.pqixing.modularization.android.dps.Dependencies
 //import com.pqixing.modularization.utils.FileUtils
 //import com.pqixing.tools.TextUtils

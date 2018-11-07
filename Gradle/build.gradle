@@ -18,22 +18,11 @@ repositories {
 }
 ext.mainDir = new File(projectDir, "src/main")
 ext.resourceDir = new File(mainDir, "resources")
-ext.javaFileDir = new File(mainDir, "java/com/pqixing/modularization/forOut")
+ext.javaFileDir = new File(mainDir, "java/com/pqixing/modularization")
 task("copyClass") {
     group = "build"
     doFirst {
-        File classDir = new File(resourceDir, "setting")
-        if (!classDir.exists()) {
-            classDir.mkdirs()
-        }
-        javaFileDir.listFiles().each { f ->
-            def out = new File(classDir, f.name)
-            out.parentFile.mkdirs()
-            def writer = out.newWriter()
-            writer.write("//" + f.text)
-            writer.flush()
-            writer.close()
-        }
+        writeFile(new File(javaFileDir,"ProjectInfo.groovy").text, new File(resourceDir, "setting/ProjectInfo.groovy"))
 
         StringBuilder sb = new StringBuilder('''package com.pqixing.modularization
 object ProjectInfoFiles {
@@ -50,11 +39,16 @@ object ProjectInfoFiles {
 
         }
         sb.deleteCharAt(sb.length() - 1).append(" ) }")
-        def writer = new File(javaFileDir.parentFile, "ProjectInfoFiles.kt").newWriter()
-        writer.write(sb.toString())
-        writer.flush()
-        writer.close()
+        writeFile(sb.toString(), new File(javaFileDir, "ProjectInfoFiles.kt"))
     }
+}
+
+def writeFile(String txt, File out) {
+    def writer = out.newWriter()
+    if (!out.parentFile.exists()) out.parentFile.mkdirs()
+    writer.write(txt)
+    writer.flush()
+    writer.close()
 }
 
 uploadArchives.dependsOn "clean"

@@ -5,7 +5,7 @@ import com.pqixing.Tools
 import com.pqixing.interfaces.ILog
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.forOut.ProjectInfo
+import com.pqixing.modularization.ProjectInfo
 import com.pqixing.modularization.manager.GitCredential
 import com.pqixing.tools.CheckUtils
 import com.pqixing.tools.TextUtils
