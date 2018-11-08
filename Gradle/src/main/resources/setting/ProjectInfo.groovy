@@ -43,4 +43,9 @@ class ProjectInfo {
 
     /**工程编译目录，使用不同的编译目录便于同时执行多个编译事件，例如ToMaven和构建*/
     String buildDir = ""
+
+    /**
+     * 运行类型,gradle,plugin
+     */
+    String runPluginType = "gradle";
 }

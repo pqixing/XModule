@@ -74,6 +74,8 @@ public class GitTest {
         }
         checkOut("yqq_2.2",open);
         checkOut("yqq_2.2",open);
+
+
 //        open.log().setMaxCount(3).call().forEach(new Consumer<RevCommit>() {
 //            @Override
 //            public void accept(RevCommit revCommit) {

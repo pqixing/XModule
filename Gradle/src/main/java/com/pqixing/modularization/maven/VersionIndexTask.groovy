@@ -4,7 +4,7 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.gradle.common.GlobalConfig
 import com.pqixing.modularization.net.Net
 
-class IndexMavenTask extends BaseTask {
+class VersionIndexTask extends BaseTask {
     @Override
     void start() {
         String groupUrl = com.pqixing.modularization.gradle.utils.TextUtils.getUrl(GlobalConfig.groupName)

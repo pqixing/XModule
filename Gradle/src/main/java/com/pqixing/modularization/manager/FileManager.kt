@@ -16,14 +16,24 @@ import java.io.File
  * 管理文件的输出和读取
  */
 object FileManager {
-    var codeRootDir:File?= null
-    get() {
-        if (field == null) {
-            field = GroovyHelper.getExtValue(BasePlugin.getPlugin(ManagerPlugin::class.java).project.gradle, FileNames.CODE_ROOT) as File?
+    var codeRootDir: File? = null
+        get() {
+            if (field == null) {
+                field = GroovyHelper.getExtValue(BasePlugin.getPlugin(ManagerPlugin::class.java).project.gradle, FileNames.CODE_ROOT) as File?
+            }
+            return field
         }
-        return field
-    }
 
+    /**
+     * 存放信息的目录
+     */
+    var infoDir: File? = null
+        get() {
+            if (field == null) {
+                field = File(docRoot, "ProjectInfo")
+            }
+            return field
+        }
 
     var docRoot: File? = null
         get() {
