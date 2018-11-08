@@ -53,4 +53,6 @@ public class FileNames {
     public static final String SETTINGS_GRADLE = "settings.gradle";
     public static final String IMPORTPROJECT_GRADLE = "ImportProject.gradle";
     public static final String DOCUMENT = "Document";
+    public static final String CODE_ROOT = "codeRootDir";
+    public static final String PROJECT_XML = "project.xml";
 }

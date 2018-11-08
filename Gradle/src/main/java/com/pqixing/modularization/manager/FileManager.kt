@@ -4,7 +4,9 @@ import com.pqixing.git.GitUtils
 import com.pqixing.git.PercentProgress
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.ProjectInfoFiles
+import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.IPlugin
+import com.pqixing.modularization.utils.GroovyHelper
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
@@ -14,6 +16,27 @@ import java.io.File
  * 管理文件的输出和读取
  */
 object FileManager {
+    var codeRootDir:File?= null
+    get() {
+        if (field == null) {
+            field = GroovyHelper.getExtValue(BasePlugin.getPlugin(ManagerPlugin::class.java).project.gradle, FileNames.CODE_ROOT) as File?
+        }
+        return field
+    }
+
+
+    var docRoot: File? = null
+        get() {
+            if (field == null) {
+                field = File(BasePlugin.getPlugin(ManagerPlugin::class.java).rootDir, FileNames.DOCUMENT)
+            }
+            return field
+        }
+
+    fun getProjectXml(): File {
+        return File(docRoot, FileNames.PROJECT_XML)
+    }
+
     /**
      * 检测需要导出的文件有没有被导出
      * 待检测项
@@ -60,7 +83,7 @@ object FileManager {
         if (manager.docGitUrl.isEmpty()) {
             ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "doc git can not be empty!!")
         }
-        val docRoot = File(rootDir, FileNames.DOCUMENT)
+        val docRoot = docRoot!!
         if (docRoot.exists() && !GitUtils.isGitDir(docRoot)) {
             FileUtils.delete(docRoot)
         }

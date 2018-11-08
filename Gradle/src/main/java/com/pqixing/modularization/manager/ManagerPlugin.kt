@@ -10,6 +10,7 @@ import org.gradle.api.Project
  */
 
 class ManagerPlugin : BasePlugin() {
+    
     override fun getIgnoreFields() = setOf(FileNames.PROJECT_INFO, FileNames.INCLUDE_KT, FileNames.DOCUMENT)
 
     @Override

@@ -15,13 +15,13 @@ object GitUtils {
     }
 
     @JvmStatic
-    fun clone(gitUrl: String, dirPath: String) = clone(gitUrl, dirPath, "master", Tools.logger)
+    fun clone(gitUrl: String, gitDir: File) = clone(gitUrl, gitDir, "master", Tools.logger)
 
     @JvmStatic
-    fun clone(gitUrl: String, dirPath: String, branchName: String) = clone(gitUrl, dirPath, branchName, Tools.logger)
+    fun clone(gitUrl: String, gitDir: File, branchName: String) = clone(gitUrl, gitDir, branchName, Tools.logger)
 
     @JvmStatic
-    fun clone(gitUrl: String, dirPath: String, logger: ILog) = clone(gitUrl, dirPath, "master", logger)
+    fun clone(gitUrl: String, gitDir: File, logger: ILog) = clone(gitUrl, gitDir, "master", logger)
 
     /**
      * clone
@@ -30,18 +30,16 @@ object GitUtils {
      * @return
      */
     @JvmStatic
-    fun clone(gitUrl: String, dirPath: String, branchName: String, logger: ILog): Boolean {
-        val gitDir = File(dirPath)
+    fun clone(gitUrl: String, gitDir: File, branchName: String, logger: ILog): Git? {
         return try {
             Git.cloneRepository()
                     .setCredentialsProvider(UsernamePasswordCredentialsProvider(credentials.getUserName(), credentials.getPassWord()))
                     .setURI(gitUrl).setDirectory(gitDir).setBranch(branchName)
                     .setProgressMonitor(PercentProgress(logger))
                     .call()
-            isGitDir(gitDir)
         } catch (e: Exception) {
             logger?.println(e.toString())
-            false
+            null
         }
     }
 
@@ -62,7 +60,7 @@ object GitUtils {
     }
 
     inline fun isGitDir(dir: File): Boolean {
-        val g = File(dir, ".manager")
+        val g = File(dir, ".git")
         return g.isDirectory && g.exists()
     }
 

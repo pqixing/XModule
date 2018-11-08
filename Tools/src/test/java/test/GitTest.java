@@ -8,6 +8,7 @@ import com.pqixing.interfaces.ICredential;
 import com.pqixing.interfaces.ILog;
 import com.pqixing.shell.Shell;
 
+import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.DiffCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
@@ -31,7 +32,7 @@ public class GitTest {
     public void testClone() throws GitAPIException {
         init();
         long start = System.currentTimeMillis();
-        GitUtils.clone("https://github.com/pqixing/modularization.manager", "/home/pqixing/Desktop/test2");
+//        GitUtils.clone("https://github.com/pqixing/modularization.manager", "/home/pqixing/Desktop/test2");
         System.out.println("end count " + (System.currentTimeMillis() - start));
 
         start = System.currentTimeMillis();
@@ -65,26 +66,48 @@ public class GitTest {
     public void testBranch() throws IOException, GitAPIException {
         init();
         Git open = Git.open(new File("/opt/Code/dachen/YHQ/MedicalProject"));
-//        PullResult call = open.pull().setProgressMonitor(new PercentProgress(l -> System.out.println(l))).setCredentialsProvider(new UsernamePasswordCredentialsProvider(GitUtils.credentials.getUserName(),GitUtils.credentials.getPassWord())).call();
-//        System.out.println(call.isSuccessful()+call.toString());
-        open.checkout().setName("master").setForce(true).addPath().getName();
-//        open.checkout().setName("master4444").setCreateBranch(true).call();
 
-        open.log().setMaxCount(3).call().forEach(new Consumer<RevCommit>() {
-            @Override
-            public void accept(RevCommit revCommit) {
-                System.out.println(revCommit.getFullMessage());
+        List<Ref> call = open.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
+
+        for (Ref c : call) {
+            System.out.println(c.getName());
+        }
+        checkOut("yqq_2.2",open);
+        checkOut("yqq_2.2",open);
+//        open.log().setMaxCount(3).call().forEach(new Consumer<RevCommit>() {
+//            @Override
+//            public void accept(RevCommit revCommit) {
+//                System.out.println(revCommit.getFullMessage());
+//            }
+//        });
+//
+//        List<Ref> refs = open.branchList().call();
+//        Ref ref = refs.get(0);
+//
+//        Repository repository = open.getRepository();
+//        String branch = repository.getBranch();
+//        Object master = repository.getRemoteName("origin");
+//        System.out.println(master);
+//        open.close();
+    }
+
+    public void checkOut(String branchName, Git git) throws GitAPIException {
+        List<Ref> local = git.branchList().call();
+        String end = "/" + branchName;
+        for (Ref c : local) {
+            if (c.getName().endsWith(end)) {
+                git.checkout().setName(branchName).call();
+                System.out.println("切换本地分支");
+                return;
             }
-        });
-
-        open.branchCreate()
-        List<Ref> refs = open.branchList().call();
-        Ref ref = refs.get(0);
-
-        Repository repository = open.getRepository();
-        String branch = repository.getBranch();
-        Object master = repository.getRemoteName("origin");
-        System.out.println(master);
-        open.close();
+        }
+        List<Ref> remote = git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call();
+        for (Ref c : remote) {
+            if (c.getName().endsWith(end)) {
+                git.checkout().setName(branchName).setCreateBranch(true).setStartPoint(c.getName()).setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).call();
+                System.out.println("切换远程分支");
+                return;
+            }
+        }
     }
 }
