@@ -7,7 +7,6 @@ import com.pqixing.modularization.wrapper.ProjectXml
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
-import org.eclipse.jgit.api.errors.GitAPIException
 import org.gradle.api.Project
 import java.io.File
 

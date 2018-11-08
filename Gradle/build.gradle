@@ -1,8 +1,15 @@
 // 应用插件
 apply plugin: "groovy"
 apply plugin: "maven"
-apply plugin: 'kotlin-kapt'
 apply plugin: 'java-library'
+apply plugin: 'kotlin'
+sourceCompatibility = "8"
+targetCompatibility = "8"
+repositories {
+    mavenCentral()
+    jcenter()
+    google()
+}
 // 添加依赖
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -12,12 +19,9 @@ dependencies {
     implementation "com.alibaba:fastjson:1.2.44"
 //    implementation "com.android.tools.build:gradle:3.1.2"
     implementation project(":Tools")
+
 }
 
-// 代码仓库
-repositories {
-    jcenter()
-}
 ext.mainDir = new File(projectDir, "src/main")
 ext.resourceDir = new File(mainDir, "resources")
 ext.javaFileDir = new File(mainDir, "java/com/pqixing/modularization")
@@ -52,6 +56,6 @@ def writeFile(String txt, File out) {
     writer.flush()
     writer.close()
 }
-
-uploadArchives.dependsOn "clean"
-uploadArchives.dependsOn "auto"
+//
+//uploadArchives.dependsOn "clean"
+//uploadArchives.dependsOn "auto"
