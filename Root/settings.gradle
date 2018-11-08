@@ -1,4 +1,3 @@
-include ':Plugin'
 //addInclude ':GradlePg', ':Luanch', ':AnnotationProcess', ':Annotation',
 addInclude "Tools","Intellij","Annotation","Gradle"
 
