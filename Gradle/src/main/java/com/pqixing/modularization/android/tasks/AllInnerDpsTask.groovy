@@ -3,7 +3,7 @@
 //import com.pqixing.modularization.Keys
 //import com.pqixing.modularization.base.BaseTask
 //import com.pqixing.modularization.common.BuildConfig
-//import com.pqixing.modularization.utils.FileUtils
+//import com.pqixing.modularization.modularization.FileUtils
 //
 //class AllInnerDpsTask extends BaseTask {
 //    boolean winOs

@@ -7,8 +7,8 @@ package com.pqixing.modularization.analysis
 //import com.pqixing.modularization.manager.GitConfig
 //import com.pqixing.modularization.maven.MavenType
 //import com.pqixing.modularization.ModuleConfig
-//import com.pqixing.modularization.utils.FileUtils
-//import com.pqixing.modularization.utils.Print
+//import com.pqixing.modularization.modularization.FileUtils
+//import com.pqixing.modularization.modularization.Print
 //import com.pqixing.modularization.wrapper.ProjectWrapper
 //import org.gradle.api.DefaultTask
 //
@@ -120,7 +120,7 @@ package com.pqixing.modularization.analysis
 //        runtime++
 //        if (item == null) return
 //        if (item.version == "+" || item.version.contains("last"))
-//            item.version = XmlUtils.parseLastVersion(XmlUtils.getMetaUrl(maven.maven_url, Default.groupName, item.moduleName))
+//            item.version = XmlUtils.parseLastVersion(XmlUtils.getMateUrl(maven.maven_url, Default.groupName, item.moduleName))
 //
 //        String pomStr = FileUtils.readCachePom(maven, item.moduleName, item.version)
 //        String groupName = "${Default.groupName}.android"
@@ -201,7 +201,7 @@ package com.pqixing.modularization.analysis
 //        if (compareMaven == null) compareMaven = maven
 //        Dependencies.DpItem compareItem = new Dependencies.DpItem()
 //        compareItem.moduleName = item.moduleName.split("-b-")[0]
-//        compareItem.version = XmlUtils.parseLastVersion(XmlUtils.getMetaUrl(compareMaven.maven_url, Default.groupName, compareItem.moduleName))
+//        compareItem.version = XmlUtils.parseLastVersion(XmlUtils.getMateUrl(compareMaven.maven_url, Default.groupName, compareItem.moduleName))
 //        loadItemInfo(FileUtils.readCachePom(compareMaven, compareItem.moduleName, compareItem.version), compareItem)
 //        String checkStr = isCheck(item, compareItem) ? "√" : " "
 //        return "$checkStr     $dpLevel      $compareItem.version/${compareItem.lastUpdateTimeStr}    $item.version/${item.lastUpdateTimeStr}         $item.moduleName    \n"

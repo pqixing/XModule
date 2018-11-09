@@ -7,7 +7,7 @@
 //import com.pqixing.modularization.git.GitConfig
 //import com.pqixing.modularization.ProjectInfo
 //import com.pqixing.modularization.android.dps.Dependencies
-//import com.pqixing.modularization.utils.FileUtils
+//import com.pqixing.modularization.modularization.FileUtils
 //import com.pqixing.tools.TextUtils
 //import org.gradle.api.Project
 //
@@ -68,6 +68,6 @@
 //            FileUtils.write(enterFile, writes.enter)
 //        }
 //
-//        return [FileUtils.write(new File(buildConfig.cacheDir, "java.gradle"), writes.sourceSet)]
+//        return [FileUtils.write(new File(buildConfig.cacheDir, "iterface.gradle"), writes.sourceSet)]
 //    }
 //}

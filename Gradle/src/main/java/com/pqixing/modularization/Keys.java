@@ -1,6 +1,13 @@
 package com.pqixing.modularization;
 
 public class Keys {
+    public static final String UPDATE_TIME = "update_time";
+    public static final String UPDATE_LOG = "update_log";
+    public static final String UPDATE_VERSION = "update_version";
+    /**
+     * 版本号过滤
+     */
+    public static final String VERSION_FILTER = "version_filter";
 
     public static final String TAG = "//START.*?//END";
 
@@ -99,7 +106,6 @@ public class Keys {
     public static final String PREFIX_NET = "http";
 
 
-
     /**
      * 主线版本依赖去除是
      */
@@ -163,11 +169,11 @@ public class Keys {
     /**
      * gradle.properteis文件
      */
-    public static final String  NAME_PRO_GRADLE= "gradle.properties";
+    public static final String NAME_PRO_GRADLE = "gradle.properties";
     /**
      * 编译的缓存目录
      */
-    public static final String  ENV_BUILD_DIR= "buildDir";
+    public static final String ENV_BUILD_DIR = "buildDir";
     /**
      * 待操作的git名称
      */
@@ -194,7 +200,7 @@ public class Keys {
     static String TIP_BRANCH_NOT_EXISTS = "Branch Not Exists";
 
     /**
-     *git操作失败
+     * git操作失败
      */
     static String TIP_GIT_MERGE_FAIL = "Git MERGE FAIL";
     /**

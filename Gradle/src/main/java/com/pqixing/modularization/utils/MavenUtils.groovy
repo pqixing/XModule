@@ -1,10 +1,10 @@
-//package com.pqixing.modularization.utils
+//package com.pqixing.modularization.modularization
 //
 //import com.pqixing.modularization.Keys
 //import com.pqixing.modularization.base.BasePlugin
 //import com.pqixing.modularization.common.GlobalConfig
 //import com.pqixing.modularization.net.Net
-//import com.pqixing.modularization.wrapper.MetadataWrapper
+//import com.pqixing.modularization.wrapper.MavenMetadata
 //import com.pqixing.modularization.wrapper.PomWrapper
 //import com.pqixing.modularization.wrapper.ProjectWrapper
 //import com.pqixing.tools.TextUtils
@@ -115,7 +115,7 @@
 //            String version = ""
 //            def metaFile = new File(dir, "meta.xml")
 //            if (metaFile.exists()) {
-//                version = new MetadataWrapper(FileUtils.read(metaFile)).release
+//                version = new MavenMetadata(FileUtils.read(metaFile)).release
 //            } else dir.eachDir {
 //                String newVersion = it.name.trim()
 //                if (TextUtils.compareVersion(newVersion, version) > 0) version = newVersion
@@ -157,7 +157,7 @@
 //     * 更新某个模块的maven仓库记录
 //     */
 //    static boolean updateMavenRecord(ProjectWrapper wrapper, String mavenName, String mavenUrl, String artifactId, boolean push = true) {
-//        MetadataWrapper metaWrapper = MetadataWrapper.create(mavenUrl, GlobalConfig.groupName, artifactId)
+//        MavenMetadata metaWrapper = MavenMetadata.create(mavenUrl, GlobalConfig.groupName, artifactId)
 //        if (metaWrapper.empty) return false
 //
 //        File docDir = push ? upDocumentDir : documentDir;

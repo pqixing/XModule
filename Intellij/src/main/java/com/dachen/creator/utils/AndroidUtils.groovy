@@ -61,7 +61,7 @@ public class AndroidUtils {
 
     @Nullable
     public static VirtualFile getPackageByName(PsiClass clazz, String className, String pkgName) {
-        // app包名根目录 ...\app\src\main\java\PACKAGE_NAME\
+        // app包名根目录 ...\app\src\main\iterface\PACKAGE_NAME\
         VirtualFile pkgDir = AndroidUtils.getAppPackageBySimpleClass(clazz, className);
         // 判断根目录下是否有对应包名文件夹
         VirtualFile realDir = pkgDir.findChild(pkgName);
@@ -99,7 +99,7 @@ public class AndroidUtils {
             dir = dir.getParent();
         }
         String path = dir.getPath().replace("/", ".");
-        String preText = "src.main.java";
+        String preText = "src.main.iterface";
         int preIndex = path.indexOf(preText) + preText.length() + 1;
         path = path.substring(preIndex);
         return path;

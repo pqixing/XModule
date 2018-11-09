@@ -9,8 +9,8 @@
 //import com.pqixing.modularization.git.GitConfig
 //import com.pqixing.modularization.ProjectInfo
 //import com.pqixing.modularization.maven.MavenType
-//import com.pqixing.modularization.utils.FileUtils
-//import com.pqixing.modularization.utils.MavenUtils
+//import com.pqixing.modularization.modularization.FileUtils
+//import com.pqixing.modularization.modularization.MavenUtils
 //import com.pqixing.tools.TextUtils
 //import com.pqixing.modularization.wrapper.PomWrapper
 //import com.pqixing.modularization.wrapper.ProjectWrapper

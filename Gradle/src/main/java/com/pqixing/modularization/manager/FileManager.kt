@@ -3,10 +3,11 @@ package com.pqixing.modularization.manager
 import com.pqixing.git.GitUtils
 import com.pqixing.git.PercentProgress
 import com.pqixing.modularization.FileNames
+import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.ProjectInfoFiles
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.IPlugin
-import com.pqixing.modularization.utils.GroovyHelper
+import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
@@ -16,10 +17,14 @@ import java.io.File
  * 管理文件的输出和读取
  */
 object FileManager {
+    /**
+     * 本地doc工程的信息
+     */
+    var docProject: GitProject? = null
     var codeRootDir: File? = null
         get() {
             if (field == null) {
-                field = GroovyHelper.getExtValue(BasePlugin.getPlugin(ManagerPlugin::class.java).project.gradle, FileNames.CODE_ROOT) as File?
+                field = JGroovyHelper.getImpl(IExtHelper::class.java).getExtValue(BasePlugin.getPlugin(ManagerPlugin::class.java)?.project?.gradle, FileNames.CODE_ROOT) as File?
             }
             return field
         }
@@ -35,10 +40,17 @@ object FileManager {
             return field
         }
 
+    var cacheRoot: File? = null
+        get() {
+            if (field == null) {
+                field = File(BasePlugin.getPlugin(ManagerPlugin::class.java)?.cacheDir, FileNames.MODULARIZATION)
+            }
+            return field
+        }
     var docRoot: File? = null
         get() {
             if (field == null) {
-                field = File(BasePlugin.getPlugin(ManagerPlugin::class.java).rootDir, FileNames.DOCUMENT)
+                field = File(BasePlugin.getPlugin(ManagerPlugin::class.java)?.rootDir, FileNames.DOCUMENT)
             }
             return field
         }
@@ -57,8 +69,8 @@ object FileManager {
      */
     fun checkFileExist(plugin: IPlugin): String {
         var error = ""
-        with(File(plugin.rootDir, FileNames.INCLUDE_KT)) {
-            if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource("setting/include.kt"))
+        with(File(plugin.rootDir, FileNames.IMPORT_KT)) {
+            if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource("setting/import.kt"))
         }
         with(File(plugin.rootDir, FileNames.PROJECT_INFO)) {
             if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource("setting/ProjectInfo.groovy"))

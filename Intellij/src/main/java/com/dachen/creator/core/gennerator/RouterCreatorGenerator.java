@@ -16,7 +16,7 @@ public class RouterCreatorGenerator {
 
     private static void genRouterPathsFile(Project project, PsiClass clazz) {
         String fullClassName = clazz.getQualifiedName();
-        String className = fullClassName.substring(fullClassName.lastIndexOf(".") + 1, fullClassName.length()) + ".java";
+        String className = fullClassName.substring(fullClassName.lastIndexOf(".") + 1, fullClassName.length()) + ".iterface";
         VirtualFile pkgDir = AndroidUtils.getPackageByName(clazz, className, "proxy");
         VirtualFile virtualFile = pkgDir.findChild(className);
         if(virtualFile != null){

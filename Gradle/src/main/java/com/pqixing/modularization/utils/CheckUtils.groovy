@@ -1,6 +1,6 @@
-//package com.pqixing.modularization.utils
+//package com.pqixing.modularization.modularization
 //
-//import java.util.regex.Pattern
+//import iterface.util.regex.Pattern
 //
 //class CheckUtils {
 //    /**

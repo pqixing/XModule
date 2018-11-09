@@ -1,4 +1,4 @@
-//package com.pqixing.modularization.utils
+//package com.pqixing.modularization.modularization
 //
 //import com.pqixing.modularization.Keys
 //import com.pqixing.modularization.gradle.common.BuildConfig

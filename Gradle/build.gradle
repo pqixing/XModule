@@ -1,10 +1,14 @@
 // 应用插件
-apply plugin: "groovy"
 apply plugin: "maven"
-apply plugin: 'java-library'
+apply plugin: 'java'
+apply plugin: "groovy"
 apply plugin: "kotlin"
 sourceCompatibility = "8"
 targetCompatibility = "8"
+sourceSets {
+    main.java.srcDirs += "src/groovy"
+    test.java.srcDirs += "src/groovy"
+}
 repositories {
     mavenCentral()
     jcenter()
@@ -36,11 +40,12 @@ dependencies {
 
 ext.mainDir = new File(projectDir, "src/main")
 ext.resourceDir = new File(mainDir, "resources")
-ext.javaFileDir = new File(mainDir, "java/com/pqixing/modularization")
+ext.javaFileDir = new File(mainDir, "iterface/com/pqixing/modularization")
 task("copyClass") {
     group = "build"
     doFirst {
-        writeFile("//" + new File(javaFileDir, "ProjectInfo.groovy").text, new File(resourceDir, "setting/ProjectInfo.groovy"))
+        def fileName = "ProjectInfo.iterface"
+        writeFile("//" + new File(javaFileDir, fileName).text, new File(resourceDir, "setting/$fileName"))
 
         StringBuilder sb = new StringBuilder('''package com.pqixing.modularization
 object ProjectInfoFiles {
@@ -71,3 +76,9 @@ def writeFile(String txt, File out) {
 //
 //uploadArchives.dependsOn "clean"
 //uploadArchives.dependsOn "auto"
+afterEvaluate {
+    project.compileGroovy.dependsOn.remove('compileJava')
+    project.compileKotlin.dependsOn project.compileGroovy
+    compileKotlin.classpath += files(compileGroovy.destinationDir)
+    classes.dependsOn compileKotlin
+}

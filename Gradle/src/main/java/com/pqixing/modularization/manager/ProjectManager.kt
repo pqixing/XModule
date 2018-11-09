@@ -3,7 +3,7 @@ package com.pqixing.modularization.manager
 import com.pqixing.Tools
 import com.pqixing.git.GitUtils
 import com.pqixing.modularization.ProjectInfo
-import com.pqixing.modularization.wrapper.ProjectXml
+import com.pqixing.modularization.wrapper.XmlHelper
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
@@ -15,7 +15,7 @@ object ProjectManager {
     var hasInit = false
     fun checkVail() {
         if (hasInit) return
-        ProjectXml.parse(FileManager.getProjectXml().readText(), allProjects)
+        XmlHelper.parseProjectXml(FileManager.getProjectXml(), allProjects)
         hasInit = true
     }
 

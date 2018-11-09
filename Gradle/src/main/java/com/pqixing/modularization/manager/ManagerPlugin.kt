@@ -10,8 +10,8 @@ import org.gradle.api.Project
  */
 
 class ManagerPlugin : BasePlugin() {
-    
-    override fun getIgnoreFields() = setOf(FileNames.PROJECT_INFO, FileNames.INCLUDE_KT, FileNames.DOCUMENT)
+    override val ignoreFields: Set<String>
+        get() = setOf(FileNames.PROJECT_INFO, FileNames.IMPORT_KT, FileNames.DOCUMENT)
 
     @Override
     override fun linkTask() = listOf(AllCleanTask::class.java)

@@ -2,8 +2,8 @@
 //
 //import com.pqixing.modularization.Keys
 //import com.pqixing.modularization.base.BaseTask
-//import com.pqixing.modularization.utils.FileUtils
-//import com.pqixing.modularization.utils.Print
+//import com.pqixing.modularization.modularization.FileUtils
+//import com.pqixing.modularization.modularization.Print
 //import com.pqixing.tools.TextUtils
 //
 //class BuildFirstTask extends BaseTask {

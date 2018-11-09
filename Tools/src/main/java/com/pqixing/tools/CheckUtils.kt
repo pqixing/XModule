@@ -4,7 +4,7 @@ import com.pqixing.Conts
 import java.io.File
 
 
-internal object CheckUtils {
+ object CheckUtils {
     /**
      * 判空处理
      * @param obj

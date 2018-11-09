@@ -57,12 +57,12 @@ public class ModelCodeFactory {
 //                continue;
 //            }
 
-            if (type.startsWith("java.io.File") || type.endsWith("<java.io.File>") ) {
+            if (type.startsWith("iterface.io.File") || type.endsWith("<iterface.io.File>") ) {
                 code.append(StringUtils.formatSingleLine(2, ".putParam(" + pt + ")"));
                 continue;
             }
             if(reqMethod!=null) {
-                if ("java.lang.String[]".equals(type) || reqMethod.contains("STRING")) {
+                if ("iterface.lang.String[]".equals(type) || reqMethod.contains("STRING")) {
                     code.append(StringUtils.formatSingleLine(2, ".putParam(" + pt + ")"));
                     continue;
                 }

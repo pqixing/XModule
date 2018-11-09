@@ -34,6 +34,12 @@ object FileUtils {
     }
 
     @JvmStatic
+    fun readText(f: File): String? {
+        if (!f.exists()) return null
+        return f.readText()
+    }
+
+    @JvmStatic
     fun delete(f: File): Boolean {
         if (!f.exists()) return false
         if (f.isDirectory) f.listFiles().forEach { delete(it) }

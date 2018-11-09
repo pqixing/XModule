@@ -10,21 +10,21 @@ class GitProject {
     /**
      * git工程名称,指目录名称
      */
-    var name: String =""
+    var name: String = ""
 
     /**
      * git地址
      */
-    var gitUrl: String=""
+    var gitUrl: String = ""
 
     /**
      *
      */
-    var introduce: String=""
+    var introduce: String = ""
     /**
      * 根目录的名称
      */
-    var rootName: String=""
+    var rootName: String = ""
 
     var gitInfo: GitInfo? = null
 
@@ -42,5 +42,15 @@ class GitProject {
 
     }
 
-    class GitInfo
+}
+
+/**
+ * git相关信息
+ */
+data class GitInfo(var commit: String = ""
+                   , var author: String = ""
+                   , var lastTime: String = ""
+                   , var message: String = ""
+                   , var branch: String = "") {
+    var log: List<String>? = null
 }
