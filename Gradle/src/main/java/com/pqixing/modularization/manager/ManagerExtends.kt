@@ -4,7 +4,7 @@ import com.pqixing.modularization.base.BaseExtension
 
 import org.gradle.api.Project
 
-class ManagerExtends(project: Project) : BaseExtension(project) {
+open class ManagerExtends(project: Project) : BaseExtension(project) {
 
     /**
      * 存放配置的git目录

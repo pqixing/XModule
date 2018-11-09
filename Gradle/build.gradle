@@ -39,6 +39,7 @@ dependencies {
     implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
     implementation 'com.github.vidstige:jadb:+'
     implementation "com.alibaba:fastjson:1.2.44"
+    implementation "com.pqixing.gradle:tools:0.0.1"
 
 }
 

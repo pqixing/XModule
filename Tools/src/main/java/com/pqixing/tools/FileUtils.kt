@@ -1,18 +1,18 @@
 package com.pqixing.tools
 
+import com.pqixing.Tools
 import java.io.File
 
 object FileUtils {
-    lateinit var baseDir: String
-    lateinit var cacheDir: String
-    fun init(baseDir: String) {
-        this.baseDir = cacheDir
-        this.cacheDir = "$baseDir/.files"
+    lateinit var clazz: Class<*>
+    fun init(clazz: Class<*>) {
+        this.clazz = clazz
     }
+
 
     @JvmStatic
     fun getTextFromResource(name: String): String {
-        val reader = this.javaClass.getResourceAsStream("/$name").bufferedReader()
+        val reader = clazz.getResourceAsStream(name).reader()
         val text = reader.readText()
         reader.close()
         return text
@@ -23,7 +23,7 @@ object FileUtils {
      */
     @JvmStatic
     fun writeText(file: File, text: String, checkChange: Boolean = false): String {
-        if (checkChange && file.readText() == text) return file.path
+        if (checkChange && readText(file) == text) return file.path
         if (!file.parentFile.exists()) file.parentFile.mkdirs()
         with(file.writer()) {
             write(text)

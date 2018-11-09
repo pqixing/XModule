@@ -37,7 +37,7 @@ object FileManager {
     var infoDir: File? = null
         get() {
             if (field == null) {
-                field = File(docRoot, "ProjectInfo")
+                field = File(docRoot, "com.pqixing.modularization/ProjectInfo")
             }
             return field
         }
@@ -75,13 +75,13 @@ object FileManager {
             if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource("setting/import.kt"))
         }
         with(File(plugin.rootDir, FileNames.PROJECT_INFO)) {
-            if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource("setting/ProjectInfo.groovy"))
+            if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource("setting/ProjectInfo.java"))
         }
 
         with(File(plugin.rootDir, FileNames.SETTINGS_GRADLE)) {
             var e = "setting change"
             if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource("setting/settings.gradle"))
-            else if (!readText().matches(Regex("//START.*//END"))) {
+            else if (!readText().matches(Regex("//START.*?//END"))) {
                 appendText(FileUtils.getTextFromResource("setting/settings.gradle"))
             } else {
                 e = ""
@@ -90,8 +90,8 @@ object FileManager {
             Unit
         }
         with(File(plugin.cacheDir, FileNames.IMPORTPROJECT_GRADLE)) {
-            val importProject = com.pqixing.tools.FileUtils.getTextFromResource("setting/ImportProject.gradle")
-            com.pqixing.tools.FileUtils.writeText(this, importProject, true)
+            val importProject = FileUtils.getTextFromResource("setting/${FileNames.IMPORTPROJECT_GRADLE}")
+            FileUtils.writeText(this, importProject)
             error += "ImportProject.gradle has update!! try sync again"
         }
         return error
@@ -124,8 +124,8 @@ object FileManager {
             val info = plugin.projectInfo
             var user = extends.gitUserName
             var psw = extends.gitPassWord
-            if (user.isEmpty()) user = info?.gitUserName?:""
-            if (psw.isEmpty()) psw = info?.gitPassWord?:""
+            if (user.isEmpty()) user = info?.gitUserName ?: ""
+            if (psw.isEmpty()) psw = info?.gitPassWord ?: ""
             Git.cloneRepository()
                     .setCredentialsProvider(UsernamePasswordCredentialsProvider(user, psw))
                     .setURI(manager.docGitUrl).setDirectory(docRoot).setBranch(docBranch)

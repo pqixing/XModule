@@ -1,0 +1,8 @@
+package com.pqixing.modularization.ProjectInfo.manager
+
+allprojects {
+    repositories {
+        jcenter()
+        google()
+    }
+}

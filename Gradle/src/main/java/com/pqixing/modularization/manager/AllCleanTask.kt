@@ -3,7 +3,7 @@ package com.pqixing.modularization.manager
 import com.pqixing.Tools
 import com.pqixing.modularization.base.BaseTask
 
-class AllCleanTask : BaseTask() {
+open class AllCleanTask : BaseTask() {
     override fun start() {
 
     }

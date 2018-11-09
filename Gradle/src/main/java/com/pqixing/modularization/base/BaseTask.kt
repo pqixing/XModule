@@ -57,7 +57,7 @@ abstract class BaseTask constructor() : DefaultTask() {
         }
 
         fun <T : Task> taskByName(project: Project, taskName: String, tClass: Class<T>): T {
-            return project.task(mapOf("type" to tClass), taskName) as T
+            return project.tasks.create(taskName,tClass) as T
 
         }
 

@@ -18,6 +18,21 @@ repositories {
 project.assemble.doLast{
     copy {
         from("build/libs/")
-        into("../Gradle/libs/")
+//        into("../Gradle/libs/")
+    }
+}
+
+apply plugin: "maven"
+// 上传到本地代码库
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri("/home/pqixing/.repo")) {
+                authentication(userName: "", password: "")
+            }
+            pom.groupId = "com.pqixing.gradle" // 组名
+            pom.artifactId = "tools"// 插件名
+            pom.version = "0.0.1" // 版本号
+        }
     }
 }

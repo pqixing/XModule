@@ -1,5 +1,6 @@
 package com.pqixing.modularization.manager
 
+import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import org.gradle.api.Project
@@ -35,5 +36,7 @@ class ManagerPlugin : BasePlugin() {
             }
             extends.checkVail()
         }
+
+
     }
 }

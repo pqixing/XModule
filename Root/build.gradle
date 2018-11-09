@@ -13,6 +13,9 @@ buildscript {
 } //
 allprojects {
     repositories {
+        maven {
+            url uri("/home/pqixing/.repo")
+        }
         jcenter()
         google()
         maven {

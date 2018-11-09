@@ -1,0 +1,6 @@
+<git baseUrl="http://192.168.3.200/android">
+    <project name="Project1" introduce="代码目录介绍" url="http://192.168.3.200/android/Document.git" />
+    <project name="Project1" introduce="代码目录介绍">
+        <submodule name="module1" introduce="Git 内的模块定义" />
+    </project>
+</git>
