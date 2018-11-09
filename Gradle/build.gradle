@@ -34,7 +34,11 @@ dependencies {
     implementation "com.alibaba:fastjson:1.2.44"
 //    implementation "com.android.tools.build:gradle:3.1.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation project(":Tools")
+
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:+'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
+    implementation 'com.github.vidstige:jadb:+'
+    implementation "com.alibaba:fastjson:1.2.44"
 
 }
 
@@ -73,12 +77,24 @@ def writeFile(String txt, File out) {
     writer.flush()
     writer.close()
 }
-//
-//uploadArchives.dependsOn "clean"
-//uploadArchives.dependsOn "auto"
+
 afterEvaluate {
     project.compileGroovy.dependsOn.remove('compileJava')
     project.compileKotlin.dependsOn project.compileGroovy
     compileKotlin.classpath += files(compileGroovy.destinationDir)
     classes.dependsOn compileKotlin
+}
+
+// 上传到本地代码库
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri("/home/pqixing/.repo")) {
+                authentication(userName: "", password: "")
+            }
+            pom.groupId = "com.pqixing.gradle" // 组名
+            pom.artifactId = "modularization"// 插件名
+            pom.version = "0.0.1" // 版本号
+        }
+    }
 }

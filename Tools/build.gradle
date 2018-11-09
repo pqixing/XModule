@@ -18,6 +18,6 @@ repositories {
 project.assemble.doLast{
     copy {
         from("build/libs/")
-        into("../IntellijPg/libs/")
+        into("../Gradle/libs/")
     }
 }
