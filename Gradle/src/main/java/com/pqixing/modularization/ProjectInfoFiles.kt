@@ -9,5 +9,4 @@ object ProjectInfoFiles {
 "ProjectInfo/maven/maven.gradle",
 "ProjectInfo/gradle.properties",
 "ProjectInfo/versions/version.properties",
-"ProjectInfo/versions/branch.properties",
-"ProjectInfo/versions/version_time.properties" ) }
+"ProjectInfo/versions/branch.properties" ) }

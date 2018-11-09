@@ -112,20 +112,21 @@ object FileManager {
             FileUtils.delete(docRoot)
         }
 
+        val extends = plugin.getExtends(ManagerExtends::class.java)
+        val info = plugin.projectInfo
+        var user = extends.gitUserName
+        var psw = extends.gitPassWord
+        if (user.isEmpty()) user = info?.gitUserName ?: ""
+        if (psw.isEmpty()) psw = info?.gitPassWord ?: ""
 
         val git = if (docRoot.exists()) {
             Git.open(docRoot).apply {
                 //切换到log分支
                 checkout().setForce(true).setName(docBranch).call()
-                pull().call()
+                pull().setCredentialsProvider(UsernamePasswordCredentialsProvider(user, psw)).call()
             }
         } else {
-            val extends = plugin.getExtends(ManagerExtends::class.java)
-            val info = plugin.projectInfo
-            var user = extends.gitUserName
-            var psw = extends.gitPassWord
-            if (user.isEmpty()) user = info?.gitUserName ?: ""
-            if (psw.isEmpty()) psw = info?.gitPassWord ?: ""
+
             Git.cloneRepository()
                     .setCredentialsProvider(UsernamePasswordCredentialsProvider(user, psw))
                     .setURI(manager.docGitUrl).setDirectory(docRoot).setBranch(docBranch)

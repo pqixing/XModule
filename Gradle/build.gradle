@@ -44,12 +44,12 @@ dependencies {
 }
 
 ext.mainDir = new File(projectDir, "src/main")
-ext.resourceDir = new File(mainDir, "resources")
-ext.javaFileDir = new File(mainDir, "iterface/com/pqixing/modularization")
+ext.resourceDir = new File(mainDir, "resources/com/pqixing/modularization")
+ext.javaFileDir = new File(mainDir, "java/com/pqixing/modularization")
 task("copyClass") {
     group = "build"
     doFirst {
-        def fileName = "ProjectInfo.iterface"
+        def fileName = "ProjectInfo.java"
         writeFile("//" + new File(javaFileDir, fileName).text, new File(resourceDir, "setting/$fileName"))
 
         StringBuilder sb = new StringBuilder('''package com.pqixing.modularization

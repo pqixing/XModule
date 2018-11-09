@@ -31,13 +31,6 @@ public class GitTest {
     @Test
     public void testClone() throws GitAPIException {
         init();
-        long start = System.currentTimeMillis();
-//        GitUtils.clone("https://github.com/pqixing/modularization.manager", "/home/pqixing/Desktop/test2");
-        System.out.println("end count " + (System.currentTimeMillis() - start));
-
-        start = System.currentTimeMillis();
-        Shell.runSync("manager clone --progress https://github.com/pqixing/modularization.manager", new File("/home/pqixing/Desktop/test"));
-        System.out.println("end count " + (System.currentTimeMillis() - start));
     }
 
     private void init() {
