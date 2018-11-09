@@ -17,10 +17,12 @@ import java.io.File
  * 管理文件的输出和读取
  */
 object FileManager {
+    val docBranch = "MavenLog"
+
     /**
      * 本地doc工程的信息
      */
-    var docProject: GitProject? = null
+    var docProject = GitProject()
     var codeRootDir: File? = null
         get() {
             if (field == null) {
@@ -109,8 +111,14 @@ object FileManager {
         if (docRoot.exists() && !GitUtils.isGitDir(docRoot)) {
             FileUtils.delete(docRoot)
         }
+
+
         val git = if (docRoot.exists()) {
-            Git.open(docRoot).apply { pull().call() }
+            Git.open(docRoot).apply {
+                //切换到log分支
+                checkout().setForce(true).setName(docBranch).call()
+                pull().call()
+            }
         } else {
             val extends = plugin.getExtends(ManagerExtends::class.java)
             val info = plugin.projectInfo
@@ -120,13 +128,20 @@ object FileManager {
             if (psw.isEmpty()) psw = info.gitPassWord
             Git.cloneRepository()
                     .setCredentialsProvider(UsernamePasswordCredentialsProvider(user, psw))
-                    .setURI(manager.docGitUrl).setDirectory(docRoot).setBranch("master")
+                    .setURI(manager.docGitUrl).setDirectory(docRoot).setBranch(docBranch)
                     .setProgressMonitor(PercentProgress())
                     .call()
         }
         if (!docRoot.exists()) {
             ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "Clone doc fail !! Please check")
         }
+
+        //初始化dco目录的信息
+        docProject.gitUrl = manager.docGitUrl
+        docProject.name = FileNames.DOCUMENT
+        docProject.rootName = FileNames.DOCUMENT
+        docProject.introduce = "LogManager"
+        docProject.loadGitInfo(git)
 
         val filter = ProjectInfoFiles.files.filter { copyIfNull(it, docRoot) }
         //如果有新增文件，提交
@@ -137,6 +152,7 @@ object FileManager {
             git.commit().setMessage("add file $filter").call()
             git.push()
         }
+        git.close()
     }
 
     /**

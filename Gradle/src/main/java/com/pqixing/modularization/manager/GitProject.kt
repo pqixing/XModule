@@ -1,6 +1,7 @@
 package com.pqixing.modularization.manager
 
 import org.eclipse.jgit.api.Git
+import java.util.*
 
 /**
  * Created by pqixing on 17-12-7.
@@ -26,8 +27,12 @@ class GitProject {
      */
     var rootName: String = ""
 
-    var gitInfo: GitInfo? = null
+    /**
+     * 日志相关信息
+     */
+    var lastLog: GitLog = GitLog()
 
+    var branch: String = "master"
 
     constructor(name: String, gitUrl: String, introduce: String, rootName: String) {
         this.name = name
@@ -36,21 +41,21 @@ class GitProject {
         this.rootName = rootName
     }
 
-    constructor() {}
+    constructor()
 
     fun loadGitInfo(git: Git) {
-
+        val repo = git.repository
+        branch = repo.branch
+        val command = git.log().setMaxCount(1)
+        if (rootName != name) command.addPath(name)
+        command.call().forEach { rev ->
+            lastLog.author = rev.authorIdent.name
+            lastLog.commitTime = rev.commitTime.toString()
+            lastLog.message = rev.fullMessage
+            lastLog.hash = rev.name
+        }
     }
-
 }
 
-/**
- * git相关信息
- */
-data class GitInfo(var commit: String = ""
-                   , var author: String = ""
-                   , var lastTime: String = ""
-                   , var message: String = ""
-                   , var branch: String = "") {
-    var log: List<String>? = null
-}
+
+data class GitLog(var hash: String = "", var author: String = "", var message: String = "", var commitTime: String = "")

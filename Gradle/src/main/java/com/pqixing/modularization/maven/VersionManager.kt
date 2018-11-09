@@ -88,13 +88,28 @@ object VersionManager {
      */
     private fun indexCacheVersion(cacheVersion: File, curVersions: HashMap<String, String>) {
         val properties = PropertiesUtils.readProperties(cacheVersion)
-        val lastUpdate = properties[Keys.UPDATE_TIME] ?: curVersions[Keys.UPDATE_TIME] ?: ""
-        val gitInfo = FileManager.docProject?.gitInfo!!
+        val lastUpdate = (properties[Keys.UPDATE_TIME] ?: curVersions[Keys.UPDATE_TIME]
+        ?: "0").toString()
+        val lastLog = FileManager.docProject.lastLog
 
         //cacheMap中的最后更新时间与git版本号的最后更新时间不一致，尝试更新
-        if (gitInfo.lastTime != lastUpdate) {
+        if (lastLog.commitTime != lastUpdate) {
             /**从日志中读取版本号**/
-            properties[Keys.UPDATE_TIME] = gitInfo.lastTime
+            val git = Git.open(FileManager.docRoot)
+            val lastTime = lastUpdate.toInt()
+            run out@{
+                git.log().call().forEach { rev ->
+                    if (rev.commitTime < lastTime) return@out
+                    val message = rev.fullMessage.trim()
+                    //如果是
+                    if (!message.startsWith(Keys.PREFIX_TO_MAVEN)) return@forEach
+
+                    val list = message.split(":")
+                    if (list.size < 3) return@forEach
+                    curVersions[list[1]] = list[2]
+                }
+            }
+            properties[Keys.UPDATE_TIME] = lastLog.commitTime
             PropertiesUtils.writeProperties(cacheVersion, properties)
         }
         //加载本地缓存版本号到内存
@@ -113,7 +128,7 @@ object VersionManager {
         val groupUrl = extends.groupName.replace(".", "/")
         parseNetVersions("$maven/$groupUrl", versions)
 
-        versions[Keys.UPDATE_TIME] = FileManager.docProject?.gitInfo?.lastTime ?: System.currentTimeMillis().toString()
+        versions[Keys.UPDATE_TIME] = FileManager.docProject.lastLog.commitTime
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
 
         //上传版本好到服务端

@@ -20,6 +20,6 @@ public class MavenTest {
         String s = JSON.toJSONString(aClass.newInstance());
         System.out.println("------- ---"+ s);
         ProjectInfo projectInfo = JSON.parseObject(s, ProjectInfo.class);
-        VersionManager.INSTANCE.parseNetVersions("http://192.168.3.7:9527/nexus/content/repositories/androidtest","com/dachen/android");
+//        VersionManager.INSTANCE.parseNetVersions("http://192.168.3.7:9527/nexus/content/repositories/androidtest","com/dachen/android");
     }
 }

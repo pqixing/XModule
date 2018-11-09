@@ -4,6 +4,7 @@ public class Keys {
     public static final String UPDATE_TIME = "update_time";
     public static final String UPDATE_LOG = "update_log";
     public static final String UPDATE_VERSION = "update_version";
+    public static final String PREFIX_TO_MAVEN = "ToMaven:";
     /**
      * 版本号过滤
      */
