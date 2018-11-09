@@ -39,7 +39,7 @@ public class ImportProject {
      * 解析本地需要导入的工程
      */
     void formatInclude(File includeFile) {
-        if (f == null || !f.exists() || !f.isFile()) return
+        if (includeFile == null || !includeFile.exists() || !includeFile.isFile()) return
         for (String line in includeFile.readLines()) {
             if (line.trim().startsWith("//END")) return
             def map = line.replaceAll("//.*", "").split("=")
@@ -104,7 +104,7 @@ public class ImportProject {
     }
 
     String makeIncludeTxt() {
-        HashSet<String> resultInclude = HashSet()
+        HashSet<String> resultInclude = new HashSet()
         focusIncludes.each { key ->
             if (!key.isEmpty()) resultInclude.add(key)
         }
@@ -163,6 +163,6 @@ try {
     outFile.write(text)
     apply from: outFile.absolutePath
 } catch (Exception e) {//if fail delete self
-    new File(outDir, "ImportProject.gradle").deleteOnExit()
+    new File(outDir, "ImportProject.gradle").delete()
     throw new RuntimeException(e)
 }

@@ -81,7 +81,7 @@ object FileManager {
         with(File(plugin.rootDir, FileNames.SETTINGS_GRADLE)) {
             var e = "setting change"
             if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource("setting/settings.gradle"))
-            else if (!readText().matches(Regex("//START.*?//END"))) {
+            else if (readText().lines().find { it.trim().endsWith("//END") } == null) {
                 appendText(FileUtils.getTextFromResource("setting/settings.gradle"))
             } else {
                 e = ""
