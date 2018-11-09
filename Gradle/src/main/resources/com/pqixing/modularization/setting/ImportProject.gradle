@@ -98,9 +98,10 @@ public class ImportProject {
             def childens = p.submodule
             if (childens.size() > 0) childens.each { Node s ->
                 String s_name = s.@name
-                projectPaths.put(name, "$name/$s_name")
+                projectPaths.put(s_name, "$name/$s_name")
             } else projectPaths.put(name, name)
         }
+        println("path -> $projectPaths")
     }
 
     String makeIncludeTxt() {

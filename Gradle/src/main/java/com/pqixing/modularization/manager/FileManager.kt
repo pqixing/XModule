@@ -92,7 +92,7 @@ object FileManager {
         with(File(plugin.cacheDir, FileNames.IMPORTPROJECT_GRADLE)) {
             val importProject = FileUtils.getTextFromResource("setting/${FileNames.IMPORTPROJECT_GRADLE}")
             FileUtils.writeText(this, importProject)
-            error += "ImportProject.gradle has update!! try sync again"
+//            error += "ImportProject.gradle has update!! try sync again"
         }
         return error
     }
