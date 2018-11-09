@@ -1,7 +1,6 @@
 package com.pqixing.modularization.manager
 
 import org.eclipse.jgit.api.Git
-import java.util.*
 
 /**
  * Created by pqixing on 17-12-7.

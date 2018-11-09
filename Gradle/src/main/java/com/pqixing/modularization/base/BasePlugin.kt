@@ -3,11 +3,13 @@ package com.pqixing.modularization.base
 
 import com.alibaba.fastjson.JSON
 import com.pqixing.Tools
+import com.pqixing.interfaces.ICredential
 import com.pqixing.interfaces.ILog
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.ProjectInfo
 import com.pqixing.modularization.manager.GitCredential
+import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.tools.CheckUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
@@ -15,6 +17,7 @@ import groovy.lang.GroovyClassLoader
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import java.awt.SystemColor.info
 import java.io.File
 import java.util.*
 
@@ -28,9 +31,9 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     private val tasks = HashMap<String, Task>()
 
 
-    override val projectInfo: ProjectInfo
+    override var projectInfo: ProjectInfo? = null
         get() {
-            if (info == null) {
+            if (field == null) {
                 var infoStr = jsonFromEnv
                 if (CheckUtils.isEmpty(infoStr)) {
                     try {
@@ -43,14 +46,14 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
                 }
                 if (!CheckUtils.isEmpty(infoStr)) {
                     try {
-                        info = JSON.parseObject(infoStr, ProjectInfo::class.java)
+                        field = JSON.parseObject(infoStr, ProjectInfo::class.java)
                     } catch (e: Exception) {
                     }
 
                 }
-                if (info == null) info = ProjectInfo()
+                if (field == null) field = ProjectInfo()
             }
-            return info!!
+            return field!!
         }
 
     private val jsonFromEnv: String
@@ -117,22 +120,24 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         FileUtils.writeText(ignoreFile, txt.toString())
     }
 
+    private fun initTools(project: Project) {
+        if (!Tools.init)
+            Tools.init(object : ILog {
+                override fun println(l: String?) = System.out.println(l)
+            }, project.rootDir.absolutePath, object : ICredential {
+                override fun getUserName() = projectInfo?.gitUserName ?: ""
+
+                override fun getPassWord() = projectInfo?.gitPassWord ?: ""
+            })
+    }
+
     companion object {
         private val pluginCache = HashMap<String, IPlugin>()
-
-        private var info: ProjectInfo? = null
 
         fun <T : IPlugin> getPlugin(pluginClass: Class<T>): T? {
             return pluginCache[pluginClass.name] as T
         }
 
-        private fun initTools(project: Project) {
-            if (!Tools.init)
-                Tools.init(object : ILog {
-                    override fun println(l: String?) {
-                        println(l)
-                    }
-                }, project.rootDir.absolutePath, GitCredential())
-        }
+
     }
 }

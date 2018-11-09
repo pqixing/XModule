@@ -65,7 +65,7 @@ object VersionManager {
     private fun readTargetVersions() {
         targetVersion[FileNames.MODULARIZATION] = FileNames.MODULARIZATION
         val info = BasePlugin.getPlugin(ManagerPlugin::class.java)!!.projectInfo
-        PropertiesUtils.readProperties(File(info.versionFile)).forEach {
+        PropertiesUtils.readProperties(File(info?.versionFile)).forEach {
             targetVersion[it.key.toString()] = it.value.toString()
         }
     }

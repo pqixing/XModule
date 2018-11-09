@@ -124,8 +124,8 @@ object FileManager {
             val info = plugin.projectInfo
             var user = extends.gitUserName
             var psw = extends.gitPassWord
-            if (user.isEmpty()) user = info.gitUserName
-            if (psw.isEmpty()) psw = info.gitPassWord
+            if (user.isEmpty()) user = info?.gitUserName?:""
+            if (psw.isEmpty()) psw = info?.gitPassWord?:""
             Git.cloneRepository()
                     .setCredentialsProvider(UsernamePasswordCredentialsProvider(user, psw))
                     .setURI(manager.docGitUrl).setDirectory(docRoot).setBranch(docBranch)

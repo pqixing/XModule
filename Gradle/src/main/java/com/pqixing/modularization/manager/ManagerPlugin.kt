@@ -25,7 +25,7 @@ class ManagerPlugin : BasePlugin() {
 
         //在每个工程开始同步之前，检查状态，下载，切换分支等等
         project.gradle.beforeProject {
-            ProjectManager.checkProject(it, this, projectInfo)
+            ProjectManager.checkProject(it, this, projectInfo!!)
         }
 
         project.afterEvaluate {
