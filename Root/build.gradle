@@ -8,13 +8,14 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.novoda:bintray-release:0.8.1'
 
     }
 } //
 allprojects {
     repositories {
         maven {
-            url uri("/home/pqixing/.repo")
+            url "https://dl.bintray.com/pqixing86/maven"
         }
         jcenter()
         google()
@@ -23,3 +24,11 @@ allprojects {
         }
     }
 }
+
+//tasks.withType(Javadoc) {
+//    options{
+//        encoding "UTF-8"
+//        charSet 'UTF-8'
+//        links "http://docs.oracle.com/javase/7/docs/api"
+//    }
+//}

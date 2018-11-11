@@ -1,0 +1,1 @@
+./gradlew Tools:clean Tools:build Tools:bintrayUpload -PbintrayUser=pqixing86 -PbintrayKey="" -PdryRun=false

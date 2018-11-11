@@ -1,5 +1,6 @@
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
+
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     testImplementation 'junit:junit:4.12'
@@ -15,24 +16,20 @@ targetCompatibility = "8"
 repositories {
     mavenCentral()
 }
-project.assemble.doLast{
-    copy {
-        from("build/libs/")
-//        into("../Gradle/libs/")
-    }
-}
 
+//添加
 apply plugin: "maven"
-// 上传到本地代码库
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: uri("/home/pqixing/.repo")) {
-                authentication(userName: "", password: "")
-            }
-            pom.groupId = "com.pqixing.gradle" // 组名
-            pom.artifactId = "tools"// 插件名
-            pom.version = "0.0.1" // 版本号
-        }
-    }
+apply plugin: 'com.novoda.bintray-release'
+
+//添加
+publish {
+
+    userOrg = 'pqixing86'//bintray用户名
+    uploadName = 'tools'
+    artifactId = 'tools'//项目名称
+    repoName = 'modularization'//要传到的maven的名字。你可能有多个maven，要传哪个写哪个。
+    groupId = 'com.pqixing.modularization'//jcenter上的路径
+    publishVersion = '0.0.1'//版本号
+    desc = 'Tools for modularization'//描述，不重要
+    website = 'https://github.com/pqixing/modularization'//网站，不重要；尽量模拟github上的地址
 }
