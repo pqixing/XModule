@@ -32,8 +32,8 @@ dependencies {
     implementation localGroovy()
     testImplementation 'junit:junit:4.12'
     implementation "com.alibaba:fastjson:1.2.44"
-//    implementation "com.android.tools.build:gradle:3.1.2"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "com.android.tools.build:gradle:3.1.2"
+//    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
     implementation 'org.eclipse.jgit:org.eclipse.jgit:+'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'

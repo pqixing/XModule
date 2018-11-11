@@ -29,7 +29,7 @@ publish {
     artifactId = 'tools'//项目名称
     repoName = 'modularization'//要传到的maven的名字。你可能有多个maven，要传哪个写哪个。
     groupId = 'com.pqixing.modularization'//jcenter上的路径
-    publishVersion = '0.0.1'//版本号
+    publishVersion = '0.0.2'//版本号
     desc = 'Tools for modularization'//描述，不重要
     website = 'https://github.com/pqixing/modularization'//网站，不重要；尽量模拟github上的地址
 }
