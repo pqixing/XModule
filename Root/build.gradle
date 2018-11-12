@@ -13,6 +13,7 @@ buildscript {
     }
 } //
 allprojects {
+    version = "0.0.3"
     repositories {
 //        maven {
 //            url "https://dl.bintray.com/pqixing86/maven"
@@ -30,5 +31,28 @@ tasks.withType(Javadoc) {
         encoding "UTF-8"
         charSet 'UTF-8'
         links "http://docs.oracle.com/javase/7/docs/api"
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+
+    sourceCompatibility = 1.8 // java 8
+    targetCompatibility = 1.8
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
     }
 }

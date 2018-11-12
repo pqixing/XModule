@@ -18,8 +18,8 @@ repositories {
 }
 
 //添加
-apply plugin: "maven"
-group = 'com.github.pqixing'
+//apply plugin: "maven"
+group = 'com.github.pqixing.modularization'
 //apply plugin: 'com.novoda.bintray-release'
 
 ////添加
