@@ -34,7 +34,8 @@ tasks.withType(Javadoc) {
     }
 }
 
-subprojects {
+subprojects { Project p ->
+    if(p.name!="Tools") return
     apply plugin: 'java'
     apply plugin: 'maven'
 
