@@ -37,7 +37,7 @@ object VersionManager {
      * 按照顺序，查取模块的版本号信息
      * 指定版本 > 分支版本 > 当前版本
      */
-    fun getVersion(module: String, branch: String): String {
+    fun getVersion(branch: String, module: String): String {
         checkInit(branch)
         val key = (if (branch.isEmpty()) "" else ".$branch") + ".$module"
         return targetVersion[key] ?: branchVersion[branch]!![key] ?: curVersions[key]
