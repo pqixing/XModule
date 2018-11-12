@@ -126,15 +126,6 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
 
                 override fun getPassWord() = projectInfo?.gitPassWord ?: ""
             })
-            FileUtils.init(Keys::class.java)
-//            val resource = Keys::class.java.getResource("setting/import.kt")
-//            Tools.println("resours-> $resource")
-//            val stream = resource.openStream()
-//            Tools.println("resours-> ${stream}")
-//
-//            Tools.println("resours-> ${stream.reader().readText()}")
-//            val readText = Keys::class.java.getResourceAsStream("setting/import.kt").reader().readText()
-//            Tools.println("resours 2222222-> ${readText}")
         }
     }
 
