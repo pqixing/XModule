@@ -1,4 +1,3 @@
-package com.pqixing.modularization.ProjectInfo.android
 //依赖库工程独立运行的配置文件
 android {
     buildTypes {

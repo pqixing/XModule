@@ -1,4 +1,3 @@
-package com.pqixing.modularization.ProjectInfo.maven
 
 apply plugin: "maven"
 // 上传到本地代码库,此处只是新增任务，实际参数在上传时会自动修改，无需修改

@@ -3,7 +3,6 @@ package test;
 import com.pqixing.Tools;
 import com.pqixing.interfaces.ICredential;
 import com.pqixing.interfaces.ILog;
-import com.pqixing.modularization.ProjectInfo.manager.manager;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
