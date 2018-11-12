@@ -3,6 +3,7 @@ package com.pqixing.modularization.manager
 import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
+import com.pqixing.modularization.maven.IndexVersionTask
 import org.gradle.api.Project
 
 /**
@@ -15,7 +16,7 @@ class ManagerPlugin : BasePlugin() {
         get() = setOf(FileNames.PROJECT_INFO, FileNames.IMPORT_KT, FileNames.DOCUMENT)
 
     @Override
-    override fun linkTask() = listOf(AllCleanTask::class.java)
+    override fun linkTask() = listOf(AllCleanTask::class.java, IndexVersionTask::class.java)
 
     var error: String = ""
     override fun apply(project: Project) {

@@ -1,5 +1,8 @@
 package com.pqixing.modularization.maven
 
+import com.pqixing.Tools
+import com.pqixing.git.GitUtils
+import com.pqixing.git.PercentProgress
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
@@ -12,6 +15,7 @@ import com.pqixing.tools.PropertiesUtils
 import org.eclipse.jgit.api.Git
 import java.io.File
 import java.net.URL
+import java.util.*
 
 object VersionManager {
 
@@ -72,7 +76,7 @@ object VersionManager {
 
     private fun readCurVersions() {
         curVersions[FileNames.MODULARIZATION] = FileNames.MODULARIZATION
-        val baseVersion = File(FileManager.docRoot, "versions/version.properties")
+        val baseVersion = File(FileManager.infoDir, "versions/version.properties")
         if (baseVersion.exists()) PropertiesUtils.readProperties(baseVersion).forEach {
             curVersions[it.key.toString()] = it.value.toString()
         } else {
@@ -118,6 +122,11 @@ object VersionManager {
         }
     }
 
+    fun indexVersionFromNet() {
+        curVersions.clear()
+        indexVersionFromNet(File(FileManager.infoDir, "versions/version.properties"), curVersions)
+    }
+
     /**
      * 从网络获取最新的版本号信息
      */
@@ -130,13 +139,13 @@ object VersionManager {
 
         versions[Keys.UPDATE_TIME] = FileManager.docProject.lastLog.commitTime
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
-
+        Tools.println("indexVersionFromNet update from net save to -> $outFile")
         //上传版本好到服务端
         val git = Git.open(FileManager.docRoot)
-        git.pull().call()
-        git.add().addFilepattern("*").call()
-        git.commit().setMessage("indexVersionFromNet ${System.currentTimeMillis()}").call()
-        git.push().setForce(true).call()
+        git.pull().setCredentialsProvider(FileManager.docCredentials).setProgressMonitor(PercentProgress()).call()
+        git.add().addFilepattern(".").call()
+        git.commit().setAllowEmpty(true).setMessage("indexVersionFromNet ${Date().toLocaleString()}").call()
+        git.push().setCredentialsProvider(FileManager.docCredentials).setForce(true).setProgressMonitor(PercentProgress()).call()
         git.close()
     }
 
@@ -145,15 +154,22 @@ object VersionManager {
      */
     fun parseNetVersions(baseUrl: String, versions: HashMap<String, String>) {
         val prefix = "<a href=\""
-        val r = Regex(".*?$prefix$baseUrl.*?/</a>")
-        URL(baseUrl).readText().lines().forEach { line ->
-            if (line.trim().matches(r)) {
-                val start = line.indexOf(prefix) + prefix.length
-                val metaUrl = line.substring(start, line.indexOf("\">", start)) + FileNames.MAVEN_METADATA
-                val meta = MavenMetadata(baseUrl)
-                XmlHelper.parseMetadata(URL(metaUrl).readText(), meta)
-
-                versions[meta.artifactId] = meta.release
+        val r = Regex(".*?$prefix$baseUrl.*?</a>")
+        val lines = URL(baseUrl).readText().lines()
+        kotlin.run outer@{
+            lines.forEach { line ->
+                if (line.trim().matches(r)) {
+                    val start = line.indexOf(prefix) + prefix.length
+                    val url = line.substring(start, line.indexOf("\">", start))
+                    if (url.endsWith(FileNames.MAVEN_METADATA)) {
+                        val meta = MavenMetadata(baseUrl)
+                        XmlHelper.parseMetadata(URL(url).readText(), meta)
+                        versions["${meta.groupId}.${meta.artifactId}"] = meta.release
+                        return@outer
+                    } else {
+                        parseNetVersions(url, versions)
+                    }
+                }
             }
         }
     }

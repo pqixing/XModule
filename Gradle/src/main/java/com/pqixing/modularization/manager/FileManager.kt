@@ -19,6 +19,8 @@ import java.io.File
 object FileManager {
     val docBranch = "MavenLog"
 
+    lateinit var docCredentials: UsernamePasswordCredentialsProvider
+
     /**
      * 本地doc工程的信息
      */
@@ -37,7 +39,7 @@ object FileManager {
     var infoDir: File? = null
         get() {
             if (field == null) {
-                field = File(docRoot, "com.pqixing.modularization/ProjectInfo")
+                field = File(docRoot, "ProjectInfo")
             }
             return field
         }
@@ -58,7 +60,7 @@ object FileManager {
         }
 
     fun getProjectXml(): File {
-        return File(docRoot, FileNames.PROJECTINFO + "/" + FileNames.PROJECT_XML)
+        return File(infoDir,FileNames.PROJECT_XML)
     }
 
     /**
@@ -119,16 +121,18 @@ object FileManager {
         if (user.isEmpty()) user = info?.gitUserName ?: ""
         if (psw.isEmpty()) psw = info?.gitPassWord ?: ""
 
+        docCredentials =  UsernamePasswordCredentialsProvider(user, psw)
+
         val git = if (docRoot.exists()) {
             Git.open(docRoot).apply {
                 //切换到log分支
                 checkout().setForce(true).setName(docBranch).call()
-                pull().setCredentialsProvider(UsernamePasswordCredentialsProvider(user, psw)).call()
+                pull().setCredentialsProvider(docCredentials).call()
             }
         } else {
 
             Git.cloneRepository()
-                    .setCredentialsProvider(UsernamePasswordCredentialsProvider(user, psw))
+                    .setCredentialsProvider(docCredentials)
                     .setURI(manager.docGitUrl).setDirectory(docRoot).setBranch(docBranch)
                     .setProgressMonitor(PercentProgress())
                     .call()
