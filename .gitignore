@@ -5,7 +5,5 @@
 #gradle/
 gradlew
 gradlew.bat
-gradle.properties
 local.properties
-version.properties
 CodeCreator/out/
