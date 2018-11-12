@@ -19,17 +19,18 @@ repositories {
 
 //添加
 apply plugin: "maven"
-apply plugin: 'com.novoda.bintray-release'
+group = 'com.github.pqixing'
+//apply plugin: 'com.novoda.bintray-release'
 
-//添加
-publish {
-
-    userOrg = 'pqixing86'//bintray用户名
-    uploadName = 'tools'
-    artifactId = 'tools'//项目名称
-    repoName = 'modularization'//要传到的maven的名字。你可能有多个maven，要传哪个写哪个。
-    groupId = 'com.pqixing.modularization'//jcenter上的路径
-    publishVersion = '0.0.2'//版本号
-    desc = 'Tools for modularization'//描述，不重要
-    website = 'https://github.com/pqixing/modularization'//网站，不重要；尽量模拟github上的地址
-}
+////添加
+//publish {
+//
+//    userOrg = 'pqixing86'//bintray用户名
+//    uploadName = 'tools'
+//    artifactId = 'tools'//项目名称
+//    repoName = 'modularization'//要传到的maven的名字。你可能有多个maven，要传哪个写哪个。
+//    groupId = 'com.pqixing.modularization'//jcenter上的路径
+//    publishVersion = '0.0.2'//版本号
+//    desc = 'Tools for modularization'//描述，不重要
+//    website = 'https://github.com/pqixing/modularization'//网站，不重要；尽量模拟github上的地址
+//}

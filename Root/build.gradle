@@ -14,9 +14,9 @@ buildscript {
 } //
 allprojects {
     repositories {
-        maven {
-            url "https://dl.bintray.com/pqixing86/maven"
-        }
+//        maven {
+//            url "https://dl.bintray.com/pqixing86/maven"
+//        }
         jcenter()
         google()
         maven {
