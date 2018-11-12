@@ -4,7 +4,8 @@ import com.pqixing.git.GitUtils
 import com.pqixing.git.PercentProgress
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
-import com.pqixing.modularization.ProjectInfoFiles
+import com.pqixing.ProjectInfoFiles
+import com.pqixing.git.GitProject
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.IPlugin
 import com.pqixing.modularization.iterface.IExtHelper

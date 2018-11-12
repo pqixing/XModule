@@ -8,8 +8,8 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.modularization.wrapper.MavenMetadata
-import com.pqixing.modularization.wrapper.XmlHelper
+import com.pqixing.help.MavenMetadata
+import com.pqixing.help.XmlHelper
 import com.pqixing.tools.PropertiesUtils
 import org.eclipse.jgit.api.Git
 import java.io.File

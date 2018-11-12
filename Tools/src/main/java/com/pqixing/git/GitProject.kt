@@ -1,4 +1,4 @@
-package com.pqixing.modularization.manager
+package com.pqixing.git
 
 import org.eclipse.jgit.api.Git
 

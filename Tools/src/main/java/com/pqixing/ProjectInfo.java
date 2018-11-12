@@ -1,4 +1,4 @@
-package com.pqixing.modularization;
+package com.pqixing;
 
 /**
  * 工程配置文件

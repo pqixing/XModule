@@ -3,6 +3,7 @@ apply plugin: 'kotlin'
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation localGroovy()
     testImplementation 'junit:junit:4.12'
     implementation 'org.eclipse.jgit:org.eclipse.jgit:+'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
@@ -34,3 +35,40 @@ group = 'com.github.pqixing.modularization'
 //    desc = 'Tools for modularization'//描述，不重要
 //    website = 'https://github.com/pqixing/modularization'//网站，不重要；尽量模拟github上的地址
 //}
+
+
+ext.mainDir = new File(projectDir, "src/main")
+ext.resourceDir = new File(mainDir, "resources/com/pqixing")
+ext.javaFileDir = new File(mainDir, "java/com/pqixing")
+task("copyClass") {
+    group = "build"
+    doFirst {
+        def fileName = "ProjectInfo.java"
+        writeFile("//" + new File(javaFileDir, fileName).text, new File(resourceDir, "setting/$fileName"))
+
+        StringBuilder sb = new StringBuilder('''package com.pqixing
+object ProjectInfoFiles {
+    val files = listOf(''')
+        def dir = new File(resourceDir, "ProjectInfo")
+        def prefix = dir.name
+        dir.listFiles().each { f1 ->
+            if (f1.isDirectory()) {
+                def prefix2 = f1.name
+                f1.listFiles().each { f2 ->
+                    sb.append("\n\"$prefix/$prefix2/$f2.name\",")
+                }
+            } else sb.append("\n\"$prefix/$f1.name\",")
+
+        }
+        sb.deleteCharAt(sb.length() - 1).append(" ) }")
+        writeFile(sb.toString(), new File(javaFileDir, "ProjectInfoFiles.kt"))
+    }
+}
+
+def writeFile(String txt, File out) {
+    def writer = out.newWriter()
+    if (!out.parentFile.exists()) out.parentFile.mkdirs()
+    writer.write(txt)
+    writer.flush()
+    writer.close()
+}

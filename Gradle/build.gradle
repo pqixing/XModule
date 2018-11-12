@@ -39,46 +39,11 @@ dependencies {
     implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
     implementation 'com.github.vidstige:jadb:+'
     implementation "com.alibaba:fastjson:1.2.44"
-    implementation "com.github.pqixing.modularization:Tools:0.0.4"
-//    implementation project(":Tools")
+//    implementation "com.github.pqixing.modularization:Tools:0.0.4"
+    implementation project(":Tools")
 
 }
 
-ext.mainDir = new File(projectDir, "src/main")
-ext.resourceDir = new File(mainDir, "resources/com/pqixing/modularization")
-ext.javaFileDir = new File(mainDir, "java/com/pqixing/modularization")
-task("copyClass") {
-    group = "build"
-    doFirst {
-        def fileName = "ProjectInfo.java"
-        writeFile("//" + new File(javaFileDir, fileName).text, new File(resourceDir, "setting/$fileName"))
-
-        StringBuilder sb = new StringBuilder('''package com.pqixing.modularization
-object ProjectInfoFiles {
-    val files = listOf(''')
-        def dir = new File(resourceDir, "ProjectInfo")
-        def prefix = dir.name
-        dir.listFiles().each { f1 ->
-            if (f1.isDirectory()) {
-                def prefix2 = f1.name
-                f1.listFiles().each { f2 ->
-                    sb.append("\n\"$prefix/$prefix2/$f2.name\",")
-                }
-            } else sb.append("\n\"$prefix/$f1.name\",")
-
-        }
-        sb.deleteCharAt(sb.length() - 1).append(" ) }")
-        writeFile(sb.toString(), new File(javaFileDir, "ProjectInfoFiles.kt"))
-    }
-}
-
-def writeFile(String txt, File out) {
-    def writer = out.newWriter()
-    if (!out.parentFile.exists()) out.parentFile.mkdirs()
-    writer.write(txt)
-    writer.flush()
-    writer.close()
-}
 
 afterEvaluate {
     project.compileGroovy.dependsOn.remove('compileJava')

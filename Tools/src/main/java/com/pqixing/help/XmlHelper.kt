@@ -1,6 +1,6 @@
-package com.pqixing.modularization.wrapper
+package com.pqixing.help
 
-import com.pqixing.modularization.manager.GitProject
+import com.pqixing.git.GitProject
 import com.pqixing.tools.CheckUtils
 import groovy.util.Node
 import groovy.util.XmlParser

@@ -2,8 +2,9 @@ package com.pqixing.modularization.manager
 
 import com.pqixing.Tools
 import com.pqixing.git.GitUtils
-import com.pqixing.modularization.ProjectInfo
-import com.pqixing.modularization.wrapper.XmlHelper
+import com.pqixing.ProjectInfo
+import com.pqixing.git.GitProject
+import com.pqixing.help.XmlHelper
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand

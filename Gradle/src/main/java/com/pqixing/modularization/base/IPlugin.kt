@@ -1,6 +1,6 @@
 package com.pqixing.modularization.base
 
-import com.pqixing.modularization.ProjectInfo
+import com.pqixing.ProjectInfo
 
 import org.gradle.api.Project
 import org.gradle.api.Task

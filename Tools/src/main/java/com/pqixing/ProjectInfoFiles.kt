@@ -1,4 +1,4 @@
-package com.pqixing.modularization
+package com.pqixing
 object ProjectInfoFiles {
     val files = listOf(
 "ProjectInfo/gradles/libraryRun.gradle",

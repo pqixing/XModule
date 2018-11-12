@@ -3,9 +3,10 @@ package com.pqixing
 import com.pqixing.git.GitUtils
 import com.pqixing.interfaces.ICredential
 import com.pqixing.interfaces.ILog
+import com.pqixing.tools.FileUtils
 
 
-object Tools :ILog {
+object Tools : ILog {
     override fun println(l: String?) {
         logger?.println(l)
     }
@@ -18,6 +19,7 @@ object Tools :ILog {
         Tools.rootDir = rootDir
         Tools.logger = logger
         GitUtils.init(credentials)
+        FileUtils.init(Tools::class.java)
         init = true
     }
 }

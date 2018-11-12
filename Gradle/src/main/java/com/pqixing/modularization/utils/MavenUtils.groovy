@@ -4,7 +4,7 @@
 //import com.pqixing.modularization.base.BasePlugin
 //import com.pqixing.modularization.common.GlobalConfig
 //import com.pqixing.modularization.net.Net
-//import com.pqixing.modularization.wrapper.MavenMetadata
+//import com.pqixing.help.MavenMetadata
 //import com.pqixing.modularization.wrapper.PomWrapper
 //import com.pqixing.modularization.wrapper.ProjectWrapper
 //import com.pqixing.tools.TextUtils

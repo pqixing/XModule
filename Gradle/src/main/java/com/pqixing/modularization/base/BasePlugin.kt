@@ -2,12 +2,12 @@ package com.pqixing.modularization.base
 
 
 import com.alibaba.fastjson.JSON
+import com.pqixing.ProjectInfo
 import com.pqixing.Tools
 import com.pqixing.interfaces.ICredential
 import com.pqixing.interfaces.ILog
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.ProjectInfo
 import com.pqixing.tools.CheckUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
