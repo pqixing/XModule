@@ -1,7 +1,6 @@
 package com.pqixing.modularization.maven
 
 import com.pqixing.Tools
-import com.pqixing.git.GitUtils
 import com.pqixing.git.PercentProgress
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
@@ -40,7 +39,8 @@ object VersionManager {
      */
     fun getVersion(module: String, branch: String): String {
         checkInit(branch)
-        return targetVersion[module] ?: branchVersion[branch]!![module] ?: curVersions[module]
+        val key = (if (branch.isEmpty()) "" else ".$branch") + ".$module"
+        return targetVersion[key] ?: branchVersion[branch]!![key] ?: curVersions[key]
         ?: "+"
     }
 
@@ -135,7 +135,7 @@ object VersionManager {
         val extends = plugin.getExtends(ManagerExtends::class.java)
         val maven = extends.groupMaven
         val groupUrl = extends.groupName.replace(".", "/")
-        parseNetVersions("$maven/$groupUrl", versions)
+        parseNetVersions("$maven/$groupUrl", versions, extends.groupName)
 
         versions[Keys.UPDATE_TIME] = FileManager.docProject.lastLog.commitTime
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
@@ -152,7 +152,7 @@ object VersionManager {
     /**
      * 解析maven仓库，爬取当前group的所有版本
      */
-    fun parseNetVersions(baseUrl: String, versions: HashMap<String, String>) {
+    fun parseNetVersions(baseUrl: String, versions: HashMap<String, String>, groupName: String) {
         val prefix = "<a href=\""
         val r = Regex(".*?$prefix$baseUrl.*?</a>")
         val lines = URL(baseUrl).readText().lines()
@@ -164,10 +164,10 @@ object VersionManager {
                     if (url.endsWith(FileNames.MAVEN_METADATA)) {
                         val meta = MavenMetadata(baseUrl)
                         XmlHelper.parseMetadata(URL(url).readText(), meta)
-                        versions["${meta.groupId}.${meta.artifactId}"] = meta.release
+                        versions["${meta.groupId.replace(groupName, "")}.${meta.artifactId}"] = meta.release
                         return@outer
                     } else {
-                        parseNetVersions(url, versions)
+                        parseNetVersions(url, versions, groupName)
                     }
                 }
             }
