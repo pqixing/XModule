@@ -1,5 +1,3 @@
-package com.pqixing.modularization.ProjectInfo.plugins
-
 allprojects {
     repositories {
         jcenter()

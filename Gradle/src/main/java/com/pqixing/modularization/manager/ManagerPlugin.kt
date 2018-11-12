@@ -12,6 +12,11 @@ import org.gradle.api.Project
  */
 
 class ManagerPlugin : BasePlugin() {
+    override fun initBeforeApply() {
+
+    }
+
+    override val applyFiles: List<String> = listOf("com.module.manager", "com.module.git")
     override val ignoreFields: Set<String>
         get() = setOf(FileNames.PROJECT_INFO, FileNames.IMPORT_KT, FileNames.DOCUMENT)
 

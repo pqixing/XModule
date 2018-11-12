@@ -7,7 +7,7 @@ import org.gradle.api.Project
 
 import java.util.HashSet
 
-class DpsExtends(project: Project) : BaseExtension(project) {
+open class DpsExtends(project: Project) : BaseExtension(project) {
     internal var modules = HashSet<Module>()
 
 
@@ -28,7 +28,11 @@ class DpsExtends(project: Project) : BaseExtension(project) {
         return module(moduleName, Module.SCOP_IMPL, closure)
     }
 
-    fun addImpl(moduleName: String, closure: Closure<Any?>? = null): Module {
+    fun addImpl(moduleName: String): Module {
+        return module(moduleName, Module.SCOP_API, null)
+    }
+
+    fun addImpl(moduleName: String, closure: Closure<Any?>?): Module {
         return module(moduleName, Module.SCOP_API, closure)
     }
 }

@@ -61,7 +61,7 @@ object FileManager {
         }
 
     fun getProjectXml(): File {
-        return File(infoDir,FileNames.PROJECT_XML)
+        return File(infoDir, FileNames.PROJECT_XML)
     }
 
     /**
@@ -122,7 +122,7 @@ object FileManager {
         if (user.isEmpty()) user = info?.gitUserName ?: ""
         if (psw.isEmpty()) psw = info?.gitPassWord ?: ""
 
-        docCredentials =  UsernamePasswordCredentialsProvider(user, psw)
+        docCredentials = UsernamePasswordCredentialsProvider(user, psw)
 
         val git = if (docRoot.exists()) {
             Git.open(docRoot).apply {
@@ -152,9 +152,7 @@ object FileManager {
         val filter = ProjectInfoFiles.files.filter { copyIfNull(it, docRoot) }
         //如果有新增文件，提交
         if (filter.isNotEmpty()) {
-            val add = git.add()
-            filter.forEach { add.addFilepattern(it) }
-            add.call()
+            git.add().addFilepattern(".").call()
             git.commit().setMessage("add file $filter").call()
             git.push()
         }

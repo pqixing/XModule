@@ -7,7 +7,10 @@ import com.pqixing.Tools
 import com.pqixing.interfaces.ICredential
 import com.pqixing.interfaces.ILog
 import com.pqixing.modularization.FileNames
+import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
+import com.pqixing.modularization.iterface.IExtHelper
+import com.pqixing.modularization.manager.FileManager
 import com.pqixing.tools.CheckUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
@@ -25,8 +28,11 @@ import java.util.*
 abstract class BasePlugin : Plugin<Project>, IPlugin {
     lateinit var p: Project
 
+    protected abstract val applyFiles: List<String>
+
     private val tasks = HashMap<String, Task>()
 
+    abstract fun initBeforeApply()
 
     override var projectInfo: ProjectInfo? = null
         get() {
@@ -86,6 +92,17 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         setPlugin()
         initTools(project)
         createIgnoreFile()
+        initBeforeApply()
+
+        val file = File(FileManager.infoDir, "gradles")
+        val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
+        extHelper.setExtValue(project, "gradles", file.absolutePath)
+
+        applyFiles.forEach {
+            val f = File(file, "$it.gradle")
+            if (f.exists() && f.isFile)
+                project.apply(mapOf("from" to f.absolutePath))
+        }
         linkTask()?.forEach { onTaskCreate(it, BaseTask.task(project, it)) }
     }
 

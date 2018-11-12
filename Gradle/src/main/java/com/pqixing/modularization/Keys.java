@@ -35,11 +35,11 @@ public class Keys {
     /**
      * App插件名称
      */
-    public static final String NAME_APP = "con.android.application";
+    public static final String NAME_APP = "com.android.application";
     /**
      * library插件名称
      */
-    public static final String NAME_LIBRARY = "con.android.library";
+    public static final String NAME_LIBRARY = "com.android.library";
     /**
      * git插件名称
      */
