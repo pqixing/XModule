@@ -39,8 +39,8 @@ dependencies {
     implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
     implementation 'com.github.vidstige:jadb:+'
     implementation "com.alibaba:fastjson:1.2.44"
-//    implementation "com.github.pqixing:modularization:0.0.2"
-    implementation project(":Tools")
+    implementation "com.github.pqixing.modularization:Tools:0.0.4"
+//    implementation project(":Tools")
 
 }
 

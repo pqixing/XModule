@@ -49,7 +49,7 @@ public class ImportProject {
     }
 
     private void parseValue(String k, String v) {
-        String key = k.replace("var ", "").replace("val ", "").trim()
+        String key = k.replace("var ", "").replace("val ", "").replace("\"", "").trim()
         String value = v.replace("+", ",").trim()
         switch (key) {
             case "targetInclude": formatInclude(new File(value))
@@ -73,6 +73,7 @@ public class ImportProject {
                 if (!value.isEmpty())
                     codeRoot = value
                 break
+            default: return
         }
     }
 
@@ -101,13 +102,15 @@ public class ImportProject {
                 projectPaths.put(s_name, "$name/$s_name")
             } else projectPaths.put(name, name)
         }
-        println("path -> $projectPaths")
+
     }
 
     String makeIncludeTxt() {
         HashSet<String> resultInclude = new HashSet()
         focusIncludes.each { key ->
-            if (!key.isEmpty()) resultInclude.add(key)
+            if (!key.isEmpty()) {
+                resultInclude.add(key)
+            }
         }
         if (resultInclude.isEmpty()) {
             includes.each { key ->
@@ -117,13 +120,12 @@ public class ImportProject {
                 if (!key.isEmpty()) resultInclude.remove(key)
             }
         }
-
         StringBuilder sb = new StringBuilder("// $codeRootDir.absolutePath \n")
         def dir = codeRootDir.absolutePath
         resultInclude.each { key ->
-            def map = projectPaths.find { it.key == key }
-            if (map != null) {
-                sb.append("\ninclude (':$map.key') \n project(':$map.key').projectDir = new File('$dir','${map.value.replace("\\", "/")}')")
+            def value = projectPaths[key]
+            if (value != null) {
+                sb.append("\ninclude (':$key') \n project(':$key').projectDir = new File('$dir','${value.replace("\\", "/")}')")
             }
         }
 
@@ -148,7 +150,7 @@ public class ImportProject {
         if (codeRoot.isEmpty()) {
             codeRoot = "../"
         }
-        codeRootDir = codeRoot == "../" ? new File(rootDir, codeRoot) : new File(codeRoot)
+        codeRootDir = codeRoot == "../" ? rootDir.parentFile : new File(codeRoot)
         gradle.ext.codeRootDir = codeRootDir
     }
 

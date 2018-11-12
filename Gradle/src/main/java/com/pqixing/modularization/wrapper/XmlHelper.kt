@@ -34,7 +34,6 @@ object XmlHelper {
     fun parseProjectXml(txt: File, projects: HashMap<String, GitProject>) {
         val node = XmlParser().parseText(txt.readText())
         val baseUrl = node.get("@baseUrl").toString()
-        node.getAt(QName("project"))
         node.getAt(QName("project")).forEach {
             val p: Node = it as? Node ?: return@forEach
 
@@ -42,7 +41,7 @@ object XmlHelper {
             var introduce = p.get("@introduce").toString()
 
             //该工程的git地址
-            var gitUrl: String = p.get("@url").toString()
+            var gitUrl: String = p.get("@url")?.toString()?:""
             if (CheckUtils.isEmpty(gitUrl)) gitUrl = "$baseUrl/${rootName}.git"
 
             val children = p.getAt(QName("submodule"))
@@ -52,7 +51,7 @@ object XmlHelper {
                 val cp = c as? Node ?: return@forEach
                 val name = cp.get("@name").toString()
                 introduce = cp.get("@introduce").toString()
-                addProject(projects, rootName, gitUrl, introduce, rootName)
+                addProject(projects, name, gitUrl, introduce, rootName)
             }
         }
 

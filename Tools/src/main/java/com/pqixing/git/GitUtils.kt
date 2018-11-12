@@ -1,6 +1,7 @@
 package com.pqixing.git
 
 import com.pqixing.Tools
+import com.pqixing.Tools.logger
 import com.pqixing.interfaces.ICredential
 import com.pqixing.interfaces.ILog
 import org.eclipse.jgit.api.Git
@@ -31,16 +32,11 @@ object GitUtils {
      */
     @JvmStatic
     fun clone(gitUrl: String, gitDir: File, branchName: String, logger: ILog): Git? {
-        return try {
-            Git.cloneRepository()
-                    .setCredentialsProvider(UsernamePasswordCredentialsProvider(credentials.getUserName(), credentials.getPassWord()))
-                    .setURI(gitUrl).setDirectory(gitDir).setBranch(branchName)
-                    .setProgressMonitor(PercentProgress(logger))
-                    .call()
-        } catch (e: Exception) {
-            logger?.println(e.toString())
-            null
-        }
+        return Git.cloneRepository()
+                .setCredentialsProvider(UsernamePasswordCredentialsProvider(credentials.getUserName(), credentials.getPassWord()))
+                .setURI(gitUrl).setDirectory(gitDir).setBranch(branchName)
+                .setProgressMonitor(PercentProgress(logger))
+                .call()
     }
 
     /**

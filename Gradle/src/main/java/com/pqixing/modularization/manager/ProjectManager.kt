@@ -35,7 +35,9 @@ object ProjectManager {
         val rootDir = File(FileManager.codeRootDir, gitProject.rootName)
 
         val git = if (!projectDir.exists() || !checkRootDir(rootDir)) {//下载工程
+            Tools.println("start clone project ${project.name} url -> ${gitProject.gitUrl}")
             GitUtils.clone(gitProject.gitUrl, rootDir, info.curBranch)
+
         } else {
             Git.open(rootDir).apply { checkBranch(this, info) }
         }

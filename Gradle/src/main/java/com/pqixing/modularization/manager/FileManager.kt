@@ -58,7 +58,7 @@ object FileManager {
         }
 
     fun getProjectXml(): File {
-        return File(docRoot, FileNames.PROJECT_XML)
+        return File(docRoot, FileNames.PROJECTINFO + "/" + FileNames.PROJECT_XML)
     }
 
     /**

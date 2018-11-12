@@ -53,6 +53,7 @@ public class FileNames {
     public static final String SETTINGS_GRADLE = "settings.gradle";
     public static final String IMPORTPROJECT_GRADLE = "ImportProject.gradle";
     public static final String DOCUMENT = "Document";
+    public static final String PROJECTINFO = "ProjectInfo";
     public static final String CODE_ROOT = "codeRootDir";
     public static final String PROJECT_XML = "project.xml";
     public static final String MAVEN_METADATA = "maven-metadata.xml";
