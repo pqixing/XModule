@@ -4,7 +4,7 @@ ext {
     kotlin_version = "1.3.0"
 }
 android {
-    buildToolsVersion '27.0.3'
+    buildToolsVersion '28.0.2'
     compileSdkVersion 26
     defaultConfig {
         minSdkVersion 17
@@ -23,13 +23,13 @@ android {
     }
     buildTypes {
         //生产测试环境
-        preTest {
-            initwith release
+        outTest {
+            initWith release
             matchingFallbacks = ['release']
         }
         //测试环境
-        test {
-            initwith release
+        inTest {
+            initWith release
             matchingFallbacks = ['preTest', 'release']
         }
     }

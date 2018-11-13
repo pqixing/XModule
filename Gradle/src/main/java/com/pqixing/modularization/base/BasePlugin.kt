@@ -27,6 +27,7 @@ import java.util.*
 
 abstract class BasePlugin : Plugin<Project>, IPlugin {
     lateinit var p: Project
+    val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
     protected abstract val applyFiles: List<String>
 
@@ -95,7 +96,6 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         initBeforeApply()
 
         val file = File(FileManager.infoDir, "gradles")
-        val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         extHelper.setExtValue(project, "gradles", file.absolutePath)
 
         applyFiles.forEach {

@@ -1,6 +1,5 @@
 package com.pqixing.modularization.manager
 
-import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.maven.IndexVersionTask
@@ -36,6 +35,7 @@ class ManagerPlugin : BasePlugin() {
         }
 
         project.afterEvaluate {
+            extHelper.setExtValue(project, "groupName", extends.groupName)
             FileManager.checkDocument(this)
             if (error.isNotEmpty()) {
                 ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, error)
