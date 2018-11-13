@@ -33,11 +33,11 @@ class ManagerPlugin : BasePlugin() {
 
         error = FileManager.checkFileExist(this)
 
-        //在每个工程开始同步之前，检查状态，下载，切换分支等等
+
         project.gradle.beforeProject {
+            //在每个工程开始同步之前，检查状态，下载，切换分支等等
             ProjectManager.checkProject(it, this, projectInfo!!)
         }
-
         project.afterEvaluate {
             val extends = getExtends(ManagerExtends::class.java)
             extHelper.setExtValue(project, "groupName", extends.groupName)
@@ -54,16 +54,19 @@ class ManagerPlugin : BasePlugin() {
                 ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, error)
             }
             extends.checkVail()
-            it.allprojects { p -> extHelper.addRepositories(p, extends.dependMaven) }
+
+            project.allprojects { p ->
+                extHelper.addRepositories(p, extends.dependMaven)
+            }
         }
 
-        project.gradle.addBuildListener(object : BuildAdapter() {
-            override fun buildFinished(result: BuildResult) {
-                //构建结束时，重置projectInfo
-                pi = null
-                FileManager.cacheRoot = null
-                FileManager.codeRootDir = null
-            }
-        })
+//        project.gradle.addBuildListener(object : BuildAdapter() {
+//            override fun buildFinished(result: BuildResult) {
+//                //构建结束时，重置projectInfo
+//                pi = null
+//                FileManager.cacheRoot = null
+//                FileManager.codeRootDir = null
+//            }
+//        })
     }
 }

@@ -3,6 +3,7 @@ package com.pqixing.git
 import com.pqixing.Tools
 import com.pqixing.interfaces.ICredential
 import com.pqixing.interfaces.ILog
+import com.pqixing.tools.CheckUtils.isGitDir
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.*
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
@@ -14,28 +15,29 @@ object GitUtils {
         this.credentials = credentials
     }
 
-    @JvmStatic
-    fun clone(gitUrl: String, gitDir: File) = clone(gitUrl, gitDir, "master", Tools.logger)
-
-    @JvmStatic
-    fun clone(gitUrl: String, gitDir: File, branchName: String) = clone(gitUrl, gitDir, branchName, Tools.logger)
-
-    @JvmStatic
-    fun clone(gitUrl: String, gitDir: File, logger: ILog) = clone(gitUrl, gitDir, "master", logger)
-
     /**
      * clone
      * @param gitUrl
      * @param dirPath
      * @return
      */
-    @JvmStatic
-    fun clone(gitUrl: String, gitDir: File, branchName: String, logger: ILog): Git? {
-        return Git.cloneRepository()
-                .setCredentialsProvider(UsernamePasswordCredentialsProvider(credentials.getUserName(), credentials.getPassWord()))
+    fun clone(gitUrl: String, gitDir: File, branchName: String = "master"): Git? {
+        val git = Git.cloneRepository()
                 .setURI(gitUrl).setDirectory(gitDir).setBranch(branchName)
-                .setProgressMonitor(PercentProgress(logger))
-                .call()
+                .init().execute()
+        if (git == null) {
+            if (branchName != "master") return clone(gitUrl, gitDir, "master")
+        } else {
+            //如果名字不等（clone的分支不存在） checkout到master
+            if (git.repository.branch != branchName) {
+                git.checkout().setName("master")
+                        .setCreateBranch(true)
+                        .setStartPoint("refs/remotes/origin/master")
+                        .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
+                        .init().execute()
+            }
+        }
+        return git
     }
 
     /**
@@ -43,7 +45,6 @@ object GitUtils {
      * @param dir
      * @return
      */
-    @JvmStatic
     fun findGitDir(dir: File?): File? {
         var p = dir
         var g: File?
@@ -76,17 +77,20 @@ fun <T> GitCommand<T>.init(provider: UsernamePasswordCredentialsProvider? = null
     }
     if (this is PullCommand) this.setProgressMonitor(PercentProgress())
     if (this is PushCommand) this.progressMonitor = PercentProgress()
+    if (this is CloneCommand) this.setProgressMonitor(PercentProgress())
+    if (this is CheckoutCommand) this.setProgressMonitor(PercentProgress())
+    if (this is CheckoutCommand) this.setProgressMonitor(PercentProgress())
     return this
 }
 
 fun <T> GitCommand<T>.execute(): T? = try {
     Tools.println("Git task -> $repository : ${javaClass.simpleName} ")
     val call = call()
-    Tools.println("success ->  ${javaClass.simpleName}")
+    Tools.println("Git task end ->  ${javaClass.simpleName}")
     call
 } catch (e: Exception) {
     ///home/pqixing/Desktop/gradleProject/Root/Document/.git
-    FileUtils.delete(File(repository.directory, "index.lock"))
+//    FileUtils.delete(File(repository.directory, "index.lock"))
     Tools.println(e.toString())
     null
 }

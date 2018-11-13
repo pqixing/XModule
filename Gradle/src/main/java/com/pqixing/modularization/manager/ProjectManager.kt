@@ -4,6 +4,8 @@ import com.pqixing.Tools
 import com.pqixing.git.GitUtils
 import com.pqixing.ProjectInfo
 import com.pqixing.git.GitProject
+import com.pqixing.git.execute
+import com.pqixing.git.init
 import com.pqixing.help.XmlHelper
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.Git
@@ -36,13 +38,12 @@ object ProjectManager {
         val rootDir = File(FileManager.codeRootDir, gitProject.rootName)
 
         val git = if (!projectDir.exists() || !checkRootDir(rootDir)) {//下载工程
-            Tools.println("start clone project ${project.name} url -> ${gitProject.gitUrl}")
             GitUtils.clone(gitProject.gitUrl, rootDir, info.curBranch)
-
         } else {
-            Git.open(rootDir).apply { checkBranch(this, info) }
+            Git.open(rootDir)
         }
         if (git != null) {
+            checkBranch(git, info)
             gitProject.loadGitInfo(git)
             git.close()
         }
@@ -59,17 +60,15 @@ object ProjectManager {
 
 
         val local = git.branchList().call()
-
-        //强制切换，丢失本地未commit的文件
-        if (info.focusCheckOut) {
-            git.stashCreate().call()
-            git.stashDrop().call()
-        }
-
         val end = "/$branchName"
         for (c in local) {
             if (c.name.endsWith(end)) {
-                git.checkout().setName(branchName).call()
+                //强制切换，丢失本地未commit的文件
+                if (info.focusCheckOut) {
+                    git.stashCreate().call()
+                    git.stashDrop().call()
+                }
+                git.checkout().setName(branchName).init().execute()
                 Tools.println("Checkout local branch $branchName")
                 return
             }
@@ -80,11 +79,16 @@ object ProjectManager {
                 .call()
         for (c in remote) {
             if (c.name.endsWith(end)) {
+                //强制切换，丢失本地未commit的文件
+                if (info.focusCheckOut) {
+                    git.stashCreate().call()
+                    git.stashDrop().call()
+                }
                 git.checkout().setName(branchName)
                         .setCreateBranch(true)
                         .setStartPoint(c.name)
                         .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
-                        .call()
+                        .init().execute()
                 Tools.println("Checkout remote branch $branchName")
                 return
             }

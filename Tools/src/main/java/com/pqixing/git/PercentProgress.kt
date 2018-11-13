@@ -7,12 +7,12 @@ import com.sun.org.apache.xml.internal.security.Init
 import org.eclipse.jgit.lib.ProgressMonitor
 import java.text.DecimalFormat
 
-class PercentProgress @JvmOverloads constructor(private val logger: ILog? = Tools.logger, val space: Float = 5f) : ProgressMonitor {
+class PercentProgress @JvmOverloads constructor(private val logger: ILog? = Tools.logger, val space: Float = 1500f) : ProgressMonitor {
     private var title: String? = null
     private var last: Int = 0
     private var total: Int = 0
 
-    private var lastLogPercent = 0f;
+    private var lastLogTime = 0L;
     private val d = DecimalFormat("##0.00")
     //百分比间隔
 
@@ -23,22 +23,21 @@ class PercentProgress @JvmOverloads constructor(private val logger: ILog? = Tool
         this.title = title
         this.total = totalWork
         last = 0
-        lastLogPercent = 0f
-        logger?.println("$title -> $totalWork")
+        lastLogTime = 0L
+        logger?.println("beginTask -> $title : $totalWork")
     }
 
     override fun update(completed: Int) {
         last += completed
-        val newPercent = last * 100F / total
-
-        if (newPercent - lastLogPercent >= space) {
-            logger?.println("$title -> [$last/$total ${newPercent.toInt()}%]")
-            lastLogPercent = newPercent
+        val t = System.currentTimeMillis()
+        if (last == total || t - lastLogTime >= space) {
+            lastLogTime = t
+            logger?.println("          -> $last/$total : ${(last.toFloat() * 100 / total).toInt()}%")
         }
     }
 
     override fun endTask() {
-
+        logger?.println("endTask   -> $title : $total")
     }
 
     override fun isCancelled(): Boolean {
