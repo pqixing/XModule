@@ -1,12 +1,11 @@
 package com.pqixing.git
 
 import com.pqixing.Tools
-import com.pqixing.Tools.logger
 import com.pqixing.interfaces.ICredential
 import com.pqixing.interfaces.ILog
-import org.eclipse.jgit.api.Git
+import com.pqixing.tools.FileUtils
+import org.eclipse.jgit.api.*
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
-
 import java.io.File
 
 object GitUtils {
@@ -67,4 +66,29 @@ object GitUtils {
         val e = url.indexOf(".", s)
         return url.substring(s, if (e == -1) url.length else e)
     }
+
 }
+
+fun <T> GitCommand<T>.init(provider: UsernamePasswordCredentialsProvider? = null): GitCommand<T> {
+    if (this is TransportCommand<*, *>) {
+        if (provider != null) setCredentialsProvider(provider)
+        else setCredentialsProvider(UsernamePasswordCredentialsProvider(GitUtils.credentials.getUserName(), GitUtils.credentials.getPassWord()))
+    }
+    if (this is PullCommand) this.setProgressMonitor(PercentProgress())
+    if (this is PushCommand) this.progressMonitor = PercentProgress()
+    return this
+}
+
+fun <T> GitCommand<T>.execute(): T? = try {
+    Tools.println("Git task -> $repository : ${javaClass.simpleName} ")
+    val call = call()
+    Tools.println("success ->  ${javaClass.simpleName}")
+    call
+} catch (e: Exception) {
+    ///home/pqixing/Desktop/gradleProject/Root/Document/.git
+    FileUtils.delete(File(repository.directory, "index.lock"))
+    Tools.println(e.toString())
+    null
+}
+
+

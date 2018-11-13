@@ -43,7 +43,7 @@ object FileUtils {
     fun delete(f: File): Boolean {
         if (!f.exists()) return false
         if (f.isDirectory) f.listFiles().forEach { delete(it) }
-        f.deleteOnExit()
+        if (f.exists()) f.delete()
         return true
     }
 }

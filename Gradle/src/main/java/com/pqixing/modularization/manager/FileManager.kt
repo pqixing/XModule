@@ -1,11 +1,9 @@
 package com.pqixing.modularization.manager
 
-import com.pqixing.git.GitUtils
-import com.pqixing.git.PercentProgress
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.ProjectInfoFiles
-import com.pqixing.git.GitProject
+import com.pqixing.git.*
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.IPlugin
 import com.pqixing.modularization.iterface.IExtHelper
@@ -94,7 +92,7 @@ object FileManager {
         }
         with(File(plugin.cacheDir, FileNames.IMPORTPROJECT_GRADLE)) {
             val importProject = FileUtils.getTextFromResource("setting/${FileNames.IMPORTPROJECT_GRADLE}")
-            FileUtils.writeText(this, importProject,true)
+            FileUtils.writeText(this, importProject, true)
 //            error += "ImportProject.gradle has update!! try sync again"
         }
         return error
@@ -128,38 +126,35 @@ object FileManager {
             Git.open(docRoot).apply {
                 //切换到log分支
                 if (docBranch != repository.branch) {
-                    stashCreate().call()
-                    stashDrop().call()
-                    checkout().setForce(true).setName(docBranch).call()
+                    stashCreate().init(docCredentials).execute()
+                    stashDrop().init(docCredentials).execute()
+                    checkout().setForce(true).setName(docBranch).init().execute()
                 }
-                pull().setCredentialsProvider(docCredentials).call()
+                pull().init(docCredentials).execute()
             }
         } else {
 
             Git.cloneRepository()
-                    .setCredentialsProvider(docCredentials)
                     .setURI(manager.docGitUrl).setDirectory(docRoot).setBranch(docBranch)
-                    .setProgressMonitor(PercentProgress())
-                    .call()
+                    .init(docCredentials).execute()
         }
         if (!docRoot.exists()) {
             ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "Clone doc fail !! Please check")
         }
 
+        val filter = ProjectInfoFiles.files.filter { copyIfNull(it, docRoot) }
         //初始化dco目录的信息
         docProject.gitUrl = manager.docGitUrl
         docProject.name = FileNames.DOCUMENT
         docProject.rootName = FileNames.DOCUMENT
         docProject.introduce = "LogManager"
+        if (git == null) return@with
         docProject.loadGitInfo(git)
-
-        val filter = ProjectInfoFiles.files.filter { copyIfNull(it, docRoot) }
-
         //如果有新增文件，提交
         if (filter.isNotEmpty()) {
-            git.add().addFilepattern(".").call()
-            git.commit().setMessage("add file $filter").call()
-            git.push().setForce(true).call()
+            git.add().addFilepattern(".").init().execute()
+            git.commit().setAllowEmpty(true).setMessage("add file $filter").init().execute()
+            git.push().setForce(true).init().execute()
         }
         git.close()
     }

@@ -136,8 +136,9 @@ object VersionManager {
         val extends = plugin.getExtends(ManagerExtends::class.java)
         val maven = extends.groupMaven
         val groupUrl = extends.groupName.replace(".", "/")
+        Tools.println("indexVersionFromNet  start ->")
         parseNetVersions("$maven/$groupUrl", versions, extends.groupName)
-
+        Tools.println("indexVersionFromNet  end ->")
         versions[Keys.UPDATE_TIME] = FileManager.docProject.lastLog.commitTime
         //上传版本好到服务端
         val git = Git.open(FileManager.docRoot)
@@ -168,6 +169,7 @@ object VersionManager {
                         val meta = MavenMetadata(baseUrl)
                         XmlHelper.parseMetadata(URL(url).readText(), meta)
                         versions["${meta.groupId.replace(groupName, "")}.${meta.artifactId}"] = meta.release
+                        Tools.println("${meta.groupId} -> ${meta.artifactId}")
                         return@outer
                     } else {
                         parseNetVersions(url, versions, groupName)

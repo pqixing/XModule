@@ -50,10 +50,7 @@ public class GExtHelper implements IExtHelper {
     void addRepositories(Project project, @NotNull List<String> dependMaven) {
         project.repositories {
             dependMaven.each { l ->
-                maven {
-                    url l
-                }
-                Tools.println("$project.name addRepositories -> $l")
+                maven { url l }
             }
         }
     }

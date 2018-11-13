@@ -6,6 +6,9 @@ buildscript {
         maven {
             url "https://jitpack.io"
         }
+        maven {
+            url uri("/home/pqixing/.repo")
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.0'
