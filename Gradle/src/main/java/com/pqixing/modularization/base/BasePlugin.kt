@@ -15,6 +15,9 @@ import com.pqixing.tools.CheckUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import groovy.lang.GroovyClassLoader
+import org.gradle.BuildAdapter
+import org.gradle.BuildListener
+import org.gradle.BuildResult
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -37,7 +40,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
 
     override var projectInfo: ProjectInfo? = null
         get() {
-            if (field == null) {
+            if (pi == null) {
                 var infoStr = jsonFromEnv
                 if (CheckUtils.isEmpty(infoStr)) {
                     try {
@@ -50,14 +53,14 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
                 }
                 if (!CheckUtils.isEmpty(infoStr)) {
                     try {
-                        field = JSON.parseObject(infoStr, ProjectInfo::class.java)
+                        pi = JSON.parseObject(infoStr, ProjectInfo::class.java)
                     } catch (e: Exception) {
                     }
 
                 }
-                if (field == null) field = ProjectInfo()
+                if (pi == null) pi = ProjectInfo()
             }
-            return field!!
+            return pi!!
         }
 
     private val jsonFromEnv: String
@@ -153,6 +156,6 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
             return pluginCache[pluginClass.simpleName] as T
         }
 
-
+        var pi: ProjectInfo? = null
     }
 }

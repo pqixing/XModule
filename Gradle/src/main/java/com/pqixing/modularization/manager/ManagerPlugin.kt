@@ -1,8 +1,11 @@
 package com.pqixing.modularization.manager
 
+import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.maven.IndexVersionTask
+import org.gradle.BuildAdapter
+import org.gradle.BuildResult
 import org.gradle.api.Project
 
 /**
@@ -43,6 +46,13 @@ class ManagerPlugin : BasePlugin() {
             extends.checkVail()
         }
 
+        project.gradle.addBuildListener(object : BuildAdapter() {
+            override fun buildFinished(result: BuildResult) {
 
+                Tools.println("buildFinished -> -----")
+                //构建结束时，重置projectInfo
+                pi = null
+            }
+        })
     }
 }
