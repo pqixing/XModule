@@ -36,6 +36,7 @@ public class Keys {
      * App插件名称
      */
     public static final String NAME_APP = "com.android.application";
+    public static final String NAME_LIBRARY_RUN = "libraryRun.gradle";
     /**
      * library插件名称
      */

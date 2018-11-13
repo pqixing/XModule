@@ -1,9 +1,11 @@
 package com.pqixing.modularization.impl
 
+import com.pqixing.Tools
 import com.pqixing.modularization.iterface.IExtHelper
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.invocation.Gradle;
+import org.gradle.api.invocation.Gradle
+import org.jetbrains.annotations.NotNull;
 
 public class GExtHelper implements IExtHelper {
 
@@ -18,7 +20,7 @@ public class GExtHelper implements IExtHelper {
     @Override
     Object setExtValue(Project project, String key, String value) {
         try {
-             project.ext."$key" = value
+            project.ext."$key" = value
         } catch (Exception e) {
         }
     }
@@ -42,5 +44,17 @@ public class GExtHelper implements IExtHelper {
     @Override
     void setExtMethod(Project project, String method, Action action) {
         project.ext."$method" = { action?.execute(it) }
+    }
+
+    @Override
+    void addRepositories(Project project, @NotNull List<String> dependMaven) {
+        project.repositories {
+            dependMaven.each { l ->
+                maven {
+                    url l
+                }
+                Tools.println("$project.name addRepositories -> $l")
+            }
+        }
     }
 }

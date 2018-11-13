@@ -10,7 +10,7 @@ import org.gradle.api.Task
 
 open class ApplicationPlugin : AndroidPlugin() {
     override val applyFiles: List<String>
-        get() = listOf("com.module.application","module.application")
+        get() = listOf("com.module.application")
     override val androidPlugin: String = Keys.NAME_APP
 
     override val ignoreFields: Set<String> = setOf()

@@ -1,7 +1,6 @@
 package com.pqixing.modularization.android
 
 import com.pqixing.modularization.Keys
-import org.gradle.api.Project
 import org.gradle.api.Task
 
 /**
@@ -9,10 +8,23 @@ import org.gradle.api.Task
  */
 
 open class LibraryPlugin : AndroidPlugin() {
-    override val applyFiles: List<String>
-        get() = listOf("com.module.library","module.library")
+    val runType = Regex(".*?assemble.*?Dev")
+    var forRun = false
 
-    override val androidPlugin: String = Keys.NAME_LIBRARY
+    override val applyFiles: List<String> = if (forRun) listOf("com.module.library", Keys.NAME_LIBRARY_RUN) else listOf("com.module.library")
+
+    override val androidPlugin: String
+        get() {
+            kotlin.run outer@{
+                project.gradle.startParameter.taskNames.forEach {
+                    if (it.matches(runType)) {
+                        forRun = true
+                        return@outer
+                    }
+                }
+            }
+            return if (forRun) Keys.NAME_APP else Keys.NAME_LIBRARY
+        }
 
     override val ignoreFields: Set<String> = setOf("scr/dev")
 

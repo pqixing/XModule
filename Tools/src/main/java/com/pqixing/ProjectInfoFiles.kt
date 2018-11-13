@@ -9,5 +9,6 @@ object ProjectInfoFiles {
 "ProjectInfo/gradles/com.module.manager.gradle",
 "ProjectInfo/gradles/android.gradle",
 "ProjectInfo/project.xml",
+"ProjectInfo/build.gradle",
 "ProjectInfo/gradle.properties",
 "ProjectInfo/versions/version.properties" ) }

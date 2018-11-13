@@ -4,9 +4,11 @@ import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.maven.IndexVersionTask
+import com.pqixing.tools.FileUtils
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import org.gradle.api.Project
+import java.io.File
 
 /**
  * Created by pqixing on 17-12-20.
@@ -40,16 +42,23 @@ class ManagerPlugin : BasePlugin() {
             val extends = getExtends(ManagerExtends::class.java)
             extHelper.setExtValue(project, "groupName", extends.groupName)
             FileManager.checkDocument(this)
+
+            //如果需要同步build文件，则同步
+            if (extends.syncBuild) {
+                val buildGradle = "build.gradle"
+                val docBuild = File(FileManager.infoDir, buildGradle)
+                FileUtils.writeText(File(rootDir, buildGradle), docBuild.readText(), true)
+            }
+
             if (error.isNotEmpty()) {
                 ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, error)
             }
             extends.checkVail()
+            it.allprojects { p -> extHelper.addRepositories(p, extends.dependMaven) }
         }
 
         project.gradle.addBuildListener(object : BuildAdapter() {
             override fun buildFinished(result: BuildResult) {
-
-                Tools.println("buildFinished -> -----")
                 //构建结束时，重置projectInfo
                 pi = null
                 FileManager.cacheRoot = null

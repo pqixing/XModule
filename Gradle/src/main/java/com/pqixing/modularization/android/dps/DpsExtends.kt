@@ -35,4 +35,8 @@ open class DpsExtends(project: Project) : BaseExtension(project) {
     fun addImpl(moduleName: String, closure: Closure<Any?>?): Module {
         return module(moduleName, Module.SCOP_API, closure)
     }
+
+    companion object {
+
+    }
 }

@@ -4,6 +4,7 @@ package com.pqixing.modularization.android
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.dps.DpsExtends
+import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.iterface.IExtHelper
 import org.gradle.api.Project
@@ -18,7 +19,7 @@ abstract class AndroidPlugin : BasePlugin() {
 
     override fun initBeforeApply() {
         //根据情况进行不同的Android插件依赖
-        project.apply(mapOf("plugin" to "$androidPlugin"))
+        project.apply(mapOf("plugin" to androidPlugin))
     }
 
     override fun apply(project: Project) {
@@ -33,9 +34,6 @@ abstract class AndroidPlugin : BasePlugin() {
         extHelper.setExtMethod(project, "endConfig", null)
 
         //在工程处理后，处理组件依赖
-//        project.afterEvaluate
-//        run {
-//
-//        }
+        project.afterEvaluate { DpsManager(this@AndroidPlugin).resolveDps() }
     }
 }

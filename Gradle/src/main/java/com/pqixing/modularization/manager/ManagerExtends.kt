@@ -23,11 +23,16 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
      */
     var groupMaven = ""
     /**
+     * 从doc目录同步当前的build.gradle文件
+     */
+    var syncBuild = true
+    /**
      * 添加依赖地址，如果为空，默认使用groupMaven
      */
-    var dependMaven: List<String> = arrayListOf()
+    var dependMaven: MutableList<String> = arrayListOf()
 
     fun checkVail() {
+        if (dependMaven.isEmpty()) dependMaven.add(groupMaven)
         if (docGitUrl.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "docGitUrl can not be null!!!")
         if (groupName.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "groupName can not be null!!!")
         if (groupMaven.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "groupMaven can not be null!!!")

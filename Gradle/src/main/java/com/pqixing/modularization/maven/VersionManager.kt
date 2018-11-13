@@ -131,6 +131,7 @@ object VersionManager {
      * 从网络获取最新的版本号信息
      */
     fun indexVersionFromNet(outFile: File, versions: HashMap<String, String>) {
+
         val plugin = BasePlugin.getPlugin(ManagerPlugin::class.java)!!
         val extends = plugin.getExtends(ManagerExtends::class.java)
         val maven = extends.groupMaven
@@ -138,11 +139,13 @@ object VersionManager {
         parseNetVersions("$maven/$groupUrl", versions, extends.groupName)
 
         versions[Keys.UPDATE_TIME] = FileManager.docProject.lastLog.commitTime
-        PropertiesUtils.writeProperties(outFile, versions.toProperties())
-        Tools.println("indexVersionFromNet update from net save to -> $outFile")
         //上传版本好到服务端
         val git = Git.open(FileManager.docRoot)
         git.pull().setCredentialsProvider(FileManager.docCredentials).setProgressMonitor(PercentProgress()).call()
+
+        PropertiesUtils.writeProperties(outFile, versions.toProperties())
+        Tools.println("indexVersionFromNet update from net save to -> $outFile")
+
         git.add().addFilepattern(".").call()
         git.commit().setAllowEmpty(true).setMessage("indexVersionFromNet ${Date().toLocaleString()}").call()
         git.push().setCredentialsProvider(FileManager.docCredentials).setForce(true).setProgressMonitor(PercentProgress()).call()

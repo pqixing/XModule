@@ -120,6 +120,7 @@ public class ImportProject {
                 if (!key.isEmpty()) resultInclude.remove(key)
             }
         }
+        println("resultInclude -> $resultInclude focusIncludes->$focusIncludes projectPaths -> $projectPaths")
         StringBuilder sb = new StringBuilder("// $codeRootDir.absolutePath \n")
         def dir = codeRootDir.absolutePath
         resultInclude.each { key ->
