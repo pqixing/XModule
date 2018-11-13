@@ -15,9 +15,9 @@ buildscript {
 allprojects {
     version = "0.0.3"
     repositories {
-//        maven {
-//            url "https://dl.bintray.com/pqixing86/maven"
-//        }
+        maven {
+            url uri("/home/pqixing/.repo")
+        }
         jcenter()
         google()
         maven {

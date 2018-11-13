@@ -15,7 +15,7 @@ import org.gradle.api.Project
 
 class ManagerPlugin : BasePlugin() {
     override fun initBeforeApply() {
-
+        project.extensions.create("manager", ManagerExtends::class.java, project)
     }
 
     override val applyFiles: List<String> = listOf("com.module.manager", "com.module.git")
@@ -28,7 +28,6 @@ class ManagerPlugin : BasePlugin() {
     var error: String = ""
     override fun apply(project: Project) {
         super.apply(project)
-        val extends = project.extensions.create("manager", ManagerExtends::class.java, project)
 
         error = FileManager.checkFileExist(this)
 
@@ -38,6 +37,7 @@ class ManagerPlugin : BasePlugin() {
         }
 
         project.afterEvaluate {
+            val extends = getExtends(ManagerExtends::class.java)
             extHelper.setExtValue(project, "groupName", extends.groupName)
             FileManager.checkDocument(this)
             if (error.isNotEmpty()) {
@@ -52,6 +52,8 @@ class ManagerPlugin : BasePlugin() {
                 Tools.println("buildFinished -> -----")
                 //构建结束时，重置projectInfo
                 pi = null
+                FileManager.cacheRoot = null
+                FileManager.codeRootDir = null
             }
         })
     }
