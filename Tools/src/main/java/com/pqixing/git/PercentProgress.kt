@@ -13,7 +13,7 @@ class PercentProgress @JvmOverloads constructor(private val logger: ILog? = Tool
     private var total: Int = 0
 
     private var lastLogTime = 0L;
-    private val d = DecimalFormat("##0.00")
+    private var startTime = 0L
     //百分比间隔
 
     override fun start(totalTasks: Int) {
@@ -24,7 +24,8 @@ class PercentProgress @JvmOverloads constructor(private val logger: ILog? = Tool
         this.total = totalWork
         last = 0
         lastLogTime = 0L
-        logger?.println("beginTask -> $title : $totalWork")
+        startTime = System.currentTimeMillis()
+        logger?.println("   $title -> total : $totalWork")
     }
 
     override fun update(completed: Int) {
@@ -37,7 +38,7 @@ class PercentProgress @JvmOverloads constructor(private val logger: ILog? = Tool
     }
 
     override fun endTask() {
-        logger?.println("endTask   -> $title : $total")
+        logger?.println("   $title  ->  end spend :${System.currentTimeMillis() - startTime}")
     }
 
     override fun isCancelled(): Boolean {
