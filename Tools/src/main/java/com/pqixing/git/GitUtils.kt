@@ -6,6 +6,7 @@ import com.pqixing.interfaces.ILog
 import com.pqixing.tools.CheckUtils.isGitDir
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.*
+import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
 
@@ -84,9 +85,10 @@ fun <T> GitCommand<T>.init(provider: UsernamePasswordCredentialsProvider? = null
 }
 
 fun <T> GitCommand<T>.execute(): T? = try {
-    Tools.println("Git task ->  ${javaClass.simpleName} : ${repository?.branch} : $repository ")
+    Tools.println("Git task ->  ${javaClass.simpleName}")
     val call = call()
-    Tools.println("Git task end ->  ${javaClass.simpleName} : ${repository?.branch} : $repository ")
+    val repo: Repository = (call as? Git)?.repository ?: repository
+    Tools.println("Git task end -> ${javaClass.simpleName} : ${repo?.branch} : $repo \n $call")
     call
 } catch (e: Exception) {
     ///home/pqixing/Desktop/gradleProject/Root/Document/.git

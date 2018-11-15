@@ -44,6 +44,7 @@ object ProjectManager {
         }
         if (git != null) {
             checkBranch(git, info)
+            if (info.updateCode) git.pull().init().execute()
             gitProject.loadGitInfo(git)
             git.close()
         }

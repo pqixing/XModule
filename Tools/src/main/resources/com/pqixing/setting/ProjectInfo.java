@@ -30,6 +30,11 @@ public class ProjectInfo {
     public boolean focusCheckOut = false;
 
     /**
+     * 是否更新代码
+     */
+    public boolean updateCode = false;
+
+    /**
      * 是否拦截依赖缺少的异常 , 默认true
      * true: 当有依赖模块缺少时 ， 抛出异常 ， 方便查找问题
      * false: 不拦截错误 ， 方便代码导入AS ， 但是缺少依赖构建过程出现的类缺失异常问题很难定位
