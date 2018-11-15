@@ -2,17 +2,20 @@ package com.pqixing.modularization.maven
 
 import com.pqixing.Tools
 import com.pqixing.git.PercentProgress
+import com.pqixing.help.MavenMetadata
+import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.help.MavenMetadata
-import com.pqixing.help.XmlHelper
 import com.pqixing.tools.PropertiesUtils
+import com.pqixing.tools.UrlUtils
+import com.sun.jndi.toolkit.url.Uri
 import org.eclipse.jgit.api.Git
 import java.io.File
+import java.net.URI
 import java.net.URL
 import java.util.*
 
@@ -108,9 +111,9 @@ object VersionManager {
                     //如果是
                     if (!message.startsWith(Keys.PREFIX_TO_MAVEN)) return@forEach
 
-                    val list = message.split(":")
-                    if (list.size < 3) return@forEach
-                    curVersions[list[1]] = list[2]
+                    val params = UrlUtils.getParams(message)
+                    if (params == null || params.size < 2) return@forEach
+                    curVersions[params[Keys.LOG_MODULE]!!] = params[Keys.LOG_VERSION]!!
                 }
             }
             properties[Keys.UPDATE_TIME] = lastLog.commitTime
