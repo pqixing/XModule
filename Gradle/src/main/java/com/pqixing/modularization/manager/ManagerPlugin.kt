@@ -60,13 +60,13 @@ class ManagerPlugin : BasePlugin() {
             }
         }
 
-//        project.gradle.addBuildListener(object : BuildAdapter() {
-//            override fun buildFinished(result: BuildResult) {
-//                //构建结束时，重置projectInfo
-//                pi = null
-//                FileManager.cacheRoot = null
-//                FileManager.codeRootDir = null
-//            }
-//        })
+        project.gradle.addBuildListener(object : BuildAdapter() {
+            override fun buildFinished(result: BuildResult) {
+                //构建结束时，重置projectInfo
+                pi = null
+                FileManager.cacheRoot = null
+                FileManager.codeRootDir = null
+            }
+        })
     }
 }
