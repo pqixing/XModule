@@ -88,7 +88,7 @@ fun <T> GitCommand<T>.execute(): T? = try {
     Tools.println("Git task ->  ${javaClass.simpleName}")
     val call = call()
     val repo: Repository? = (call as? Git)?.repository ?: repository
-    Tools.println("Git task end -> ${javaClass.simpleName} : ${repo?.branch} : $repo \n $call")
+    Tools.println("Git task end -> ${javaClass.simpleName} : ${repo?.branch} : $repo \n      result -> $call")
     call
 } catch (e: Exception) {
     ///home/pqixing/Desktop/gradleProject/Root/Document/.git
