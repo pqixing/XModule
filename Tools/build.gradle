@@ -1,5 +1,9 @@
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
+ext.runT ={String name ,Closure c =null ->
+    println("name -> $name")
+    c?.call()
+}
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -8,7 +12,13 @@ dependencies {
     implementation 'org.eclipse.jgit:org.eclipse.jgit:+'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
     implementation 'com.github.vidstige:jadb:+'
-    implementation "com.alibaba:fastjson:1.2.44"
+    compile "com.alibaba:fastjson:1.2.44"
+    runT ("哈哈哈"){
+        println("--------")
+    }
+}
+configurations {
+    runT it.name
 }
 
 sourceCompatibility = "8"

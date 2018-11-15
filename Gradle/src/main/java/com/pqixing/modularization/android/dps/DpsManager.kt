@@ -6,7 +6,8 @@ class DpsManager(val plugin: AndroidPlugin) {
 
 
     //处理依赖
-    fun resolveDps() {
+    fun resolveDps(dpsExt: DpsExtends) {
 
     }
+
 }

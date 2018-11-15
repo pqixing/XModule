@@ -34,6 +34,6 @@ abstract class AndroidPlugin : BasePlugin() {
         extHelper.setExtMethod(project, "endConfig", null)
 
         //在工程处理后，处理组件依赖
-        project.afterEvaluate { DpsManager(this@AndroidPlugin).resolveDps() }
+        project.afterEvaluate { DpsManager(this@AndroidPlugin).resolveDps(dpsExt) }
     }
 }

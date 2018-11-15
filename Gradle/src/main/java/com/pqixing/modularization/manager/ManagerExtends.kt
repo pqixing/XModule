@@ -30,6 +30,10 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
      * 添加依赖地址，如果为空，默认使用groupMaven
      */
     var dependMaven: MutableList<String> = arrayListOf()
+    /**
+     * 依赖匹配传递，如果当前分支无对应依赖包，则按照
+     */
+    var matchingFallbacks: MutableList<String> = arrayListOf("release", "master")
 
     fun checkVail() {
         if (dependMaven.isEmpty()) dependMaven.add(groupMaven)
