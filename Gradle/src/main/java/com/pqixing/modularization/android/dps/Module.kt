@@ -13,7 +13,8 @@ class Module(project: Project) : BaseExtension(project) {
     /**
      * 当前模块是否使用了本地依赖
      */
-    var onLocalCompile: Boolean = false
+    var onLocalCompile = false
+    var focusVersion = false
     var moduleName: String = ""
 
     var branch = ""
