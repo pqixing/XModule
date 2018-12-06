@@ -141,6 +141,7 @@ object VersionManager {
      * 把每个版本的最后版本号添加
      */
     private fun addVersion(curVersions: HashMap<String, String>, groupId: String, artifactId: String, version: List<String>) {
+        val addV = StringBuffer()
         //倒叙查询
         for (i in version.size - 1 downTo 0) {
             val v = version[i]
@@ -151,9 +152,10 @@ object VersionManager {
             val latKey = curVersions[key]?.toInt() ?: 0
             if (lv.toInt() > latKey) {
                 curVersions[key] = lv
-                Tools.println("addVersion -> $groupId -> $artifactId -> $v")
+                addV.append(v).append(",")
             }
         }
+        Tools.println("addVersion -> $groupId -> $artifactId -> $addV")
     }
 
     fun indexVersionFromNet() {
