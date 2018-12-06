@@ -17,9 +17,6 @@ dependencies {
         println("--------")
     }
 }
-configurations {
-    runT it.name
-}
 
 sourceCompatibility = "8"
 targetCompatibility = "8"

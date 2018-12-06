@@ -6,6 +6,7 @@ public class Keys {
     public static final String UPDATE_VERSION = "update_version";
     public static final String PREFIX_TO_MAVEN = "build://aar";
     public static final String LOG_MODULE = "module";
+    public static final String LOG_BRANCH = "branch";
     public static final String LOG_VERSION = "version";
     /**
      * 版本号过滤

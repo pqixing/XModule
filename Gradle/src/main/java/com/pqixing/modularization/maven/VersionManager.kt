@@ -12,14 +12,16 @@ import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.tools.PropertiesUtils
 import com.pqixing.tools.UrlUtils
-import com.sun.jndi.toolkit.url.Uri
 import org.eclipse.jgit.api.Git
 import java.io.File
-import java.net.URI
 import java.net.URL
 import java.util.*
 
 object VersionManager {
+
+
+    private val matchingFallbacks = arrayListOf<String>()
+    private var groupName = ""
 
     /**
      * 当前最新的版本信息
@@ -36,34 +38,45 @@ object VersionManager {
      */
     private val targetVersion = HashMap<String, String>()
 
+
     /**
      * 按照顺序，查取模块的版本号信息
      * 指定版本 > 分支版本 > 当前版本
      */
-    fun getVersion(branch: String, module: String): String {
-        checkInit(branch)
-        val key = (if (branch.isEmpty()) "" else ".$branch") + ".$module"
-        return targetVersion[key] ?: branchVersion[branch]!![key] ?: curVersions[key]
-        ?: "+"
+    fun getVersion(branch: String, module: String, version: String): String {
+        for (i in -1 until matchingFallbacks.size) {
+            val b = if (i < 0) branch else matchingFallbacks[i]
+            val branchVersion = findBranchVersion(b)
+            val key = "$groupName.$b.$module.$version"
+            val v = branchVersion[key] ?: continue
+            return "$version.$v"
+        }
+        return "$version.+"
     }
 
     //
-    private fun checkInit(branch: String) {
+    @Synchronized
+    private fun findBranchVersion(branch: String): HashMap<String, String> {
         if (curVersions.isEmpty()) readCurVersions()
-        if (branchVersion[branch] == null) readBranchVersion(branch)
         if (targetVersion.isEmpty()) readTargetVersions()
+        return branchVersion[branch] ?: readBranchVersion(branch)
     }
 
     /**
      * 读取某个分支指定的配置文件
      */
-    private fun readBranchVersion(branch: String) {
+    private fun readBranchVersion(branch: String): HashMap<String, String> {
         val branchMap = HashMap<String, String>()
         branchVersion[branch] = branchMap
+        //将基础版本放入
+        branchMap.putAll(curVersions)
         val branchFile = File(FileManager.docRoot, "versions/version_$branch.properties")
         PropertiesUtils.readProperties(branchFile).forEach {
             branchMap[it.key.toString()] = it.value.toString()
         }
+        //最后放入指定版本
+        branchMap.putAll(targetVersion)
+        return branchMap
     }
 
     /**
@@ -78,50 +91,65 @@ object VersionManager {
     }
 
     private fun readCurVersions() {
+        BasePlugin.getPlugin(ManagerPlugin::class.java)?.getExtends(ManagerExtends::class.java)?.apply {
+            this@VersionManager.matchingFallbacks.addAll(matchingFallbacks)
+            this@VersionManager.groupName = groupName
+        }
         curVersions[FileNames.MODULARIZATION] = FileNames.MODULARIZATION
+
         val baseVersion = File(FileManager.infoDir, "versions/version.properties")
-        if (baseVersion.exists()) PropertiesUtils.readProperties(baseVersion).forEach {
+        val basePros = PropertiesUtils.readProperties(baseVersion)
+        if (basePros.isNotEmpty()) PropertiesUtils.readProperties(baseVersion).forEach {
             curVersions[it.key.toString()] = it.value.toString()
         } else {
             //从网络处理花版本号
             indexVersionFromNet(baseVersion, curVersions)
         }
-        val cacheVersion = File(FileManager.cacheRoot, "versions/${curVersions[Keys.UPDATE_TIME]}.properties")
-        indexCacheVersion(cacheVersion, curVersions)
+        val updateTime = curVersions[Keys.UPDATE_TIME]?.toInt()
+                ?: (System.currentTimeMillis() / 1000).toInt()
+        indexCacheVersion(updateTime, curVersions)
     }
 
     /**
      * 从本地加载缓存的版本号信息
      */
-    private fun indexCacheVersion(cacheVersion: File, curVersions: HashMap<String, String>) {
-        val properties = PropertiesUtils.readProperties(cacheVersion)
-        val lastUpdate = (properties[Keys.UPDATE_TIME] ?: curVersions[Keys.UPDATE_TIME]
-        ?: "0").toString()
+    private fun indexCacheVersion(lastUpdate: Int, curVersions: HashMap<String, String>) {
         val lastLog = FileManager.docProject.lastLog
-
         //cacheMap中的最后更新时间与git版本号的最后更新时间不一致，尝试更新
         if (lastLog.commitTime != lastUpdate) {
             /**从日志中读取版本号**/
             val git = Git.open(FileManager.docRoot)
-            val lastTime = lastUpdate.toInt()
             run out@{
                 git.log().call().forEach { rev ->
-                    if (rev.commitTime < lastTime) return@out
+                    if (rev.commitTime < lastUpdate) return@out
                     val message = rev.fullMessage.trim()
                     //如果是
                     if (!message.startsWith(Keys.PREFIX_TO_MAVEN)) return@forEach
 
                     val params = UrlUtils.getParams(message)
-                    if (params == null || params.size < 2) return@forEach
-                    curVersions[params[Keys.LOG_MODULE]!!] = params[Keys.LOG_VERSION]!!
+                    if (params == null || params.size < 3) return@forEach
+                    addVersion(curVersions, params[Keys.LOG_BRANCH]!!, params[Keys.LOG_MODULE]!!, listOf(params[Keys.LOG_VERSION]!!))
                 }
             }
-            properties[Keys.UPDATE_TIME] = lastLog.commitTime
-            PropertiesUtils.writeProperties(cacheVersion, properties)
         }
-        //加载本地缓存版本号到内存
-        properties.forEach {
-            curVersions[it.key.toString()] = it.value.toString()
+    }
+
+    /**
+     * 把每个版本的最后版本号添加
+     */
+    private fun addVersion(curVersions: HashMap<String, String>, groupId: String, artifactId: String, version: List<String>) {
+        //倒叙查询
+        for (i in version.size - 1 downTo 0) {
+            val v = version[i]
+            val l = v.lastIndexOf('.')
+            val bv = v.substring(0, l)
+            val lv = v.substring(l + 1)
+            val key = "$groupId.$artifactId.$bv"
+            val latKey = curVersions[key]?.toInt() ?: 0
+            if (lv.toInt() > latKey) {
+                curVersions[key] = lv
+                Tools.println("addVersion -> $groupId -> $artifactId -> $v")
+            }
         }
     }
 
@@ -142,7 +170,7 @@ object VersionManager {
         Tools.println("indexVersionFromNet  start ->")
         parseNetVersions("$maven/$groupUrl", versions, extends.groupName)
         Tools.println("indexVersionFromNet  end ->")
-        versions[Keys.UPDATE_TIME] = FileManager.docProject.lastLog.commitTime
+        versions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
         //上传版本好到服务端
         val git = Git.open(FileManager.docRoot)
         git.pull().setCredentialsProvider(FileManager.docCredentials).setProgressMonitor(PercentProgress()).call()
@@ -171,8 +199,7 @@ object VersionManager {
                     if (url.endsWith(FileNames.MAVEN_METADATA)) {
                         val meta = MavenMetadata(baseUrl)
                         XmlHelper.parseMetadata(URL(url).readText(), meta)
-                        versions["${meta.groupId.replace(groupName, "")}.${meta.artifactId}"] = meta.release
-                        Tools.println("${meta.groupId} -> ${meta.artifactId}")
+                        addVersion(versions, meta.groupId.trim(), meta.artifactId.trim(), meta.versions)
                         return@outer
                     } else {
                         parseNetVersions(url, versions, groupName)

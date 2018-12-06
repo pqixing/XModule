@@ -49,7 +49,7 @@ class GitProject {
         if (rootName != name) command.addPath(name)
         command.call().forEach { rev ->
             lastLog.author = rev.authorIdent.name
-            lastLog.commitTime = rev.commitTime.toString()
+            lastLog.commitTime = rev.commitTime
             lastLog.message = rev.fullMessage
             lastLog.hash = rev.name
         }
@@ -57,4 +57,4 @@ class GitProject {
 }
 
 
-data class GitLog(var hash: String = "", var author: String = "", var message: String = "", var commitTime: String = "")
+data class GitLog(var hash: String = "", var author: String = "", var message: String = "", var commitTime: Int = 0)
