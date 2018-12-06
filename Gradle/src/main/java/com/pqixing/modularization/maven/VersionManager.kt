@@ -2,6 +2,8 @@ package com.pqixing.modularization.maven
 
 import com.pqixing.Tools
 import com.pqixing.git.PercentProgress
+import com.pqixing.git.execute
+import com.pqixing.git.init
 import com.pqixing.help.MavenMetadata
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
@@ -13,6 +15,7 @@ import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.tools.PropertiesUtils
 import com.pqixing.tools.UrlUtils
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.PushCommand
 import java.io.File
 import java.net.URL
 import java.util.*
@@ -20,7 +23,7 @@ import java.util.*
 object VersionManager {
 
 
-    private val matchingFallbacks = arrayListOf<String>()
+    private val matchingFallbacks = mutableListOf<String>()
     private var groupName = ""
 
     /**
@@ -178,9 +181,9 @@ object VersionManager {
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
         Tools.println("indexVersionFromNet update from net save to -> $outFile")
 
-        git.add().addFilepattern(".").call()
-        git.commit().setAllowEmpty(true).setMessage("indexVersionFromNet ${Date().toLocaleString()}").call()
-        git.push().setCredentialsProvider(FileManager.docCredentials).setForce(true).setProgressMonitor(PercentProgress()).call()
+        git.add().addFilepattern(FileNames.PROJECTINFO).init().execute()
+        git.commit().setAllowEmpty(true).setMessage("indexVersionFromNet ${Date().toLocaleString()}").init().execute()
+        (git.push().init() as PushCommand).setCredentialsProvider(FileManager.docCredentials).setForce(true).execute()
         git.close()
     }
 
