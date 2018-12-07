@@ -23,7 +23,7 @@ object FileManager {
     /**
      * 本地doc工程的信息
      */
-    var docProject = GitProject()
+    lateinit var docProject: Components
     var codeRootDir: File? = null
         get() {
             if (field == null) {
@@ -148,6 +148,7 @@ object FileManager {
         docProject.name = FileNames.DOCUMENT
         docProject.rootName = FileNames.DOCUMENT
         docProject.introduce = "LogManager"
+        docProject = Components(FileNames.DOCUMENT, manager.docGitUrl, "LogManager", FileNames.DOCUMENT, Components.TYPE_DOCUMENT)
         if (git == null) return@with
         docProject.loadGitInfo(git)
         //如果有新增文件，提交

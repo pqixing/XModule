@@ -22,12 +22,12 @@
 //
 //    //对应all*.exclude
 //    var allExcludes: HashMap<String, Map<String, String>>
-//    var modules: HashSet<Module>
+//    var dpComponents: HashSet<DpComponents>
 //    //传递下来的master分支的exclude
 //    var masterExclude: MutableSet<String> = HashSet()
-//    var dependentLose: Set<Module> = HashSet()
+//    var dependentLose: Set<DpComponents> = HashSet()
 //    //本地依赖的模块名称,可传递给主工程使用
-//    var localDependency: MutableSet<Module>
+//    var localDependency: MutableSet<DpComponents>
 //    var localImportModules: Set<String>
 //
 //    var autoImpl = true
@@ -48,7 +48,7 @@
 //
 //            Print.ln("onDp out -> \$project.name")
 //            val sb = StringBuilder("dependencies { \n")
-//            modules.each
+//            dpComponents.each
 //            run {
 //                if (model.moduleName === project.name) return
 //                val compile: Boolean
@@ -123,12 +123,12 @@
 //    }
 //
 //    init {
-//        modules = HashSet()
+//        dpComponents = HashSet()
 //        allExcludes = HashMap()
 //    }
 //
-//    fun module(moduleName: String, scope: String, closure: Closure<*>?): Module {
-//        val inner = Module()
+//    fun module(moduleName: String, scope: String, closure: Closure<*>?): DpComponents {
+//        val inner = DpComponents()
 //        inner.moduleName = moduleName
 //        inner.scope = scope
 //        if (closure != null) {
@@ -140,12 +140,12 @@
 //        return inner
 //    }
 //
-//    fun add(moduleName: String, closure: Closure<*>): Module {
-//        return module(moduleName, Module.SCOP_IMPL, closure)
+//    fun add(moduleName: String, closure: Closure<*>): DpComponents {
+//        return module(moduleName, DpComponents.SCOP_IMPL, closure)
 //    }
 //
-//    fun addImpl(moduleName: String, closure: Closure<*>): Module {
-//        return module(moduleName, Module.SCOP_API, closure)
+//    fun addImpl(moduleName: String, closure: Closure<*>): DpComponents {
+//        return module(moduleName, DpComponents.SCOP_API, closure)
 //    }
 //
 //    fun init() {
@@ -188,7 +188,7 @@
 //     * @param module
 //     * @return
 //     */
-//    fun onLocalCompile(sb: StringBuilder, module: Module): Boolean {
+//    fun onLocalCompile(sb: StringBuilder, module: DpComponents): Boolean {
 //        //如果该依赖没有本地导入，不进行本地依赖
 //        if (!localImportModules.contains(module.moduleName)) return false
 //        sb.append(" \$module.scope ( project(':\$module.moduleName')) {")
@@ -204,7 +204,7 @@
 //     * @param module
 //     * @return
 //     */
-//    fun onMavenCompile(sb: StringBuilder, module: Module): Boolean {
+//    fun onMavenCompile(sb: StringBuilder, module: DpComponents): Boolean {
 //        var lastVersion = ""
 //        if (module.focusMaster) {
 //            lastVersion = getLastVersion(module.groupId, module.moduleName)
@@ -242,7 +242,7 @@
 //     * 抛出依赖缺失异常
 //     * @param module
 //     */
-//    fun throwCompileLose(module: Module) {
+//    fun throwCompileLose(module: DpComponents) {
 //        if (GlobalConfig.abortDependentLose) throw RuntimeException("Lose dependent \$module.artifactId , please chack config!!!!!!!")
 //        dependentLose += module
 //    }

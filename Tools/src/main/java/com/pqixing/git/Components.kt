@@ -4,9 +4,10 @@ import org.eclipse.jgit.api.Git
 
 /**
  * Created by pqixing on 17-12-7.
+ * 工程组件
  */
 
-class GitProject {
+class Components {
     /**
      * git工程名称,指目录名称
      */
@@ -30,21 +31,22 @@ class GitProject {
      * 日志相关信息
      */
     var lastLog: GitLog = GitLog()
+    /**
+     * 该组件类型
+     */
+    var type: String = TYPE_LIBRARY
 
-    var branch: String = "master"
-
-    constructor(name: String, gitUrl: String, introduce: String, rootName: String) {
+    constructor(name: String, gitUrl: String, introduce: String, rootName: String, type: String) {
         this.name = name
         this.gitUrl = gitUrl
         this.introduce = introduce
         this.rootName = rootName
+        this.type = type
     }
-
-    constructor()
 
     fun loadGitInfo(git: Git) {
         val repo = git.repository
-        branch = repo.branch
+        lastLog.branch = repo.branch
         val command = git.log().setMaxCount(1)
         if (rootName != name) command.addPath(name)
         command.call().forEach { rev ->
@@ -54,7 +56,14 @@ class GitProject {
             lastLog.hash = rev.name
         }
     }
+
+    companion object {
+        val TYPE_LIBRARY = "library"
+        val TYPE_APPLICATION = "application"
+        val TYPE_BUSINESS = "business"
+        val TYPE_DOCUMENT = "document"
+    }
 }
 
 
-data class GitLog(var hash: String = "", var author: String = "", var message: String = "", var commitTime: Int = 0)
+data class GitLog(var hash: String = "", var author: String = "", var message: String = "", var commitTime: Int = 0, var branch: String = "master")

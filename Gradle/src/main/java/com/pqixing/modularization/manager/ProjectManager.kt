@@ -1,11 +1,8 @@
 package com.pqixing.modularization.manager
 
 import com.pqixing.Tools
-import com.pqixing.git.GitUtils
 import com.pqixing.ProjectInfo
-import com.pqixing.git.GitProject
-import com.pqixing.git.execute
-import com.pqixing.git.init
+import com.pqixing.git.*
 import com.pqixing.help.XmlHelper
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.Git
@@ -14,7 +11,7 @@ import org.gradle.api.Project
 import java.io.File
 
 object ProjectManager {
-    val allProjects = HashMap<String, GitProject>()
+    val allProjects = HashMap<String, Components>()
     var hasInit = false
     fun checkVail() {
         if (hasInit) return

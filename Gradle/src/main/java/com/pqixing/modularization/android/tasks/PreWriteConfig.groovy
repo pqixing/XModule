@@ -36,7 +36,7 @@
 //        def dependent = wrapper.getExtends(Dependencies)
 //
 //        StringBuilder dpNames = new StringBuilder()
-//        dependent.modules.each { m ->
+//        dependent.dpComponents.each { m ->
 //            dpNames.append("$Keys.PREFIX_PKG.${m.groupId}.${TextUtils.numOrLetter(m.moduleName).toLowerCase()}.${TextUtils.className(m.moduleName)}Config,")
 //        }
 //        if (dpNames.length() > 1) dpNames.deleteCharAt(dpNames.length() - 1)
@@ -44,7 +44,7 @@
 //
 //        addConfig("NAME": buildConfig.projectName, "DP_CONFIGS_NAMES": dpNames.toString())
 //        addConfig("LAUNCH_CONFIG": launchClass)
-////        addConfig("DEPENDENCIES": JSON.toJSONString(dependent.modules).replace("\"", ""))
+////        addConfig("DEPENDENCIES": JSON.toJSONString(dependent.dpComponents).replace("\"", ""))
 //
 //        addConfig(["BUILD_TIME": System.currentTimeMillis().toString(), "BUILD_TIME_STR": new Date().toLocaleString()])
 //        addConfig(["GIT_COMMIT_LOG": gitConfig.lastLog, "GIT_COMMIT_NUM": gitConfig.revisionNum])

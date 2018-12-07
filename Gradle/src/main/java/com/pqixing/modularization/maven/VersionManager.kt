@@ -202,8 +202,7 @@ object VersionManager {
                     val start = line.indexOf(prefix) + prefix.length
                     val url = line.substring(start, line.indexOf("\">", start))
                     if (url.endsWith(FileNames.MAVEN_METADATA)) {
-                        val meta = MavenMetadata(baseUrl)
-                        XmlHelper.parseMetadata(URL(url).readText(), meta)
+                        val meta = XmlHelper.parseMetadata(URL(url).readText(), baseUrl)
                         addVersion(versions, meta.groupId.trim(), meta.artifactId.trim(), meta.versions)
                         return@outer
                     } else {

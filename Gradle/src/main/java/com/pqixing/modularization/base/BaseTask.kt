@@ -13,7 +13,7 @@ import java.util.*
  * 同步文档的任务
  */
 
-abstract class BaseTask constructor() : DefaultTask() {
+abstract class BaseTask : DefaultTask() {
     var ideVersion: String? = null
 
     init {

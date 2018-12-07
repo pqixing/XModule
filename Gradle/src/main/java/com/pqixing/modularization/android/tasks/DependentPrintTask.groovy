@@ -2,7 +2,7 @@
 //
 //import com.pqixing.modularization.Keys
 //import com.pqixing.modularization.android.dps.Dependencies
-//import com.pqixing.modularization.android.dps.Module
+//import com.pqixing.modularization.android.dps.DpComponents
 //import com.pqixing.modularization.android.dps.SimpleModule
 //import com.pqixing.modularization.base.BaseTask
 //import com.pqixing.modularization.common.BuildConfig
@@ -50,7 +50,7 @@
 //        MavenUtils.saveMavenMaps(mavenType.name, wrapper.getExtends(GitConfig).branchName,"all", new File(outDir, Keys.FILE_VERSION_DP))
 //        StringBuilder sb = new StringBuilder()
 //        //输出批量上传脚本以及依赖排序
-//        wrapper.getExtends(Dependencies).modules.each {
+//        wrapper.getExtends(Dependencies).dpComponents.each {
 //            loadModuleDependent(it)
 //            writerInnerDp(sb, it, 0)
 //        }
@@ -61,7 +61,7 @@
 //    @Override
 //    void end() {
 //        HashMap<String, SimpleModule> container = new HashMap<>()
-//        wrapper.getExtends(Dependencies).modules.each { sortDependent(container, it, 1) }
+//        wrapper.getExtends(Dependencies).dpComponents.each { sortDependent(container, it, 1) }
 //
 //        StringBuilder sb = new StringBuilder("$project.name Sort Dp By Level:\n")
 //        StringBuilder names = new StringBuilder("\n\nYou can upload all library according to the following order \n")
@@ -89,7 +89,7 @@
 //     * @param module
 //     * @param level
 //     */
-//    void sortDependent(HashMap<String, SimpleModule> container, Module module, int level) {
+//    void sortDependent(HashMap<String, SimpleModule> container, DpComponents module, int level) {
 //
 //        def split = module.artifactId.split(Keys.BRANCH_TAG)
 //        String moduleName = split[0]
@@ -110,35 +110,35 @@
 //        simple.type = Math.max(type, simple.type)
 //        simple.level = Math.max(level, simple.level)
 //
-//        module.modules.each { sortDependent(container, it, level + 1) }
+//        module.dpComponents.each { sortDependent(container, it, level + 1) }
 //    }
 //    /**
 //     * 输出依赖文本
 //     * @param deep
 //     * @param module
 //     */
-//    void writerInnerDp(StringBuilder sb, Module module, int deep) {
+//    void writerInnerDp(StringBuilder sb, DpComponents module, int deep) {
 //        sb.append("${TextUtils.getTab(deep)}++ $module.artifactId : $module.updateTimeStr : ${module.gitLog.replace("\n", "")} \n")
 //        module.excludes.each { map ->
 //            sb.append("${TextUtils.getTab(deep + 1)}-- ${map.toString()} \n")
 //        }
-//        module.modules.each { writerInnerDp(sb, it, deep + 1) }
+//        module.dpComponents.each { writerInnerDp(sb, it, deep + 1) }
 //    }
 //
 //    /**
 //     * 加载该模块的依赖关系
 //     * @param module
 //     */
-//    void loadModuleDependent(Module module) {
+//    void loadModuleDependent(DpComponents module) {
 //        if (module.onLocalCompile) {//如果该模块是本地依赖，则获取对应的project，然后读取其中的依赖
 //            Project p = wrapper.findProject(module.moduleName)
 //            if (p != null) {
-//                module.modules.addAll(ProjectWrapper.with(p).getExtends(Dependencies)?.modules ?: [])
+//                module.dpComponents.addAll(ProjectWrapper.with(p).getExtends(Dependencies)?.dpComponents ?: [])
 //            }
 //        } else {
 //            def pomWrapper = PomWrapper.create(mavenType.maven_url, module.groupId, module.artifactId, module.version)
 //            if (!pomWrapper.empty) pomWrapper.loadModule(module)
 //        }
-//        module.modules.each { loadModuleDependent(it) }
+//        module.dpComponents.each { loadModuleDependent(it) }
 //    }
 //}
