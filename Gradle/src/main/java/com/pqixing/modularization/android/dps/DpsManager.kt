@@ -135,7 +135,7 @@ class DpsManager(val plugin: AndroidPlugin) {
     private fun addMavenCompile(scope: String, branch: String, module: String, version: String, includes: ArrayList<String>, excludes: HashSet<String>, dpExcludes: HashSet<Pair<String?, String?>>, config: String = ""): Boolean {
         val dpVersion = VersionManager.getVersion(branch, module, version)
         if (dpVersion.first.isEmpty()) return false
-        includes.add("$scope ('${managerExtends.groupName}.${dpVersion.first}:$module:${dpVersion.second}') \n { ${excludeStr(excludes = dpExcludes)} \n $config }")
+        includes.add("$scope ('${managerExtends.groupName}.${dpVersion.first}:$module:${dpVersion.second}') { ${excludeStr(excludes = dpExcludes)} \n $config }")
         addBranchExclude(dpVersion.first, module, excludes)
         excludes.addAll(getPom(dpVersion.first, module, dpVersion.second).allExclude)
         return true
@@ -180,12 +180,12 @@ class DpsManager(val plugin: AndroidPlugin) {
                 ?: return false
         dpc.localCompile = true
         if (dpComponents.type == Components.TYPE_LIBRARY_API) {
-            includes.add("${DpsExtends.SCOP_RUNTIME} ( project(':${dpc.moduleName}') \n { ${excludeStr(excludes = dpc.excludes)} }")
+            includes.add("${DpsExtends.SCOP_RUNTIME}  project(':${dpc.moduleName}') { ${excludeStr(excludes = dpc.excludes)} }")
             addBranchExclude(branch, dpc.moduleName, excludes)
             //添加对api的maven仓库的编译依赖，只有编译时期使用
             addMavenCompile(DpsExtends.SCOP_COMPILEONLY, dpc.branch, "${dpc.moduleName}_api", dpc.version, includes, excludes, HashSet(), "force = true")
         } else {
-            includes.add("${DpsExtends.SCOP_API} ( project(':${dpc.moduleName}') \n { ${excludeStr(excludes = dpc.excludes)} }")
+            includes.add("${DpsExtends.SCOP_API}  project(':${dpc.moduleName}')  { ${excludeStr(excludes = dpc.excludes)} }")
             addBranchExclude(branch, dpc.moduleName, excludes)
         }
         return true

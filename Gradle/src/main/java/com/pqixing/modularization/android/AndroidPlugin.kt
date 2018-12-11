@@ -3,6 +3,7 @@ package com.pqixing.modularization.android
 
 import com.pqixing.Tools
 import com.pqixing.git.Components
+import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.dps.DpsExtends
@@ -10,8 +11,11 @@ import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.tools.FileUtils
 import org.gradle.api.Project
 import org.gradle.api.Task
+import java.io.File
+import java.security.Key
 
 /**
  *  var forRun = false
@@ -90,7 +94,8 @@ open class AndroidPlugin : BasePlugin() {
         //在工程处理后，处理组件依赖
         extHelper.setExtMethod(project, "endConfig") {
             dpsManager = DpsManager(this@AndroidPlugin)
-            dpsManager.resolveDps(dpsExt)
+            val dependencies = dpsManager.resolveDps(dpsExt)
+            project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dependencies, true)))
         }
         extHelper.setExtValue(project, "ToMavenApi", if (APP_TYPE == Components.TYPE_LIBRARY_API && BUILD_TYPE == Components.TYPE_LIBRARY_API) "Y" else "N")
     }

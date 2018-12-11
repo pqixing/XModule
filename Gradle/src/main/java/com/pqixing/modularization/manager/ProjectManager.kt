@@ -26,7 +26,7 @@ object ProjectManager {
     fun checkProject(project: Project, info: ProjectInfo): Components? {
         checkVail()
         val buildDir = info.buildDir.toString().trim()
-        if (buildDir.isNotEmpty()) project.buildDir = File(project.buildDir, buildDir)
+        if (buildDir.isNotEmpty()) project.buildDir = File(project.buildDir, "B_$buildDir")
 
         //不在配置文件的git工程，不进行管理
         val gitProject = allComponents[project.name] ?: return null
