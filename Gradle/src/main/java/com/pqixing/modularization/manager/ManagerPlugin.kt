@@ -1,12 +1,16 @@
 package com.pqixing.modularization.manager
 
+import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.maven.IndexVersionTask
 import com.pqixing.tools.FileUtils
 import org.gradle.BuildAdapter
+import org.gradle.BuildListener
 import org.gradle.BuildResult
 import org.gradle.api.Project
+import org.gradle.api.initialization.Settings
+import org.gradle.api.invocation.Gradle
 import java.io.File
 
 /**
@@ -37,6 +41,27 @@ class ManagerPlugin : BasePlugin() {
             //在每个工程开始同步之前，检查状态，下载，切换分支等等
             ProjectManager.checkProject(it, projectInfo!!)
         }
+        project.gradle.addBuildListener(object :BuildListener{
+            override fun settingsEvaluated(settings: Settings) {
+                Tools.println("settingsEvaluated ----------")
+            }
+
+            override fun buildFinished(result: BuildResult) {
+                Tools.println("buildFinished ----------")
+            }
+
+            override fun projectsLoaded(gradle: Gradle) {
+                Tools.println("projectsLoaded ----------")
+            }
+
+            override fun buildStarted(gradle: Gradle) {
+                Tools.println("buildStarted ----------")
+            }
+
+            override fun projectsEvaluated(gradle: Gradle) {
+                Tools.println("projectsEvaluated ----------")
+            }
+        })
         project.afterEvaluate {
             val extends = getExtends(ManagerExtends::class.java)
             extHelper.setExtValue(project, "groupName", extends.groupName)

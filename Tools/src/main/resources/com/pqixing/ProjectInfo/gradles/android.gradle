@@ -1,4 +1,4 @@
-apply from:"$gradles/ktolin.gradle"
+apply from: "$gradles/ktolin.gradle"
 android {
     buildToolsVersion '28.0.2'
     compileSdkVersion 26
@@ -19,7 +19,7 @@ android {
     }
     buildTypes {
         //生产测试环境
-        outTest {
+        preTest {
             initWith release
             matchingFallbacks = ['release']
         }

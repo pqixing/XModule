@@ -12,6 +12,7 @@ import java.io.File
 
 object ProjectManager {
     val allComponents = HashMap<String, Components>()
+    val gitForProject = HashMap<String, Git>()
     var hasInit = false
     fun findComponent(name: String) = allComponents[name]
     fun checkVail() {
@@ -34,19 +35,29 @@ object ProjectManager {
         val projectDir = project.projectDir
 
         val rootDir = File(FileManager.codeRootDir, gitProject.rootName)
+        var git = gitForProject[rootDir.absolutePath]
+        if (git == null) {
+            git = initGit(projectDir, rootDir, gitProject.gitUrl, info)
+        }
 
+        if (git != null) {
+            gitForProject[rootDir.absolutePath] = git
+            gitProject.loadGitInfo(git)
+        }
+        return gitProject
+    }
+
+    private fun initGit(projectDir: File, rootDir: File, gitUrl: String, info: ProjectInfo): Git? {
         val git = if (!projectDir.exists() || !checkRootDir(rootDir)) {//下载工程
-            GitUtils.clone(gitProject.gitUrl, rootDir, info.curBranch)
+            GitUtils.clone(gitUrl, rootDir, info.curBranch)
         } else {
             Git.open(rootDir)
         }
         if (git != null) {
             checkBranch(git, info)
             if (info.updateCode) git.pull().init().execute()
-            gitProject.loadGitInfo(git)
-            git.close()
         }
-        return gitProject
+        return git
     }
 
     /**
