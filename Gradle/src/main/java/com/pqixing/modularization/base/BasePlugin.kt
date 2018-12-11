@@ -128,7 +128,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         val defSets = mutableSetOf<String>("build"
                 , Keys.FOCUS_GRADLE
                 , FileNames.MODULARIZATION
-                , "*.iml")
+                , "*.iml", "import.kt")
         defSets += ignoreFields
         val old = FileUtils.readText(ignoreFile) ?: ""
         old.lines().forEach { line -> defSets.remove(line.trim()) }

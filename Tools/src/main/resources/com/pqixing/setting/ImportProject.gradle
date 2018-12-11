@@ -81,9 +81,9 @@ public class ImportProject {
     void readDps(String type, String dpsName) {
         String url = projectPaths.find { it.key == dpsName }?.value
         if (url == null || url.isEmpty()) return
-        def f = new File(codeRootDir, url)
+        def f = new File(codeRootDir, "$url/import.kt")
         if (!f.exists()) return
-        String[] map = line.replaceAll("//.*", "").split("=")
+        String[] map = f.text.trim().replaceAll("//.*", "").split("=")
         parseValue(type, map[map.length - 1])
     }
 
