@@ -4,6 +4,7 @@ import com.pqixing.ProjectInfo
 
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.invocation.Gradle
 
 import java.io.File
 
@@ -19,6 +20,9 @@ interface IPlugin {
     fun getTask(taskClass: Class<out Task>): Set<Task>
     fun linkTask(): List<Class<out Task>>
 
+    fun getGradle():Gradle
+
     fun <T> getExtends(tClass: Class<T>): T
+    fun callBeforeApplyMould()
 
 }

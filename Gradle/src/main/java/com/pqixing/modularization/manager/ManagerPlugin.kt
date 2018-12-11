@@ -1,6 +1,5 @@
 package com.pqixing.modularization.manager
 
-import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.maven.IndexVersionTask
@@ -16,7 +15,7 @@ import java.io.File
  */
 
 class ManagerPlugin : BasePlugin() {
-    override fun initBeforeApply() {
+    override fun callBeforeApplyMould() {
         project.extensions.create("manager", ManagerExtends::class.java, project)
     }
 
@@ -29,14 +28,14 @@ class ManagerPlugin : BasePlugin() {
 
     var error: String = ""
     override fun apply(project: Project) {
-        super.apply(project)
 
+        super.apply(project)
         error = FileManager.checkFileExist(this)
 
 
         project.gradle.beforeProject {
             //在每个工程开始同步之前，检查状态，下载，切换分支等等
-            ProjectManager.checkProject(it, this, projectInfo!!)
+            ProjectManager.checkProject(it, projectInfo!!)
         }
         project.afterEvaluate {
             val extends = getExtends(ManagerExtends::class.java)
@@ -66,6 +65,8 @@ class ManagerPlugin : BasePlugin() {
                 pi = null
                 FileManager.cacheRoot = null
                 FileManager.codeRootDir = null
+                ProjectManager.allComponents.clear()
+                ProjectManager.hasInit = false
             }
         })
     }

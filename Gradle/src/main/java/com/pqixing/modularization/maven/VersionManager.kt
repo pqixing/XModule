@@ -4,7 +4,6 @@ import com.pqixing.Tools
 import com.pqixing.git.PercentProgress
 import com.pqixing.git.execute
 import com.pqixing.git.init
-import com.pqixing.help.MavenMetadata
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
@@ -12,13 +11,16 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
+import com.pqixing.tools.CheckUtils.isVersionCode
 import com.pqixing.tools.PropertiesUtils
+import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.PushCommand
 import java.io.File
 import java.net.URL
 import java.util.*
+import kotlin.Comparator
 
 object VersionManager {
 
@@ -46,19 +48,58 @@ object VersionManager {
      * 按照顺序，查取模块的版本号信息
      * 指定版本 > 分支版本 > 当前版本
      */
-    fun getVersion(branch: String, module: String, version: String): String {
-        for (i in -1 until matchingFallbacks.size) {
+    fun getVersion(branch: String, module: String, version: String): Pair<String, String> {
+        val branchVersion = findBranchVersion(branch)
+        val start = matchingFallbacks.indexOf(branch)
+        for (i in start until matchingFallbacks.size) {
             val b = if (i < 0) branch else matchingFallbacks[i]
-            val branchVersion = findBranchVersion(b)
-            val key = "$groupName.$b.$module.$version"
-            val v = branchVersion[key] ?: continue
-            return "$version.$v"
+            val preKey = "$groupName.$b.$module."
+            //如果传入的是固定的版本号,则只查询各分支是否存在此版本号，不做自动升级版本号处理
+            return if (isVersionCode(version)) {
+                val baseVersion = version.substring(version.lastIndexOf('.'))
+                val v = branchVersion["$preKey$baseVersion"] ?: continue
+                val finalVersion = "$baseVersion.$v"
+                if (finalVersion != version) continue
+                Pair(b, finalVersion)
+            } else {
+                val baseVersion = if (isBaseVersion(version)) version else findBaseVersion(version, preKey, branchVersion)
+                //该分支找不到对应的版本号
+                if (!isBaseVersion(baseVersion)) continue
+                val v = branchVersion["$preKey$baseVersion"] ?: continue
+                Pair(b, "$baseVersion.$v")
+            }
         }
-        return "$version.+"
+        return Pair("", "+")
     }
 
-    //
-    @Synchronized
+    /**
+     * 检查改分支是否存在版本号
+     */
+    fun checkBranchVersion(branch: String, module: String): Boolean {
+        val branchVersion = findBranchVersion(branch)
+        val preKey = "$groupName.$branch.$module."
+        return isBaseVersion(findBaseVersion("+", preKey, branchVersion))
+    }
+
+    /**
+     * 是不是基础版本，etc 1.0
+     */
+    fun isBaseVersion(version: String?): Boolean = version?.matches(Regex("\\d*\\.\\d+")) ?: false
+
+    private fun findBaseVersion(v: String, preKey: String, versions: HashMap<String, String>): String {
+        var vs = versions.keys.filter { it.startsWith(preKey) }
+        if (vs.isEmpty()) return v
+        vs = vs.map { it.replace(preKey, "") }
+                .sortedWith(Comparator { p0, p1 -> TextUtils.compareVersion(p0, p1) })
+        if (v.isEmpty() || v == "+") return vs[0]
+        val v1 = "$v."
+        for (s in vs) {
+            if (s.startsWith(v1)) return v1
+        }
+        return v
+    }
+
+    fun isVersionCode(str: String?) = str?.matches(Regex("\\d*[.\\d]+")) ?: false
     private fun findBranchVersion(branch: String): HashMap<String, String> {
         if (curVersions.isEmpty()) readCurVersions()
         if (targetVersion.isEmpty()) readTargetVersions()
@@ -202,7 +243,7 @@ object VersionManager {
                     val start = line.indexOf(prefix) + prefix.length
                     val url = line.substring(start, line.indexOf("\">", start))
                     if (url.endsWith(FileNames.MAVEN_METADATA)) {
-                        val meta = XmlHelper.parseMetadata(URL(url).readText(), baseUrl)
+                        val meta = XmlHelper.parseMetadata(URL(url).readText())
                         addVersion(versions, meta.groupId.trim(), meta.artifactId.trim(), meta.versions)
                         return@outer
                     } else {

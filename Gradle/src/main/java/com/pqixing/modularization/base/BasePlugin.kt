@@ -18,9 +18,11 @@ import groovy.lang.GroovyClassLoader
 import org.gradle.BuildAdapter
 import org.gradle.BuildListener
 import org.gradle.BuildResult
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.invocation.Gradle
 import java.io.File
 import java.util.*
 
@@ -36,9 +38,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
 
     private val tasks = HashMap<String, Task>()
 
-    abstract fun initBeforeApply()
-
-    override var projectInfo: ProjectInfo? = null
+    override var projectInfo: ProjectInfo = ProjectInfo()
         get() {
             if (pi == null) {
                 var infoStr = jsonFromEnv
@@ -87,6 +87,8 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         initProject(project)
     }
 
+    override fun getGradle(): Gradle = p.gradle
+
     fun setPlugin() {
         pluginCache[javaClass.simpleName] = this
     }
@@ -96,11 +98,11 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         setPlugin()
         initTools(project)
         createIgnoreFile()
-        initBeforeApply()
 
         val file = File(FileManager.infoDir, "gradles")
         extHelper.setExtValue(project, "gradles", file.absolutePath)
 
+        callBeforeApplyMould()
         applyFiles.forEach {
             val f = File(file, "$it.gradle")
             if (f.exists() && f.isFile)
@@ -140,6 +142,8 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     private fun initTools(project: Project) {
         if (!Tools.init) {
             Tools.init(object : ILog {
+                override fun printError(l: String?) = throw  GradleException(l)
+
                 override fun println(l: String?) = System.out.println(l)
             }, project.rootDir.absolutePath, object : ICredential {
                 override fun getUserName() = projectInfo?.gitUserName ?: ""

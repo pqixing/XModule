@@ -11,25 +11,26 @@ import org.gradle.api.Project
 import java.io.File
 
 object ProjectManager {
-    val allProjects = HashMap<String, Components>()
+    val allComponents = HashMap<String, Components>()
     var hasInit = false
+    fun findComponent(name: String) = allComponents[name]
     fun checkVail() {
         if (hasInit) return
-        XmlHelper.parseProjectXml(FileManager.getProjectXml(), allProjects)
+        XmlHelper.parseProjectXml(FileManager.getProjectXml(), allComponents)
         hasInit = true
     }
 
     /**
      * 检查每个子工程的状态，分支信息等
      */
-    fun checkProject(project: Project, plugin: ManagerPlugin, info: ProjectInfo) {
+    fun checkProject(project: Project, info: ProjectInfo): Components? {
         checkVail()
         val buildDir = info.buildDir.toString().trim()
         if (buildDir.isNotEmpty()) project.buildDir = File(project.buildDir, buildDir)
 
         //不在配置文件的git工程，不进行管理
-        val gitProject = allProjects[project.name] ?: return
-
+        val gitProject = allComponents[project.name] ?: return null
+        if (gitProject.hasInit) return gitProject//已经初始化，不再重复初始化
         val projectDir = project.projectDir
 
         val rootDir = File(FileManager.codeRootDir, gitProject.rootName)
@@ -45,6 +46,7 @@ object ProjectManager {
             gitProject.loadGitInfo(git)
             git.close()
         }
+        return gitProject
     }
 
     /**

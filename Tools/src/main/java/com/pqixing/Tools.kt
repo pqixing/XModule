@@ -7,9 +7,9 @@ import com.pqixing.tools.FileUtils
 
 
 object Tools : ILog {
-    override fun println(l: String?) {
-        logger?.println(l)
-    }
+    override fun printError(l: String?) = logger?.printError(l)
+
+    override fun println(l: String?) = logger?.println(l)
 
     lateinit var rootDir: String
     lateinit var logger: ILog

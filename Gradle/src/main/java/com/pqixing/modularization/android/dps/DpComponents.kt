@@ -2,8 +2,8 @@ package com.pqixing.modularization.android.dps
 
 import com.pqixing.modularization.android.dps.DpsExtends.Companion.SCOP_RUNTIME
 import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.manager.ProjectManager
 import org.gradle.api.Project
-import java.util.*
 
 /**
  * Created by pqixing on 17-12-25.
@@ -11,18 +11,15 @@ import java.util.*
  */
 
 class DpComponents(project: Project) : BaseExtension(project) {
+    var type: String = ""
+        get() = ProjectManager.allComponents[moduleName]!!.type
 
-    /**
-     * 是否校验过状态
-     */
-    var check = false
     /**
      * 当前模块是否使用了本地依赖
      */
     var localCompile = false
     var moduleName: String = ""
 
-    var branch = ""
     /**
      * 依赖模式
      * runtimeOnly , compileOnly , implementation , compile
@@ -31,20 +28,17 @@ class DpComponents(project: Project) : BaseExtension(project) {
 
     var version: String = ""
 
-    var excludes: LinkedList<Map<String, String>>? = null
+    var branch: String = ""
+
+    var excludes: HashSet<Pair<String?, String?>> = HashSet()
     /**
      * 依赖中的依赖树
      */
-    var dpComponents: Set<DpComponents>? = null
+    var dpComponents: HashSet<DpComponents> = HashSet()
 
-
-    private fun checkExclude() {
-        if (excludes == null) excludes = LinkedList()
+    override fun toString(): String {
+        return "DpComponents(localCompile=$localCompile, moduleName='$moduleName', scope='$scope', version='$version', branch='$branch')"
     }
 
-    fun exclude(exclude: Map<String, String>) {
-        checkExclude()
-        excludes?.add(exclude)
-    }
 
 }

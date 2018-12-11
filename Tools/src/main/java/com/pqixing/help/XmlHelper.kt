@@ -7,11 +7,53 @@ import groovy.util.XmlParser
 import groovy.xml.QName
 import java.io.File
 import java.util.*
+import kotlin.collections.HashSet
 
 object XmlHelper {
 
-    fun parseMetadata(txt: String, groupUrl: String): MavenMetadata {
-        val mate = MavenMetadata(groupUrl)
+    /**
+     * 解析出pom文件的all exclude依赖
+     */
+    fun parsePomEclude(pomText: String, matchGroup: String): MavenPom {
+        val pom = MavenPom()
+        val node = XmlParser().parseText(pomText)
+        pom.groupId = getChildNodeValue(node, "groupId")
+        pom.artifactId = getChildNodeValue(node, "artifactId")
+        pom.version = getChildNodeValue(node, "version")
+        pom.packaging = getChildNodeValue(node, "packaging")
+        pom.name = getChildNodeValue(node, "packaging")
+        val dependencies = getChildNode(node, "dependencies")
+
+        var first = true
+        for (it in dependencies.getAt(QName("dependency"))) {
+            val dependency = it as? Node ?: continue
+            val gid = getChildNodeValue(dependency, "groupId")
+            if (gid.startsWith(matchGroup)) {
+                pom.dependency.add(pairToStr(gid, getChildNodeValue(dependency, "artifactId")))
+            }
+            if (!first && pom.allExclude.isEmpty()) continue
+
+            val exclude = HashSet<String>()
+            val exclusion = getChildNode(dependency, "exclusions").getAt(QName("exclusion"))
+            if (exclusion.isEmpty()) pom.allExclude.clear()
+            else exclusion.forEach {
+                val e = it as? Node ?: return@forEach
+                val g = getChildNodeValue(e, "groupId")
+                if (g.startsWith(matchGroup)) {
+                    val p = "$g,${getChildNodeValue(e, "artifactId")}"
+                    if (first) pom.allExclude.add(p)
+                    else exclude.add(p)
+                }
+            }
+            if (!first) pom.allExclude.removeIf { !exclude.contains(it) }
+            first = false
+        }
+        return pom
+    }
+
+
+    fun parseMetadata(txt: String): MavenMetadata {
+        val mate = MavenMetadata()
         val node = XmlParser().parseText(txt)
         mate.groupId = getChildNodeValue(node, "groupId")
         mate.artifactId = getChildNodeValue(node, "artifactId")
@@ -58,11 +100,23 @@ object XmlHelper {
                 addProject(projects, name, gitUrl, introduce, rootName, type)
             }
         }
-
     }
 
     private inline fun addProject(projects: HashMap<String, Components>, name: String, gitUrl: String, introduce: String, rootName: String, type: String) {
         val project = Components(name, gitUrl, introduce, rootName, type)
         projects[name] = project
+    }
+
+    /**
+     *
+     */
+    fun pairToStr(p: Pair<String?, String?>): String = "${p.first},${p.second}"
+
+    fun pairToStr(first: String?, second: String): String = "$first,$second"
+
+    fun strToPair(s: String): Pair<String?, String?> {
+        val i = s.indexOf(",")
+        if (i < 0) return Pair(s, null)
+        return Pair(s.substring(0, i), s.substring(i + 1))
     }
 }

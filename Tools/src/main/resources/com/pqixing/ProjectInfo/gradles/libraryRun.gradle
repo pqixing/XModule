@@ -8,6 +8,6 @@ android {
     }
 }
 dependencies {
-    //只在deb类型编译使用的依赖，正式打包不会用到
-    devImplementation ""
+    //只在dev类型编译使用的依赖，正式打包不会用到
+    devApi ""
 }

@@ -33,7 +33,7 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
     /**
      * 依赖匹配传递，如果当前分支无对应依赖包，则按照
      */
-    var matchingFallbacks: MutableList<String> = arrayListOf("release", "master")
+    var matchingFallbacks: MutableList<String> = arrayListOf("master")
 
     fun checkVail() {
         if (dependMaven.isEmpty()) dependMaven.add(groupMaven)

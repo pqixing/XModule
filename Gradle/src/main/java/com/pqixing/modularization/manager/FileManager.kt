@@ -144,10 +144,6 @@ object FileManager {
 
         val filter = ProjectInfoFiles.files.filter { copyIfNull(it, docRoot) }
         //初始化dco目录的信息
-        docProject.gitUrl = manager.docGitUrl
-        docProject.name = FileNames.DOCUMENT
-        docProject.rootName = FileNames.DOCUMENT
-        docProject.introduce = "LogManager"
         docProject = Components(FileNames.DOCUMENT, manager.docGitUrl, "LogManager", FileNames.DOCUMENT, Components.TYPE_DOCUMENT)
         if (git == null) return@with
         docProject.loadGitInfo(git)

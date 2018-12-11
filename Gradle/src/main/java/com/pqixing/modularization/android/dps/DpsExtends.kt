@@ -1,42 +1,77 @@
 package com.pqixing.modularization.android.dps
 
+import com.pqixing.Tools
 import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.manager.ProjectManager
 import groovy.lang.Closure
 import org.gradle.api.Project
 import java.util.*
 
 open class DpsExtends(project: Project) : BaseExtension(project) {
-    internal var modules = HashSet<DpComponents>()
+    internal var apis = HashSet<DpComponents>()
+    internal var devApis = HashSet<DpComponents>()
+    //组件工程
+    val components = ProjectManager.allComponents[project.name]!!
 
-    private fun compile(moduleName: String, version: String = "+", scope: String = SCOP_COMPILE, closure: Closure<Any?>? = null) {
+    private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null) {
         val inner = DpComponents(project)
-        inner.moduleName = moduleName
+        //根据 ： 号分割
+        val split = name.split(":")
+        when (split.size) {
+            1 -> {
+                inner.branch = components.lastLog.branch
+                inner.moduleName = split[0]
+                inner.version = "+"
+            }
+            2 -> {
+                inner.branch = components.lastLog.branch
+                inner.moduleName = split[0]
+                inner.version = split[1]
+            }
+            3 -> {
+                inner.branch = split[0]
+                inner.moduleName = split[1]
+                inner.version = split[2]
+            }
+            else -> Tools.printError("DpsExtends compile illegal name -> $name")
+        }
         inner.scope = scope
-        inner.version = version
         if (closure != null) {
             closure.delegate = inner
             closure.resolveStrategy = Closure.DELEGATE_ONLY
             closure.call()
         }
-        modules.add(inner)
-        println("compile -> $version $scope")
+        container.add(inner)
     }
 
-    fun api(moduleName: String, version: String = "+", closure: Closure<Any?>? = null) = compile(moduleName, version, SCOP_API, closure)
+    fun api(moduleName: String) = api(moduleName, null)
+    fun api(moduleName: String, closure: Closure<Any?>? = null) {
+        compile(moduleName, SCOP_API, apis, closure)
+    }
 
-    fun devApi(moduleName: String, version: String = "+", closure: Closure<Any?>? = null) = compile(moduleName, version, SCOP_API, closure)
+    fun devApi(moduleName: String) = api(moduleName, null)
+    fun devApi(moduleName: String, closure: Closure<Any?>? = null) {
+        compile(moduleName, SCOP_API, devApis, closure)
+    }
 
+    @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))
+    fun add(moduleName: String) = api(moduleName)
 
-    fun add(moduleName: String, closure: Closure<Any?>? = null) = add(moduleName, "+", closure)
-    fun add(moduleName: String, version: String, closure: Closure<Any?>? = null) = compile(moduleName, version, SCOP_RUNTIME, closure)
+    @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))
+    fun add(moduleName: String, closure: Closure<Any?>? = null) = api(moduleName, closure)
 
-    fun addImpl(moduleName: String, closure: Closure<Any?>? = null) = addImpl(moduleName, "+", closure)
-    fun addImpl(moduleName: String, version: String, closure: Closure<Any?>? = null) = compile(moduleName, version, SCOP_API, closure)
+    @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))
+    fun addImpl(moduleName: String) = api(moduleName)
+
+    @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))
+    fun addImpl(moduleName: String, closure: Closure<Any?>? = null) = api(moduleName, closure)
 
     companion object {
         val SCOP_API = "api"
-        val SCOP_COMPILE = "compile"
+        val SCOP_DEV_API = "devApi"
         val SCOP_RUNTIME = "runtimeOnly"
+        val SCOP_DEV_RUNTIME = "devRuntimeOnly"
+        val SCOP_COMPILE = "compile"
         val SCOP_COMPILEONLY = "compileOnly"
         val SCOP_IMPL = "implementation"
     }

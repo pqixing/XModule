@@ -36,6 +36,8 @@ class Components {
      */
     var type: String = TYPE_LIBRARY
 
+    var hasInit = false
+
     constructor(name: String, gitUrl: String, introduce: String, rootName: String, type: String) {
         this.name = name
         this.gitUrl = gitUrl
@@ -55,12 +57,14 @@ class Components {
             lastLog.message = rev.fullMessage
             lastLog.hash = rev.name
         }
+        hasInit = true
     }
 
     companion object {
         val TYPE_LIBRARY = "library"
         val TYPE_APPLICATION = "application"
-        val TYPE_BUSINESS = "business"
+        val TYPE_LIBRARY_API = "library_api"
+        val TYPE_LIBRARY_LOCAL = "library_local"
         val TYPE_DOCUMENT = "document"
     }
 }
