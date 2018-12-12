@@ -70,7 +70,7 @@ class DpsManager(val plugin: AndroidPlugin) {
                 }
             }
         }
-
+        Tools.println("${plugin.project.name} -> Dependency Version [")
         dps.forEach { dpc ->
             val compile = when (compileModel) {
                 "localOnly" -> onLocalCompile(dpc, includes, excludes)
@@ -80,8 +80,9 @@ class DpsManager(val plugin: AndroidPlugin) {
             }
             if (!compile) loseList.add(dpc.moduleName)
             val newVersion = VersionManager.getVersion(dpc.branch, dpc.moduleName, "+")
-            Tools.println("${dpc.moduleName} config version : ${dpc.version} -> last version : ${newVersion.second} match branch : ${newVersion.first}")
+            Tools.println("      config version : ${dpc.version} -> last version : ${newVersion.second} match branch : ${newVersion.first} -> ${dpc.moduleName} ")
         }
+        Tools.println("]")
 
         /**
          * 缺失了部分依赖

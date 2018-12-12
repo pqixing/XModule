@@ -129,7 +129,7 @@ public class ImportProject {
         resultInclude.each { key ->
             def value = projectPaths[key]
             if (value != null) {
-                sb.append("\ninclude (':$key') \n project(':$key').projectDir = new File('$dir','${value.replace("\\", "/")}')")
+                sb.append("\ninclude (':$key') \n    project(':$key').projectDir = new File('$dir','${value.replace("\\", "/")}')")
             }
         }
 
