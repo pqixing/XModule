@@ -1,6 +1,7 @@
 package com.pqixing.modularization.maven
 
 import com.pqixing.Tools
+import com.pqixing.git.GitUtils
 import com.pqixing.git.PercentProgress
 import com.pqixing.git.execute
 import com.pqixing.git.init
@@ -162,7 +163,7 @@ object VersionManager {
         //cacheMap中的最后更新时间与git版本号的最后更新时间不一致，尝试更新
         if (lastLog.commitTime != lastUpdate) {
             /**从日志中读取版本号**/
-            val git = Git.open(FileManager.docRoot)
+            val git = Git.open(GitUtils.findGitDir(FileManager.docRoot))
             run out@{
                 git.log().call().forEach { rev ->
                     if (rev.commitTime < lastUpdate) return@out
@@ -218,7 +219,7 @@ object VersionManager {
         Tools.println("indexVersionFromNet  end ->")
         versions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
         //上传版本好到服务端
-        val git = Git.open(FileManager.docRoot)
+        val git = Git.open(GitUtils.findGitDir(FileManager.docRoot))
         git.pull().setCredentialsProvider(FileManager.docCredentials).setProgressMonitor(PercentProgress()).call()
 
         PropertiesUtils.writeProperties(outFile, versions.toProperties())

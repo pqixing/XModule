@@ -56,8 +56,22 @@ class DpsManager(val plugin: AndroidPlugin) {
         val loseList = mutableListOf<String>()
 
         onSelfCompile(includes, excludes)
+        val dps = HashSet<DpComponents>()
+        if (plugin.APP_TYPE == Components.TYPE_APPLICATION) {
+            dps.addAll(dpsExt.compiles)
+        } else {
+            when (plugin.BUILD_TYPE) {
+                Components.TYPE_LIBRARY_API -> dps.addAll(dpsExt.apiCompiles)
+                Components.TYPE_LIBRARY -> dps.addAll(dpsExt.compiles)
+                Components.TYPE_LIBRARY_LOCAL, Components.TYPE_APPLICATION -> {
+                    dps.addAll(dpsExt.compiles)
+                    dps.addAll(dpsExt.apiCompiles)
+                    dps.addAll(dpsExt.devCompiles)
+                }
+            }
+        }
 
-        dpsExt.apis.forEach { dpc ->
+        dps.forEach { dpc ->
             val compile = when (compileModel) {
                 "localOnly" -> onLocalCompile(dpc, includes, excludes)
                 "localFirst" -> onLocalCompile(dpc, includes, excludes) || onMavenCompile(dpc, includes, excludes)
@@ -68,21 +82,6 @@ class DpsManager(val plugin: AndroidPlugin) {
             val newVersion = VersionManager.getVersion(dpc.branch, dpc.moduleName, "+")
             Tools.println("${dpc.moduleName} config version : ${dpc.version} -> last version : ${newVersion.second} match branch : ${newVersion.first}")
         }
-
-        //如果是dev分支运行
-        if (plugin.APP_TYPE != Components.TYPE_APPLICATION && plugin.BUILD_TYPE == Components.TYPE_APPLICATION)
-            dpsExt.devApis.forEach { dpc ->
-                val compile = when (compileModel) {
-                    "localOnly" -> onLocalCompile(dpc, includes, excludes)
-                    "localFirst" -> onLocalCompile(dpc, includes, excludes) || onMavenCompile(dpc, includes, excludes)
-                    "mavenFirst" -> onMavenCompile(dpc, includes, excludes) || onLocalCompile(dpc, includes, excludes)
-                    else -> onMavenCompile(dpc, includes, excludes)
-                }
-
-                val newVersion = VersionManager.getVersion(dpc.branch, dpc.moduleName, "+")
-                Tools.println("${dpc.moduleName} config version : ${dpc.version} -> last version : ${newVersion.second} match branch : ${newVersion.first}")
-                if (!compile) loseList.add(dpc.moduleName)
-            }
 
         /**
          * 缺失了部分依赖
@@ -110,21 +109,29 @@ class DpsManager(val plugin: AndroidPlugin) {
         }
     }
 
+    /**
+     * 重新凭借scope
+     */
+    private fun getScope(prefix: String, scope: String): String {
+        if (prefix.isEmpty()) return scope
+        return "$prefix${TextUtils.firstUp(scope)}"
+    }
+
     private fun onMavenCompile(dpc: DpComponents, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
         var compile = false
         //如果是App类型工程，则以app直接依赖的版本为准，忽略依赖传递中带来的版本变化
         val config = if (plugin.APP_TYPE == Components.TYPE_APPLICATION) "force = true" else ""
         //如果是Api类型的模块，只依赖api工程，不直接依赖模块代码
         if (dpc.type == Components.TYPE_LIBRARY_API) {
-            compile = addMavenCompile(DpsExtends.SCOP_API, dpc.branch, "${dpc.moduleName}_api", dpc.version, includes, excludes, HashSet(), config) and compile
+            compile = addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_API), dpc.branch, "${dpc.moduleName}_api", dpc.version, includes, excludes, HashSet(), config) and compile
 
             //如果是作为本地运行时，则把编译对应的模块
             if (plugin.BUILD_TYPE == Components.TYPE_APPLICATION) {
-                compile = addMavenCompile(DpsExtends.SCOP_RUNTIME, dpc.branch, dpc.moduleName, dpc.version, includes, excludes, HashSet(), config) and compile
+                compile = addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_RUNTIME), dpc.branch, dpc.moduleName, dpc.version, includes, excludes, HashSet(), config) and compile
             }
 
         } else {//如果是普通模块，直接依赖模块代码
-            compile = addMavenCompile(DpsExtends.SCOP_API, dpc.branch, dpc.moduleName, dpc.version, includes, excludes, HashSet(), config) and compile
+            compile = addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_API), dpc.branch, dpc.moduleName, dpc.version, includes, excludes, HashSet(), config) and compile
         }
         return compile
     }
@@ -179,13 +186,14 @@ class DpsManager(val plugin: AndroidPlugin) {
         val dpComponents = ProjectManager.checkProject(localProject, plugin.projectInfo!!)
                 ?: return false
         dpc.localCompile = true
+        //本地project默认依赖debug
         if (dpComponents.type == Components.TYPE_LIBRARY_API) {
-            includes.add("${DpsExtends.SCOP_RUNTIME}  project(':${dpc.moduleName}') { ${excludeStr(excludes = dpc.excludes)} }")
+            includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_RUNTIME)} ( project(path : ':${dpc.moduleName}',configuration: 'debug')) { ${excludeStr(excludes = dpc.excludes)} }")
             addBranchExclude(branch, dpc.moduleName, excludes)
             //添加对api的maven仓库的编译依赖，只有编译时期使用
-            addMavenCompile(DpsExtends.SCOP_COMPILEONLY, dpc.branch, "${dpc.moduleName}_api", dpc.version, includes, excludes, HashSet(), "force = true")
+            addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_COMPILEONLY), dpc.branch, "${dpc.moduleName}_api", dpc.version, includes, excludes, HashSet(), "force = true")
         } else {
-            includes.add("${DpsExtends.SCOP_API}  project(':${dpc.moduleName}')  { ${excludeStr(excludes = dpc.excludes)} }")
+            includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_API)} ( project(path : ':${dpc.moduleName}',configuration: 'debug'))  { ${excludeStr(excludes = dpc.excludes)} }")
             addBranchExclude(branch, dpc.moduleName, excludes)
         }
         return true

@@ -154,8 +154,17 @@ public class ImportProject {
         if (codeRoot.isEmpty()) {
             codeRoot = "../"
         }
-        codeRootDir = codeRoot.startsWith("..") ? new File(rootDir, codeRoot) : new File(codeRoot)
+        codeRoot = codeRoot.replace('"', "")
+        codeRootDir = codeRoot.startsWith("../") ? getDir(rootDir, codeRoot) : new File(codeRoot)
         gradle.ext.codeRootDir = codeRootDir
+    }
+
+    private File getDir(File dir, String codeRoot) {
+        codeRoot.split("/").each {
+            if (it == "..") dir = dir.parentFile
+            else dir = new File(dir, it)
+        }
+        return dir
     }
 
 }

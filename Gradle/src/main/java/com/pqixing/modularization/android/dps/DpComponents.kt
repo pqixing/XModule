@@ -20,6 +20,8 @@ class DpComponents(project: Project) : BaseExtension(project) {
     var localCompile = false
     var moduleName: String = ""
 
+    var dpType = ""
+
     /**
      * 依赖模式
      * runtimeOnly , compileOnly , implementation , compile

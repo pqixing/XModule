@@ -8,12 +8,13 @@ import org.gradle.api.Project
 import java.util.*
 
 open class DpsExtends(project: Project) : BaseExtension(project) {
-    internal var apis = HashSet<DpComponents>()
-    internal var devApis = HashSet<DpComponents>()
+    internal var compiles = HashSet<DpComponents>()
+    internal var devCompiles = HashSet<DpComponents>()
+    internal var apiCompiles = HashSet<DpComponents>()
     //组件工程
     val components = ProjectManager.allComponents[project.name]!!
 
-    private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null) {
+    private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null): DpComponents {
         val inner = DpComponents(project)
         //根据 ： 号分割
         val split = name.split(":")
@@ -42,35 +43,39 @@ open class DpsExtends(project: Project) : BaseExtension(project) {
             closure.call()
         }
         container.add(inner)
+        return inner
     }
 
-    fun api(moduleName: String) = api(moduleName, null)
-    fun api(moduleName: String, closure: Closure<Any?>? = null) {
-        compile(moduleName, SCOP_API, apis, closure)
+    fun compile(moduleName: String) = compile(moduleName, null)
+    fun compile(moduleName: String, closure: Closure<Any?>? = null) {
+        compile(moduleName, SCOP_API, compiles, closure)
     }
 
-    fun devApi(moduleName: String) = api(moduleName, null)
-    fun devApi(moduleName: String, closure: Closure<Any?>? = null) {
-        compile(moduleName, SCOP_API, devApis, closure)
+    fun apiCompile(moduleName: String) = apiCompile(moduleName, null)
+    fun apiCompile(moduleName: String, closure: Closure<Any?>? = null) {
+        compile(moduleName, SCOP_API, apiCompiles, closure)
+    }
+
+    fun devCompile(moduleName: String) = devCompile(moduleName, null)
+    fun devCompile(moduleName: String, closure: Closure<Any?>? = null) {
+        compile(moduleName, SCOP_API, devCompiles, closure).dpType = "dev"
     }
 
     @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))
-    fun add(moduleName: String) = api(moduleName)
+    fun add(moduleName: String) = compile(moduleName)
 
     @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))
-    fun add(moduleName: String, closure: Closure<Any?>? = null) = api(moduleName, closure)
+    fun add(moduleName: String, closure: Closure<Any?>? = null) = compile(moduleName, closure)
 
     @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))
-    fun addImpl(moduleName: String) = api(moduleName)
+    fun addImpl(moduleName: String) = compile(moduleName)
 
     @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))
-    fun addImpl(moduleName: String, closure: Closure<Any?>? = null) = api(moduleName, closure)
+    fun addImpl(moduleName: String, closure: Closure<Any?>? = null) = compile(moduleName, closure)
 
     companion object {
         val SCOP_API = "api"
-        val SCOP_DEV_API = "devApi"
         val SCOP_RUNTIME = "runtimeOnly"
-        val SCOP_DEV_RUNTIME = "devRuntimeOnly"
         val SCOP_COMPILE = "compile"
         val SCOP_COMPILEONLY = "compileOnly"
         val SCOP_IMPL = "implementation"
