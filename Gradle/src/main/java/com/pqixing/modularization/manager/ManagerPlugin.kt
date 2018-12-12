@@ -20,7 +20,7 @@ class ManagerPlugin : BasePlugin() {
 
     override val applyFiles: List<String> = listOf("com.module.manager", "com.module.git")
     override val ignoreFields: Set<String>
-        get() = setOf(FileNames.PROJECT_INFO, FileNames.IMPORT_KT, FileNames.MANAGER)
+        get() = setOf(FileNames.PROJECT_INFO, FileNames.IMPORT_KT)
 
     @Override
     override fun linkTask() = listOf(AllCleanTask::class.java, IndexVersionTask::class.java)
