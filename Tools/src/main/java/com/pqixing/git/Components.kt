@@ -65,6 +65,7 @@ class Components {
         val TYPE_APPLICATION = "application"
         val TYPE_LIBRARY_API = "library_api"
         val TYPE_LIBRARY_LOCAL = "library_local"
+        val TYPE_LIBRARY_SYNC = "library_sync"
         val TYPE_DOCUMENT = "document"
     }
 }

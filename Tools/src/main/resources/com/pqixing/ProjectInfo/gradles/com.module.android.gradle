@@ -1,4 +1,4 @@
-apply from: "$gradles/ktolin.gradle"
+apply from: "$gradles/com.module.ktolin.gradle"
 android {
     buildToolsVersion '28.0.2'
     compileSdkVersion 26

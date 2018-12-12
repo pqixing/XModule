@@ -17,50 +17,15 @@ import org.gradle.api.Task
 import java.io.File
 import java.security.Key
 
-/**
- *  var forRun = false
-
-override val applyFiles: List<String> = if (forRun) listOf("com.module.library", Keys.NAME_LIBRARY_RUN) else listOf("com.module.library")
-override fun apply(project: Project) {
-checkRunTasType(project)
-super.apply(project)
-}
-
-/**
- * 根据要执行的任务，来判断是什么类型
-*/
-private fun checkRunTasType(project: Project) {
-
-}
-
-override val androidPlugin: String
-get() {
-kotlin.run outer@{
-val runType = Regex(":${project.name}:assemble.*?Dev")
-project.gradle.startParameter.taskNames.forEach {
-if (it.matches(runType)) {
-forRun = true
-return@outer
-}
-}
-}
-return if (forRun) Keys.NAME_APP else Keys.NAME_LIBRARY
-}
-
-override val ignoreFields: Set<String> = setOf("scr/dev")
-
-override fun linkTask(): List<Class<out Task>> = listOf()
- */
-/**
- * Created by pqixing on 17-12-7.
- */
-
 open class AndroidPlugin : BasePlugin() {
     override fun callBeforeApplyMould() {
         checkPluginType(project)
 
         //根据情况进行不同的Android插件依赖
-        project.apply(mapOf<String,String>("plugin" to if (BUILD_TYPE == Components.TYPE_APPLICATION) Keys.NAME_APP else Keys.NAME_LIBRARY))
+        project.apply(mapOf<String, String>("plugin" to if (BUILD_TYPE == Components.TYPE_APPLICATION) Keys.NAME_APP else Keys.NAME_LIBRARY))
+        if (APP_TYPE == Components.TYPE_LIBRARY || APP_TYPE == Components.TYPE_LIBRARY_API) {
+            project.apply(mapOf<String, String>("plugin" to "maven"))
+        }
     }
 
     /**
@@ -75,7 +40,8 @@ open class AndroidPlugin : BasePlugin() {
     override val applyFiles: List<String>
         get() {
             if (APP_TYPE == Components.TYPE_APPLICATION) return listOf("com.module.application")
-            if (BUILD_TYPE == Components.TYPE_APPLICATION) return listOf("com.module.library", "com.module.libraryRun")
+            //如果是独立运行，或者是本地同步时，增加
+            if (BUILD_TYPE == Components.TYPE_APPLICATION || BUILD_TYPE == Components.TYPE_LIBRARY_SYNC) return listOf("com.module.library", "com.module.run")
             return listOf("com.module.library")
         }
     override val ignoreFields: Set<String> = setOf("scr/dev")
@@ -106,12 +72,18 @@ open class AndroidPlugin : BasePlugin() {
     private fun checkPluginType(project: Project) {
         val components = ProjectManager.findComponent(project.name) ?: return
         APP_TYPE = components.type
+        if (APP_TYPE == Components.TYPE_APPLICATION) {
+            BUILD_TYPE = Components.TYPE_APPLICATION
+            return
+        }
         val rxForRun = Regex(":${project.name}:assemble.*?Dev")
         val rxToMaven = ":${project.name}:ToMaven"
         val rxToMavenApi = ":${project.name}:ToMavenApi"
         var match = mutableListOf<String>()
+        var assemble = false
         for (t in getGradle().startParameter.taskNames) {
             match.add(t)
+            assemble = assemble || t.contains(":assemble")
             when {
                 t.matches(rxForRun) -> BUILD_TYPE = Components.TYPE_APPLICATION
                 t == rxToMaven -> BUILD_TYPE = Components.TYPE_LIBRARY
@@ -123,7 +95,7 @@ open class AndroidPlugin : BasePlugin() {
             Tools.printError("Can not run those tasks at times -> $match")
         }
         if (match.size == 0) {
-            BUILD_TYPE = if (APP_TYPE == Components.TYPE_APPLICATION) Components.TYPE_APPLICATION else Components.TYPE_LIBRARY_LOCAL
+            BUILD_TYPE = if (assemble) Components.TYPE_LIBRARY_LOCAL else Components.TYPE_LIBRARY_SYNC
         }
     }
 }
