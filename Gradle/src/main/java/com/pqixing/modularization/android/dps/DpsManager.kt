@@ -189,12 +189,12 @@ class DpsManager(val plugin: AndroidPlugin) {
         dpc.localCompile = true
         //本地project默认依赖debug
         if (dpComponents.type == Components.TYPE_LIBRARY_API) {
-            includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_RUNTIME)} ( project(path : ':${dpc.moduleName}',configuration: 'debug')) { ${excludeStr(excludes = dpc.excludes)} }")
+            includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_RUNTIME)} ( project(path : ':${dpc.moduleName}')) { ${excludeStr(excludes = dpc.excludes)} }")
             addBranchExclude(branch, dpc.moduleName, excludes)
             //添加对api的maven仓库的编译依赖，只有编译时期使用
             addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_COMPILEONLY), dpc.branch, "${dpc.moduleName}_api", dpc.version, includes, excludes, HashSet(), "force = true")
         } else {
-            includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_API)} ( project(path : ':${dpc.moduleName}',configuration: 'debug'))  { ${excludeStr(excludes = dpc.excludes)} }")
+            includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_API)} ( project(path : ':${dpc.moduleName}'))  { ${excludeStr(excludes = dpc.excludes)} }")
             addBranchExclude(branch, dpc.moduleName, excludes)
         }
         return true

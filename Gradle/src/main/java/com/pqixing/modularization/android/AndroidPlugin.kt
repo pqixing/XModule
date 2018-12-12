@@ -60,7 +60,7 @@ open class AndroidPlugin : BasePlugin() {
         checkPluginType(project)
 
         //根据情况进行不同的Android插件依赖
-        project.apply(mapOf("plugin" to if (BUILD_TYPE == Components.TYPE_APPLICATION) Keys.NAME_APP else Keys.NAME_LIBRARY))
+        project.apply(mapOf<String,String>("plugin" to if (BUILD_TYPE == Components.TYPE_APPLICATION) Keys.NAME_APP else Keys.NAME_LIBRARY))
     }
 
     /**

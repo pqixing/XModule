@@ -69,7 +69,10 @@ object ProjectManager {
         if (!info.syncBranch) return
         val branchName = rootBranch
         //在同一个分支，不处理
-        if (branchName == git.repository.branch) return
+        if (branchName == git.repository.branch){
+            Tools.println("Cur  branch $branchName")
+            return
+        }
 
 
         val local = git.branchList().call()
