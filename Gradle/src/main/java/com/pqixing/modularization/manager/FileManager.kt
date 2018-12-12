@@ -16,7 +16,6 @@ import java.io.File
  * 管理文件的输出和读取
  */
 object FileManager {
-    val docBranch = "MavenLog"
 
     lateinit var docCredentials: UsernamePasswordCredentialsProvider
 
@@ -32,17 +31,6 @@ object FileManager {
             return field
         }
 
-    /**
-     * 存放信息的目录
-     */
-    var infoDir: File? = null
-        get() {
-            if (field == null) {
-                field = File(docRoot, "ProjectInfo")
-            }
-            return field
-        }
-
     var cacheRoot: File? = null
         get() {
             if (field == null) {
@@ -53,13 +41,13 @@ object FileManager {
     var docRoot: File? = null
         get() {
             if (field == null) {
-                field = File(BasePlugin.getPlugin(ManagerPlugin::class.java)?.rootDir, FileNames.DOCUMENT)
+                field = File(BasePlugin.getPlugin(ManagerPlugin::class.java)?.rootDir, FileNames.MANAGER)
             }
             return field
         }
 
     fun getProjectXml(): File {
-        return File(infoDir, FileNames.PROJECT_XML)
+        return File(docRoot, FileNames.PROJECT_XML)
     }
 
     /**
@@ -104,14 +92,7 @@ object FileManager {
      * Document 目录用来存放一些公共的配置文件
      */
     fun checkDocument(plugin: IPlugin) = with(plugin) {
-        val manager = getExtends(ManagerExtends::class.java)
-        if (manager.docGitUrl.isEmpty()) {
-            ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "doc git can not be empty!!")
-        }
         val docRoot = docRoot!!
-        if (docRoot.exists() && !GitUtils.isGitDir(docRoot)) {
-            FileUtils.delete(docRoot)
-        }
 
         val extends = plugin.getExtends(ManagerExtends::class.java)
         val info = plugin.projectInfo
@@ -122,31 +103,16 @@ object FileManager {
 
         docCredentials = UsernamePasswordCredentialsProvider(user, psw)
 
-        val git = if (docRoot.exists()) {
-            Git.open(docRoot).apply {
-                //切换到log分支
-                if (docBranch != repository.branch) {
-                    stashCreate().init(docCredentials).execute()
-                    stashDrop().init(docCredentials).execute()
-                    checkout().setForce(true).setName(docBranch).init().execute()
-                }
-                pull().init(docCredentials).execute()
-            }
-        } else {
-
-            Git.cloneRepository()
-                    .setURI(manager.docGitUrl).setDirectory(docRoot).setBranch(docBranch)
-                    .init(docCredentials).execute()
-        }
-        if (!docRoot.exists()) {
-            ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "Clone doc fail !! Please check")
+        val git = Git.open(plugin.projectDir).apply {
+            pull().init(docCredentials).execute()
         }
 
         val filter = ProjectInfoFiles.files.filter { copyIfNull(it, docRoot) }
         //初始化dco目录的信息
-        docProject = Components(FileNames.DOCUMENT, manager.docGitUrl, "LogManager", FileNames.DOCUMENT, Components.TYPE_DOCUMENT)
+        docProject = Components(FileNames.ROOT, "", "LogManager", FileNames.MANAGER, Components.TYPE_DOCUMENT)
         if (git == null) return@with
         docProject.loadGitInfo(git)
+        ProjectManager.rootBranch = docProject.lastLog.branch
         //如果有新增文件，提交
         if (filter.isNotEmpty()) {
             git.add().addFilepattern(".").init().execute()
@@ -160,7 +126,8 @@ object FileManager {
      * 如果工程目录下没有文件，拷贝
      */
     private fun copyIfNull(fileName: String, docRoot: File): Boolean {
-        val f = File(docRoot, fileName)
+        val outFile = fileName.replace("ProjectInfo/", "")
+        val f = File(docRoot, outFile)
         if (f.exists()) return false
         FileUtils.writeText(f, FileUtils.getTextFromResource(fileName))
         return true

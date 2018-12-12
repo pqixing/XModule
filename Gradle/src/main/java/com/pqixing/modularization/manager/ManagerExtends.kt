@@ -9,10 +9,8 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
     /**
      * 存放配置的git目录
      */
-    var docGitUrl = ""
     var gitUserName = ""
     var gitPassWord = ""
-    var branchName = "master"
 
     /**
      * 报名
@@ -22,10 +20,10 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
      * 上传组件的Maven地址，下载地址请到Doc目录的Manger目录进行配置
      */
     var groupMaven = ""
-    /**
-     * 从doc目录同步当前的build.gradle文件
-     */
-    var syncBuild = true
+//    /**
+//     * 从doc目录同步当前的build.gradle文件
+//     */
+//    var syncBuild = true
     /**
      * 添加依赖地址，如果为空，默认使用groupMaven
      */
@@ -37,7 +35,6 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
 
     fun checkVail() {
         if (dependMaven.isEmpty()) dependMaven.add(groupMaven)
-        if (docGitUrl.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "docGitUrl can not be null!!!")
         if (groupName.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "groupName can not be null!!!")
         if (groupMaven.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "groupMaven can not be null!!!")
     }

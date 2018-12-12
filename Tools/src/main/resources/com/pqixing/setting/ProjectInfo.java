@@ -17,10 +17,6 @@ public class ProjectInfo {
     public String gitPassWord = null;
 
     /**
-     * 当前分支名称
-     */
-    public String curBranch = "master";
-    /**
      * 检测分支是否一致，不一致时进行切换
      */
     public boolean syncBranch = true;

@@ -13,7 +13,7 @@ val dpsExclude = ""
 val focusInclude = ""
 
 //本地目录的根目录，用来查找本地目录，以及下载Clone
-val codeRoot = "../"
+val codeRoot = ".."
 
 
 //END

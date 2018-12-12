@@ -141,7 +141,7 @@ object VersionManager {
         }
         curVersions[FileNames.MODULARIZATION] = FileNames.MODULARIZATION
 
-        val baseVersion = File(FileManager.infoDir, "versions/version.properties")
+        val baseVersion = File(FileManager.docRoot, "versions/version.properties")
         val basePros = PropertiesUtils.readProperties(baseVersion)
         if (basePros.isNotEmpty()) PropertiesUtils.readProperties(baseVersion).forEach {
             curVersions[it.key.toString()] = it.value.toString()
@@ -201,7 +201,7 @@ object VersionManager {
 
     fun indexVersionFromNet() {
         curVersions.clear()
-        indexVersionFromNet(File(FileManager.infoDir, "versions/version.properties"), curVersions)
+        indexVersionFromNet(File(FileManager.docRoot, "versions/version.properties"), curVersions)
     }
 
     /**
@@ -224,7 +224,7 @@ object VersionManager {
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
         Tools.println("indexVersionFromNet update from net save to -> $outFile")
 
-        git.add().addFilepattern(FileNames.PROJECTINFO).init().execute()
+        git.add().addFilepattern(FileNames.MANAGER).init().execute()
         git.commit().setAllowEmpty(true).setMessage("indexVersionFromNet ${Date().toLocaleString()}").init().execute()
         (git.push().init() as PushCommand).setCredentialsProvider(FileManager.docCredentials).setForce(true).execute()
         git.close()

@@ -11,6 +11,8 @@ import org.gradle.api.Project
 import java.io.File
 
 object ProjectManager {
+    var rootBranch = ""
+
     val allComponents = HashMap<String, Components>()
     val gitForProject = HashMap<String, Git>()
     var hasInit = false
@@ -49,7 +51,7 @@ object ProjectManager {
 
     private fun initGit(projectDir: File, rootDir: File, gitUrl: String, info: ProjectInfo): Git? {
         val git = if (!projectDir.exists() || !checkRootDir(rootDir)) {//下载工程
-            GitUtils.clone(gitUrl, rootDir, info.curBranch)
+            GitUtils.clone(gitUrl, rootDir, rootBranch)
         } else {
             Git.open(rootDir)
         }
@@ -65,7 +67,7 @@ object ProjectManager {
      */
     private fun checkBranch(git: Git, info: ProjectInfo) {
         if (!info.syncBranch) return
-        val branchName = info.curBranch
+        val branchName = rootBranch
         //在同一个分支，不处理
         if (branchName == git.repository.branch) return
 

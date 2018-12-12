@@ -99,14 +99,14 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         initTools(project)
         createIgnoreFile()
 
-        val file = File(FileManager.infoDir, "gradles")
+        val file = File(FileManager.docRoot, "gradles")
         extHelper.setExtValue(project, "gradles", file.absolutePath)
 
         callBeforeApplyMould()
         applyFiles.forEach {
             val f = File(file, "$it.gradle")
             if (f.exists() && f.isFile)
-                project.apply(mapOf("from" to f.absolutePath))
+                project.apply(mapOf<String,String>("from" to f.absolutePath))
         }
         linkTask()?.forEach { onTaskCreate(it, BaseTask.task(project, it)) }
     }

@@ -26,10 +26,8 @@ allprojects {
 }
 
 manager{
-    docGitUrl "http://192.168.3.200/android/Document.git"
     groupName "com.dachen.android"
     gitUserName "pengqixing"
     gitPassWord "pengqixing"
     groupMaven "http://192.168.3.7:9527/nexus/content/repositories/androidtest/"
-    syncBuild true
 }

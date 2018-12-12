@@ -11,7 +11,6 @@ ext {
 }
 
 manager {
-    docGitUrl ""//必填，doc工程git
     groupName ""//必填，group名称，etc:com.xxx.xxx
     gitUserName ""//docGit的用户名，如不填，取projectInfo文件中的配置
     gitPassWord ""//docGit的密码，如不填，取projectInfo文件中的配置

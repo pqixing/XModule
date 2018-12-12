@@ -1,17 +1,9 @@
 package com.pqixing.modularization.manager
 
-import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.maven.IndexVersionTask
-import com.pqixing.tools.FileUtils
-import org.gradle.BuildAdapter
-import org.gradle.BuildListener
-import org.gradle.BuildResult
 import org.gradle.api.Project
-import org.gradle.api.initialization.Settings
-import org.gradle.api.invocation.Gradle
-import java.io.File
 
 /**
  * Created by pqixing on 17-12-20.
@@ -25,14 +17,14 @@ class ManagerPlugin : BasePlugin() {
 
     override val applyFiles: List<String> = listOf("com.module.manager", "com.module.git")
     override val ignoreFields: Set<String>
-        get() = setOf(FileNames.PROJECT_INFO, FileNames.IMPORT_KT, FileNames.DOCUMENT)
+        get() = setOf(FileNames.PROJECT_INFO, FileNames.IMPORT_KT, FileNames.MANAGER)
 
     @Override
     override fun linkTask() = listOf(AllCleanTask::class.java, IndexVersionTask::class.java)
 
     var error: String = ""
     override fun apply(project: Project) {
-
+        onSyncStart()
         super.apply(project)
         error = FileManager.checkFileExist(this)
 
@@ -41,38 +33,10 @@ class ManagerPlugin : BasePlugin() {
             //在每个工程开始同步之前，检查状态，下载，切换分支等等
             ProjectManager.checkProject(it, projectInfo!!)
         }
-        project.gradle.addBuildListener(object :BuildListener{
-            override fun settingsEvaluated(settings: Settings) {
-                Tools.println("settingsEvaluated ----------")
-            }
-
-            override fun buildFinished(result: BuildResult) {
-                Tools.println("buildFinished ----------")
-            }
-
-            override fun projectsLoaded(gradle: Gradle) {
-                Tools.println("projectsLoaded ----------")
-            }
-
-            override fun buildStarted(gradle: Gradle) {
-                Tools.println("buildStarted ----------")
-            }
-
-            override fun projectsEvaluated(gradle: Gradle) {
-                Tools.println("projectsEvaluated ----------")
-            }
-        })
         project.afterEvaluate {
             val extends = getExtends(ManagerExtends::class.java)
             extHelper.setExtValue(project, "groupName", extends.groupName)
             FileManager.checkDocument(this)
-
-            //如果需要同步build文件，则同步
-            if (extends.syncBuild) {
-                val buildGradle = "build.gradle"
-                val docBuild = File(FileManager.infoDir, buildGradle)
-                FileUtils.writeText(File(rootDir, buildGradle), docBuild.readText(), true)
-            }
 
             if (error.isNotEmpty()) {
                 ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, error)
@@ -83,16 +47,15 @@ class ManagerPlugin : BasePlugin() {
                 extHelper.addRepositories(p, extends.dependMaven)
             }
         }
+    }
 
-        project.gradle.addBuildListener(object : BuildAdapter() {
-            override fun buildFinished(result: BuildResult) {
-                //构建结束时，重置projectInfo
-                pi = null
-                FileManager.cacheRoot = null
-                FileManager.codeRootDir = null
-                ProjectManager.allComponents.clear()
-                ProjectManager.hasInit = false
-            }
-        })
+    fun onSyncStart() {
+        //构建结束时，重置projectInfo
+        pi = null
+        FileManager.cacheRoot = null
+        FileManager.codeRootDir = null
+        ProjectManager.allComponents.clear()
+        ProjectManager.hasInit = false
+        ProjectManager.rootBranch = ""
     }
 }
