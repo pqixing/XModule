@@ -10,11 +10,18 @@ import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.iterface.IExtHelper
+import com.pqixing.modularization.manager.ManagerExtends
+import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.maven.ToMavenApiTask
+import com.pqixing.modularization.maven.ToMavenCheckTask
+import com.pqixing.modularization.maven.ToMavenTask
 import com.pqixing.tools.FileUtils
+import com.pqixing.tools.TextUtils
 import org.gradle.api.Project
 import org.gradle.api.Task
 import java.io.File
+import java.lang.StringBuilder
 import java.security.Key
 
 open class AndroidPlugin : BasePlugin() {
@@ -37,6 +44,11 @@ open class AndroidPlugin : BasePlugin() {
      */
     var BUILD_TYPE: String = ""
 
+    /**
+     * 获取Api目录的路径
+     */
+    fun getApiPath(): String = File(projectDir, "src/main/api").absolutePath
+
     override val applyFiles: List<String>
         get() {
             if (APP_TYPE == Components.TYPE_APPLICATION) return listOf("com.module.application")
@@ -46,13 +58,17 @@ open class AndroidPlugin : BasePlugin() {
         }
     override val ignoreFields: Set<String> = setOf("scr/dev")
 
-    override fun linkTask(): List<Class<out Task>> = listOf()
+    override fun linkTask(): List<Class<out Task>> {
+        if (APP_TYPE == Components.TYPE_LIBRARY_API) return listOf(ToMavenCheckTask::class.java, ToMavenApiTask::class.java)
+        if (APP_TYPE == Components.TYPE_LIBRARY) return listOf(ToMavenCheckTask::class.java,ToMavenTask::class.java)
+        return emptyList()
+    }
 
     lateinit var dpsManager: DpsManager
     override fun apply(project: Project) {
+        val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, project)
         super.apply(project)
         //创建配置读取
-        val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, project)
         val moduleConfig = CompatDps(project, dpsExt)
         project.extensions.add(Keys.CONFIG_MODULE, moduleConfig)
 
@@ -62,8 +78,42 @@ open class AndroidPlugin : BasePlugin() {
             dpsManager = DpsManager(this@AndroidPlugin)
             val dependencies = dpsManager.resolveDps(dpsExt)
             project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dependencies, true)))
+
+            compatOldPlugin(dpsExt)
         }
-        extHelper.setExtValue(project, "ToMavenApi", if (APP_TYPE == Components.TYPE_LIBRARY_API && BUILD_TYPE == Components.TYPE_LIBRARY_API) "Y" else "N")
+        extHelper.setExtValue(project, "JustApi", if (APP_TYPE == Components.TYPE_LIBRARY_API && BUILD_TYPE == Components.TYPE_LIBRARY_API) "Y" else "N")
+
+    }
+
+    private fun compatOldPlugin(dpsExt: DpsExtends) {
+//        dpNames.append("$Keys.PREFIX_PKG.${m.groupId}.${TextUtils.numOrLetter(m.moduleName).toLowerCase()}.${TextUtils.className(m.moduleName)}Config,")
+//
+        val javaCacheDir = File(cacheDir, "java")
+        val groupName = getPlugin(ManagerPlugin::class.java)!!.getExtends(ManagerExtends::class.java).groupName
+        val configStr = StringBuilder("package auto.$groupName.${TextUtils.numOrLetter(project.name).toLowerCase()};\n")
+                .append("public class ${TextUtils.className(project.name)}Config { \n")
+        //Config文件输出
+        val DP_CONFIGS_NAMES = dpsExt.compiles.map { "auto.$groupName.${TextUtils.numOrLetter(it.moduleName).toLowerCase()}.${TextUtils.className(it.moduleName)}Config" }
+                .sortedBy { it }.toString()
+        configStr.append("public static final String  DP_CONFIGS_NAMES = \"${DP_CONFIGS_NAMES.replace("[", "").replace("]","")}\";\n")
+        val CONFIG = "auto.$groupName.${TextUtils.numOrLetter(project.name).toLowerCase()}.${TextUtils.className(project.name)}"
+        configStr.append("public static final String  LAUNCH_CONFIG = \"${CONFIG}Launch\";\n")
+        val NAME = TextUtils.numOrLetter(project.name).toLowerCase()
+        configStr.append("public static final String  NAME = \"$NAME\";\n").append("}")
+
+        val filePath = "auto.$groupName.${TextUtils.numOrLetter(project.name).toLowerCase()}.${TextUtils.className(project.name)}Config".replace(".", "/") + ".java"
+        FileUtils.writeText(File(javaCacheDir, filePath), configStr.toString(), true)
+
+        val enterFile = File(javaCacheDir, "auto/com/pqixing/configs/Enter.java")
+        if (BUILD_TYPE == Components.TYPE_APPLICATION) {
+            val enterStr = StringBuilder("package auto.com.pqixing.configs;\n public class Enter { \n")
+                    .append("public static final String  LAUNCH = \"${CONFIG}Launch\";\n")
+                    .append("public static final String  CONFIG = \"${CONFIG}Config\";\n")
+                    .append("}")
+            FileUtils.writeText(enterFile, enterStr.toString(), true)
+        } else FileUtils.delete(enterFile)
+
+
     }
 
     /**

@@ -16,4 +16,6 @@ public interface IExtHelper {
     void setExtMethod(Project project, String method, Action action);
 
     void addRepositories(Project project,@NotNull List<String> dependMaven);
+    void addSourceDir(Project project,String dir);
+    void setSourceDir(Project project,String dir);
 }

@@ -1,11 +1,11 @@
 package com.pqixing.modularization.impl
 
-import com.pqixing.Tools
+
 import com.pqixing.modularization.iterface.IExtHelper
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNull
 
 public class GExtHelper implements IExtHelper {
 
@@ -53,5 +53,18 @@ public class GExtHelper implements IExtHelper {
                 maven { url l }
             }
         }
+    }
+
+    @Override
+    void addSourceDir(Project project, String dir) {
+        project.android.sourceSets.main.java.srcDirs += dir
+    }
+
+    @Override
+    void setSourceDir(Project project, String dir) {
+        project.android.sourceSets.main.java.srcDirs = [dir]
+        project.android.sourceSets.main.res.srcDirs = ["res2"]
+        project.android.sourceSets.main.jniLibs.srcDirs = ["jniLibs2"]
+        project.android.sourceSets.main.assets.srcDirs = ["assets2"]
     }
 }

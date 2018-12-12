@@ -4,8 +4,10 @@ import com.pqixing.Tools
 import com.pqixing.git.Components
 import com.pqixing.help.MavenPom
 import com.pqixing.help.XmlHelper
+import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BasePlugin
+import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
@@ -104,9 +106,23 @@ class DpsManager(val plugin: AndroidPlugin) {
      * 处理自身的依赖，主要针对Library_api类型
      */
     private fun onSelfCompile(includes: ArrayList<String>, excludes: HashSet<String>) {
+        val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         //如果是api模块作为独立运行时，移除api模块代码（因为主模块默认已经包含了api的代码）
-        if (components.type == Components.TYPE_LIBRARY_API && plugin.BUILD_TYPE == Components.TYPE_APPLICATION) {
-            addBranchExclude(components.lastLog.branch, "${components.name}_api", excludes, 0)
+        if (plugin.APP_TYPE == Components.TYPE_LIBRARY_API) {
+            when (plugin.BUILD_TYPE) {
+                Components.TYPE_APPLICATION, Components.TYPE_LIBRARY_SYNC, Components.TYPE_LIBRARY_LOCAL -> {
+                    //添加本地Api路径
+                    addBranchExclude(components.lastLog.branch, "${components.name}_api", excludes, 0)
+                    extHelper.addSourceDir(plugin.project, plugin.getApiPath())
+                }
+                //打包Api时，设置java目录只有Api
+                Components.TYPE_LIBRARY_API -> extHelper.setSourceDir(plugin.project, plugin.getApiPath())
+            }
+        }
+
+        //如果不是打包API，添加自动生成代码的source目录
+        if (plugin.BUILD_TYPE != Components.TYPE_LIBRARY_API) {
+            extHelper.addSourceDir(plugin.project, File(plugin.cacheDir, "java").absolutePath)
         }
     }
 
