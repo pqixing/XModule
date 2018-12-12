@@ -14,19 +14,16 @@ android {
         }
     }
 
-    lintOptions {
-        abortOnError false
-    }
     buildTypes {
         //生产测试环境
-        preTest {
+        outTest {
             initWith release
             matchingFallbacks = ['release']
         }
         //测试环境
         inTest {
             initWith release
-            matchingFallbacks = ['preTest', 'release']
+            matchingFallbacks = ['release']
         }
     }
 }
