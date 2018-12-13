@@ -3,6 +3,9 @@ package com.pqixing.modularization.android.dps
 import com.pqixing.Tools
 import com.pqixing.git.Components
 import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.base.BasePlugin
+import com.pqixing.modularization.manager.ManagerExtends
+import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import groovy.lang.Closure
 import org.gradle.api.Project
@@ -13,7 +16,8 @@ open class DpsExtends(project: Project) : BaseExtension(project) {
     internal var devCompiles = HashSet<DpComponents>()
     internal var apiCompiles = HashSet<DpComponents>()
     //组件工程
-    val components = ProjectManager.allComponents[project.name]?: Components("","","","","")
+    val components = ProjectManager.allComponents[project.name]!!
+    val manager = BasePlugin.getPlugin(ManagerPlugin::class.java)!!.getExtends(ManagerExtends::class.java)
 
     private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null): DpComponents {
         val inner = DpComponents(project)
@@ -42,6 +46,9 @@ open class DpsExtends(project: Project) : BaseExtension(project) {
             closure.delegate = inner
             closure.resolveStrategy = Closure.DELEGATE_ONLY
             closure.call()
+        }
+        if(inner.version.isEmpty()||inner.version == "+"){
+            inner.version = manager.baseVersion
         }
         container.add(inner)
         return inner

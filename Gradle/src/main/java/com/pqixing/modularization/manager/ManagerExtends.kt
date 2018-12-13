@@ -42,6 +42,10 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
      * 依赖匹配传递，如果当前分支无对应依赖包，则按照
      */
     var matchingFallbacks: MutableList<String> = arrayListOf("master")
+    /**
+     * 默认基础版本，如果ToMaven或者是依赖时没有配置，默认使用1.0
+     */
+    var baseVersion = "1.0"
 
     fun checkVail() {
         if (dependMaven.isEmpty()) dependMaven.add(groupMaven)
