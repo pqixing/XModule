@@ -65,26 +65,32 @@ class DpsManager(val plugin: AndroidPlugin) {
             when (plugin.BUILD_TYPE) {
                 Components.TYPE_LIBRARY_API -> dps.addAll(dpsExt.apiCompiles)
                 Components.TYPE_LIBRARY -> dps.addAll(dpsExt.compiles)
-                Components.TYPE_LIBRARY_LOCAL, Components.TYPE_APPLICATION -> {
+                Components.TYPE_LIBRARY_SYNC, Components.TYPE_APPLICATION -> {
                     dps.addAll(dpsExt.compiles)
                     dps.addAll(dpsExt.apiCompiles)
                     dps.addAll(dpsExt.devCompiles)
                 }
+                Components.TYPE_LIBRARY_LOCAL ->{
+                    dps.addAll(dpsExt.compiles)
+                    dps.addAll(dpsExt.apiCompiles)
+                }
             }
         }
-        Tools.println("${plugin.project.name} -> Dependency Version [")
-        dps.forEach { dpc ->
-            val compile = when (compileModel) {
-                "localOnly" -> onLocalCompile(dpc, includes, excludes)
-                "localFirst" -> onLocalCompile(dpc, includes, excludes) || onMavenCompile(dpc, includes, excludes)
-                "mavenFirst" -> onMavenCompile(dpc, includes, excludes) || onLocalCompile(dpc, includes, excludes)
-                else -> onMavenCompile(dpc, includes, excludes)
+        if(dps.isNotEmpty()) {
+            Tools.println("${plugin.project.name} -> Dependency Version [")
+            dps.forEach { dpc ->
+                val compile = when (compileModel) {
+                    "localOnly" -> onLocalCompile(dpc, includes, excludes)
+                    "localFirst" -> onLocalCompile(dpc, includes, excludes) || onMavenCompile(dpc, includes, excludes)
+                    "mavenFirst" -> onMavenCompile(dpc, includes, excludes) || onLocalCompile(dpc, includes, excludes)
+                    else -> onMavenCompile(dpc, includes, excludes)
+                }
+                if (!compile) loseList.add(dpc.moduleName)
+                val newVersion = VersionManager.getVersion(dpc.branch, dpc.moduleName, "+")
+                Tools.println("      config version : ${dpc.version} -> last version : ${newVersion.second} match branch : ${newVersion.first} -> ${dpc.moduleName} ")
             }
-            if (!compile) loseList.add(dpc.moduleName)
-            val newVersion = VersionManager.getVersion(dpc.branch, dpc.moduleName, "+")
-            Tools.println("      config version : ${dpc.version} -> last version : ${newVersion.second} match branch : ${newVersion.first} -> ${dpc.moduleName} ")
+            Tools.println("]")
         }
-        Tools.println("]")
 
         /**
          * 缺失了部分依赖
@@ -136,6 +142,7 @@ class DpsManager(val plugin: AndroidPlugin) {
 
     private fun onMavenCompile(dpc: DpComponents, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
         var compile = false
+
         //如果是App类型工程，则以app直接依赖的版本为准，忽略依赖传递中带来的版本变化
         val config = if (plugin.APP_TYPE == Components.TYPE_APPLICATION) "force = true" else ""
         //如果是Api类型的模块，只依赖api工程，不直接依赖模块代码

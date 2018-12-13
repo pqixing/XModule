@@ -53,7 +53,7 @@ open class AndroidPlugin : BasePlugin() {
         get() {
             if (APP_TYPE == Components.TYPE_APPLICATION) return listOf("com.module.application")
             //如果是独立运行，或者是本地同步时，增加
-            if (BUILD_TYPE == Components.TYPE_APPLICATION || BUILD_TYPE == Components.TYPE_LIBRARY_SYNC) return listOf("com.module.library", "com.module.run")
+            if (BUILD_TYPE == Components.TYPE_APPLICATION || BUILD_TYPE == Components.TYPE_LIBRARY_SYNC) return listOf("com.module.library", "com.module.dev")
             return listOf("com.module.library")
         }
     override val ignoreFields: Set<String> = setOf("scr/dev")
@@ -86,7 +86,6 @@ open class AndroidPlugin : BasePlugin() {
     }
 
     private fun compatOldPlugin(dpsExt: DpsExtends) {
-//        dpNames.append("$Keys.PREFIX_PKG.${m.groupId}.${TextUtils.numOrLetter(m.moduleName).toLowerCase()}.${TextUtils.className(m.moduleName)}Config,")
 //
         val javaCacheDir = File(cacheDir, "java")
         val groupName = getPlugin(ManagerPlugin::class.java)!!.getExtends(ManagerExtends::class.java).groupName

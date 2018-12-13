@@ -3,7 +3,7 @@ object ProjectInfoFiles {
     val files = listOf(
 "ProjectInfo/gradles/com.module.android.gradle",
 "ProjectInfo/gradles/com.module.application.gradle",
-"ProjectInfo/gradles/com.module.run.gradle",
+"ProjectInfo/gradles/com.module.dev.gradle",
 "ProjectInfo/gradles/com.module.ktolin.gradle",
 "ProjectInfo/gradles/com.module.library.gradle",
 "ProjectInfo/gradles/com.module.manager.gradle",
