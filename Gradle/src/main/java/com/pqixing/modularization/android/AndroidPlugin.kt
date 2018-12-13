@@ -6,6 +6,7 @@ import com.pqixing.git.Components
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
+import com.pqixing.modularization.android.dps.DpsAnalyTask
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BasePlugin
@@ -60,9 +61,11 @@ open class AndroidPlugin : BasePlugin() {
     override val ignoreFields: Set<String> = setOf("scr/dev")
 
     override fun linkTask(): List<Class<out Task>> {
-        if (APP_TYPE == Components.TYPE_LIBRARY_API) return listOf(CleanCache::class.java, ToMavenCheckTask::class.java, ToMavenApiTask::class.java)
-        if (APP_TYPE == Components.TYPE_LIBRARY) return listOf(CleanCache::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java)
-        return listOf(CleanCache::class.java)
+        var tasks = listOf(CleanCache::class.java, DpsAnalyTask::class.java)
+        if (APP_TYPE == Components.TYPE_LIBRARY_API || APP_TYPE == Components.TYPE_LIBRARY) {
+            tasks += listOf(ToMavenCheckTask::class.java, ToMavenTask::class.java, ToMavenApiTask::class.java)
+        }
+        return tasks
     }
 
     lateinit var dpsManager: DpsManager
