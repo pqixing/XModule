@@ -202,6 +202,7 @@ object VersionManager {
 
     fun indexVersionFromNet() {
         curVersions.clear()
+        branchVersion.clear()
         indexVersionFromNet(File(FileManager.docRoot, "versions/version.properties"), curVersions)
     }
 

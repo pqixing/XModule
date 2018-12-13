@@ -1,6 +1,7 @@
 package com.pqixing.modularization.android.dps
 
 import com.pqixing.Tools
+import com.pqixing.git.Components
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.manager.ProjectManager
 import groovy.lang.Closure
@@ -12,7 +13,7 @@ open class DpsExtends(project: Project) : BaseExtension(project) {
     internal var devCompiles = HashSet<DpComponents>()
     internal var apiCompiles = HashSet<DpComponents>()
     //组件工程
-    val components = ProjectManager.allComponents[project.name]!!
+    val components = ProjectManager.allComponents[project.name]?: Components("","","","","")
 
     private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null): DpComponents {
         val inner = DpComponents(project)

@@ -15,4 +15,8 @@ manager {
     gitUserName ""//docGit的用户名，如不填，取projectInfo文件中的配置
     gitPassWord ""//docGit的密码，如不填，取projectInfo文件中的配置
     groupMaven ""//用于上传Maven仓库
+
+    mavenUserName  ""//用于上传Maven的用户名
+    mavenPassWord  ""//用于上传的密码
+    branch "" //指定同步的分支，不指定时，取当前CodeManager的分支
 }

@@ -33,17 +33,6 @@ class DpComponents(project: Project) : BaseExtension(project) {
     var branch: String = ""
 
     var excludes: HashSet<Pair<String?, String?>> = HashSet()
-    /**
-     * 实际编译版本号
-     */
-    internal  var compileVersion = ""
-    internal  var apiVersion = ""
-    /**
-     * 实际编辑的分支
-     */
-    internal var compileBranch = ""
-    internal var apiBranch = ""
-
 
     /**
      * 依赖中的依赖树

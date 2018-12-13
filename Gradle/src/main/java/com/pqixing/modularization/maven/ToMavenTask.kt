@@ -4,9 +4,9 @@ import com.pqixing.modularization.base.BaseTask
 
 open class ToMavenTask : BaseTask() {
     init {
-        this.dependsOn("uploadArchives", "ToMavenCheck", "clean")
-        project.getTasksByName("clean", false)?.forEach { it.mustRunAfter("ToMavenCheck") }
-        project.getTasksByName("uploadArchives", false)?.forEach { it.mustRunAfter("clean") }
+        this.dependsOn("uploadArchives", "ToMavenCheck", "CleanCache")
+        project.getTasksByName("CleanCache", false)?.forEach { it.mustRunAfter("ToMavenCheck") }
+        project.getTasksByName("uploadArchives", false)?.forEach { it.mustRunAfter("CleanCache") }
     }
 
     override fun start() {

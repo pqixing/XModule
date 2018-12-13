@@ -112,7 +112,11 @@ object FileManager {
         docProject = Components(FileNames.ROOT, "", "LogManager", FileNames.MANAGER, Components.TYPE_DOCUMENT)
         if (git == null) return@with
         docProject.loadGitInfo(git)
-        ProjectManager.rootBranch = docProject.lastLog.branch
+
+        if(extends.branch.isEmpty()){
+            extends.branch = docProject.lastLog.branch
+        }
+        ProjectManager.rootBranch = extends.branch
         //如果有新增文件，提交
         if (filter.isNotEmpty()) {
             git.add().addFilepattern(".").init().execute()

@@ -13,6 +13,7 @@ import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.maven.CleanCache
 import com.pqixing.modularization.maven.ToMavenApiTask
 import com.pqixing.modularization.maven.ToMavenCheckTask
 import com.pqixing.modularization.maven.ToMavenTask
@@ -59,9 +60,9 @@ open class AndroidPlugin : BasePlugin() {
     override val ignoreFields: Set<String> = setOf("scr/dev")
 
     override fun linkTask(): List<Class<out Task>> {
-        if (APP_TYPE == Components.TYPE_LIBRARY_API) return listOf(ToMavenCheckTask::class.java, ToMavenApiTask::class.java)
-        if (APP_TYPE == Components.TYPE_LIBRARY) return listOf(ToMavenCheckTask::class.java,ToMavenTask::class.java)
-        return emptyList()
+        if (APP_TYPE == Components.TYPE_LIBRARY_API) return listOf(CleanCache::class.java, ToMavenCheckTask::class.java, ToMavenApiTask::class.java)
+        if (APP_TYPE == Components.TYPE_LIBRARY) return listOf(CleanCache::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java)
+        return listOf(CleanCache::class.java)
     }
 
     lateinit var dpsManager: DpsManager
@@ -72,9 +73,11 @@ open class AndroidPlugin : BasePlugin() {
         val moduleConfig = CompatDps(project, dpsExt)
         project.extensions.add(Keys.CONFIG_MODULE, moduleConfig)
 
+        //如果是空同步，不做任何处理
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         //在工程处理后，处理组件依赖
         extHelper.setExtMethod(project, "endConfig") {
+            if (isEmptyTask) return@setExtMethod //如果是空同步，不处理依赖，节约时间
             dpsManager = DpsManager(this@AndroidPlugin)
             val dependencies = dpsManager.resolveDps(dpsExt)
             project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dependencies, true)))
@@ -94,7 +97,7 @@ open class AndroidPlugin : BasePlugin() {
         //Config文件输出
         val DP_CONFIGS_NAMES = dpsExt.compiles.map { "auto.$groupName.${TextUtils.numOrLetter(it.moduleName).toLowerCase()}.${TextUtils.className(it.moduleName)}Config" }
                 .sortedBy { it }.toString()
-        configStr.append("public static final String  DP_CONFIGS_NAMES = \"${DP_CONFIGS_NAMES.replace("[", "").replace("]","")}\";\n")
+        configStr.append("public static final String  DP_CONFIGS_NAMES = \"${DP_CONFIGS_NAMES.replace("[", "").replace("]", "")}\";\n")
         val CONFIG = "auto.$groupName.${TextUtils.numOrLetter(project.name).toLowerCase()}.${TextUtils.className(project.name)}"
         configStr.append("public static final String  LAUNCH_CONFIG = \"${CONFIG}Launch\";\n")
         val NAME = TextUtils.numOrLetter(project.name).toLowerCase()

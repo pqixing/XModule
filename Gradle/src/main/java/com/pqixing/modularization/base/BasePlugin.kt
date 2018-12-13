@@ -32,6 +32,7 @@ import java.util.*
 
 abstract class BasePlugin : Plugin<Project>, IPlugin {
     lateinit var p: Project
+    var isEmptyTask:Boolean = false
     val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
     protected abstract val applyFiles: List<String>
@@ -93,7 +94,9 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         pluginCache[javaClass.simpleName] = this
     }
 
+
     protected fun initProject(project: Project) {
+        isEmptyTask = project.gradle.startParameter.taskNames.isEmpty()
         this.p = project
         setPlugin()
         initTools(project)

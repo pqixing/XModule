@@ -1,5 +1,6 @@
 package com.pqixing.modularization.manager
 
+import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.maven.IndexVersionTask
@@ -27,6 +28,7 @@ class ManagerPlugin : BasePlugin() {
 
     var error: String = ""
     override fun apply(project: Project) {
+        val startTime = System.currentTimeMillis()
         onSyncStart()
         super.apply(project)
         error = FileManager.checkFileExist(this)
@@ -34,7 +36,7 @@ class ManagerPlugin : BasePlugin() {
 
         project.gradle.beforeProject {
             //在每个工程开始同步之前，检查状态，下载，切换分支等等
-            ProjectManager.checkProject(it, projectInfo!!)
+            if(!isEmptyTask) ProjectManager.checkProject(it, projectInfo!!)
         }
         project.afterEvaluate {
             val extends = getExtends(ManagerExtends::class.java)
@@ -50,11 +52,12 @@ class ManagerPlugin : BasePlugin() {
                 extHelper.addRepositories(p, extends.dependMaven)
             }
         }
+
         project.gradle.addBuildListener(object : BuildAdapter() {
             override fun projectsEvaluated(gradle: Gradle) {
                 ProjectManager.gitForProject.forEach { it.value.close() }
                 ProjectManager.gitForProject.clear()
-
+                Tools.println("Sync end -> spend: ${System.currentTimeMillis() - startTime} ms")
             }
         })
     }
