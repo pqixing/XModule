@@ -36,7 +36,7 @@ class ManagerPlugin : BasePlugin() {
 
         project.gradle.beforeProject {
             //在每个工程开始同步之前，检查状态，下载，切换分支等等
-            if(!isEmptyTask) ProjectManager.checkProject(it, projectInfo!!)
+            ProjectManager.checkProject(it, projectInfo!!)
         }
         project.afterEvaluate {
             val extends = getExtends(ManagerExtends::class.java)

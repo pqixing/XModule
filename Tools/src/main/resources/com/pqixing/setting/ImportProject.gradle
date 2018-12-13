@@ -85,8 +85,11 @@ public class ImportProject {
         String url = projectPaths.find { it.key == dpsName }?.value
         if (url == null || url.isEmpty()) return
 
-        def f = new File(codeRootDir, "$dpsPath/$dpsName")
-        if (!f.exists()) return
+        def f = new File(rootDir, "$dpsPath/$dpsName")
+        if (!f.exists()) {
+            println("$dpsName version not found , please run task DpsAnaly")
+            return
+        }
         String[] map = f.text.trim().replaceAll("//.*", "").split("=")
         parseValue(type, map[map.length - 1])
     }

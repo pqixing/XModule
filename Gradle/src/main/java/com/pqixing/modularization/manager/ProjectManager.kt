@@ -2,8 +2,10 @@ package com.pqixing.modularization.manager
 
 import com.pqixing.Tools
 import com.pqixing.ProjectInfo
+import com.pqixing.Tools.rootDir
 import com.pqixing.git.*
 import com.pqixing.help.XmlHelper
+import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
@@ -50,7 +52,7 @@ object ProjectManager {
     }
 
     private fun initGit(projectDir: File, rootDir: File, gitUrl: String, info: ProjectInfo): Git? {
-        val git = if (!projectDir.exists() || !checkRootDir(rootDir)) {//下载工程
+        val git = if (!projectDir.exists() || !checkRootDir(projectDir,rootDir)) {//下载工程
             GitUtils.clone(gitUrl, rootDir, rootBranch)
         } else {
             Git.open(rootDir)
@@ -87,6 +89,8 @@ object ProjectManager {
                 return
             }
         }
+        //本地没有分支时，先尝试更新一下，然后再进行处理
+        git.pull().init().execute()
         val remote = git
                 .branchList()
                 .setListMode(ListBranchCommand.ListMode.REMOTE)
@@ -110,10 +114,10 @@ object ProjectManager {
         Tools.println("Can not find branch: $branchName ")
     }
 
-    private fun checkRootDir(rootDir: File): Boolean {
+    private fun checkRootDir(projectDir:File,rootDir: File): Boolean {
         //如果根目录不是git目录,先删除
-        if (!GitUtils.isGitDir(rootDir)) {
-            rootDir.deleteOnExit()
+        if (!GitUtils.isGitDir(rootDir)||projectDir.listFiles().size<3) {
+            FileUtils.delete(rootDir)
             return false
         }
         return true

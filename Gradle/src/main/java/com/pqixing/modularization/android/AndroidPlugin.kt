@@ -77,7 +77,6 @@ open class AndroidPlugin : BasePlugin() {
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         //在工程处理后，处理组件依赖
         extHelper.setExtMethod(project, "endConfig") {
-            if (isEmptyTask) return@setExtMethod //如果是空同步，不处理依赖，节约时间
             dpsManager = DpsManager(this@AndroidPlugin)
             val dependencies = dpsManager.resolveDps(dpsExt)
             project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dependencies, true)))

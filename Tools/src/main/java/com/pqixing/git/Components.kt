@@ -1,5 +1,6 @@
 package com.pqixing.git
 
+import com.pqixing.Tools
 import org.eclipse.jgit.api.Git
 
 /**
@@ -58,6 +59,7 @@ class Components {
             lastLog.hash = rev.name
         }
         hasInit = true
+        Tools.println("${name} loadGitInfo -> branch : ${lastLog.branch} log : ${lastLog.message}")
     }
 
     companion object {
