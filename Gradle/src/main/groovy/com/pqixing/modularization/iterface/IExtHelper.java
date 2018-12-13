@@ -18,4 +18,11 @@ public interface IExtHelper {
     void addRepositories(Project project,@NotNull List<String> dependMaven);
     void addSourceDir(Project project,String dir);
     void setSourceDir(Project project,String dir);
+    void setMavenInfo(Project project,String maven_url
+            ,String userName
+            ,String password
+            ,String groupId
+            ,String artifactId
+            ,String version
+            ,String name);
 }

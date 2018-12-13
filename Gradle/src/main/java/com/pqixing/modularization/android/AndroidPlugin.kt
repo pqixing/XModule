@@ -20,6 +20,7 @@ import com.pqixing.modularization.maven.ToMavenCheckTask
 import com.pqixing.modularization.maven.ToMavenTask
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
+import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import java.io.File
@@ -54,15 +55,15 @@ open class AndroidPlugin : BasePlugin() {
         get() {
             if (APP_TYPE == Components.TYPE_APPLICATION) return listOf("com.module.application")
             //如果是独立运行，或者是本地同步时，增加
-            if (BUILD_TYPE == Components.TYPE_APPLICATION || BUILD_TYPE == Components.TYPE_LIBRARY_SYNC) return listOf("com.module.library", "com.module.dev")
-            return listOf("com.module.library")
+            if (BUILD_TYPE == Components.TYPE_APPLICATION || BUILD_TYPE == Components.TYPE_LIBRARY_SYNC) return listOf("com.module.library", "com.module.maven","com.module.dev")
+            return listOf("com.module.library","com.module.maven")
         }
     override val ignoreFields: Set<String> = setOf("scr/dev")
 
     override fun linkTask(): List<Class<out Task>> {
-        var tasks = listOf(CleanCache::class.java, DpsAnalysisTask::class.java)
-        if (APP_TYPE == Components.TYPE_LIBRARY_API || APP_TYPE == Components.TYPE_LIBRARY) {
-            tasks += listOf(ToMavenCheckTask::class.java, ToMavenTask::class.java, ToMavenApiTask::class.java)
+        var tasks = mutableListOf(CleanCache::class.java, DpsAnalysisTask::class.java,ToMavenCheckTask::class.java, ToMavenTask::class.java)
+        if (APP_TYPE == Components.TYPE_LIBRARY_API ) {
+            tasks.add(ToMavenApiTask::class.java)
         }
         return tasks
     }
@@ -74,6 +75,7 @@ open class AndroidPlugin : BasePlugin() {
         //创建配置读取
         val moduleConfig = CompatDps(project, dpsExt)
         project.extensions.add(Keys.CONFIG_MODULE, moduleConfig)
+        project.extensions.extraProperties.set(project.name, this)
 
         //如果是空同步，不做任何处理
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
@@ -92,7 +94,7 @@ open class AndroidPlugin : BasePlugin() {
     private fun compatOldPlugin(dpsExt: DpsExtends) {
 //
         val javaCacheDir = File(cacheDir, "java")
-        val groupName = getPlugin(ManagerPlugin::class.java)!!.getExtends(ManagerExtends::class.java).groupName
+        val groupName = ManagerPlugin.getManagerExtends().groupName
         val configStr = StringBuilder("package auto.$groupName.${TextUtils.numOrLetter(project.name).toLowerCase()};\n")
                 .append("public class ${TextUtils.className(project.name)}Config { \n")
         //Config文件输出
@@ -150,5 +152,9 @@ open class AndroidPlugin : BasePlugin() {
         if (match.size == 0) {
             BUILD_TYPE = if (assemble) Components.TYPE_LIBRARY_LOCAL else Components.TYPE_LIBRARY_SYNC
         }
+    }
+
+    companion object {
+        fun getPluginByProject(project: Project): AndroidPlugin = project.extensions.extraProperties.get(project.name) as AndroidPlugin
     }
 }

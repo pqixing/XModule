@@ -6,10 +6,10 @@ import com.pqixing.modularization.base.BasePlugin
 class GitCredential : ICredential {
 
     override fun getUserName(): String {
-        return BasePlugin.getPlugin(ManagerPlugin::class.java)?.projectInfo?.gitUserName?:""
+        return ManagerPlugin.getManagerPlugin().projectInfo.gitUserName
     }
 
     override fun getPassWord(): String {
-        return BasePlugin.getPlugin(ManagerPlugin::class.java)?.projectInfo?.gitPassWord?:""
+        return ManagerPlugin.getManagerPlugin().projectInfo.gitPassWord
     }
 }

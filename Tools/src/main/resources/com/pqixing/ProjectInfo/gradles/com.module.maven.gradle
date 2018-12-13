@@ -1,0 +1,14 @@
+apply plugin: "maven"
+// 上传到本地代码库,此处只是新增任务，实际参数在上传时会自动修改，无需修改
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "xxx") {
+                authentication(userName: "xxx", password: "xxx")
+            }
+            pom.groupId = 'xxx' // 组名
+            pom.artifactId = 'xxx' // 插件名
+            pom.version = '1.0' // 版本号
+        }
+    }
+}

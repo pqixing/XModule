@@ -17,7 +17,7 @@ open class DpsExtends(project: Project) : BaseExtension(project) {
     internal var apiCompiles = HashSet<DpComponents>()
     //组件工程
     val components = ProjectManager.allComponents[project.name]!!
-    val manager = BasePlugin.getPlugin(ManagerPlugin::class.java)!!.getExtends(ManagerExtends::class.java)
+    val manager = ManagerPlugin.getManagerExtends()
 
     private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null): DpComponents {
         val inner = DpComponents(project)

@@ -15,9 +15,6 @@ import com.pqixing.tools.CheckUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import groovy.lang.GroovyClassLoader
-import org.gradle.BuildAdapter
-import org.gradle.BuildListener
-import org.gradle.BuildResult
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -89,14 +86,9 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
 
     override fun getGradle(): Gradle = p.gradle
 
-    fun setPlugin() {
-        pluginCache[javaClass.simpleName] = this
-    }
-
 
     protected fun initProject(project: Project) {
         this.p = project
-        setPlugin()
         initTools(project)
         createIgnoreFile()
 
@@ -155,12 +147,6 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     }
 
     companion object {
-        private val pluginCache = HashMap<String, IPlugin>()
-
-        fun <T : IPlugin> getPlugin(pluginClass: Class<T>): T? {
-            return pluginCache[pluginClass.simpleName] as T
-        }
-
         var pi: ProjectInfo? = null
     }
 }

@@ -67,4 +67,19 @@ public class GExtHelper implements IExtHelper {
         project.android.sourceSets.main.jniLibs.srcDirs = ["jniLibs2"]
         project.android.sourceSets.main.assets.srcDirs = ["assets2"]
     }
+
+    @Override
+    void setMavenInfo(Project project, String maven_url, String userName, String password, String groupId, String artifactId, String version, String name) {
+        def deployer = project.uploadArchives.repositories.mavenDeployer
+        def pom = deployer.pom
+        def repository = deployer.repository
+
+        repository.url = maven_url
+        repository.authentication.userName = userName
+        repository.authentication.password = password
+        pom.groupId = groupId
+        pom.artifactId = artifactId
+        pom.version = version
+        pom.name = name
+    }
 }

@@ -4,8 +4,8 @@ import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.maven.IndexVersionTask
+import com.pqixing.modularization.maven.VersionManager
 import org.gradle.BuildAdapter
-import org.gradle.BuildListener
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
 
@@ -28,6 +28,7 @@ class ManagerPlugin : BasePlugin() {
 
     var error: String = ""
     override fun apply(project: Project) {
+        plugin = this
         val startTime = System.currentTimeMillis()
         onSyncStart()
         super.apply(project)
@@ -71,5 +72,12 @@ class ManagerPlugin : BasePlugin() {
         ProjectManager.gitForProject.clear()
         ProjectManager.hasInit = false
         ProjectManager.rootBranch = ""
+        VersionManager.clear()
+    }
+    companion object {
+        private lateinit var  plugin : ManagerPlugin
+
+        fun getManagerPlugin() = plugin
+        fun getManagerExtends() =  plugin.getExtends(ManagerExtends::class.java)
     }
 }

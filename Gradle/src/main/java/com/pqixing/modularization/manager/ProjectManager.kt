@@ -18,7 +18,7 @@ object ProjectManager {
     val allComponents = HashMap<String, Components>()
     val gitForProject = HashMap<String, Git>()
     var hasInit = false
-    fun findComponent(name: String) = allComponents[name]
+    fun findComponent(name: String) = allComponents[name]!!
     fun checkVail() {
         if (hasInit) return
         XmlHelper.parseProjectXml(FileManager.getProjectXml(), allComponents)

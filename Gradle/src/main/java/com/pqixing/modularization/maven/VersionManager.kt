@@ -44,6 +44,20 @@ object VersionManager {
      */
     private val targetVersion = HashMap<String, String>()
 
+    /**
+     * 获取指定分支指定baseVersion版本的最新版本号
+     */
+    fun getNewerVersion(branch: String, module: String, version: String): Int {
+        if (curVersions.isEmpty()) readCurVersions()
+        val key = "$groupName.$branch.$module.$version"
+        return curVersions[key]?.toInt() ?: 0
+    }
+    fun clear(){
+        curVersions.clear()
+        targetVersion.clear()
+        branchVersion.clear()
+    }
+
 
     /**
      * 按照顺序，查取模块的版本号信息
@@ -129,14 +143,14 @@ object VersionManager {
      */
     private fun readTargetVersions() {
         targetVersion[FileNames.MODULARIZATION] = FileNames.MODULARIZATION
-        val info = BasePlugin.getPlugin(ManagerPlugin::class.java)!!.projectInfo
+        val info = ManagerPlugin.getManagerPlugin().projectInfo
         PropertiesUtils.readProperties(File(info?.versionFile)).forEach {
             targetVersion[it.key.toString()] = it.value.toString()
         }
     }
 
     private fun readCurVersions() {
-        BasePlugin.getPlugin(ManagerPlugin::class.java)?.getExtends(ManagerExtends::class.java)?.apply {
+        ManagerPlugin.getManagerExtends().apply {
             this@VersionManager.matchingFallbacks.addAll(matchingFallbacks)
             this@VersionManager.groupName = groupName
         }
@@ -161,7 +175,8 @@ object VersionManager {
     private fun indexCacheVersion(lastUpdate: Int, curVersions: HashMap<String, String>) {
         val lastLog = FileManager.docProject.lastLog
         //cacheMap中的最后更新时间与git版本号的最后更新时间不一致，尝试更新
-        if (lastLog.commitTime != lastUpdate) {
+        if (lastLog.commitTime < lastUpdate) {
+            Tools.println("indexCacheVersion last ${lastLog.commitTime} update ->$lastUpdate")
             /**从日志中读取版本号**/
             val git = Git.open(GitUtils.findGitDir(FileManager.docRoot))
             run out@{
@@ -170,10 +185,11 @@ object VersionManager {
                     val message = rev.fullMessage.trim()
                     //如果是
                     if (!message.startsWith(Keys.PREFIX_TO_MAVEN)) return@forEach
-
+                    Tools.println("indexCacheVersion find $message")
                     val params = UrlUtils.getParams(message)
+                    Tools.println("indexCacheVersion find $params")
                     if (params == null || params.size < 3) return@forEach
-                    addVersion(curVersions, params[Keys.LOG_BRANCH]!!, params[Keys.LOG_MODULE]!!, listOf(params[Keys.LOG_VERSION]!!))
+                    addVersion(curVersions, "$groupName.${params[Keys.LOG_BRANCH]}", params[Keys.LOG_MODULE]!!, listOf(params[Keys.LOG_VERSION]!!))
                 }
             }
         }
@@ -191,13 +207,13 @@ object VersionManager {
             val bv = v.substring(0, l)
             val lv = v.substring(l + 1)
             val key = "$groupId.$artifactId.$bv"
-            val latKey = curVersions[key]?.toInt() ?: 0
+            val latKey = curVersions[key]?.toInt() ?: -1
             if (lv.toInt() > latKey) {
                 curVersions[key] = lv
                 addV.append(v).append(",")
             }
         }
-        Tools.println("addVersion -> $groupId -> $artifactId -> $addV")
+//        Tools.println("addVersion -> $groupId -> $artifactId -> $addV")
     }
 
     fun indexVersionFromNet() {
@@ -211,21 +227,20 @@ object VersionManager {
      */
     fun indexVersionFromNet(outFile: File, versions: HashMap<String, String>) {
 
-        val plugin = BasePlugin.getPlugin(ManagerPlugin::class.java)!!
+        val plugin = ManagerPlugin.getManagerPlugin()
         val extends = plugin.getExtends(ManagerExtends::class.java)
         val maven = extends.groupMaven
         val groupUrl = extends.groupName.replace(".", "/")
-        Tools.println("indexVersionFromNet  start ->")
+        Tools.println("parseNetVersions  start ->")
+        val start = System.currentTimeMillis()
         parseNetVersions("$maven/$groupUrl", versions, extends.groupName)
-        Tools.println("indexVersionFromNet  end ->")
+        Tools.println("parseNetVersions  end -> ${System.currentTimeMillis() - start} ms")
         versions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
         //上传版本好到服务端
         val git = Git.open(GitUtils.findGitDir(FileManager.docRoot))
         git.pull().setCredentialsProvider(FileManager.docCredentials).setProgressMonitor(PercentProgress()).call()
 
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
-        Tools.println("indexVersionFromNet update from net save to -> $outFile")
-
         git.add().addFilepattern(FileNames.MANAGER).init().execute()
         git.commit().setAllowEmpty(true).setMessage("indexVersionFromNet ${Date().toLocaleString()}").init().execute()
         (git.push().init() as PushCommand).setCredentialsProvider(FileManager.docCredentials).setForce(true).execute()

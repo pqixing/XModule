@@ -26,7 +26,7 @@ object FileManager {
     var codeRootDir: File? = null
         get() {
             if (field == null) {
-                field = JGroovyHelper.getImpl(IExtHelper::class.java).getExtValue(BasePlugin.getPlugin(ManagerPlugin::class.java)?.project?.gradle, FileNames.CODE_ROOT) as File?
+                field = JGroovyHelper.getImpl(IExtHelper::class.java).getExtValue(ManagerPlugin.getManagerPlugin().project.gradle, FileNames.CODE_ROOT) as File?
             }
             return field
         }
@@ -34,14 +34,14 @@ object FileManager {
     var cacheRoot: File? = null
         get() {
             if (field == null) {
-                field = File(BasePlugin.getPlugin(ManagerPlugin::class.java)?.cacheDir, FileNames.MODULARIZATION)
+                field = File(ManagerPlugin.getManagerPlugin().cacheDir, FileNames.MODULARIZATION)
             }
             return field
         }
     var docRoot: File? = null
         get() {
             if (field == null) {
-                field = File(BasePlugin.getPlugin(ManagerPlugin::class.java)?.rootDir, FileNames.MANAGER)
+                field = File(ManagerPlugin.getManagerPlugin().rootDir, FileNames.MANAGER)
             }
             return field
         }
@@ -119,9 +119,9 @@ object FileManager {
         ProjectManager.rootBranch = extends.branch
         //如果有新增文件，提交
         if (filter.isNotEmpty()) {
-            git.add().addFilepattern(".").init().execute()
-            git.commit().setAllowEmpty(true).setMessage("add file $filter").init().execute()
-            git.push().setForce(true).init().execute()
+            git.add().addFilepattern(".").init(docCredentials).execute()
+            git.commit().setAllowEmpty(true).setMessage("add file $filter").init(docCredentials).execute()
+            git.push().setForce(true).init(docCredentials).execute()
         }
         git.close()
     }

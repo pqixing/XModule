@@ -24,7 +24,7 @@ class DpsManager(val plugin: AndroidPlugin) {
          * 获取仓库aar中，exclude的传递
          */
         fun getPom(branch: String, module: String, version: String): MavenPom {
-            val plugin = BasePlugin.getPlugin(ManagerPlugin::class.java)!!
+            val plugin = ManagerPlugin.getManagerPlugin()
             val extends = plugin.getExtends(ManagerExtends::class.java)
             val groupMaven = extends.groupMaven
             val group = "${extends.groupName}.$branch"
@@ -49,7 +49,7 @@ class DpsManager(val plugin: AndroidPlugin) {
     //组件工程
     val components = ProjectManager.allComponents[plugin.project.name]!!
     val compileModel = plugin.projectInfo?.dependentModel ?: "mavenOnly"
-    val managerExtends = BasePlugin.getPlugin(ManagerPlugin::class.java)?.getExtends(ManagerExtends::class.java)!!
+    val managerExtends =ManagerPlugin.getManagerExtends()
 
     //处理依赖
     fun resolveDps(dpsExt: DpsExtends): String {
