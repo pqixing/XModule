@@ -5,7 +5,7 @@ import com.pqixing.modularization.base.BaseTask
 /**
  * 依赖对比分析
  */
-open class DpsAnalyTask:BaseTask() {
+open class DpsAnalysisTask:BaseTask() {
     override fun start() {
 
     }

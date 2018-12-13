@@ -87,7 +87,7 @@ public class ImportProject {
 
         def f = new File(rootDir, "$dpsPath/$dpsName")
         if (!f.exists()) {
-            println("$dpsName  version file :$f.absolutePath  not found , please run task DpsAnaly")
+            println("$dpsName  version file :$f.absolutePath  not found , please run task DpsAnalysisTask")
             return
         }
         String[] map = f.text.trim().replaceAll("//.*", "").split("=")
