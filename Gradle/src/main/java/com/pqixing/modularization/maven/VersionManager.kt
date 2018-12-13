@@ -64,12 +64,13 @@ object VersionManager {
      * 按照顺序，查取模块的版本号信息
      * 指定版本 > 分支版本 > 当前版本
      */
-    fun getVersion(branch: String, module: String, version: String): Pair<String, String> {
+    fun getVersion(branch: String, module: String, v: String): Pair<String, String> {
         val branchVersion = findBranchVersion(branch)
         val start = matchingFallbacks.indexOf(branch)
         for (i in start until matchingFallbacks.size) {
             val b = if (i < 0) branch else matchingFallbacks[i]
             val preKey = "$groupName.$b.$module."
+            val version = if (isVersionCode(v)) v else findBaseVersion(v,preKey,branchVersion)
             //如果传入的是固定的版本号,则只查询各分支是否存在此版本号，不做自动升级版本号处理
             if (isBaseVersion(version)) {
                 val v = branchVersion["$preKey$version"] ?: continue
@@ -83,7 +84,7 @@ object VersionManager {
                 if (v >= last) return Pair(b, version)
             }
         }
-        return Pair("", version)
+        return Pair("", v)
     }
 
     /**

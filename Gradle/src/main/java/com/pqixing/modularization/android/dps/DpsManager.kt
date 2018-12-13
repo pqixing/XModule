@@ -87,9 +87,11 @@ class DpsManager(val plugin: AndroidPlugin) {
                 }
                 if (!compile) loseList.add(dpc.moduleName)
                 val newVersion = VersionManager.getVersion(dpc.branch, dpc.moduleName, "+")
-                dpsV.add("\n       config version : ${dpc.version} -> last version : ${newVersion.second}  -> ${dpc.moduleName} ")
+                if(!newVersion.second.startsWith(dpc.version))
+                    dpsV.add("\n       Config Version : ${dpc.version} -> Last Version : ${newVersion.second} -> Match Branch : ${newVersion.first} -> ${dpc.moduleName} ")
             }
-            Tools.println("${plugin.project.name} -> Dependency Version $dpsV")
+            if(dpsV.isNotEmpty())
+                Tools.println("${plugin.project.name} -> Dependency Diff BaseVersion $dpsV")
         }
 
         /**
