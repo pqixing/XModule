@@ -28,7 +28,7 @@ class DpsManager(val plugin: AndroidPlugin) {
             val extends = plugin.getExtends(ManagerExtends::class.java)
             val groupMaven = extends.groupMaven
             val group = "${extends.groupName}.$branch"
-            val pomUrl = "$groupMaven/${group.replace(".", "/")}/$module/$version/$module-$version.xml"
+            val pomUrl = "$groupMaven/${group.replace(".", "/")}/$module/$version/$module-$version.pom"
             val pomKey = TextUtils.numOrLetter(pomUrl)
             var pom = pomCache[pomKey]
             if (pom != null) return pom

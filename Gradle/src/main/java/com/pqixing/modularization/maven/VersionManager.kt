@@ -52,7 +52,8 @@ object VersionManager {
         val key = "$groupName.$branch.$module.$version"
         return curVersions[key]?.toInt() ?: 0
     }
-    fun clear(){
+
+    fun clear() {
         curVersions.clear()
         targetVersion.clear()
         branchVersion.clear()
@@ -70,21 +71,19 @@ object VersionManager {
             val b = if (i < 0) branch else matchingFallbacks[i]
             val preKey = "$groupName.$b.$module."
             //如果传入的是固定的版本号,则只查询各分支是否存在此版本号，不做自动升级版本号处理
-            return if (isVersionCode(version)) {
-                val baseVersion = version.substring(version.lastIndexOf('.'))
-                val v = branchVersion["$preKey$baseVersion"] ?: continue
-                val finalVersion = "$baseVersion.$v"
-                if (finalVersion != version) continue
-                Pair(b, finalVersion)
-            } else {
-                val baseVersion = if (isBaseVersion(version)) version else findBaseVersion(version, preKey, branchVersion)
-                //该分支找不到对应的版本号
-                if (!isBaseVersion(baseVersion)) continue
-                val v = branchVersion["$preKey$baseVersion"] ?: continue
-                Pair(b, "$baseVersion.$v")
+            if (isBaseVersion(version)) {
+                val v = branchVersion["$preKey$version"] ?: continue
+                return Pair(b, "$version.$v")
+            }
+            if (isVersionCode(version)) {
+                val i = version.lastIndexOf('.')
+                val baseVersion = version.substring(0, i)
+                val last = version.substring(i + 1).toInt()
+                val v = branchVersion["$preKey$baseVersion"]?.toInt() ?: continue
+                if (v >= last) return Pair(b, version)
             }
         }
-        return Pair("", "+")
+        return Pair("", version)
     }
 
     /**

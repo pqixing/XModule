@@ -3,6 +3,7 @@ package com.pqixing.help
 import com.pqixing.git.Components
 import com.pqixing.tools.CheckUtils
 import groovy.util.Node
+import groovy.util.NodeList
 import groovy.util.XmlParser
 import groovy.xml.QName
 import java.io.File
@@ -17,15 +18,16 @@ object XmlHelper {
     fun parsePomEclude(pomText: String, matchGroup: String): MavenPom {
         val pom = MavenPom()
         val node = XmlParser().parseText(pomText)
+
         pom.groupId = getChildNodeValue(node, "groupId")
         pom.artifactId = getChildNodeValue(node, "artifactId")
         pom.version = getChildNodeValue(node, "version")
         pom.packaging = getChildNodeValue(node, "packaging")
-        pom.name = getChildNodeValue(node, "packaging")
+        pom.name = getChildNodeValue(node, "name")
         val dependencies = getChildNode(node, "dependencies")
 
         var first = true
-        for (it in dependencies.getAt(QName("dependency"))) {
+        for (it in getChildNodeList(dependencies, "dependency")) {
             val dependency = it as? Node ?: continue
             val gid = getChildNodeValue(dependency, "groupId")
             if (gid.startsWith(matchGroup)) {
@@ -34,7 +36,7 @@ object XmlHelper {
             if (!first && pom.allExclude.isEmpty()) continue
 
             val exclude = HashSet<String>()
-            val exclusion = getChildNode(dependency, "exclusions").getAt(QName("exclusion"))
+            val exclusion = getChildNodeList(getChildNode(dependency, "exclusions"), "exclusion")
             if (exclusion.isEmpty()) pom.allExclude.clear()
             else exclusion.forEach {
                 val e = it as? Node ?: return@forEach
@@ -55,19 +57,26 @@ object XmlHelper {
     fun parseMetadata(txt: String): MavenMetadata {
         val mate = MavenMetadata()
         val node = XmlParser().parseText(txt)
+
         mate.groupId = getChildNodeValue(node, "groupId")
         mate.artifactId = getChildNodeValue(node, "artifactId")
         val versioning = getChildNode(node, "versioning")
         mate.release = getChildNodeValue(versioning, "release")
         val versions = getChildNode(versioning, "versions")
-        versions.getAt(QName("version")).forEach {
+        getChildNodeList(versions, "version").forEach {
             val v = it as? Node ?: return@forEach
             mate.versions.add(getNodeValue(v))
         }
         return mate
     }
 
-    private fun getChildNode(paren: Node, name: String) = (paren.getAt(QName(name))[0] as Node)
+    private fun getChildNode(paren: Node, name: String) = getChildNodeList(paren, name)[0] as Node
+    private fun getChildNodeList(paren: Node, name: String): NodeList {
+        val at = paren.getAt(QName(name))
+        if (at.size > 0) return at
+        return paren.get(name) as NodeList
+    }
+
     private fun getChildNodeValue(paren: Node, name: String) = getNodeValue(getChildNode(paren, name))
     private fun getNodeValue(node: Node): String {
         val value = node.value().toString();
