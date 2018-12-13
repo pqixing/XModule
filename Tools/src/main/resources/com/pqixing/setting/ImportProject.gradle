@@ -8,6 +8,7 @@ public class ImportProject {
 
     final String includeKt = "import.kt"
     final String defaultXmlPath = "manager/project.xml"
+    final String dpsPath = "manager/dependency"
 
     File rootDir
 
@@ -83,7 +84,8 @@ public class ImportProject {
     void readDps(String type, String dpsName) {
         String url = projectPaths.find { it.key == dpsName }?.value
         if (url == null || url.isEmpty()) return
-        def f = new File(codeRootDir, "$url/import.kt")
+
+        def f = new File(codeRootDir, "$dpsPath/$dpsName")
         if (!f.exists()) return
         String[] map = f.text.trim().replaceAll("//.*", "").split("=")
         parseValue(type, map[map.length - 1])
