@@ -36,9 +36,10 @@ object XmlHelper {
             if (!first && pom.allExclude.isEmpty()) continue
 
             val exclude = HashSet<String>()
-            val exclusion = getChildNodeList(getChildNode(dependency, "exclusions"), "exclusion")
-            if (exclusion.isEmpty()) pom.allExclude.clear()
-            else exclusion.forEach {
+            val exclusions = getChildNodeList(dependency, "exclusions")
+            if (exclusions.isNotEmpty()) getChildNodeList(exclusions[0] as Node, "exclusion").apply {
+                if (isEmpty()) pom.allExclude.clear()
+            }.forEach {
                 val e = it as? Node ?: return@forEach
                 val g = getChildNodeValue(e, "groupId")
                 if (g.startsWith(matchGroup)) {

@@ -77,7 +77,7 @@ class DpsManager(val plugin: AndroidPlugin) {
             }
         }
         if(dps.isNotEmpty()) {
-            Tools.println("${plugin.project.name} -> Dependency Version [")
+            val dpsV = mutableListOf<String>()
             dps.forEach { dpc ->
                 val compile = when (compileModel) {
                     "localOnly" -> onLocalCompile(dpc, includes, excludes)
@@ -87,9 +87,9 @@ class DpsManager(val plugin: AndroidPlugin) {
                 }
                 if (!compile) loseList.add(dpc.moduleName)
                 val newVersion = VersionManager.getVersion(dpc.branch, dpc.moduleName, "+")
-                Tools.println("      config version : ${dpc.version} -> last version : ${newVersion.second} match branch : ${newVersion.first} -> ${dpc.moduleName} ")
+                dpsV.add("\n       config version : ${dpc.version} -> last version : ${newVersion.second}  -> ${dpc.moduleName} ")
             }
-            Tools.println("]")
+            Tools.println("${plugin.project.name} -> Dependency Version $dpsV")
         }
 
         /**
@@ -136,15 +136,15 @@ class DpsManager(val plugin: AndroidPlugin) {
      * 重新凭借scope
      */
     private fun getScope(prefix: String, scope: String): String {
-        if (prefix.isEmpty()) return scope
-        return "$prefix${TextUtils.firstUp(scope)}"
+        if (prefix.isEmpty()) return "    $scope"
+        return "    $prefix${TextUtils.firstUp(scope)}"
     }
 
     private fun onMavenCompile(dpc: DpComponents, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
-        var compile = false
+        var compile = true
 
         //如果是App类型工程，则以app直接依赖的版本为准，忽略依赖传递中带来的版本变化
-        val config = if (plugin.APP_TYPE == Components.TYPE_APPLICATION) "force = true" else ""
+        val config = if (plugin.APP_TYPE == Components.TYPE_APPLICATION) "; force = true ;" else ""
         //如果是Api类型的模块，只依赖api工程，不直接依赖模块代码
         if (dpc.type == Components.TYPE_LIBRARY_API) {
             compile = addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_API), dpc.branch, "${dpc.moduleName}_api", dpc.version, includes, excludes, HashSet(), config) and compile
@@ -166,7 +166,11 @@ class DpsManager(val plugin: AndroidPlugin) {
     private fun addMavenCompile(scope: String, branch: String, module: String, version: String, includes: ArrayList<String>, excludes: HashSet<String>, dpExcludes: HashSet<Pair<String?, String?>>, config: String = ""): Boolean {
         val dpVersion = VersionManager.getVersion(branch, module, version)
         if (dpVersion.first.isEmpty()) return false
-        includes.add("$scope ('${managerExtends.groupName}.${dpVersion.first}:$module:${dpVersion.second}') { ${excludeStr(excludes = dpExcludes)} \n $config }")
+        var c =""
+        if(dpVersion.second == version){
+            c =" ;force = true ;"
+        }
+        includes.add("$scope ('${managerExtends.groupName}.${dpVersion.first}:$module:${dpVersion.second}') { ${excludeStr(excludes = dpExcludes)} $config $c }")
         addBranchExclude(dpVersion.first, module, excludes)
         excludes.addAll(getPom(dpVersion.first, module, dpVersion.second).allExclude)
         return true
@@ -193,7 +197,7 @@ class DpsManager(val plugin: AndroidPlugin) {
     private fun excludeStr(prefix: String = "exclude", excludes: Set<Pair<String?, String?>>): String {
         val sb = StringBuilder()
         excludes.forEach {
-            sb.append("$prefix (")
+            sb.append("    $prefix (")
             if (it.first != null) sb.append("group : '${it.first}', ")
             if (it.second != null) sb.append("module : '${it.second}', ")
             sb.deleteCharAt(sb.length - 1)
@@ -215,7 +219,7 @@ class DpsManager(val plugin: AndroidPlugin) {
             includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_RUNTIME)} ( project(path : ':${dpc.moduleName}')) { ${excludeStr(excludes = dpc.excludes)} }")
             addBranchExclude(branch, dpc.moduleName, excludes)
             //添加对api的maven仓库的编译依赖，只有编译时期使用
-            addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_COMPILEONLY), dpc.branch, "${dpc.moduleName}_api", dpc.version, includes, excludes, HashSet(), "force = true")
+            addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_COMPILEONLY), dpc.branch, "${dpc.moduleName}_api", dpc.version, includes, excludes, HashSet(), " ;force = true ;")
         } else {
             includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_API)} ( project(path : ':${dpc.moduleName}'))  { ${excludeStr(excludes = dpc.excludes)} }")
             addBranchExclude(branch, dpc.moduleName, excludes)
