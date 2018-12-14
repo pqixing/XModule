@@ -64,13 +64,13 @@ object VersionManager {
      * 按照顺序，查取模块的版本号信息
      * 指定版本 > 分支版本 > 当前版本
      */
-    fun getVersion(branch: String, module: String, v: String): Pair<String, String> {
+    fun getVersion(branch: String, module: String, inputVersion: String): Pair<String, String> {
         val branchVersion = findBranchVersion(branch)
         val start = matchingFallbacks.indexOf(branch)
         for (i in start until matchingFallbacks.size) {
             val b = if (i < 0) branch else matchingFallbacks[i]
             val preKey = "$groupName.$b.$module."
-            val version = if (isVersionCode(v)) v else findBaseVersion(v,preKey,branchVersion)
+            val version = if (isBaseVersion(inputVersion)) inputVersion else findBaseVersion(inputVersion, preKey, branchVersion)
             //如果传入的是固定的版本号,则只查询各分支是否存在此版本号，不做自动升级版本号处理
             if (isBaseVersion(version)) {
                 val v = branchVersion["$preKey$version"] ?: continue
@@ -78,13 +78,14 @@ object VersionManager {
             }
             if (isVersionCode(version)) {
                 val i = version.lastIndexOf('.')
+                if (i < 0) continue
                 val baseVersion = version.substring(0, i)
                 val last = version.substring(i + 1).toInt()
                 val v = branchVersion["$preKey$baseVersion"]?.toInt() ?: continue
                 if (v >= last) return Pair(b, version)
             }
         }
-        return Pair("", v)
+        return Pair("", inputVersion)
     }
 
     /**
@@ -103,15 +104,15 @@ object VersionManager {
 
     private fun findBaseVersion(v: String, preKey: String, versions: HashMap<String, String>): String {
         var vs = versions.keys.filter { it.startsWith(preKey) }
-        if (vs.isEmpty()) return v
+        if (vs.isEmpty()) return "+"
         vs = vs.map { it.replace(preKey, "") }
                 .sortedWith(Comparator { p0, p1 -> TextUtils.compareVersion(p0, p1) })
         if (v.isEmpty() || v == "+") return vs[0]
         val v1 = "$v."
         for (s in vs) {
-            if (s.startsWith(v1)) return v1
+            if (s.startsWith(v1)) return s
         }
-        return v
+        return "+"
     }
 
     fun isVersionCode(str: String?) = str?.matches(Regex("\\d*[.\\d]+")) ?: false
@@ -176,7 +177,6 @@ object VersionManager {
         val lastLog = FileManager.docProject.lastLog
         //cacheMap中的最后更新时间与git版本号的最后更新时间不一致，尝试更新
         if (lastLog.commitTime < lastUpdate) {
-            Tools.println("indexCacheVersion last ${lastLog.commitTime} update ->$lastUpdate")
             /**从日志中读取版本号**/
             val git = Git.open(GitUtils.findGitDir(FileManager.docRoot))
             run out@{
@@ -185,9 +185,7 @@ object VersionManager {
                     val message = rev.fullMessage.trim()
                     //如果是
                     if (!message.startsWith(Keys.PREFIX_TO_MAVEN)) return@forEach
-                    Tools.println("indexCacheVersion find $message")
                     val params = UrlUtils.getParams(message)
-                    Tools.println("indexCacheVersion find $params")
                     if (params == null || params.size < 3) return@forEach
                     addVersion(curVersions, "$groupName.${params[Keys.LOG_BRANCH]}", params[Keys.LOG_MODULE]!!, listOf(params[Keys.LOG_VERSION]!!))
                 }

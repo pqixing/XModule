@@ -166,6 +166,7 @@ class DpsManager(val plugin: AndroidPlugin) {
      * 添加一个仓库依赖
      */
     private fun addMavenCompile(scope: String, branch: String, module: String, version: String, includes: ArrayList<String>, excludes: HashSet<String>, dpExcludes: HashSet<Pair<String?, String?>>, config: String = ""): Boolean {
+
         val dpVersion = VersionManager.getVersion(branch, module, version)
         if (dpVersion.first.isEmpty()) return false
         var c =""
