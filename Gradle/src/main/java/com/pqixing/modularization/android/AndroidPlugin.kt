@@ -51,18 +51,20 @@ open class AndroidPlugin : BasePlugin() {
      */
     fun getApiPath(): String = File(projectDir, "src/main/api").absolutePath
 
+    fun getApiManifestPath(): String = File(cacheDir, "src/api/AndroidManifest.xml").absolutePath
+
     override val applyFiles: List<String>
         get() {
             if (APP_TYPE == Components.TYPE_APPLICATION) return listOf("com.module.application")
             //如果是独立运行，或者是本地同步时，增加
-            if (BUILD_TYPE == Components.TYPE_APPLICATION || BUILD_TYPE == Components.TYPE_LIBRARY_SYNC) return listOf("com.module.library", "com.module.maven","com.module.dev")
-            return listOf("com.module.library","com.module.maven")
+            if (BUILD_TYPE == Components.TYPE_APPLICATION || BUILD_TYPE == Components.TYPE_LIBRARY_SYNC) return listOf("com.module.library", "com.module.maven", "com.module.dev")
+            return listOf("com.module.library", "com.module.maven")
         }
     override val ignoreFields: Set<String> = setOf("scr/dev")
 
     override fun linkTask(): List<Class<out Task>> {
-        var tasks = mutableListOf(CleanCache::class.java, DpsAnalysisTask::class.java,ToMavenCheckTask::class.java, ToMavenTask::class.java)
-        if (APP_TYPE == Components.TYPE_LIBRARY_API ) {
+        var tasks = mutableListOf(CleanCache::class.java, DpsAnalysisTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java)
+        if (APP_TYPE == Components.TYPE_LIBRARY_API) {
             tasks.add(ToMavenApiTask::class.java)
         }
         return tasks
@@ -84,11 +86,17 @@ open class AndroidPlugin : BasePlugin() {
             dpsManager = DpsManager(this@AndroidPlugin)
             val dependencies = dpsManager.resolveDps(dpsExt)
             project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dependencies, true)))
-
+            if (BUILD_TYPE == Components.TYPE_LIBRARY_API) writeEmptyManifest()
             compatOldPlugin(dpsExt)
         }
         extHelper.setExtValue(project, "JustApi", if (APP_TYPE == Components.TYPE_LIBRARY_API && BUILD_TYPE == Components.TYPE_LIBRARY_API) "Y" else "N")
 
+    }
+
+    private fun writeEmptyManifest() {
+        FileUtils.writeText(File(getApiManifestPath())
+                , "<manifest package=\"${ManagerPlugin.getManagerExtends().groupName}.${project.name}_api\" />"
+                , true)
     }
 
     private fun compatOldPlugin(dpsExt: DpsExtends) {

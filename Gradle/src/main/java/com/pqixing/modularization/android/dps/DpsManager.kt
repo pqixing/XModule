@@ -6,7 +6,6 @@ import com.pqixing.help.MavenPom
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.android.AndroidPlugin
-import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
@@ -124,7 +123,7 @@ class DpsManager(val plugin: AndroidPlugin) {
                     extHelper.addSourceDir(plugin.project, plugin.getApiPath())
                 }
                 //打包Api时，设置java目录只有Api
-                Components.TYPE_LIBRARY_API -> extHelper.setSourceDir(plugin.project, plugin.getApiPath())
+                Components.TYPE_LIBRARY_API -> extHelper.setApiSourceDir(plugin.project, plugin.getApiPath(),plugin.getApiManifestPath())
             }
         }
 

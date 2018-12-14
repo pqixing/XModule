@@ -17,7 +17,7 @@ public interface IExtHelper {
 
     void addRepositories(Project project,@NotNull List<String> dependMaven);
     void addSourceDir(Project project,String dir);
-    void setSourceDir(Project project,String dir);
+    void setApiSourceDir(Project project, String dir,String manifestPath);
     void setMavenInfo(Project project,String maven_url
             ,String userName
             ,String password
