@@ -12,7 +12,6 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
-import com.pqixing.shell.Shell
 import com.pqixing.tools.UrlUtils
 import java.util.*
 

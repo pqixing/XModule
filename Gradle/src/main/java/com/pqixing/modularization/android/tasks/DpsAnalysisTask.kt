@@ -1,4 +1,4 @@
-package com.pqixing.modularization.android.dps
+package com.pqixing.modularization.android.tasks
 
 import com.pqixing.modularization.base.BaseTask
 

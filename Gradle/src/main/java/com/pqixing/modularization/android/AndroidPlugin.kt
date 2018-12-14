@@ -6,12 +6,11 @@ import com.pqixing.git.Components
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.android.dps.DpsAnalysisTask
+import com.pqixing.modularization.android.tasks.DpsAnalysisTask
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.iterface.IExtHelper
-import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.maven.CleanCache
@@ -20,7 +19,6 @@ import com.pqixing.modularization.maven.ToMavenCheckTask
 import com.pqixing.modularization.maven.ToMavenTask
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import java.io.File
