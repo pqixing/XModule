@@ -117,7 +117,6 @@ object XmlHelper {
     private inline fun addProject(projects: HashMap<String, Components>, name: String, gitUrl: String, introduce: String, rootName: String, type: String) {
         val project = Components(name, gitUrl, introduce, rootName, type)
         projects[name] = project
-        Tools.println("addProject ->$project")
     }
 
     /**

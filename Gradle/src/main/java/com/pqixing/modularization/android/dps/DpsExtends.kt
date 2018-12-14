@@ -23,6 +23,12 @@ open class DpsExtends(project: Project) : BaseExtension(project) {
      * 上传到Maven的版本
      */
     var toMavenVersion = ""
+    get() {
+        if(field.isEmpty()) {
+            field = ManagerPlugin.getManagerExtends().baseVersion
+        }
+        return field
+    }
     /**
      * 上传到Maven的描述
      */

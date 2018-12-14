@@ -2,6 +2,7 @@ package com.pqixing.git
 
 import com.pqixing.Tools
 import org.eclipse.jgit.api.Git
+import java.io.File
 
 /**
  * Created by pqixing on 17-12-7.
@@ -52,6 +53,7 @@ class Components {
         lastLog.branch = repo.branch
         val command = git.log().setMaxCount(1)
         if (rootName != name) command.addPath(name)
+        lastLog.gitDir = repo.directory
         command.call().forEach { rev ->
             lastLog.author = rev.authorIdent.name
             lastLog.commitTime = rev.commitTime
@@ -78,4 +80,6 @@ class Components {
 }
 
 
-data class GitLog(var hash: String = "", var author: String = "", var message: String = "", var commitTime: Int = 0, var branch: String = "master")
+data class GitLog(var hash: String = "", var author: String = "", var message: String = "", var commitTime: Int = 0, var branch: String = "master") {
+    lateinit var gitDir: File
+}

@@ -16,7 +16,7 @@ import com.pqixing.tools.TextUtils
 import java.io.File
 import java.net.URL
 
-class DpsManager(val plugin: AndroidPlugin) {
+class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
     companion object {
         val pomCache: HashMap<String, MavenPom> = HashMap()
         /**
@@ -48,13 +48,13 @@ class DpsManager(val plugin: AndroidPlugin) {
     //组件工程
     val components = ProjectManager.allComponents[plugin.project.name]!!
     val compileModel = plugin.projectInfo?.dependentModel ?: "mavenOnly"
-    val managerExtends =ManagerPlugin.getManagerExtends()
+    val managerExtends = ManagerPlugin.getManagerExtends()
 
+    val loseList = mutableListOf<String>()
     //处理依赖
-    fun resolveDps(dpsExt: DpsExtends): String {
+    fun resolveDps(): String {
         val excludes: HashSet<String> = HashSet()
         val includes: ArrayList<String> = ArrayList()
-        val loseList = mutableListOf<String>()
 
         onSelfCompile(includes, excludes)
         val dps = HashSet<DpComponents>()
@@ -69,13 +69,13 @@ class DpsManager(val plugin: AndroidPlugin) {
                     dps.addAll(dpsExt.apiCompiles)
                     dps.addAll(dpsExt.devCompiles)
                 }
-                Components.TYPE_LIBRARY_LOCAL ->{
+                Components.TYPE_LIBRARY_LOCAL -> {
                     dps.addAll(dpsExt.compiles)
                     dps.addAll(dpsExt.apiCompiles)
                 }
             }
         }
-        if(dps.isNotEmpty()) {
+        if (dps.isNotEmpty()) {
             val dpsV = mutableListOf<String>()
             dps.forEach { dpc ->
                 val compile = when (compileModel) {
@@ -86,10 +86,10 @@ class DpsManager(val plugin: AndroidPlugin) {
                 }
                 if (!compile) loseList.add(dpc.moduleName)
                 val newVersion = VersionManager.getVersion(dpc.branch, dpc.moduleName, "+")
-                if(!newVersion.second.startsWith(dpc.version))
+                if (!newVersion.second.startsWith(dpc.version))
                     dpsV.add("\n       Config Version : ${dpc.version} -> Last Version : ${newVersion.second} -> Match Branch : ${newVersion.first} -> ${dpc.moduleName} ")
             }
-            if(dpsV.isNotEmpty())
+            if (dpsV.isNotEmpty())
                 Tools.println("${plugin.project.name} -> Dependency Diff BaseVersion $dpsV")
         }
 
@@ -100,7 +100,7 @@ class DpsManager(val plugin: AndroidPlugin) {
             if (plugin.projectInfo.allowLose) Tools.println("resolveDps -> lose dps -> $loseList")
             else Tools.printError("resolveDps -> lose dps -> $loseList")
         }
-        val sb = java.lang.StringBuilder("dependencies { \n")
+        val sb = java.lang.StringBuilder("dependencies {  // APP_TYPE : ${plugin.APP_TYPE} -> BUILD_TYPE : ${plugin.BUILD_TYPE}\n")
         includes.forEach { sb.append(it).append("\n") }
         sb.append("}\n")
                 .append("configurations { \n")
@@ -122,8 +122,9 @@ class DpsManager(val plugin: AndroidPlugin) {
                     addBranchExclude(components.lastLog.branch, "${components.name}_api", excludes, 0)
                     extHelper.addSourceDir(plugin.project, plugin.getApiPath())
                 }
+                Components.TYPE_LIBRARY -> addMavenCompile(DpsExtends.SCOP_API, components.lastLog.branch, "${components.name}_api", dpsExt.toMavenVersion, includes, excludes, HashSet())
                 //打包Api时，设置java目录只有Api
-                Components.TYPE_LIBRARY_API -> extHelper.setApiSourceDir(plugin.project, plugin.getApiPath(),plugin.getApiManifestPath()    )
+                Components.TYPE_LIBRARY_API -> extHelper.setApiSourceDir(plugin.project, plugin.getApiPath(), plugin.getApiManifestPath())
             }
         }
 
@@ -168,9 +169,9 @@ class DpsManager(val plugin: AndroidPlugin) {
 
         val dpVersion = VersionManager.getVersion(branch, module, version)
         if (dpVersion.first.isEmpty()) return false
-        var c =""
-        if(dpVersion.second == version){
-            c =" ;force = true ;"
+        var c = ""
+        if (dpVersion.second == version) {
+            c = " ;force = true ;"
         }
         includes.add("$scope ('${managerExtends.groupName}.${dpVersion.first}:$module:${dpVersion.second}') { ${excludeStr(excludes = dpExcludes)} $config $c }")
         addBranchExclude(dpVersion.first, module, excludes)
@@ -185,7 +186,7 @@ class DpsManager(val plugin: AndroidPlugin) {
         with(managerExtends.matchingFallbacks) {
             val start = indexOf(compileBranch) + pointer
             for (i in start until size) {
-                val b = if(i<0) compileBranch else get(i)
+                val b = if (i < 0) compileBranch else get(i)
                 if (VersionManager.checkBranchVersion(b, moduleName)) {
                     excludes.add(XmlHelper.pairToStr("${managerExtends.groupName}.$b", moduleName))
                 }

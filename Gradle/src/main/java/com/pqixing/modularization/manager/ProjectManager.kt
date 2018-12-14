@@ -71,7 +71,6 @@ object ProjectManager {
     private fun checkBranch(git: Git, info: ProjectInfo) {
         if (!info.syncBranch) return
         val branchName = rootBranch
-        Tools.println("checkBranch ${git.repository} -> branch : $branchName target -> $rootBranch")
         //在同一个分支，不处理
         if (branchName == git.repository.branch) return
 

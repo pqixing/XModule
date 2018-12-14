@@ -6,10 +6,11 @@ import com.pqixing.interfaces.ILog
 import com.pqixing.tools.FileUtils
 
 
-object Tools : ILog {
-    override fun printError(l: String?) = logger?.printError(l)
+object Tools {
 
-    override fun println(l: String?) = logger?.println(l)
+    fun printError(l: String?,exitCode: Int = -1) = logger?.printError(exitCode,l)
+
+    fun println(l: String?) = logger?.println(l)
 
     lateinit var rootDir: String
     lateinit var logger: ILog

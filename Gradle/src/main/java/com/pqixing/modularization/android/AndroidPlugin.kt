@@ -83,8 +83,8 @@ open class AndroidPlugin : BasePlugin() {
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         //在工程处理后，处理组件依赖
         extHelper.setExtMethod(project, "endConfig") {
-            dpsManager = DpsManager(this@AndroidPlugin)
-            val dependencies = dpsManager.resolveDps(dpsExt)
+            dpsManager = DpsManager(this@AndroidPlugin,dpsExt)
+            val dependencies = dpsManager.resolveDps()
             project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dependencies, true)))
             if (BUILD_TYPE == Components.TYPE_LIBRARY_API) writeEmptyManifest()
             compatOldPlugin(dpsExt)
@@ -135,7 +135,6 @@ open class AndroidPlugin : BasePlugin() {
     private fun checkPluginType(project: Project) {
         val components = ProjectManager.findComponent(project.name) ?: return
         APP_TYPE = components.type
-        Tools.println("checkPluginType $APP_TYPE")
         if (APP_TYPE == Components.TYPE_APPLICATION) {
             BUILD_TYPE = Components.TYPE_APPLICATION
             return

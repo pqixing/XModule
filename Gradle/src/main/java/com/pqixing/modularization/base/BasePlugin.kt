@@ -138,7 +138,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     private fun initTools(project: Project) {
         if (!Tools.init) {
             Tools.init(object : ILog {
-                override fun printError(l: String?) = throw  GradleException(l)
+                override fun printError(exitCode:Int,l: String?) = throw  GradleException(l)
 
                 override fun println(l: String?) = System.out.println(l)
             }, project.rootDir.absolutePath, object : ICredential {
