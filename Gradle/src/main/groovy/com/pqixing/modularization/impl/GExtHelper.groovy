@@ -64,9 +64,10 @@ public class GExtHelper implements IExtHelper {
     void setApiSourceDir(Project project, String dir,String manifestPath) {
         project.android.sourceSets.main.java.srcDirs = [dir]
         project.android.sourceSets.main.manifest.srcFile manifestPath
-        project.android.sourceSets.main.res.srcDirs = ["res2"]
-        project.android.sourceSets.main.jniLibs.srcDirs = ["jniLibs2"]
-        project.android.sourceSets.main.assets.srcDirs = ["assets2"]
+        project.android.sourceSets.main.res.srcDirs = ["src/main/resApi"]
+        project.android.sourceSets.main.resources.srcDirs = ['src/main/resourcesApi']
+        project.android.sourceSets.main.jniLibs.srcDirs = ["src/main/jniLibsApi"]
+        project.android.sourceSets.main.assets.srcDirs = ["src/main/assetsApi"]
     }
 
     @Override

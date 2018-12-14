@@ -123,7 +123,7 @@ class DpsManager(val plugin: AndroidPlugin) {
                     extHelper.addSourceDir(plugin.project, plugin.getApiPath())
                 }
                 //打包Api时，设置java目录只有Api
-                Components.TYPE_LIBRARY_API -> extHelper.setApiSourceDir(plugin.project, plugin.getApiPath(),plugin.getApiManifestPath())
+                Components.TYPE_LIBRARY_API -> extHelper.setApiSourceDir(plugin.project, plugin.getApiPath(),plugin.getApiManifestPath()    )
             }
         }
 
@@ -200,8 +200,8 @@ class DpsManager(val plugin: AndroidPlugin) {
         val sb = StringBuilder()
         excludes.forEach {
             sb.append("    $prefix (")
-            if (it.first != null) sb.append("group : '${it.first}', ")
-            if (it.second != null) sb.append("module : '${it.second}', ")
+            if (it.first != null) sb.append("group : '${it.first}',")
+            if (it.second != null) sb.append("module : '${it.second}',")
             sb.deleteCharAt(sb.length - 1)
             sb.append(") \n")
         }
