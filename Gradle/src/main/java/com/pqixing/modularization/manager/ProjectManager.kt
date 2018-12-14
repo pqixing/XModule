@@ -31,7 +31,8 @@ object ProjectManager {
     fun checkProject(project: Project, info: ProjectInfo): Components? {
         checkVail()
         val buildDir = info.buildDir.toString().trim()
-        if (buildDir.isNotEmpty()) project.buildDir = File(project.buildDir, "B_$buildDir")
+        //重新设置build 目录
+        project.buildDir = File(project.buildDir, if (buildDir.isEmpty()) "default" else buildDir)
 
         //不在配置文件的git工程，不进行管理
         val gitProject = allComponents[project.name] ?: return null
@@ -52,7 +53,7 @@ object ProjectManager {
     }
 
     private fun initGit(projectDir: File, rootDir: File, gitUrl: String, info: ProjectInfo): Git? {
-        val git = if (!projectDir.exists() || !checkRootDir(projectDir,rootDir)) {//下载工程
+        val git = if (!projectDir.exists() || !checkRootDir(projectDir, rootDir)) {//下载工程
             GitUtils.clone(gitUrl, rootDir, rootBranch)
         } else {
             Git.open(rootDir)
@@ -114,9 +115,9 @@ object ProjectManager {
         Tools.println("Can not find branch: $branchName ")
     }
 
-    private fun checkRootDir(projectDir:File,rootDir: File): Boolean {
+    private fun checkRootDir(projectDir: File, rootDir: File): Boolean {
         //如果根目录不是git目录,先删除
-        if (!GitUtils.isGitDir(rootDir)||projectDir.listFiles().size<3) {
+        if (!GitUtils.isGitDir(rootDir) || projectDir.listFiles().size < 3) {
             FileUtils.delete(rootDir)
             return false
         }

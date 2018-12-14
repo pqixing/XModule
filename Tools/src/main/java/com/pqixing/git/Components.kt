@@ -62,6 +62,11 @@ class Components {
         Tools.println("${name} loadGitInfo -> branch : ${lastLog.branch} log : ${lastLog.message}")
     }
 
+    override fun toString(): String {
+        return "Components(name='$name', gitUrl='$gitUrl', introduce='$introduce', rootName='$rootName', type='$type', hasInit=$hasInit)"
+    }
+
+
     companion object {
         val TYPE_LIBRARY = "library"
         val TYPE_APPLICATION = "application"

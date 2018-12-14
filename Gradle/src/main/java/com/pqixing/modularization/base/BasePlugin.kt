@@ -78,7 +78,10 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         get() = project.buildDir
 
     override val cacheDir: File
-        get() = File(buildDir, FileNames.MODULARIZATION)
+        get() {
+            val suffix = if (project == project.rootProject) "" else "_${buildDir.name}"
+            return File(projectDir, "build/${FileNames.MODULARIZATION}$suffix")
+        }
 
     override fun apply(project: Project) {
         initProject(project)
@@ -99,7 +102,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         applyFiles.forEach {
             val f = File(file, "$it.gradle")
             if (f.exists() && f.isFile)
-                project.apply(mapOf<String,String>("from" to f.absolutePath))
+                project.apply(mapOf<String, String>("from" to f.absolutePath))
         }
         linkTask()?.forEach { onTaskCreate(it, BaseTask.task(project, it)) }
     }

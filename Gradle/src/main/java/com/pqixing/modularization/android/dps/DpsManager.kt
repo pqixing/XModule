@@ -186,7 +186,7 @@ class DpsManager(val plugin: AndroidPlugin) {
         with(managerExtends.matchingFallbacks) {
             val start = indexOf(compileBranch) + pointer
             for (i in start until size) {
-                val b = get(i)
+                val b = if(i<0) compileBranch else get(i)
                 if (VersionManager.checkBranchVersion(b, moduleName)) {
                     excludes.add(XmlHelper.pairToStr("${managerExtends.groupName}.$b", moduleName))
                 }

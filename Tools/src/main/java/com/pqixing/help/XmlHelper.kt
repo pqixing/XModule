@@ -1,5 +1,6 @@
 package com.pqixing.help
 
+import com.pqixing.Tools
 import com.pqixing.git.Components
 import com.pqixing.tools.CheckUtils
 import groovy.util.Node
@@ -103,11 +104,12 @@ object XmlHelper {
             if (children.isEmpty()) {
                 addProject(projects, rootName, gitUrl, introduce, rootName, type)
             } else children.forEach { c ->
-                val cp = c as? Node ?: return@forEach
-                val name = cp.get("@name").toString()
-                val type = p.get("@type")?.toString() ?: Components.TYPE_LIBRARY
-                introduce = cp.get("@introduce").toString()
-                addProject(projects, name, gitUrl, introduce, rootName, type)
+                if(c is Node) {
+                    val name = c.get("@name").toString()
+                    val t = c.get("@type")?.toString() ?: Components.TYPE_LIBRARY
+                    introduce = c.get("@introduce").toString()
+                    addProject(projects, name, gitUrl, introduce, rootName, t)
+                }
             }
         }
     }
@@ -115,6 +117,7 @@ object XmlHelper {
     private inline fun addProject(projects: HashMap<String, Components>, name: String, gitUrl: String, introduce: String, rootName: String, type: String) {
         val project = Components(name, gitUrl, introduce, rootName, type)
         projects[name] = project
+        Tools.println("addProject ->$project")
     }
 
     /**

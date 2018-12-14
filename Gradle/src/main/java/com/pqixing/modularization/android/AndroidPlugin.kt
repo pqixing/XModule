@@ -127,6 +127,7 @@ open class AndroidPlugin : BasePlugin() {
     private fun checkPluginType(project: Project) {
         val components = ProjectManager.findComponent(project.name) ?: return
         APP_TYPE = components.type
+        Tools.println("checkPluginType $APP_TYPE")
         if (APP_TYPE == Components.TYPE_APPLICATION) {
             BUILD_TYPE = Components.TYPE_APPLICATION
             return
