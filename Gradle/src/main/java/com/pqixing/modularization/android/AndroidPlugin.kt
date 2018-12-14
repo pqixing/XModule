@@ -9,6 +9,7 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.tasks.DpsAnalysisTask
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
+import com.pqixing.modularization.android.tasks.PrepareDevTask
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.ManagerPlugin
@@ -30,6 +31,9 @@ open class AndroidPlugin : BasePlugin() {
 
         //根据情况进行不同的Android插件依赖
         project.apply(mapOf<String, String>("plugin" to if (BUILD_TYPE == Components.TYPE_APPLICATION) Keys.NAME_APP else Keys.NAME_LIBRARY))
+        val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
+        extHelper.setExtValue(project, "AsApp", if (BUILD_TYPE == Components.TYPE_APPLICATION) "Y" else "N")
+
         if (APP_TYPE == Components.TYPE_LIBRARY || APP_TYPE == Components.TYPE_LIBRARY_API) {
             project.apply(mapOf<String, String>("plugin" to "maven"))
         }
@@ -61,15 +65,15 @@ open class AndroidPlugin : BasePlugin() {
     override val ignoreFields: Set<String> = setOf("scr/dev")
 
     override fun linkTask(): List<Class<out Task>> {
-        var tasks = mutableListOf(CleanCache::class.java, DpsAnalysisTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java)
-        if (APP_TYPE == Components.TYPE_LIBRARY_API) {
-            tasks.add(ToMavenApiTask::class.java)
-        }
+        var tasks = mutableListOf(CleanCache::class.java, DpsAnalysisTask::class.java)
+        if (APP_TYPE == Components.TYPE_LIBRARY||APP_TYPE == Components.TYPE_LIBRARY_API) tasks.addAll(listOf(PrepareDevTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java))
+        if (APP_TYPE == Components.TYPE_LIBRARY_API) tasks.add(ToMavenApiTask::class.java)
         return tasks
     }
 
     lateinit var dpsManager: DpsManager
     override fun apply(project: Project) {
+        //如果是空同步，不做任何处理
         val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, project)
         super.apply(project)
         //创建配置读取
@@ -77,11 +81,11 @@ open class AndroidPlugin : BasePlugin() {
         project.extensions.add(Keys.CONFIG_MODULE, moduleConfig)
         project.extensions.extraProperties.set(project.name, this)
 
-        //如果是空同步，不做任何处理
+
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         //在工程处理后，处理组件依赖
         extHelper.setExtMethod(project, "endConfig") {
-            dpsManager = DpsManager(this@AndroidPlugin,dpsExt)
+            dpsManager = DpsManager(this@AndroidPlugin, dpsExt)
             val dependencies = dpsManager.resolveDps()
             project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dependencies, true)))
             if (BUILD_TYPE == Components.TYPE_LIBRARY_API) writeEmptyManifest()

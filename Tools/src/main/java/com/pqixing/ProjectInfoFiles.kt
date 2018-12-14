@@ -1,6 +1,9 @@
 package com.pqixing
 object ProjectInfoFiles {
     val files = listOf(
+"ProjectInfo/android/DevActivity.java",
+"ProjectInfo/android/AndroidManifest.xml",
+"ProjectInfo/android/DevApplication.java",
 "ProjectInfo/gradles/com.module.android.gradle",
 "ProjectInfo/gradles/com.module.application.gradle",
 "ProjectInfo/gradles/com.module.maven.gradle",

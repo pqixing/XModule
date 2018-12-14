@@ -1,5 +1,11 @@
 //依赖库工程独立运行的配置文件
 android {
+    defaultConfig {
+        if(AsApp == "Y"){
+            applicationId = "com.modularization.dev.$project.name"
+        }
+        multiDexEnabled true
+    }
     buildTypes {
         //dev渠道不能去掉，独立运行任务取决该渠道
         dev {
