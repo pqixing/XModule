@@ -19,6 +19,15 @@ open class DpsExtends(project: Project) : BaseExtension(project) {
     val components = ProjectManager.allComponents[project.name]!!
     val manager = ManagerPlugin.getManagerExtends()
 
+    /**
+     * 上传到Maven的版本
+     */
+    var toMavenVersion = ""
+    /**
+     * 上传到Maven的描述
+     */
+    var toMavenDesc = ""
+
     private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null): DpComponents {
         val inner = DpComponents(project)
         //根据 ： 号分割

@@ -27,4 +27,12 @@ class CompatDps(project: Project, val dpsExtends: DpsExtends) : BaseExtension(pr
     fun mavenTypes(closure: Closure<out Any?>) {
 
     }
+
+    fun toMavenVersion(version:String){
+        dpsExtends.toMavenVersion = version
+    }
+
+    fun toMavenDesc(desc:String){
+        dpsExtends.toMavenDesc = desc
+    }
 }

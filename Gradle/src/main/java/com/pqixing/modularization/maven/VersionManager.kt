@@ -50,7 +50,7 @@ object VersionManager {
     fun getNewerVersion(branch: String, module: String, version: String): Int {
         if (curVersions.isEmpty()) readCurVersions()
         val key = "$groupName.$branch.$module.$version"
-        return curVersions[key]?.toInt() ?: 0
+        return curVersions[key]?.toInt() ?: -1
     }
 
     fun clear() {
@@ -106,7 +106,7 @@ object VersionManager {
         var vs = versions.keys.filter { it.startsWith(preKey) }
         if (vs.isEmpty()) return "+"
         vs = vs.map { it.replace(preKey, "") }
-                .sortedWith(Comparator { p0, p1 -> TextUtils.compareVersion(p0, p1) })
+                .sortedWith(Comparator { p0, p1 -> -TextUtils.compareVersion(p0, p1) })
         if (v.isEmpty() || v == "+") return vs[0]
         val v1 = "$v."
         for (s in vs) {
