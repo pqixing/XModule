@@ -33,6 +33,8 @@ object FileManager : OnClear {
      * 本地doc工程的信息
      */
     lateinit var docProject: Components
+    var projectRoot: File = ManagerPlugin.getManagerPlugin().projectDir
+
     var codeRootDir: File? = null
         get() {
             if (field == null) {

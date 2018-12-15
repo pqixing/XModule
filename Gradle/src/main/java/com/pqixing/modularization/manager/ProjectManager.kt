@@ -40,11 +40,24 @@ object ProjectManager : OnClear {
         return allComponents.values.toSet()
     }
 
+    /**
+     * 查出所有工程的Git目录
+     */
+    fun findAllGitPath(): Map<String, File> {
+        checkVail()
+        val m = HashMap<File, String>()
+        return allComponents.map { it.value.gitUrl to File(FileManager.codeRootDir, it.value.rootName) }.toMap()
+    }
+
     fun findComponent(name: String): Components {
         checkVail()
         return allComponents[name]!!
     }
 
+    fun setGit(name: String, git: Git?) {
+        git ?: return
+        gitForProject[name] = git
+    }
 
     fun findGit(name: String): Git? {
         var git = gitForProject[name]
@@ -150,7 +163,7 @@ object ProjectManager : OnClear {
         Tools.println("Can not find branch: $branchName ")
     }
 
-    private fun checkRootDir(projectDir: File, rootDir: File): Boolean {
+    fun checkRootDir(projectDir: File, rootDir: File): Boolean {
         //如果根目录不是git目录,先删除
         if (!GitUtils.isGitDir(rootDir) || projectDir.listFiles().size < 3) {
             FileUtils.delete(rootDir)

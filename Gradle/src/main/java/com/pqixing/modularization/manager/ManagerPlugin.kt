@@ -4,7 +4,7 @@ import com.pqixing.ProjectInfo
 import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.manager.tasks.CleanProjectTask
+import com.pqixing.modularization.manager.tasks.*
 import com.pqixing.modularization.maven.IndexVersionTask
 import com.pqixing.modularization.maven.VersionManager
 import org.gradle.BuildAdapter
@@ -17,7 +17,7 @@ import org.gradle.api.invocation.Gradle
  * 管理代码工程的导入，maven仓库的依赖的版本生成
  */
 
-class ManagerPlugin : BasePlugin() {
+open class ManagerPlugin : BasePlugin() {
     override fun callBeforeApplyMould() {
         project.extensions.create("manager", ManagerExtends::class.java, project)
     }
@@ -27,7 +27,10 @@ class ManagerPlugin : BasePlugin() {
         get() = setOf(FileNames.PROJECT_INFO, FileNames.IMPORT_KT)
 
     @Override
-    override fun linkTask() = listOf(CleanProjectTask::class.java, IndexVersionTask::class.java)
+    override fun linkTask() = listOf(CloneProjectTask::class.java
+            , CreateBranchTask::class.java
+            , CheckOutBranchTask::class.java
+            , CheckMegerTask::class.java, CleanProjectTask::class.java, IndexVersionTask::class.java)
 
     var error: String = ""
     override fun apply(project: Project) {
@@ -65,9 +68,9 @@ class ManagerPlugin : BasePlugin() {
     }
 
     companion object {
-        private lateinit var  plugin : ManagerPlugin
+        private lateinit var plugin: ManagerPlugin
 
         fun getManagerPlugin() = plugin
-        fun getManagerExtends() =  plugin.getExtends(ManagerExtends::class.java)
+        fun getManagerExtends() = plugin.getExtends(ManagerExtends::class.java)
     }
 }
