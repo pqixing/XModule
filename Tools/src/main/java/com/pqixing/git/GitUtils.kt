@@ -192,10 +192,8 @@ fun <T> GitCommand<T>.init(provider: UsernamePasswordCredentialsProvider? = null
 
 fun <T> GitCommand<T>.execute(): T? = try {
     Tools.println("Git task ->  ${javaClass.simpleName}")
-    val call = call()
-    val repo: Repository? = (call as? Git)?.repository ?: repository
-    Tools.println("Git task end -> ${javaClass.simpleName} : ${repo?.branch} : ${repo?.directory?.parentFile?.name} \n      result -> $call")
-    call
+    call()
+//    Tools.println("Git task end -> ${javaClass.simpleName} : ${repo?.branch} : ${repo?.directory?.parentFile?.name} \n      result -> $call")
 } catch (e: Exception) {
     ///home/pqixing/Desktop/gradleProject/Root/Document/.git
 //    FileUtils.delete(File(repository.directory, "index.lock"))
