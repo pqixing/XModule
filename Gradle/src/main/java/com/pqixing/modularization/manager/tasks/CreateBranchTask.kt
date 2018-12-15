@@ -28,6 +28,6 @@ open class CreateBranchTask : BaseTask() {
             val create = GitUtils.createBranch(ProjectManager.findGit(it.absolutePath), targetBranch)
             if (!create) fail.add(it.name)
         }
-        IdeUtils.writeResult("CreateBranchTask fail -> $fail", fail.size)
+        IdeUtils.writeResult("CreateBranchTask -> $fail", fail.size)
     }
 }

@@ -19,6 +19,6 @@ open class PullProjectTask : BaseTask() {
         val gits = ProjectManager.findAllGitPath().values.toMutableList()
 
         gits.forEach { if (!GitUtils.pull(ProjectManager.findGit(it.absolutePath))) fail.add(it.name) }
-        IdeUtils.writeResult("PullProjectTask fail -> $fail", fail.size)
+        IdeUtils.writeResult("PullProjectTask -> $fail", fail.size)
     }
 }

@@ -29,7 +29,7 @@ open class CloneProjectTask : BaseTask() {
     }
 
     override fun end() {
-        val result = "Clone -> $clones,Fail -> $fails"
+        val result = "Clone -> $clones,  Fail-> $fails"
         IdeUtils.writeResult(result, fails.size)
     }
 }
