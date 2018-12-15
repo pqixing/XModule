@@ -11,6 +11,7 @@ import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.FileManager
+import com.pqixing.modularization.utils.IdeUtils
 import com.pqixing.tools.CheckUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
@@ -138,7 +139,8 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     private fun initTools(project: Project) {
         if (!Tools.init) {
             Tools.init(object : ILog {
-                override fun printError(exitCode:Int,l: String?) = throw  GradleException(l)
+                override fun printError(exitCode: Int, l: String?) = IdeUtils.writeResult(l
+                        ?: "", exitCode)
 
                 override fun println(l: String?) = System.out.println(l)
             }, project.rootDir.absolutePath, object : ICredential {

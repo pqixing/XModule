@@ -9,6 +9,7 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.tasks.DpsAnalysisTask
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
+import com.pqixing.modularization.android.tasks.BuildApk
 import com.pqixing.modularization.android.tasks.PrepareDevTask
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.iterface.IExtHelper
@@ -66,20 +67,25 @@ open class AndroidPlugin : BasePlugin() {
 
     override fun linkTask(): List<Class<out Task>> {
         var tasks = mutableListOf(CleanCache::class.java, DpsAnalysisTask::class.java)
-        if (APP_TYPE == Components.TYPE_LIBRARY||APP_TYPE == Components.TYPE_LIBRARY_API) tasks.addAll(listOf(PrepareDevTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java))
+        if (APP_TYPE == Components.TYPE_LIBRARY || APP_TYPE == Components.TYPE_LIBRARY_API) tasks.addAll(listOf(PrepareDevTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java))
         if (APP_TYPE == Components.TYPE_LIBRARY_API) tasks.add(ToMavenApiTask::class.java)
+        if (APP_TYPE != Components.TYPE_APPLICATION) {
+            tasks.add(BuildApk::class.java)
+        }
         return tasks
     }
 
     lateinit var dpsManager: DpsManager
     override fun apply(project: Project) {
+        project.extensions.extraProperties.set(project.name, this)
         //如果是空同步，不做任何处理
         val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, project)
         super.apply(project)
         //创建配置读取
         val moduleConfig = CompatDps(project, dpsExt)
         project.extensions.add(Keys.CONFIG_MODULE, moduleConfig)
-        project.extensions.extraProperties.set(project.name, this)
+
+
 
 
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
@@ -142,6 +148,7 @@ open class AndroidPlugin : BasePlugin() {
             return
         }
         val rxForRun = Regex(":${project.name}:assemble.*?Dev")
+        val rxForBuildApk = ":${project.name}:BuildApk"
         val rxToMaven = ":${project.name}:ToMaven"
         val rxToMavenApi = ":${project.name}:ToMavenApi"
         var match = mutableListOf<String>()
@@ -150,6 +157,7 @@ open class AndroidPlugin : BasePlugin() {
             match.add(t)
             assemble = assemble || t.contains(":assemble")
             when {
+                t.matches(rxForRun) || t == rxForBuildApk -> BUILD_TYPE = Components.TYPE_APPLICATION
                 t.matches(rxForRun) -> BUILD_TYPE = Components.TYPE_APPLICATION
                 t == rxToMaven -> BUILD_TYPE = Components.TYPE_LIBRARY
                 t == rxToMavenApi -> BUILD_TYPE = Components.TYPE_LIBRARY_API

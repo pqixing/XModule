@@ -34,20 +34,20 @@ abstract class BaseTask : DefaultTask() {
     fun run() {
         checkIdeVersion()
         val startTime = System.currentTimeMillis()
-        Tools.println("start task $project.name:$name -> ${Date(startTime).toLocaleString()}")
+        Tools.println("Task Start ${project.name}:$name -> ${Date(startTime).toLocaleString()}")
         start()
         runTask()
         end()
         val endTime = System.currentTimeMillis()
-        Tools.println("end task $project.name:$name count :  ${endTime - startTime}  :-> ${Date(endTime).toLocaleString()}")
+        Tools.println("Task End${project.name}:$name count :  ${endTime - startTime}")
     }
 
 
-    abstract fun start()
+    open fun start() {}
 
     abstract fun runTask()
 
-    abstract fun end()
+    open fun end() {}
 
     companion object {
         val minVersion = "ide:2.1"
@@ -57,7 +57,7 @@ abstract class BaseTask : DefaultTask() {
         }
 
         fun <T : Task> taskByName(project: Project, taskName: String, tClass: Class<T>): T {
-            return project.tasks.create(taskName,tClass) as T
+            return project.tasks.create(taskName, tClass) as T
 
         }
 

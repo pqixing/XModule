@@ -5,7 +5,9 @@ import org.gradle.api.Project;
 import org.gradle.api.invocation.Gradle;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 public interface IExtHelper {
     public Object getExtValue(Project project, String key);
@@ -25,4 +27,12 @@ public interface IExtHelper {
             ,String artifactId
             ,String version
             ,String name);
+
+    /**
+     * 获取Android输出文件
+     * @param project
+     * @param type
+     * @return
+     */
+    Map<String,File> getAndroidOut(Project project, String type);
 }

@@ -1,11 +1,14 @@
 package com.pqixing.modularization;
 
+import org.jetbrains.annotations.Nullable;
+
 public class Keys {
     public static final String UPDATE_TIME = "update_time";
     public static final String UPDATE_LOG = "update_log";
     public static final String UPDATE_VERSION = "update_version";
     public static final String PREFIX_TO_MAVEN = "build://aar";
     public static final String PREFIX_LOG = "build://log";
+    public static final String PREFIX_IDE_LOG = "ide://log";
     public static final String LOG_MODULE = "module";
     public static final String LOG_BRANCH = "branch";
     public static final String LOG_VERSION = "version";
@@ -221,4 +224,8 @@ public class Keys {
      */
     static String ENV_BUILD_APP_NAME = "appBuildName";
 
+    /**
+     * 获取
+     */
+    public static final String RUN_TASK_ID = "run_task_id";
 }

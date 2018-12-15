@@ -61,7 +61,7 @@ public class GExtHelper implements IExtHelper {
     }
 
     @Override
-    void setApiSourceDir(Project project, String dir,String manifestPath) {
+    void setApiSourceDir(Project project, String dir, String manifestPath) {
         project.android.sourceSets.main.java.srcDirs = [dir]
         project.android.sourceSets.main.manifest.srcFile manifestPath
         project.android.sourceSets.main.res.srcDirs = ["src/main/resApi"]
@@ -83,5 +83,14 @@ public class GExtHelper implements IExtHelper {
         pom.artifactId = artifactId
         pom.version = version
         pom.name = name
+    }
+
+    @Override
+    Map<String, File> getAndroidOut(Project project, String type) {
+        HashMap<String, File> variants = new HashMap<>()
+        (type == "application" ? project.android.applicationVariants : project.android.libraryVariants).all {
+            variants.put(it.name, it.outputs[0].outputFile)
+        }
+        return variants
     }
 }
