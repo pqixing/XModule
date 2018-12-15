@@ -1,18 +1,16 @@
 package com.pqixing.modularization.manager
 
-import com.pqixing.Tools
 import com.pqixing.ProjectInfo
-import com.pqixing.Tools.rootDir
-import com.pqixing.git.*
+import com.pqixing.git.Components
+import com.pqixing.git.GitUtils
+import com.pqixing.git.execute
+import com.pqixing.git.init
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.tools.FileUtils
-import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.api.ListBranchCommand
 import org.gradle.api.Project
-import org.gradle.internal.impldep.org.bouncycastle.asn1.x500.style.RFC4519Style.name
 import java.io.File
 
 object ProjectManager : OnClear {
@@ -22,7 +20,12 @@ object ProjectManager : OnClear {
 
     override fun clear() {
         hasInit = false
-        gitForProject.forEach { it.value.close() }
+        gitForProject.forEach {
+            val gitPath = it.value.repository?.directory?.absolutePath
+            it.value.close()
+            if (gitPath != null)//执行完成后，删除index.lock文件，防止其他集成无法操作
+                FileUtils.delete(File(gitPath, "index.lock"))
+        }
         gitForProject.clear()
         allComponents.clear()
         rootBranch = ""
@@ -33,6 +36,7 @@ object ProjectManager : OnClear {
     private val allComponents = HashMap<String, Components>()
     private val gitForProject = HashMap<String, Git>()
 
+    var projectRoot: File = ManagerPlugin.getManagerPlugin().projectDir
     var hasInit = false
 
     fun findAllComponent(): Set<Components> {
@@ -102,65 +106,14 @@ object ProjectManager : OnClear {
     }
 
     private fun initGit(projectDir: File, rootDir: File, gitUrl: String, info: ProjectInfo): Git? {
-        val git = if (!projectDir.exists() || !checkRootDir(projectDir, rootDir)) {//下载工程
+        return if (!projectDir.exists() || !checkRootDir(projectDir, rootDir)) {//下载工程
             GitUtils.clone(gitUrl, rootDir, rootBranch)
         } else {
             Git.open(rootDir)
+        }?.apply {
+            if (info.syncBranch) GitUtils.checkoutBranch(this, rootBranch, info.focusCheckOut)
+            if (info.updateCode) this.pull().init().execute()
         }
-        if (git != null) {
-            checkBranch(git, info)
-            if (info.updateCode) git.pull().init().execute()
-        }
-        return git
-    }
-
-    /**
-     * 检查分支是否一致
-     */
-    private fun checkBranch(git: Git, info: ProjectInfo) {
-        if (!info.syncBranch) return
-        val branchName = rootBranch
-        //在同一个分支，不处理
-        if (branchName == git.repository.branch) return
-
-
-        val local = git.branchList().call()
-        val end = "/$branchName"
-        for (c in local) {
-            if (c.name.endsWith(end)) {
-                //强制切换，丢失本地未commit的文件
-                if (info.focusCheckOut) {
-                    git.stashCreate().call()
-                    git.stashDrop().call()
-                }
-                git.checkout().setName(branchName).init().execute()
-                Tools.println("Checkout local branch $branchName")
-                return
-            }
-        }
-        //本地没有分支时，先尝试更新一下，然后再进行处理
-        git.pull().init().execute()
-        val remote = git
-                .branchList()
-                .setListMode(ListBranchCommand.ListMode.REMOTE)
-                .call()
-        for (c in remote) {
-            if (c.name.endsWith(end)) {
-                //强制切换，丢失本地未commit的文件
-                if (info.focusCheckOut) {
-                    git.stashCreate().call()
-                    git.stashDrop().call()
-                }
-                git.checkout().setName(branchName)
-                        .setCreateBranch(true)
-                        .setStartPoint(c.name)
-                        .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
-                        .init().execute()
-                Tools.println("Checkout remote branch $branchName")
-                return
-            }
-        }
-        Tools.println("Can not find branch: $branchName ")
     }
 
     fun checkRootDir(projectDir: File, rootDir: File): Boolean {

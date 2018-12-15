@@ -7,11 +7,6 @@ import org.gradle.api.Project
 open class ManagerExtends(project: Project) : BaseExtension(project) {
 
     /**
-     * 存放配置的git目录
-     */
-    var gitUserName = ""
-    var gitPassWord = ""
-    /**
      * 上传到maven的用户名
      */
     var mavenUserName = ""

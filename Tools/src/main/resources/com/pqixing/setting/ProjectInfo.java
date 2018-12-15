@@ -66,4 +66,9 @@ public class ProjectInfo {
      * 运行类型,gradle,plugin
      */
     public String runPluginType = "gradle";
+
+    /**
+     * Git 相关Task读取分支的地方
+     */
+    public String taskBranch = "";
 }

@@ -27,13 +27,10 @@ object FileManager : OnClear {
         codeRootDir = null
     }
 
-    lateinit var docCredentials: UsernamePasswordCredentialsProvider
-
     /**
      * 本地doc工程的信息
      */
     lateinit var docProject: Components
-    var projectRoot: File = ManagerPlugin.getManagerPlugin().projectDir
 
     var codeRootDir: File? = null
         get() {
@@ -107,16 +104,8 @@ object FileManager : OnClear {
         val docRoot = docRoot!!
 
         val extends = plugin.getExtends(ManagerExtends::class.java)
-        val info = plugin.projectInfo
-        var user = extends.gitUserName
-        var psw = extends.gitPassWord
-        if (user.isEmpty()) user = info?.gitUserName ?: ""
-        if (psw.isEmpty()) psw = info?.gitPassWord ?: ""
-
-        docCredentials = UsernamePasswordCredentialsProvider(user, psw)
-
         val git = ProjectManager.findGit(plugin.projectDir.absolutePath)?.apply {
-            pull().init(docCredentials).execute()
+            pull().init().execute()
         }
 
         val filter = ProjectInfoFiles.files.filter { copyIfNull(it, docRoot) }
@@ -131,9 +120,9 @@ object FileManager : OnClear {
         ProjectManager.rootBranch = extends.branch
         //如果有新增文件，提交
         if (filter.isNotEmpty()) {
-            git.add().addFilepattern(".").init(docCredentials).execute()
-            git.commit().setAllowEmpty(true).setMessage("add file $filter").init(docCredentials).execute()
-            git.push().setForce(true).init(docCredentials).execute()
+            git.add().addFilepattern(".").init().execute()
+            git.commit().setAllowEmpty(true).setMessage("add file $filter").init().execute()
+            git.push().setForce(true).init().execute()
         }
         git.close()
     }

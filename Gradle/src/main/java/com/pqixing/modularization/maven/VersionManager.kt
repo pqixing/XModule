@@ -240,12 +240,12 @@ object VersionManager : OnClear {
         versions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
         //上传版本好到服务端
         val git = Git.open(GitUtils.findGitDir(FileManager.docRoot))
-        git.pull().setCredentialsProvider(FileManager.docCredentials).setProgressMonitor(PercentProgress()).call()
+        git.pull().init().execute()
 
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
         git.add().addFilepattern(FileNames.MANAGER).init().execute()
         git.commit().setAllowEmpty(true).setMessage("indexVersionFromNet ${Date().toLocaleString()}").init().execute()
-        (git.push().init() as PushCommand).setCredentialsProvider(FileManager.docCredentials).setForce(true).execute()
+        git.push().setForce(true).init().execute()
         git.close()
     }
 

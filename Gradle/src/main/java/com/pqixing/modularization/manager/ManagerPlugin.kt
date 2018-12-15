@@ -1,16 +1,13 @@
 package com.pqixing.modularization.manager
 
-import com.pqixing.ProjectInfo
 import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.manager.tasks.*
 import com.pqixing.modularization.maven.IndexVersionTask
-import com.pqixing.modularization.maven.VersionManager
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import org.gradle.api.Project
-import org.gradle.api.invocation.Gradle
 
 /**
  * Created by pqixing on 17-12-20.
@@ -29,8 +26,9 @@ open class ManagerPlugin : BasePlugin() {
     @Override
     override fun linkTask() = listOf(CloneProjectTask::class.java
             , CreateBranchTask::class.java
-            , CheckOutBranchTask::class.java
-            , CheckMegerTask::class.java, CleanProjectTask::class.java, IndexVersionTask::class.java)
+            , CheckOutTask::class.java
+            ,PullProjectTask::class.java
+            , MergeTask::class.java, CleanProjectTask::class.java, IndexVersionTask::class.java)
 
     var error: String = ""
     override fun apply(project: Project) {

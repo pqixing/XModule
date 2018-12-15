@@ -25,8 +25,8 @@ open class ToMavenTask : BaseTask() {
 
         val commitMsg = "${Keys.PREFIX_TO_MAVEN}?${Keys.LOG_BRANCH}=$branch&${Keys.LOG_MODULE}=$artifactId&${Keys.LOG_VERSION}=$version"
         val git = Git.open(project.rootDir)
-        git.commit().setAllowEmpty(true).setMessage(commitMsg).init(FileManager.docCredentials).execute()
-        git.push().init(FileManager.docCredentials).execute()
+        git.commit().setAllowEmpty(true).setMessage(commitMsg).init().execute()
+        git.push().init().execute()
         IdeUtils.writeResult("$branch:$artifactId:$version")
     }
 
