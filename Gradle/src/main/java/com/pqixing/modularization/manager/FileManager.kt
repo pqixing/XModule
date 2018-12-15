@@ -1,21 +1,31 @@
 package com.pqixing.modularization.manager
 
+import com.pqixing.ProjectInfoFiles
+import com.pqixing.git.Components
+import com.pqixing.git.execute
+import com.pqixing.git.init
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
-import com.pqixing.ProjectInfoFiles
-import com.pqixing.git.*
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.IPlugin
+import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.tools.FileUtils
-import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
 
 /**
  * 管理文件的输出和读取
  */
-object FileManager {
+object FileManager : OnClear {
+    init {
+        BasePlugin.addClearLister(this)
+    }
+
+    override fun clear() {
+        cacheRoot = null
+        codeRootDir = null
+    }
 
     lateinit var docCredentials: UsernamePasswordCredentialsProvider
 
@@ -103,7 +113,7 @@ object FileManager {
 
         docCredentials = UsernamePasswordCredentialsProvider(user, psw)
 
-        val git = Git.open(plugin.projectDir).apply {
+        val git = ProjectManager.findGit(plugin.projectDir.absolutePath)?.apply {
             pull().init(docCredentials).execute()
         }
 
@@ -113,7 +123,7 @@ object FileManager {
         if (git == null) return@with
         docProject.loadGitInfo(git)
 
-        if(extends.branch.isEmpty()){
+        if (extends.branch.isEmpty()) {
             extends.branch = docProject.lastLog.branch
         }
         ProjectManager.rootBranch = extends.branch

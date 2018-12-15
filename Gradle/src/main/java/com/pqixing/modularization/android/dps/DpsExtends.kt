@@ -16,7 +16,7 @@ open class DpsExtends(project: Project) : BaseExtension(project) {
     internal var devCompiles = HashSet<DpComponents>()
     internal var apiCompiles = HashSet<DpComponents>()
     //组件工程
-    val components = ProjectManager.allComponents[project.name]!!
+    val components = ProjectManager.findComponent(project.name)
     val manager = ManagerPlugin.getManagerExtends()
 
     /**

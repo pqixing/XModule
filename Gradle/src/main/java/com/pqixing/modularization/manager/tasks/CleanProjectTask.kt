@@ -1,9 +1,9 @@
-package com.pqixing.modularization.manager
+package com.pqixing.modularization.manager.tasks
 
 import com.pqixing.Tools
 import com.pqixing.modularization.base.BaseTask
 
-open class AllCleanTask : BaseTask() {
+open class CleanProjectTask : BaseTask() {
     override fun start() {
 
     }

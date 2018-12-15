@@ -4,6 +4,7 @@ import com.pqixing.Tools
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.tools.FileUtils
+import org.gradle.api.GradleException
 import java.io.File
 
 /**
@@ -30,6 +31,9 @@ object IdeUtils {
         if (!ideFile.exists()) {
             FileUtils.writeText(ideFile, log)
         } else ideFile.appendText("\n" + log)
+        if(exitCode!=0){
+            throw  GradleException(msg)
+        }
     }
 
     fun getProperty(key: String): String? = try {

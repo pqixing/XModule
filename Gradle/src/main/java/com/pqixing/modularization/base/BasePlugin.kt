@@ -9,6 +9,7 @@ import com.pqixing.interfaces.ILog
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
+import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.utils.IdeUtils
@@ -153,5 +154,14 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
 
     companion object {
         var pi: ProjectInfo? = null
+        val listeners = mutableSetOf<OnClear>()
+        fun addClearLister(l: OnClear) {
+            listeners.add(l)
+        }
+
+        fun onClear() {
+            pi = null
+            listeners.forEach { it.clear() }
+        }
     }
 }

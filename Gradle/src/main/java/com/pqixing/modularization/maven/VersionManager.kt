@@ -9,6 +9,7 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
+import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
@@ -23,7 +24,16 @@ import java.net.URL
 import java.util.*
 import kotlin.Comparator
 
-object VersionManager {
+object VersionManager : OnClear {
+    init {
+        BasePlugin.addClearLister(this)
+    }
+
+    override fun clear() {
+        curVersions.clear()
+        targetVersion.clear()
+        branchVersion.clear()
+    }
 
 
     private val matchingFallbacks = mutableListOf<String>()
@@ -51,12 +61,6 @@ object VersionManager {
         if (curVersions.isEmpty()) readCurVersions()
         val key = "$groupName.$branch.$module.$version"
         return curVersions[key]?.toInt() ?: -1
-    }
-
-    fun clear() {
-        curVersions.clear()
-        targetVersion.clear()
-        branchVersion.clear()
     }
 
 

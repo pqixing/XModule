@@ -46,7 +46,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
     }
 
     //组件工程
-    val components = ProjectManager.allComponents[plugin.project.name]!!
+    val components = ProjectManager.findComponent(plugin.project.name)
     val compileModel = plugin.projectInfo?.dependentModel ?: "mavenOnly"
     val managerExtends = ManagerPlugin.getManagerExtends()
 

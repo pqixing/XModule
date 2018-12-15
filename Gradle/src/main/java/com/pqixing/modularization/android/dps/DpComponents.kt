@@ -12,7 +12,7 @@ import org.gradle.api.Project
 
 class DpComponents(project: Project) : BaseExtension(project) {
     var type: String = ""
-        get() = ProjectManager.allComponents[moduleName]!!.type
+        get() = ProjectManager.findComponent(moduleName).type
 
     /**
      * 当前模块是否使用了本地依赖

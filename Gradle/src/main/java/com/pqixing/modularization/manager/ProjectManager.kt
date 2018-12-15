@@ -5,20 +5,56 @@ import com.pqixing.ProjectInfo
 import com.pqixing.Tools.rootDir
 import com.pqixing.git.*
 import com.pqixing.help.XmlHelper
+import com.pqixing.modularization.base.BasePlugin
+import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.CreateBranchCommand
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
 import org.gradle.api.Project
+import org.gradle.internal.impldep.org.bouncycastle.asn1.x500.style.RFC4519Style.name
 import java.io.File
 
-object ProjectManager {
+object ProjectManager : OnClear {
+    init {
+        BasePlugin.addClearLister(this)
+    }
+
+    override fun clear() {
+        hasInit = false
+        gitForProject.forEach { it.value.close() }
+        gitForProject.clear()
+        allComponents.clear()
+        rootBranch = ""
+    }
+
     var rootBranch = ""
 
-    val allComponents = HashMap<String, Components>()
-    val gitForProject = HashMap<String, Git>()
+    private val allComponents = HashMap<String, Components>()
+    private val gitForProject = HashMap<String, Git>()
+
     var hasInit = false
-    fun findComponent(name: String) = allComponents[name]!!
+
+    fun findAllComponent(): Set<Components> {
+        checkVail()
+        return allComponents.values.toSet()
+    }
+
+    fun findComponent(name: String): Components {
+        checkVail()
+        return allComponents[name]!!
+    }
+
+
+    fun findGit(name: String): Git? {
+        var git = gitForProject[name]
+        if (git == null) {
+            git = Git.open(File(name))
+            if (git != null) gitForProject[name] = git
+        }
+        return git
+    }
+
     fun checkVail() {
         if (hasInit) return
         XmlHelper.parseProjectXml(FileManager.getProjectXml(), allComponents)

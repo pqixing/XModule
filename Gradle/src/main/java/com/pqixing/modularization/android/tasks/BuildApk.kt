@@ -20,7 +20,6 @@ open class BuildApk : BaseTask() {
             val plugin = AndroidPlugin.getPluginByProject(project)
             val rxForRun = Regex(".*?Dev")
             val androidOut = extHelper.getAndroidOut(project, if (plugin.BUILD_TYPE == Components.TYPE_APPLICATION) "application" else "library")
-            Tools.println("---------> $androidOut")
             for (t in androidOut) {
                 if (t.key.matches(rxForRun)||t.key == "dev") {
                     this@BuildApk.dependsOn("assemble${TextUtils.firstUp(t.key)}")
@@ -32,6 +31,7 @@ open class BuildApk : BaseTask() {
     }
 
     override fun runTask() {
+
         if (outputFile == null || !outputFile!!.exists() || !outputFile!!.name.endsWith(".apk")) {
             Tools.printError("Can not fount apk with path :${outputFile?.absolutePath}")
         } else {

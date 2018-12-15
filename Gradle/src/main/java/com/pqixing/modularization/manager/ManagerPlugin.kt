@@ -1,11 +1,14 @@
 package com.pqixing.modularization.manager
 
+import com.pqixing.ProjectInfo
 import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
+import com.pqixing.modularization.manager.tasks.CleanProjectTask
 import com.pqixing.modularization.maven.IndexVersionTask
 import com.pqixing.modularization.maven.VersionManager
 import org.gradle.BuildAdapter
+import org.gradle.BuildResult
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
 
@@ -24,20 +27,19 @@ class ManagerPlugin : BasePlugin() {
         get() = setOf(FileNames.PROJECT_INFO, FileNames.IMPORT_KT)
 
     @Override
-    override fun linkTask() = listOf(AllCleanTask::class.java, IndexVersionTask::class.java)
+    override fun linkTask() = listOf(CleanProjectTask::class.java, IndexVersionTask::class.java)
 
     var error: String = ""
     override fun apply(project: Project) {
         plugin = this
         val startTime = System.currentTimeMillis()
-        onSyncStart()
         super.apply(project)
         error = FileManager.checkFileExist(this)
 
 
         project.gradle.beforeProject {
             //在每个工程开始同步之前，检查状态，下载，切换分支等等
-            ProjectManager.checkProject(it, projectInfo!!)
+            ProjectManager.checkProject(it, projectInfo)
         }
         project.afterEvaluate {
             val extends = getExtends(ManagerExtends::class.java)
@@ -55,25 +57,13 @@ class ManagerPlugin : BasePlugin() {
         }
 
         project.gradle.addBuildListener(object : BuildAdapter() {
-            override fun projectsEvaluated(gradle: Gradle) {
-                ProjectManager.gitForProject.forEach { it.value.close() }
-                ProjectManager.gitForProject.clear()
-                Tools.println("Sync end -> spend: ${System.currentTimeMillis() - startTime} ms")
+            override fun buildFinished(result: BuildResult) {
+                BasePlugin.onClear()
+                Tools.println("buildFinished -> spend: ${System.currentTimeMillis() - startTime} ms")
             }
         })
     }
 
-    fun onSyncStart() {
-        //构建结束时，重置projectInfo
-        pi = null
-        FileManager.cacheRoot = null
-        FileManager.codeRootDir = null
-        ProjectManager.allComponents.clear()
-        ProjectManager.gitForProject.clear()
-        ProjectManager.hasInit = false
-        ProjectManager.rootBranch = ""
-        VersionManager.clear()
-    }
     companion object {
         private lateinit var  plugin : ManagerPlugin
 
