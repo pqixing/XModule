@@ -17,7 +17,7 @@ open class CheckOutTask : BaseTask() {
         if (targetBranch.isEmpty()) targetBranch = ProjectManager.rootBranch
 
         val fail = ArrayList<String>()
-        val gits = ProjectManager.findAllGitPath().values.toMutableList()
+        val gits = ProjectManager.findAllGitPath().values.filter { it.exists() }.toMutableList()
         //判断rootBranch是否等于该分支
         if (ProjectManager.rootBranch != targetBranch) gits.add(0, ProjectManager.projectRoot)
 

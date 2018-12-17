@@ -137,18 +137,17 @@ object GitUtils {
 
         var remote = false
         var tryCheckOut = tryCheckOut(git, branchName, git.branchList().call(), remote)
-        if (!tryCheckOut) else {
+        if (!tryCheckOut){
             remote = true
             //本地没有分支时，先尝试更新一下，然后再进行处理
-            git.pull().init().execute()
+            pull(git)
             tryCheckOut = tryCheckOut(git, branchName, git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call(), remote)
         }
         //还原本地的代码
         if (!isClean && !focusCheckOut) git.stashApply().execute()
 
-        if (tryCheckOut) {
-            Tools.println("Checkout ${if (remote) "remote" else "local"} branch $branchName")
-        } else Tools.println("Can not find branch: $branchName ")
+        if (!tryCheckOut) Tools.println("Can not find branch: $branchName ")
+
 
         return tryCheckOut
     }
@@ -180,7 +179,8 @@ object GitUtils {
                             .setStartPoint(c.name)
                             .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
                 }
-                command.init().execute()
+                command.init().call()
+                Tools.println("Checkout ${git.repository.directory.parentFile.name}-> ${if (remote) "remote" else "local"} branch $branchName")
                 return true
             }
         }
@@ -225,8 +225,7 @@ fun <T> GitCommand<T>.init(provider: UsernamePasswordCredentialsProvider? = null
 //    if (this is PullCommand) this.setProgressMonitor(PercentProgress())
 //    if (this is PushCommand) this.progressMonitor = PercentProgress()
     if (this is CloneCommand) this.setProgressMonitor(PercentProgress())
-    if (this is CheckoutCommand) this.setProgressMonitor(PercentProgress())
-    if (this is CheckoutCommand) this.setProgressMonitor(PercentProgress())
+//    if (this is CheckoutCommand) this.setProgressMonitor(PercentProgress())
     return this
 }
 
