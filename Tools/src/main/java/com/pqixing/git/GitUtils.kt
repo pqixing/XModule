@@ -56,7 +56,7 @@ object GitUtils {
         try {
             git.add().addFilepattern(file).init().call()
             git.commit().setMessage(commitMsg).init().call()
-            git.push().setForce(force).init().call()
+            push(git,true)
         } catch (e: Exception) {
             Tools.println("addAndPush Exception -> $e")
             return false
@@ -69,17 +69,32 @@ object GitUtils {
     /**
      *刷新工程
      */
-    fun pull(git: Git?): Boolean {
+    fun push(git: Git?,force: Boolean = false): Boolean {
         git ?: return false
         try {
-            Tools.println("${git.repository.directory.parentFile} start pull :")
-            git.pull().init().call()
+            val call = git.push().setForce(force).init().call()
+            Tools.println("Push ${git.repository.directory.parentFile.name} Complete push -> ${call.map { it.messages }}")
         } catch (e: Exception) {
-            Tools.println(" Exception -> $e")
+            Tools.println(" Exception push -> $e")
             return false
         }
-        Tools.println("Complete -> ${git.log().setMaxCount(1).call().map { "${it.committerIdent} -> ${it.fullMessage}" }[0]}")
         return true
+    }
+
+    /**
+     *刷新工程
+     */
+    fun pull(git: Git?): Boolean {
+        git ?: return false
+        return try {
+            val call = git.pull().init().call()
+            val isSuccessful = call.isSuccessful
+            Tools.println("Pull ${git.repository.directory.parentFile.name} Complete-> ${isSuccessful}  ${git.log().setMaxCount(1).call().map { "${it.committerIdent} -> ${it.fullMessage}" }[0]}")
+            isSuccessful
+        } catch (e: Exception) {
+            Tools.println(" Exception pull-> $e")
+            false
+        }
     }
 
     /**
@@ -208,7 +223,7 @@ fun <T> GitCommand<T>.init(provider: UsernamePasswordCredentialsProvider? = null
         else setCredentialsProvider(UsernamePasswordCredentialsProvider(GitUtils.credentials.getUserName(), GitUtils.credentials.getPassWord()))
     }
 //    if (this is PullCommand) this.setProgressMonitor(PercentProgress())
-    if (this is PushCommand) this.progressMonitor = PercentProgress()
+//    if (this is PushCommand) this.progressMonitor = PercentProgress()
     if (this is CloneCommand) this.setProgressMonitor(PercentProgress())
     if (this is CheckoutCommand) this.setProgressMonitor(PercentProgress())
     if (this is CheckoutCommand) this.setProgressMonitor(PercentProgress())

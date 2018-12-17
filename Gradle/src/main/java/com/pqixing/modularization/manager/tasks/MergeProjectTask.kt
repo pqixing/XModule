@@ -26,8 +26,8 @@ open class MergeProjectTask : BaseTask() {
 
     init {
         //先更新版本信息，以免出现问题
-//        this.dependsOn("CloneProject", "PullProject")
-//        project.getTasksByName("PullProject", false)?.forEach { it.mustRunAfter("CloneProject") }
+        this.dependsOn("CloneProject", "PullProject")
+        project.getTasksByName("PullProject", false)?.forEach { it.mustRunAfter("CloneProject") }
     }
 
 
@@ -65,7 +65,8 @@ open class MergeProjectTask : BaseTask() {
         allGitPath.forEach {
             val git = ProjectManager.findGit(it.value.absolutePath) ?: return@forEach
             val ref = GitUtils.findBranchRef(git, targetBranch, true) ?: return@forEach
-            val call = git.merge().setCommit(true).include(ref).call()
+            val call = git.merge().setCommit(true).include(ref).init().call()
+            Tools.println("Merge ${it.value.name} $rootBranch -> $targetBranch ${call.mergeStatus}")
             if (call.mergeStatus == MergeResult.MergeStatus.CONFLICTING) configGit.add(it.value.name)
         }
         val result = StringBuilder("Merge result")

@@ -11,12 +11,13 @@ open class CloneProjectTask : BaseTask() {
 
     val clones = ArrayList<String>()
     val fails = ArrayList<String>()
+    val exists = ArrayList<String>()
 
     override fun runTask() = ProjectManager.findAllGitPath().forEach {
         val dir = it.value
         val gitUrl = it.key
         if (GitUtils.isGitDir(dir)) {
-            Tools.println("          -> ${dir.name} exists")
+            exists.add(dir.name)
             return@forEach
         }
         if (dir.exists()) {
@@ -29,7 +30,7 @@ open class CloneProjectTask : BaseTask() {
     }
 
     override fun end() {
-        val result = "Clone -> $clones,  Fail-> $fails"
+        val result = "Clone -> $clones,  Fail -> $fails  exists -> $exists"
         IdeUtils.writeResult(result, fails.size)
     }
 }

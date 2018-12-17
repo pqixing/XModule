@@ -27,8 +27,8 @@ open class ManagerPlugin : BasePlugin() {
     override fun linkTask() = listOf(CloneProjectTask::class.java
             , CreateBranchTask::class.java
             , CheckOutTask::class.java
-            ,PullProjectTask::class.java
-            , MergeProjectTask::class.java, CleanProjectTask::class.java, IndexVersionTask::class.java)
+            , PullProjectTask::class.java
+            , MergeProjectTask::class.java, PushProjectTask::class.java, CleanProjectTask::class.java, IndexVersionTask::class.java)
 
     var error: String = ""
     override fun apply(project: Project) {
