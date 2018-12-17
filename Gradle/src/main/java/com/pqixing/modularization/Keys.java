@@ -1,5 +1,6 @@
 package com.pqixing.modularization;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Keys {
@@ -12,6 +13,7 @@ public class Keys {
     public static final String LOG_MODULE = "module";
     public static final String LOG_BRANCH = "branch";
     public static final String LOG_VERSION = "version";
+    public static final String TXT_DPS_ANALYSIS = "DpsAnalysis.txt";
     /**
      * 版本号过滤
      */
@@ -228,4 +230,8 @@ public class Keys {
      * 获取
      */
     public static final String RUN_TASK_ID = "run_task_id";
+    /**
+     * 合并结果分析
+     */
+    public static final String MERGE_RESULT = "merge.txt";
 }

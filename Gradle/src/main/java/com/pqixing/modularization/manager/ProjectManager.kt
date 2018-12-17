@@ -49,7 +49,6 @@ object ProjectManager : OnClear {
      */
     fun findAllGitPath(): Map<String, File> {
         checkVail()
-        val m = HashMap<File, String>()
         return allComponents.map { it.value.gitUrl to File(FileManager.codeRootDir, it.value.rootName) }.toMap()
     }
 

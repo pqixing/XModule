@@ -2,15 +2,11 @@ package com.pqixing.git
 
 import com.pqixing.Tools
 import com.pqixing.interfaces.ICredential
-import com.pqixing.interfaces.ILog
-import com.pqixing.tools.CheckUtils.isGitDir
-import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.*
 import org.eclipse.jgit.lib.Ref
-import org.eclipse.jgit.lib.Repository
-import org.eclipse.jgit.transport.FetchResult
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
+import java.util.*
 
 object GitUtils {
     lateinit var credentials: ICredential
@@ -53,16 +49,36 @@ object GitUtils {
     }
 
     /**
+     * 添加文件并且上传
+     */
+    fun addAndPush(git: Git?, file: String, commitMsg: String, force: Boolean = false): Boolean {
+        git ?: return false
+        try {
+            git.add().addFilepattern(file).init().call()
+            git.commit().setMessage(commitMsg).init().call()
+            git.push().setForce(force).init().call()
+        } catch (e: Exception) {
+            Tools.println("addAndPush Exception -> $e")
+            return false
+        }
+        Tools.println("addAndPush Complete -> add path :$file , msg $commitMsg")
+        return true
+
+    }
+
+    /**
      *刷新工程
      */
     fun pull(git: Git?): Boolean {
         git ?: return false
         try {
-            Tools.println("${git.repository.directory.parentFile} start pull ->")
+            Tools.println("${git.repository.directory.parentFile} start pull :")
             git.pull().init().call()
         } catch (e: Exception) {
+            Tools.println(" Exception -> $e")
             return false
         }
+        Tools.println("Complete -> ${git.log().setMaxCount(1).call().map { "${it.committerIdent} -> ${it.fullMessage}" }[0]}")
         return true
     }
 
@@ -82,12 +98,7 @@ object GitUtils {
         }
         git.checkout().setCreateBranch(true).setName(branchName).setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).init().execute()
         //创建分支成功，提交
-        if (branchName == git.repository.branch) {
-            git.push().init().execute()
-            return true
-        }
-
-        return false
+        return branchName == git.repository.branch
     }
 
     /**
@@ -125,6 +136,20 @@ object GitUtils {
         } else Tools.println("Can not find branch: $branchName ")
 
         return tryCheckOut
+    }
+
+    /**
+     * 查找对应的分支
+     */
+    fun findBranchRef(git: Git?, branchName: String, remote: Boolean): Ref? {
+        git ?: return null
+        val end = "/$branchName"
+        val list = git.branchList()
+        if (remote) list.setListMode(ListBranchCommand.ListMode.REMOTE)
+        for (c in list.call()) {
+            if (c.name.endsWith(end)) return c
+        }
+        return null
     }
 
     /**
@@ -182,7 +207,7 @@ fun <T> GitCommand<T>.init(provider: UsernamePasswordCredentialsProvider? = null
         if (provider != null) setCredentialsProvider(provider)
         else setCredentialsProvider(UsernamePasswordCredentialsProvider(GitUtils.credentials.getUserName(), GitUtils.credentials.getPassWord()))
     }
-    if (this is PullCommand) this.setProgressMonitor(PercentProgress())
+//    if (this is PullCommand) this.setProgressMonitor(PercentProgress())
     if (this is PushCommand) this.progressMonitor = PercentProgress()
     if (this is CloneCommand) this.setProgressMonitor(PercentProgress())
     if (this is CheckoutCommand) this.setProgressMonitor(PercentProgress())

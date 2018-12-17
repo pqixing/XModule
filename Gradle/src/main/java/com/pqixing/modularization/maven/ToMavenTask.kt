@@ -6,7 +6,6 @@ import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.iterface.IExtHelper
-import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.utils.IdeUtils
 import org.eclipse.jgit.api.Git
 

@@ -63,6 +63,18 @@ object VersionManager : OnClear {
         return curVersions[key]?.toInt() ?: -1
     }
 
+    /**
+     * 根据分支，查找出所有模块名称
+     */
+    fun findAllModuleByBranch(branch: String): Set<String> {
+        if (curVersions.isEmpty()) readCurVersions()
+        val preKey = "$groupName.$branch."
+        return curVersions.keys.filter { it.startsWith(preKey) }.map {
+            val r = it.replace(preKey, "")
+            r.substring(0, r.indexOf("."))
+        }.toSet()
+    }
+
 
     /**
      * 按照顺序，查取模块的版本号信息
@@ -240,12 +252,11 @@ object VersionManager : OnClear {
         versions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
         //上传版本好到服务端
         val git = Git.open(GitUtils.findGitDir(FileManager.docRoot))
-        git.pull().init().execute()
+        GitUtils.pull(git)
 
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
-        git.add().addFilepattern(FileNames.MANAGER).init().execute()
-        git.commit().setAllowEmpty(true).setMessage("indexVersionFromNet ${Date().toLocaleString()}").init().execute()
-        git.push().setForce(true).init().execute()
+
+        GitUtils.addAndPush(git, FileNames.MANAGER, "indexVersionFromNet ${Date().toLocaleString()}", true)
         git.close()
     }
 

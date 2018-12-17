@@ -2,6 +2,7 @@ package com.pqixing.modularization.manager
 
 import com.pqixing.ProjectInfoFiles
 import com.pqixing.git.Components
+import com.pqixing.git.GitUtils
 import com.pqixing.git.execute
 import com.pqixing.git.init
 import com.pqixing.modularization.FileNames
@@ -105,12 +106,12 @@ object FileManager : OnClear {
 
         val extends = plugin.getExtends(ManagerExtends::class.java)
         val git = ProjectManager.findGit(plugin.projectDir.absolutePath)?.apply {
-            pull().init().execute()
+            GitUtils.pull(this)
         }
 
         val filter = ProjectInfoFiles.files.filter { copyIfNull(it, docRoot) }
         //初始化dco目录的信息
-        docProject = Components(FileNames.ROOT, "", "LogManager", FileNames.MANAGER, Components.TYPE_DOCUMENT)
+        docProject = Components(FileNames.MANAGER, "", "LogManager", FileNames.ROOT, Components.TYPE_DOCUMENT)
         if (git == null) return@with
         docProject.loadGitInfo(git)
 
@@ -120,9 +121,7 @@ object FileManager : OnClear {
         ProjectManager.rootBranch = extends.branch
         //如果有新增文件，提交
         if (filter.isNotEmpty()) {
-            git.add().addFilepattern(".").init().execute()
-            git.commit().setAllowEmpty(true).setMessage("add file $filter").init().execute()
-            git.push().setForce(true).init().execute()
+            GitUtils.addAndPush(git, ".", "add file $filter",true)
         }
         git.close()
     }

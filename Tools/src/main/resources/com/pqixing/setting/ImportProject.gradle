@@ -90,8 +90,10 @@ public class ImportProject {
             println("$dpsName  version file :$f.absolutePath  not found , please run task DpsAnalysisTask")
             return
         }
-        String[] map = f.text.trim().replaceAll("//.*", "").split("=")
-        parseValue(type, map[map.length - 1])
+        //读取第一行
+        String[] map = f.text.readLines()[0].replaceAll("//.*", "").split("=")
+        if (map.length >= 2) parseValue(type, map[map.length - 1])
+
     }
 
     /**

@@ -28,7 +28,7 @@ open class ManagerPlugin : BasePlugin() {
             , CreateBranchTask::class.java
             , CheckOutTask::class.java
             ,PullProjectTask::class.java
-            , MergeTask::class.java, CleanProjectTask::class.java, IndexVersionTask::class.java)
+            , MergeProjectTask::class.java, CleanProjectTask::class.java, IndexVersionTask::class.java)
 
     var error: String = ""
     override fun apply(project: Project) {
