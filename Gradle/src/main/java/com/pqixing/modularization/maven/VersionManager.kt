@@ -2,9 +2,6 @@ package com.pqixing.modularization.maven
 
 import com.pqixing.Tools
 import com.pqixing.git.GitUtils
-import com.pqixing.git.PercentProgress
-import com.pqixing.git.execute
-import com.pqixing.git.init
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
@@ -13,12 +10,11 @@ import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.tools.CheckUtils.isVersionCode
+import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.PropertiesUtils
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.api.PushCommand
 import java.io.File
 import java.net.URL
 import java.util.*
@@ -33,11 +29,21 @@ object VersionManager : OnClear {
         curVersions.clear()
         targetVersion.clear()
         branchVersion.clear()
+        matchingFallbacks.clear()
+        groupName = ""
     }
 
 
     private val matchingFallbacks = mutableListOf<String>()
+        get() {
+            if (field.isEmpty()) field.addAll(ManagerPlugin.getManagerExtends().matchingFallbacks)
+            return field
+        }
     private var groupName = ""
+        get() {
+            if (field.isEmpty()) field = ManagerPlugin.getManagerExtends().groupName
+            return field
+        }
 
     /**
      * 当前最新的版本信息
@@ -167,10 +173,6 @@ object VersionManager : OnClear {
     }
 
     private fun readCurVersions() {
-        ManagerPlugin.getManagerExtends().apply {
-            this@VersionManager.matchingFallbacks.addAll(matchingFallbacks)
-            this@VersionManager.groupName = groupName
-        }
         curVersions[FileNames.MODULARIZATION] = FileNames.MODULARIZATION
 
         val baseVersion = File(FileManager.docRoot, "versions/version.properties")
@@ -237,9 +239,38 @@ object VersionManager : OnClear {
     }
 
     /**
+     * 创建一个分支的版本号Tag标签
+     */
+    fun createVersionTag(): Boolean {
+        val plugin = ManagerPlugin.getManagerPlugin()
+        val info = plugin.projectInfo
+        val taskBranch = info.taskBranch
+        if (taskBranch.isEmpty()) {
+            Tools.printError("createVersionTag taskBranch is empty, please input taskBranch!!")
+            return false
+        }
+        //拷贝一份
+        val fallbacks = matchingFallbacks.toMutableList()
+        info.tagBranchs.split(",").forEach { if (it.isNotEmpty() && !fallbacks.contains(it)) fallbacks.add(it) }
+
+        val matchKeys = fallbacks.map { "$groupName.$it." }
+
+        val tagVersions = curVersions.filter { c -> matchKeys.any { f -> c.key.startsWith(f) } }
+
+
+        val branchFile = File(FileManager.docRoot, "versions/version_${info.taskBranch}.properties")
+        PropertiesUtils.writeProperties(branchFile, tagVersions.toProperties())
+        ResultUtils.writeResult(branchFile.absolutePath)
+        val git = Git.open(GitUtils.findGitDir(FileManager.docRoot))
+        GitUtils.addAndPush(git, FileNames.MANAGER, "createVersionTag $taskBranch ${Date().toLocaleString()}", true)
+        git.close()
+        return true
+    }
+
+    /**
      * 从网络获取最新的版本号信息
      */
-    fun indexVersionFromNet(outFile: File, versions: HashMap<String, String>) {
+    private fun indexVersionFromNet(outFile: File, versions: HashMap<String, String>) {
 
         val plugin = ManagerPlugin.getManagerPlugin()
         val extends = plugin.getExtends(ManagerExtends::class.java)

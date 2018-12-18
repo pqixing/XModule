@@ -12,12 +12,11 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.FileManager
-import com.pqixing.modularization.utils.IdeUtils
+import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.CheckUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import groovy.lang.GroovyClassLoader
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -140,7 +139,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     private fun initTools(project: Project) {
         if (!Tools.init) {
             Tools.init(object : ILog {
-                override fun printError(exitCode: Int, l: String?) = IdeUtils.writeResult(l
+                override fun printError(exitCode: Int, l: String?) = ResultUtils.writeResult(l
                         ?: "", exitCode)
 
                 override fun println(l: String?) = System.out.println(l)

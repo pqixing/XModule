@@ -2,7 +2,7 @@ package com.pqixing.modularization.android.tasks
 
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.FileManager
-import com.pqixing.modularization.utils.IdeUtils
+import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import java.io.File
@@ -31,6 +31,6 @@ open class PrepareDevTask : BaseTask() {
     }
 
     override fun end() {
-        IdeUtils.writeResult("PrepareDevTask -> finish")
+        ResultUtils.writeResult("PrepareDevTask -> finish")
     }
 }

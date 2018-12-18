@@ -71,4 +71,10 @@ public class ProjectInfo {
      * Git 相关Task读取分支的地方
      */
     public String taskBranch = "";
+
+    /**
+     * 打Tag版本号标签时，需要指定包含那些分支的版本号。 默认包含 matchingFallbacks
+     * 多个分支名称使用 逗号隔开 etc a1,a2,a3
+     */
+    public String tagBranchs ="";
 }

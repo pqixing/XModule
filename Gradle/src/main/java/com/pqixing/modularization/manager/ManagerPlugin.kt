@@ -4,7 +4,8 @@ import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.manager.tasks.*
-import com.pqixing.modularization.maven.IndexVersionTask
+import com.pqixing.modularization.maven.VersionTagTask
+import com.pqixing.modularization.maven.VersionIndexTask
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import org.gradle.api.Project
@@ -28,7 +29,11 @@ open class ManagerPlugin : BasePlugin() {
             , CreateBranchTask::class.java
             , CheckOutTask::class.java
             , PullProjectTask::class.java
-            , MergeProjectTask::class.java, PushProjectTask::class.java, CleanProjectTask::class.java, IndexVersionTask::class.java)
+            , MergeProjectTask::class.java
+            , PushProjectTask::class.java
+            , CleanProjectTask::class.java
+            , VersionIndexTask::class.java
+            , VersionTagTask::class.java)
 
     var error: String = ""
     override fun apply(project: Project) {

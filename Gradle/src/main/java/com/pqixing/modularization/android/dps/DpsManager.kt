@@ -6,6 +6,8 @@ import com.pqixing.help.MavenPom
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.android.AndroidPlugin
+import com.pqixing.modularization.base.BasePlugin
+import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
@@ -16,7 +18,15 @@ import com.pqixing.tools.TextUtils
 import java.io.File
 import java.net.URL
 
-class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
+class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
+    init {
+        BasePlugin.addClearLister(this)
+    }
+
+    override fun clear() {
+        pomCache.clear()
+    }
+
     companion object {
         val pomCache: HashMap<String, MavenPom> = HashMap()
         /**

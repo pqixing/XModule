@@ -28,10 +28,13 @@ object ProjectManager : OnClear {
         }
         gitForProject.clear()
         allComponents.clear()
+        errorBranchProject.clear()
         rootBranch = ""
+
     }
 
     var rootBranch = ""
+    var errorBranchProject = HashSet<String>()
 
     private val allComponents = HashMap<String, Components>()
     private val gitForProject = HashMap<String, Git>()
@@ -110,7 +113,11 @@ object ProjectManager : OnClear {
         } else {
             Git.open(rootDir)
         }?.apply {
-            if (info.syncBranch) GitUtils.checkoutBranch(this, rootBranch, info.focusCheckOut)
+            if (info.syncBranch) {
+                val checkout = GitUtils.checkoutBranch(this, rootBranch, info.focusCheckOut)
+                //如果切换分支失败，做个标记
+                if (!checkout) errorBranchProject.add("${rootDir.name}/${this.repository.branch}")
+            }
             if (info.updateCode) this.pull().init().execute()
         }
     }

@@ -5,7 +5,7 @@ import com.pqixing.git.GitUtils
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
-import com.pqixing.modularization.utils.IdeUtils
+import com.pqixing.modularization.utils.ResultUtils
 
 /**
  * 切换分支
@@ -30,6 +30,6 @@ open class CheckOutTask : BaseTask() {
             val check = GitUtils.checkoutBranch(ProjectManager.findGit(it.absolutePath), targetBranch, true)
             if (!check) fail.add(it.name)
         }
-        IdeUtils.writeResult("CheckOutTask -> $fail", fail.size)
+        ResultUtils.writeResult("CheckOutTask -> $fail", fail.size)
     }
 }

@@ -6,7 +6,7 @@ import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.iterface.IExtHelper
-import com.pqixing.modularization.utils.IdeUtils
+import com.pqixing.modularization.utils.ResultUtils
 import org.eclipse.jgit.api.Git
 
 open class ToMavenTask : BaseTask() {
@@ -26,7 +26,7 @@ open class ToMavenTask : BaseTask() {
         val git = Git.open(project.rootDir)
         git.commit().setAllowEmpty(true).setMessage(commitMsg).init().execute()
         git.push().init().execute()
-        IdeUtils.writeResult("$branch:$artifactId:$version")
+        ResultUtils.writeResult("$branch:$artifactId:$version")
     }
 
     override fun runTask() {

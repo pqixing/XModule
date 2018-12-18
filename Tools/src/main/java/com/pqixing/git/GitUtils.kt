@@ -56,7 +56,7 @@ object GitUtils {
         try {
             git.add().addFilepattern(file).init().call()
             git.commit().setMessage(commitMsg).init().call()
-            push(git,true)
+            push(git, true)
         } catch (e: Exception) {
             Tools.println("addAndPush Exception -> $e")
             return false
@@ -69,7 +69,7 @@ object GitUtils {
     /**
      *刷新工程
      */
-    fun push(git: Git?,force: Boolean = false): Boolean {
+    fun push(git: Git?, force: Boolean = false): Boolean {
         git ?: return false
         try {
             val call = git.push().setForce(force).init().call()
@@ -137,7 +137,7 @@ object GitUtils {
 
         var remote = false
         var tryCheckOut = tryCheckOut(git, branchName, git.branchList().call(), remote)
-        if (!tryCheckOut){
+        if (!tryCheckOut) {
             remote = true
             //本地没有分支时，先尝试更新一下，然后再进行处理
             pull(git)
@@ -181,7 +181,7 @@ object GitUtils {
                 }
                 command.init().call()
                 Tools.println("Checkout ${git.repository.directory.parentFile.name}-> ${if (remote) "remote" else "local"} branch $branchName")
-                return true
+                return git.repository.branch == branchName//是否切换成功
             }
         }
         return false

@@ -8,7 +8,7 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.maven.VersionManager
-import com.pqixing.modularization.utils.IdeUtils
+import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.MergeResult
 import java.io.File
@@ -105,6 +105,6 @@ open class MergeProjectTask : BaseTask() {
         //输出日志
         FileUtils.writeText(mergeFile, result.toString())
 
-        IdeUtils.writeResult(mergeFile.absolutePath)
+        ResultUtils.writeResult(mergeFile.absolutePath)
     }
 }

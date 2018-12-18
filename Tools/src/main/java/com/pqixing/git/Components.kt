@@ -61,7 +61,7 @@ class Components {
             lastLog.hash = rev.name
         }
         hasInit = true
-        Tools.println("${name} loadGitInfo -> branch : ${lastLog.branch} log : ${lastLog.message}")
+        Tools.println("LoadGitInfo $name -> branch : ${lastLog.branch} log : ${lastLog.message}")
     }
 
     override fun toString(): String {

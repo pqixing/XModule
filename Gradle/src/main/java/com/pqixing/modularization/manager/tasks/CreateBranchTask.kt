@@ -5,7 +5,8 @@ import com.pqixing.git.GitUtils
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
-import com.pqixing.modularization.utils.IdeUtils
+import com.pqixing.modularization.maven.VersionManager
+import com.pqixing.modularization.utils.ResultUtils
 
 open class CreateBranchTask : BaseTask() {
     init {
@@ -13,6 +14,7 @@ open class CreateBranchTask : BaseTask() {
         this.dependsOn("CloneProject", "PullProject")
         project.getTasksByName("PullProject", false).forEach { it.mustRunAfter("CloneProject") }
     }
+
     override fun runTask() {
         val info = ManagerPlugin.getManagerPlugin().projectInfo
 
@@ -29,10 +31,12 @@ open class CreateBranchTask : BaseTask() {
 
         val fail = ArrayList<String>()
         gits.forEach {
-            if(!it.exists()) return@forEach
+            if (!it.exists()) return@forEach
             val create = GitUtils.createBranch(ProjectManager.findGit(it.absolutePath), targetBranch)
             if (!create) fail.add(it.name)
         }
-        IdeUtils.writeResult("CreateBranchTask -> $fail", fail.size)
+        //创建分支成功时，同时打上版本标签
+        if (fail.isEmpty()) VersionManager.createVersionTag()
+        ResultUtils.writeResult("CreateBranchTask -> $fail", fail.size)
     }
 }

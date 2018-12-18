@@ -6,7 +6,7 @@ import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.iterface.IExtHelper
-import com.pqixing.modularization.utils.IdeUtils
+import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.TextUtils
 import java.io.File
 
@@ -35,7 +35,7 @@ open class BuildApk : BaseTask() {
         if (outputFile == null || !outputFile!!.exists() || !outputFile!!.name.endsWith(".apk")) {
             Tools.printError("Can not fount apk with path :${outputFile?.absolutePath}")
         } else {
-            IdeUtils.writeResult(outputFile!!.absolutePath)
+            ResultUtils.writeResult(outputFile!!.absolutePath)
         }
 
     }

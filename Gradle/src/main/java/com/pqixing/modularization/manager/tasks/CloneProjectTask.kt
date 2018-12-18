@@ -4,7 +4,7 @@ import com.pqixing.Tools
 import com.pqixing.git.GitUtils
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.ProjectManager
-import com.pqixing.modularization.utils.IdeUtils
+import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 
 open class CloneProjectTask : BaseTask() {
@@ -31,6 +31,6 @@ open class CloneProjectTask : BaseTask() {
 
     override fun end() {
         val result = "Clone -> $clones,  Fail -> $fails  exists -> $exists"
-        IdeUtils.writeResult(result, fails.size)
+        ResultUtils.writeResult(result, fails.size)
     }
 }

@@ -10,7 +10,7 @@ import java.io.File
 /**
  * 用于Ide的工具
  */
-object IdeUtils {
+object ResultUtils {
 
     /**
      * 输出结果，用于Ide的交互获取
