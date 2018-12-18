@@ -9,7 +9,6 @@ object FileUtils {
         this.clazz = clazz
     }
 
-
     @JvmStatic
     fun getTextFromResource(name: String): String {
         val reader = clazz.getResourceAsStream(name).reader()
@@ -45,5 +44,21 @@ object FileUtils {
         if (f.isDirectory) f.listFiles().forEach { delete(it) }
         if (f.exists()) f.delete()
         return true
+    }
+
+    /**
+     *拷贝文件
+     */
+    @JvmStatic
+    fun copy(from: File, to: File): Boolean {
+        if (!from.exists()) return false
+        delete(to)
+        if (from.isDirectory) from.listFiles().forEach { copy(it, File(to, it.name)) }
+        else {
+            to.parentFile.mkdirs()
+            from.inputStream().copyTo(to.outputStream())
+        }
+        return true
+
     }
 }

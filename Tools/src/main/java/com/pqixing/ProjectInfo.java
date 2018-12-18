@@ -77,4 +77,13 @@ public class ProjectInfo {
      * 多个分支名称使用 逗号隔开 etc a1,a2,a3
      */
     public String tagBranchs ="";
+
+
+    //BuildApk任务依赖的task任务，传空，则 优先 dev -> inTest -> outTest -> release
+    public String buildApkType = "";
+
+    /**
+     * BuildApk生成文件后的输出路径，设置了，则build结束后，会拷贝一份文件到该路径上
+     */
+    public String buildApkPath = "";
 }

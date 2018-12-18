@@ -55,7 +55,7 @@ object GitUtils {
         git ?: return false
         return try {
             val localBranch = "refs/heads/$branchName"
-            git.branchDelete().setBranchNames(localBranch).setForce(true).call()
+            git.branchDelete().setBranchNames(localBranch).setForce(true) .call()
 
             val refSpec = RefSpec()
                     .setSource(null)
