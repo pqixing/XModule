@@ -6,7 +6,6 @@ import org.eclipse.jgit.api.*
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
-import java.util.*
 
 object GitUtils {
     lateinit var credentials: ICredential
@@ -46,6 +45,23 @@ object GitUtils {
             }
         }
         return git
+    }
+
+    /**
+     * 删除分支
+     */
+    fun delete(git: Git?, branchName: String): Boolean {
+        git ?: return false
+        return try {
+            git.branchDelete().setBranchNames(branchName).setForce(true).call()
+            git.push().setForce(true).init().call()
+            Tools.println("Delete ${git.repository.directory.parentFile.name} branch -> $branchName")
+            true
+        } catch (e: Exception) {
+            Tools.println("Delete ${git.repository.directory.parentFile.name} branch -> $branchName")
+
+            false
+        }
     }
 
     /**

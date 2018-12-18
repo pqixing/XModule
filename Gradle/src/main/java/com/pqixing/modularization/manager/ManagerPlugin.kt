@@ -33,7 +33,8 @@ open class ManagerPlugin : BasePlugin() {
             , PushProjectTask::class.java
             , CleanProjectTask::class.java
             , VersionIndexTask::class.java
-            , VersionTagTask::class.java)
+            , VersionTagTask::class.java
+            , DeleteProjectTask::class.java)
 
     var error: String = ""
     override fun apply(project: Project) {
