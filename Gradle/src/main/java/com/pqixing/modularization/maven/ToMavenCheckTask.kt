@@ -2,6 +2,7 @@ package com.pqixing.modularization.maven
 
 import com.pqixing.Tools
 import com.pqixing.git.Components
+import com.pqixing.git.GitUtils
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.AndroidPlugin
@@ -51,6 +52,8 @@ open class ToMavenCheckTask : BaseTask() {
         val baseVersion = dpsExtends.toMavenVersion
         checkBaseVersion(baseVersion)
 
+        checkGitStatus(component)
+
         val v = VersionManager.getNewerVersion(lastLog.branch, artifactId, baseVersion)
         checkLastLog(component, artifactId, baseVersion, v)
 
@@ -69,6 +72,13 @@ open class ToMavenCheckTask : BaseTask() {
         extHelper.setExtValue(project, Keys.LOG_VERSION, version)
         extHelper.setExtValue(project, Keys.LOG_BRANCH, lastLog.branch)
         extHelper.setExtValue(project, Keys.LOG_MODULE, artifactId)
+    }
+
+    private fun checkGitStatus(component: Components) {
+        val path = if (component.name == component.rootName) null else name
+        if (!GitUtils.checkIfClean(ProjectManager.findGit(component.rootName), path)) {
+            Tools.printError("${component.rootName} Git status is not clean, please check your file!!")
+        }
     }
 
     /**

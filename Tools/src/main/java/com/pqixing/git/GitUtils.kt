@@ -135,7 +135,7 @@ object GitUtils {
     /**
      * 检查git是否clean状态
      */
-    fun checkIfClean(git: Git?): Boolean = git?.status()?.call()?.apply {
+    fun checkIfClean(git: Git?, path: String? = null): Boolean = git?.status()?.apply { if (path != null) addPath(path) }?.call()?.apply {
         if (untracked.isNotEmpty()) Tools.println("${git.repository.directory.parentFile.name} -> checkIfClean :untracked -> $untracked")
         if (hasUncommittedChanges()) Tools.println("${git.repository.directory.parentFile.name} -> checkIfClean :uncommittedChanges -> $uncommittedChanges")
     }?.isClean ?: false
