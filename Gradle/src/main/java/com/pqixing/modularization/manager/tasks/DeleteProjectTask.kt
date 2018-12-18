@@ -30,8 +30,6 @@ open class DeleteProjectTask : BaseTask() {
             val create = GitUtils.delete(ProjectManager.findGit(it.absolutePath), targetBranch)
             if (!create) fail.add(it.name)
         }
-        //创建分支成功时，同时打上版本标签
-        if (fail.isEmpty()) VersionManager.createVersionTag()
         ResultUtils.writeResult("DeleteProjectTask -> $fail", fail.size)
     }
 }

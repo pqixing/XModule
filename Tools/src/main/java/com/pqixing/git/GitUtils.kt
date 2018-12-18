@@ -4,6 +4,7 @@ import com.pqixing.Tools
 import com.pqixing.interfaces.ICredential
 import org.eclipse.jgit.api.*
 import org.eclipse.jgit.lib.Ref
+import org.eclipse.jgit.transport.RefSpec
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
 
@@ -53,12 +54,17 @@ object GitUtils {
     fun delete(git: Git?, branchName: String): Boolean {
         git ?: return false
         return try {
-            git.branchDelete().setBranchNames(branchName).setForce(true).call()
-            git.push().setForce(true).init().call()
+            val localBranch = "refs/heads/$branchName"
+            git.branchDelete().setBranchNames(localBranch).setForce(true).call()
+
+            val refSpec = RefSpec()
+                    .setSource(null)
+                    .setDestination("refs/heads/$branchName");
+            git.push().setRefSpecs(refSpec).setRemote("origin").init().call();
             Tools.println("Delete ${git.repository.directory.parentFile.name} branch -> $branchName")
             true
         } catch (e: Exception) {
-            Tools.println("Delete ${git.repository.directory.parentFile.name} branch -> $branchName")
+            Tools.println("Delete Exception -> $e")
 
             false
         }
