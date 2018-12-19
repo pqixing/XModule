@@ -25,6 +25,13 @@ import kotlin.collections.HashSet
  * 2，
  */
 open class DpsAnalysisTask : BaseTask() {
+    init {
+        val dpPrint = project.tasks.create("DependencyReport", org.gradle.api.tasks.diagnostics.DependencyReportTask::class.java)
+//        dpPrint.outputFile =
+        this.dependsOn(dpPrint)
+    }
+
+
     //依赖分析第一步
     val allDps = LinkedList<Vertex>()
     val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
@@ -101,7 +108,7 @@ open class DpsAnalysisTask : BaseTask() {
         if (circles.isNotEmpty()) {
             Tools.println("topoSort has circle dependen -> $circles")
         }
-        val sort = allDps.asSequence().sortedBy { it.degree }.map { it.name to it.degree }.toList()
+        val sort = allDps.asSequence().sortedBy { -it.degree }.map { it.name to it.degree }.toList()
         Tools.println("topoSort list -> $sort")
     }
 

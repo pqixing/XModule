@@ -12,6 +12,7 @@ import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.android.tasks.BuildApk
 import com.pqixing.modularization.android.tasks.PrepareDevTask
 import com.pqixing.modularization.base.BasePlugin
+import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
@@ -97,7 +98,6 @@ open class AndroidPlugin : BasePlugin() {
             compatOldPlugin(dpsExt)
         }
         extHelper.setExtValue(project, "JustApi", if (APP_TYPE == Components.TYPE_LIBRARY_API && BUILD_TYPE == Components.TYPE_LIBRARY_API) "Y" else "N")
-
     }
 
     private fun writeEmptyManifest() {
