@@ -85,7 +85,7 @@ open class MergeProjectTask : BaseTask() {
         //用来处理
         val resolverConflict = HashSet<String>()
         byBranch.forEach {
-            val gitName = ProjectManager.findComponent(it).rootName
+            val gitName = ProjectManager.findComponent(it)?.rootName ?: return@forEach
             if (configGit.remove(gitName)) resolverConflict.add("$it:$gitName")
         }
 

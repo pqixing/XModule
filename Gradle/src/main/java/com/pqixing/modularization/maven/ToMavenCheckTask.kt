@@ -11,9 +11,12 @@ import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.iterface.IExtHelper
+import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
+import java.io.File
 import java.util.*
 
 /**
@@ -36,15 +39,13 @@ open class ToMavenCheckTask : BaseTask() {
         val dpsExtends = plugin.getExtends(DpsExtends::class.java)
         arrayOf(dpsExtends.apiCompiles, dpsExtends.compiles)
 
-        val component = ProjectManager.findComponent(project.name)
+        val component = ProjectManager.findComponent(project.name)!!
         val lastLog = component.lastLog
-        val artifactId = if (plugin.APP_TYPE == Components.TYPE_LIBRARY_API && plugin.BUILD_TYPE == Components.TYPE_LIBRARY_API) {
-            checkLocalDps(dpsExtends.apiCompiles)
-            "${project.name}_api"
-        } else {
-            checkLocalDps(dpsExtends.compiles)
-            project.name
-        }
+
+        val api = plugin.APP_TYPE == Components.TYPE_LIBRARY_API && plugin.BUILD_TYPE == Components.TYPE_LIBRARY_API
+
+        val artifactId = TextUtils.getModuleName(project.name, api)
+        checkLocalDps(if (api) dpsExtends.apiCompiles else dpsExtends.compiles)
 
         checkLoseDps(plugin.dpsManager.loseList)
 
@@ -76,7 +77,7 @@ open class ToMavenCheckTask : BaseTask() {
 
     private fun checkGitStatus(component: Components) {
         val path = if (component.name == component.rootName) null else name
-        if (!GitUtils.checkIfClean(ProjectManager.findGit(component.rootName), path)) {
+        if (!GitUtils.checkIfClean(ProjectManager.findGit(File(FileManager.codeRootDir, component.rootName).absolutePath), path)) {
             Tools.printError("${component.rootName} Git status is not clean, please check your file!!")
         }
     }

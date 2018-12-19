@@ -44,7 +44,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
 
             val pomDir = File(plugin.getGradle().gradleHomeDir, "pomCache")
             val pomFile = File(pomDir, pomKey)
-            pom = if (pomFile.exists()) XmlHelper.parsePomEclude(FileUtils.readText(pomFile)!!, extends.groupName)
+            pom = if (pomFile.exists()) XmlHelper.parsePomEclude(FileUtils.readText(pomFile)!!, "${extends.groupName}.")
             else {
                 val ponTxt = URL(pomUrl).readText()
                 FileUtils.writeText(pomFile, ponTxt)
@@ -56,7 +56,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
     }
 
     //组件工程
-    val components = ProjectManager.findComponent(plugin.project.name)
+    val components = ProjectManager.findComponent(plugin.project.name)!!
     val compileModel = plugin.projectInfo?.dependentModel ?: "mavenOnly"
     val managerExtends = ManagerPlugin.getManagerExtends()
 
@@ -129,10 +129,10 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
             when (plugin.BUILD_TYPE) {
                 Components.TYPE_APPLICATION, Components.TYPE_LIBRARY_SYNC, Components.TYPE_LIBRARY_LOCAL -> {
                     //添加本地Api路径
-                    addBranchExclude(components.lastLog.branch, "${components.name}_api", excludes, 0)
+                    addBranchExclude(components.lastLog.branch, TextUtils.getApiModuleName(components.name), excludes, 0)
                     extHelper.addSourceDir(plugin.project, plugin.getApiPath())
                 }
-                Components.TYPE_LIBRARY -> addMavenCompile(DpsExtends.SCOP_API, components.lastLog.branch, "${components.name}_api", dpsExt.toMavenVersion, includes, excludes, HashSet())
+                Components.TYPE_LIBRARY -> addMavenCompile(DpsExtends.SCOP_API, components.lastLog.branch, TextUtils.getApiModuleName(components.name), dpsExt.toMavenVersion, includes, excludes, HashSet())
                 //打包Api时，设置java目录只有Api
                 Components.TYPE_LIBRARY_API -> extHelper.setApiSourceDir(plugin.project, plugin.getApiPath(), plugin.getApiManifestPath())
             }
@@ -159,7 +159,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
         val config = if (plugin.APP_TYPE == Components.TYPE_APPLICATION) "; force = true ;" else ""
         //如果是Api类型的模块，只依赖api工程，不直接依赖模块代码
         if (dpc.type == Components.TYPE_LIBRARY_API) {
-            compile = addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_API), dpc.branch, "${dpc.moduleName}_api", dpc.version, includes, excludes, HashSet(), config) and compile
+            compile = addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_API), dpc.branch, TextUtils.getApiModuleName(dpc.moduleName), dpc.version, includes, excludes, HashSet(), config) and compile
 
             //如果是作为本地运行时，则把编译对应的模块
             if (plugin.BUILD_TYPE == Components.TYPE_APPLICATION) {
@@ -229,10 +229,16 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
         dpc.localCompile = true
         //本地project默认依赖debug
         if (dpComponents.type == Components.TYPE_LIBRARY_API) {
-            includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_RUNTIME)} ( project(path : ':${dpc.moduleName}')) { ${excludeStr(excludes = dpc.excludes)} }")
-            addBranchExclude(branch, dpc.moduleName, excludes)
+            //只有App运行时，才需要打包该工程，避免循环依赖
+            if (plugin.BUILD_TYPE == Components.TYPE_APPLICATION) {
+                includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_RUNTIME)} ( project(path : ':${dpc.moduleName}')) { ${excludeStr(excludes = dpc.excludes)} }")
+                addBranchExclude(branch, dpc.moduleName, excludes)
+                //移除依赖传递中带来的api依赖，保留自身添加的api依赖
+                addBranchExclude(branch, TextUtils.getApiModuleName(dpc.moduleName), excludes, 0)
+                addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_COMPILEONLY), dpc.branch, TextUtils.getApiModuleName(dpc.moduleName), dpc.version, includes, excludes, HashSet(), " ;force = true ;")
+
+            } else addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_API), dpc.branch, TextUtils.getApiModuleName(dpc.moduleName), dpc.version, includes, excludes, HashSet(), " ;force = true ;")
             //添加对api的maven仓库的编译依赖，只有编译时期使用
-            addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_COMPILEONLY), dpc.branch, "${dpc.moduleName}_api", dpc.version, includes, excludes, HashSet(), " ;force = true ;")
         } else {
             includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_API)} ( project(path : ':${dpc.moduleName}'))  { ${excludeStr(excludes = dpc.excludes)} }")
             addBranchExclude(branch, dpc.moduleName, excludes)

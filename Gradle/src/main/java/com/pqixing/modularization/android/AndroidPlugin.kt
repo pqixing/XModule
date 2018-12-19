@@ -34,6 +34,7 @@ open class AndroidPlugin : BasePlugin() {
         project.apply(mapOf<String, String>("plugin" to if (BUILD_TYPE == Components.TYPE_APPLICATION) Keys.NAME_APP else Keys.NAME_LIBRARY))
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         extHelper.setExtValue(project, "AsApp", if (BUILD_TYPE == Components.TYPE_APPLICATION) "Y" else "N")
+        extHelper.setExtValue(project, "ModuleName", project.name)
 
         if (APP_TYPE == Components.TYPE_LIBRARY || APP_TYPE == Components.TYPE_LIBRARY_API) {
             project.apply(mapOf<String, String>("plugin" to "maven"))
@@ -79,13 +80,11 @@ open class AndroidPlugin : BasePlugin() {
     override fun apply(project: Project) {
         project.extensions.extraProperties.set(project.name, this)
         //如果是空同步，不做任何处理
-        val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, project)
+        val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, project, ProjectManager.findComponent(project.name))
         super.apply(project)
         //创建配置读取
         val moduleConfig = CompatDps(project, dpsExt)
         project.extensions.add(Keys.CONFIG_MODULE, moduleConfig)
-
-
 
 
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
@@ -103,7 +102,7 @@ open class AndroidPlugin : BasePlugin() {
 
     private fun writeEmptyManifest() {
         FileUtils.writeText(File(getApiManifestPath())
-                , "<manifest package=\"${ManagerPlugin.getManagerExtends().groupName}.${project.name}_api\" />"
+                , "<manifest package=\"${ManagerPlugin.getManagerExtends().groupName}.${TextUtils.getApiModuleName(project.name)}\" />"
                 , true)
     }
 

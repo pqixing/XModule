@@ -11,12 +11,10 @@ import groovy.lang.Closure
 import org.gradle.api.Project
 import java.util.*
 
-open class DpsExtends(project: Project) : BaseExtension(project) {
+open class DpsExtends(project: Project,val components:Components) : BaseExtension(project) {
     internal var compiles = HashSet<DpComponents>()
     internal var devCompiles = HashSet<DpComponents>()
     internal var apiCompiles = HashSet<DpComponents>()
-    //组件工程
-    val components = ProjectManager.findComponent(project.name)
     val manager = ManagerPlugin.getManagerExtends()
 
     /**

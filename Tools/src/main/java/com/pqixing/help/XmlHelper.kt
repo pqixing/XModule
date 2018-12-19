@@ -1,6 +1,5 @@
 package com.pqixing.help
 
-import com.pqixing.Tools
 import com.pqixing.git.Components
 import com.pqixing.tools.CheckUtils
 import groovy.util.Node

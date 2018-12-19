@@ -1,5 +1,6 @@
 package com.pqixing.modularization.android.dps
 
+import com.pqixing.git.Components
 import com.pqixing.modularization.android.dps.DpsExtends.Companion.SCOP_RUNTIME
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.manager.ProjectManager
@@ -12,7 +13,7 @@ import org.gradle.api.Project
 
 class DpComponents(project: Project) : BaseExtension(project) {
     var type: String = ""
-        get() = ProjectManager.findComponent(moduleName).type
+        get() = ProjectManager.findComponent(moduleName)?.type?:Components.TYPE_LIBRARY
 
     /**
      * 当前模块是否使用了本地依赖

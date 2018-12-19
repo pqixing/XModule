@@ -83,6 +83,31 @@ object TextUtils {
     }
 
     /**
+     * 根据模块名称获取对应的api模块名称
+     */
+    fun getApiModuleName(module: String): String {
+        if (checkIfApiModule(module)) return module
+        return "${module}__api"
+    }
+
+    fun checkIfApiModule(module: String) = module.endsWith("__api")
+
+    /**
+     * 从Api模块名称中，解析出实际模块名称
+     */
+    fun getModuleFromApi(module: String): String {
+        if (!checkIfApiModule(module)) return module
+        return module.substring(0, module.lastIndexOf("__"))
+    }
+
+    fun getModuleName(module: String, api: Boolean): String = if (api) getApiModuleName(module) else getModuleFromApi(module)
+
+    /**
+     * 检查是否是对应的Api模块
+     */
+    fun isTargetApiModule(module: String, apiModule: String) = checkIfApiModule(apiModule) && module == getModuleFromApi(apiModule)
+
+    /**
      * 获取系统变量
      * @param key
      * @return

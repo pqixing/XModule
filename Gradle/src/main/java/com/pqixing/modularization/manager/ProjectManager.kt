@@ -55,9 +55,9 @@ object ProjectManager : OnClear {
         return allComponents.map { it.value.gitUrl to File(FileManager.codeRootDir, it.value.rootName) }.toMap()
     }
 
-    fun findComponent(name: String): Components {
+    fun findComponent(name: String): Components? {
         checkVail()
-        return allComponents[name]!!
+        return allComponents[name]
     }
 
     fun setGit(name: String, git: Git?) {
