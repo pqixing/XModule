@@ -92,13 +92,13 @@ object VersionManager : OnClear {
         for (i in start until matchingFallbacks.size) {
             val b = if (i < 0) branch else matchingFallbacks[i]
             val preKey = "$groupName.$b.$module."
-            val version = if (isBaseVersion(inputVersion)) inputVersion else findBaseVersion(inputVersion, preKey, branchVersion)
+            val version = if (TextUtils.isBaseVersion(inputVersion)) inputVersion else findBaseVersion(inputVersion, preKey, branchVersion)
             //如果传入的是固定的版本号,则只查询各分支是否存在此版本号，不做自动升级版本号处理
-            if (isBaseVersion(version)) {
+            if (TextUtils.isBaseVersion(version)) {
                 val v = branchVersion["$preKey$version"] ?: continue
                 return Pair(b, "$version.$v")
             }
-            if (isVersionCode(version)) {
+            if (TextUtils.isVersionCode(version)) {
                 val i = version.lastIndexOf('.')
                 if (i < 0) continue
                 val baseVersion = version.substring(0, i)
@@ -116,13 +116,9 @@ object VersionManager : OnClear {
     fun checkBranchVersion(branch: String, module: String): Boolean {
         val branchVersion = findBranchVersion(branch)
         val preKey = "$groupName.$branch.$module."
-        return isBaseVersion(findBaseVersion("+", preKey, branchVersion))
+        return TextUtils.isBaseVersion(findBaseVersion("+", preKey, branchVersion))
     }
 
-    /**
-     * 是不是基础版本，etc 1.0
-     */
-    fun isBaseVersion(version: String?): Boolean = version?.matches(Regex("\\d*\\.\\d+")) ?: false
 
     private fun findBaseVersion(v: String, preKey: String, versions: HashMap<String, String>): String {
         var vs = versions.keys.filter { it.startsWith(preKey) }
@@ -137,7 +133,6 @@ object VersionManager : OnClear {
         return "+"
     }
 
-    fun isVersionCode(str: String?) = str?.matches(Regex("\\d*[.\\d]+")) ?: false
     private fun findBranchVersion(branch: String): HashMap<String, String> {
         if (curVersions.isEmpty()) readCurVersions()
         if (targetVersion.isEmpty()) readTargetVersions()

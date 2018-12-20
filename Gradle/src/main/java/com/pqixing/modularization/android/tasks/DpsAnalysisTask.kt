@@ -12,9 +12,12 @@ import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.FileManager
+import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.maven.VersionManager
+import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
+import com.pqixing.tools.UrlUtils
 import java.io.File
 import java.util.*
 import kotlin.collections.HashMap
@@ -26,14 +29,19 @@ import kotlin.collections.HashSet
  * 2，
  */
 open class DpsAnalysisTask : BaseTask() {
-    val dir = File(AndroidPlugin.getPluginByProject(project).cacheDir, "report")
-    val reportFile = File(dir, Keys.TXT_DPS_REPORT)
-    val analysisFile = File(dir, Keys.TXT_DPS_ANALYSIS)
+    val plugin = AndroidPlugin.getPluginByProject(project)
+    val groupName = ManagerPlugin.getManagerExtends().groupName
+    val dir = File(plugin.cacheDir, "report")
+    //    val temp =File(AndroidPlugin.getPluginByProject(project).buildDir,"DependencyReport.txt")
+    val temp = File(dir, "DpsReport.bak")
+    val versions = HashMap<String, String>()
+
+
     val compareFile = File(dir, Keys.TXT_DPS_COMPARE)
 
     init {
 //        val dpPrint = project.tasks.create("DependencyReport", org.gradle.api.tasks.diagnostics.DependencyReportTask::class.java)
-//        dpPrint.outputFile =reportFile
+//        dpPrint.outputFile =temp
 //        this.dependsOn(dpPrint)
     }
 
@@ -48,13 +56,14 @@ open class DpsAnalysisTask : BaseTask() {
 
     //生成DpsReport.txt
     override fun start() {
-        if (!reportFile.exists()) {
-            Tools.println("Can not find ${reportFile.absolutePath}")
+        if (!temp.exists()) {
+            Tools.println("Can not find ${temp.absolutePath}")
             return
         }
         val result = HashMap<String, String>()
         var read = 0
-        reportFile.forEachLine { it ->
+//        reportFile.forEachLine { it ->
+        temp.forEachLine { it ->
             //如果包含 releaseCompileClasspath,则下一行开始解析 note: r可能为大写，所以无需匹配
             if (it.contains("eleaseCompileClasspath")) {
                 read++
@@ -83,9 +92,13 @@ open class DpsAnalysisTask : BaseTask() {
 
             result[key] = maxVersion(oldVersion, version)
         }
-        result.forEach {
-            Tools.println("parse report version -> $it")
+        val resultStr = StringBuilder(Date().toLocaleString()).append("\n")
+        result.forEach { k, v ->
+            val version = v.split("->").last().trim()
+            resultStr.append("$k=$version\n")
+            versions[k] = version
         }
+        FileUtils.writeText(File(dir, Keys.TXT_DPS_REPORT), resultStr.toString())
     }
 
     /**
@@ -100,10 +113,6 @@ open class DpsAnalysisTask : BaseTask() {
         return if (TextUtils.compareVersion(old.last(), v.last()) > 0) oldVersion else version
     }
 
-    private fun parseVersion() {
-
-    }
-
     /**
      * 解析出需要分析的文字
      */
@@ -113,12 +122,93 @@ open class DpsAnalysisTask : BaseTask() {
 
     //DpsCompare.txt
     override fun end() {
+        val oldReport = File(project.projectDir, "DpsReport.txt")
+        if (!oldReport.exists()) {
+            Tools.println("Compare dps fail,please put the old report file on project dir and try again!!${oldReport.absolutePath}")
+            return
+        }
+        //加载旧的版本
+        val oldVersions = Properties().apply {
+            load(oldReport.inputStream())
+        }.map {
+            val key = it.key.toString().trim()
+            val value = it.value.toString()
+            val vs = value.split("=")
+            if (vs.size < 2) key to vs[0].trim() else "$key:${vs[0].trim()}" to vs[1].trim()
+        }.toMap(HashMap())
 
+//        if (true) {
+//            Tools.println("end -> $oldVersions")
+//            Tools.println("end -> $versions")
+//            return
+//        }
+        val innerModules = allDps.map { it.name }.toSet()
+        val innerList = LinkedList<String>()
+        val thirdList = LinkedList<String>()
+
+        versions.forEach { k, n ->
+            val o = oldVersions.remove(k)
+            val t = if (o == null) "add" else if (o == n) "equal" else "diff"
+
+            val inner = k.startsWith(groupName) || innerModules.contains(k)
+
+            val l = "  |-- $t   ${removeGroup(k, inner)} : ${appendVersion(n, o)}  ${getDescFromPom(k, o, n, inner)} \n"
+            (if (inner) innerList else thirdList).add(l)
+        }
+
+        oldVersions.forEach { k, o ->
+            val t = "del"
+            val inner = k.startsWith(groupName) || innerModules.contains(k)
+
+            val l = "  |-- $t   ${removeGroup(k, inner)} : $o  ${getDescFromPom(k, o, null, inner)} \n"
+            (if (inner) innerList else thirdList).add(l)
+        }
+
+        val result = StringBuilder("Inner dps compare-> \n")
+        innerList.sortedBy { it }.forEach { result.append(it) }
+
+        result.append("\nThird dps compare-> \n")
+        thirdList.sortedBy { it }.forEach { result.append(it) }
+
+        val rl = result.toString()
+        Tools.println(rl)
+        FileUtils.writeText(compareFile, rl)
+    }
+
+    private fun removeGroup(key: String, inner: Boolean): String {
+        if (!inner) return key
+        val name = key.replace(groupName, "")
+        return if (name.startsWith(".")) name.substring(1) else name
+    }
+
+    private fun appendVersion(n: String, o: String?): String {
+        o ?: return n
+        if (n == o) return n
+        return "$o -> $n"
+    }
+
+    /**
+     * 从pom文件获取组件的更新说明
+     */
+    private fun getDescFromPom(k: String, o: String?, n: String?, inner: Boolean): String {
+        if (!inner) return ""
+        val version = if (TextUtils.isVersionCode(n)) n else o
+        if (!TextUtils.isVersionCode(version)) {
+            Tools.println("$k getDescFromPom Exception -> old version : $o , new version $n")
+            return ""
+        }
+        val t = k.split(":")
+        val branch = removeGroup(t[0], true)
+        if (branch.isEmpty()) return ""
+        val module = t[1]
+        val params = UrlUtils.getParams(DpsManager.getPom(branch, module, version!!).name)
+        val commitTime = params["commitTime"]?.toInt() ?: 0
+        params["commitTime"] = Date(commitTime * 1000L).toLocaleString()
+        return "  --- " + getCollectionStr(params)
     }
 
     //生成 DpsAnalysis.txt
     override fun runTask() {
-        return
         val plugin = AndroidPlugin.getPluginByProject(project)
         val dpsExt = plugin.dpsManager.dpsExt
         //依赖排序起点
@@ -150,12 +240,28 @@ open class DpsAnalysisTask : BaseTask() {
 
         //加载定点依赖的全部依赖
         topVertex.dps.forEach { loadDps(it, branch, dpsExt) }
-        allDps.forEach { Tools.println("DpsAnalysisTask -> $it") }
-
         topoSort(allDps.first)
+        val resultStr = StringBuilder(Date().toLocaleString()).append("\n")
 
-        val cacheDir = plugin.cacheDir
-        val outFile = File(cacheDir, Keys.TXT_DPS_ANALYSIS)
+        val include = LinkedList<String>()
+        val toMavens = LinkedList<String>()
+        for (i in (allDps.size - 1) downTo 0) {
+            val d = allDps[i]
+            val moduleName = TextUtils.getModuleFromApi(d.name)
+            if (!include.contains(moduleName)) include.addFirst(moduleName)
+            val taskName = ":$moduleName:ToMaven" + if (TextUtils.checkIfApiModule(d.name)) "Api" else ""
+            if (!toMavens.contains(taskName)) toMavens.add(taskName)
+        }
+        resultStr.append("include=${getCollectionStr(include)}\n")
+        resultStr.append("SortByDegree=${getCollectionStr(allDps)} \n")
+        resultStr.append("ToMaven=${getCollectionStr(toMavens)}\n")
+        FileUtils.writeText(File(dir, Keys.TXT_DPS_ANALYSIS), resultStr.toString())
+        //拷贝一份到doc目录并且提交
+    }
+
+    private fun getCollectionStr(include: Any): String {
+        val toString = include.toString()
+        return toString.substring(1, toString.length - 1)
     }
 
     /**
@@ -183,10 +289,9 @@ open class DpsAnalysisTask : BaseTask() {
             queue.removeLast()
         }
         if (circles.isNotEmpty()) {
-            Tools.println("topoSort has circle dependen -> $circles")
+            Tools.println("Has circle dependency -> $circles")
         }
-        val sort = allDps.asSequence().sortedBy { -it.degree }.map { it.name to it.degree }.toList()
-        Tools.println("topoSort list -> $sort")
+        allDps.sortBy { it.degree }
     }
 
     fun loadDps(module: String, branch: String, dpsExt: DpsExtends) {
@@ -267,4 +372,6 @@ open class DpsAnalysisTask : BaseTask() {
 /**
  * 依赖处理的临时类，用于进行依赖排序
  */
-data class Vertex(var name: String, var degree: Int = 0, var dps: HashSet<String> = HashSet())
+class Vertex(var name: String, var degree: Int = 0, var dps: HashSet<String> = HashSet()) {
+    override fun toString(): String = "$name:$degree"
+}

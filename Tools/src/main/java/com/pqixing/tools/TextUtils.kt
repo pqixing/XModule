@@ -64,7 +64,11 @@ object TextUtils {
         collection.forEach { sb.append(it).append("##") }
         return sb.substring(0, sb.length - 2)
     }
-
+    fun isVersionCode(str: String?) = str?.matches(Regex("\\d*[.\\d]+")) ?: false
+    /**
+     * 是不是基础版本，etc 1.0
+     */
+    fun isBaseVersion(version: String?): Boolean = version?.matches(Regex("\\d*\\.\\d+")) ?: false
     /**
      * 根据深度获取tab空格
      * @param deep

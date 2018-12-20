@@ -120,7 +120,7 @@ open class ToMavenCheckTask : BaseTask() {
 
 
     private fun checkBaseVersion(baseVersion: String) {
-        if (!VersionManager.isBaseVersion(baseVersion)) Tools.printError("ToMavenCheckTask $baseVersion is not base version, try x.x etc: 1.0")
+        if (!TextUtils.isBaseVersion(baseVersion)) Tools.printError("ToMavenCheckTask $baseVersion is not base version, try x.x etc: 1.0")
     }
 
     private fun checkLoseDps(loseList: MutableList<String>) {
