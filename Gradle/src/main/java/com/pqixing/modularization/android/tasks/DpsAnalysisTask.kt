@@ -17,6 +17,7 @@ import com.pqixing.modularization.maven.VersionManager
 import com.pqixing.tools.TextUtils
 import java.io.File
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 /**
@@ -25,10 +26,15 @@ import kotlin.collections.HashSet
  * 2，
  */
 open class DpsAnalysisTask : BaseTask() {
+    val dir = File(AndroidPlugin.getPluginByProject(project).cacheDir, "report")
+    val reportFile = File(dir, Keys.TXT_DPS_REPORT)
+    val analysisFile = File(dir, Keys.TXT_DPS_ANALYSIS)
+    val compareFile = File(dir, Keys.TXT_DPS_COMPARE)
+
     init {
-        val dpPrint = project.tasks.create("DependencyReport", org.gradle.api.tasks.diagnostics.DependencyReportTask::class.java)
-//        dpPrint.outputFile =
-        this.dependsOn(dpPrint)
+//        val dpPrint = project.tasks.create("DependencyReport", org.gradle.api.tasks.diagnostics.DependencyReportTask::class.java)
+//        dpPrint.outputFile =reportFile
+//        this.dependsOn(dpPrint)
     }
 
 
@@ -40,8 +46,78 @@ open class DpsAnalysisTask : BaseTask() {
             return AndroidPlugin.getPluginByProject(project).projectInfo.dependentModel
         }
 
+    //生成DpsReport.txt
+    override fun start() {
+        if (!reportFile.exists()) {
+            Tools.println("Can not find ${reportFile.absolutePath}")
+            return
+        }
+        val result = HashMap<String, String>()
+        var read = 0
+        reportFile.forEachLine { it ->
+            //如果包含 releaseCompileClasspath,则下一行开始解析 note: r可能为大写，所以无需匹配
+            if (it.contains("eleaseCompileClasspath")) {
+                read++
+                return@forEachLine
+            }
+            if (read != 1) return@forEachLine
+            val line = trimUnUse(it)
+            if (line.isEmpty()) {
+                read++
+                return@forEachLine
+            }
+            val ls = line.split(":")
+            if (ls.size < 2) return@forEachLine
+            if (ls.size == 2) {//本地project类型依赖
+                result[ls[1]] = ls[0]
+            }
+            val key = "${ls[0]}:${ls[1]}"
 
+            //查出已经保存的版本号
+            val oldVersion = result[key]
+
+            //版本号是否是提升
+            val upgradle = ls[2].indexOf("->")
+            val version = if (upgradle < 0) ls[2].trim() else ls[2].substring(upgradle).trim()
+
+            result[key] = maxVersion(oldVersion, version)
+        }
+        result.forEach {
+            Tools.println("parse report version -> $it")
+        }
+    }
+
+    /**
+     * 比较版本号
+     */
+    private fun maxVersion(oldVersion: String?, version: String): String {
+        oldVersion ?: return version
+        val old = oldVersion.split("->")
+        val v = version.split("->")
+        if (old.size > v.size) return oldVersion
+        if (old.size < v.size) return version
+        return if (TextUtils.compareVersion(old.last(), v.last()) > 0) oldVersion else version
+    }
+
+    private fun parseVersion() {
+
+    }
+
+    /**
+     * 解析出需要分析的文字
+     */
+    private fun trimUnUse(it: String): String {
+        return it.split("---").last().replace(Regex("(\\(.*?\\))|,"), "").trim()
+    }
+
+    //DpsCompare.txt
+    override fun end() {
+
+    }
+
+    //生成 DpsAnalysis.txt
     override fun runTask() {
+        return
         val plugin = AndroidPlugin.getPluginByProject(project)
         val dpsExt = plugin.dpsManager.dpsExt
         //依赖排序起点

@@ -14,6 +14,8 @@ public class Keys {
     public static final String LOG_BRANCH = "branch";
     public static final String LOG_VERSION = "version";
     public static final String TXT_DPS_ANALYSIS = "DpsAnalysis.txt";
+    public static final String TXT_DPS_REPORT = "DpsReport.txt";
+    public static final String TXT_DPS_COMPARE = "DpsCompare.txt";
     /**
      * 版本号过滤
      */
