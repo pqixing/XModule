@@ -128,13 +128,9 @@ open class DpsAnalysisTask : BaseTask() {
             return
         }
         //加载旧的版本
-        val oldVersions = Properties().apply {
-            load(oldReport.inputStream())
-        }.map {
-            val key = it.key.toString().trim()
-            val value = it.value.toString()
-            val vs = value.split("=")
-            if (vs.size < 2) key to vs[0].trim() else "$key:${vs[0].trim()}" to vs[1].trim()
+        val oldVersions = oldReport.readLines().filter { it.contains("=") }.map {
+            val vs = it.split("=")
+            vs[0].trim() to vs[1].trim()
         }.toMap(HashMap())
 
 //        if (true) {
@@ -147,8 +143,10 @@ open class DpsAnalysisTask : BaseTask() {
         val thirdList = LinkedList<String>()
 
         versions.forEach { k, n ->
+
             val o = oldVersions.remove(k)
-            val t = if (o == null) "add" else if (o == n) "equal" else "diff"
+//            Tools.println("versions.forEach -> $k ->$o -> $n")
+            val t = if (o == null) "add  " else if (o == n) "equal" else "diff "
 
             val inner = k.startsWith(groupName) || innerModules.contains(k)
 
@@ -157,7 +155,7 @@ open class DpsAnalysisTask : BaseTask() {
         }
 
         oldVersions.forEach { k, o ->
-            val t = "del"
+            val t = "del  "
             val inner = k.startsWith(groupName) || innerModules.contains(k)
 
             val l = "  |-- $t   ${removeGroup(k, inner)} : $o  ${getDescFromPom(k, o, null, inner)} \n"
@@ -204,7 +202,7 @@ open class DpsAnalysisTask : BaseTask() {
         val params = UrlUtils.getParams(DpsManager.getPom(branch, module, version!!).name)
         val commitTime = params["commitTime"]?.toInt() ?: 0
         params["commitTime"] = Date(commitTime * 1000L).toLocaleString()
-        return "  --- " + getCollectionStr(params)
+        return "    ====> log : " + getCollectionStr(params).replace("\n"," ")
     }
 
     //生成 DpsAnalysis.txt
