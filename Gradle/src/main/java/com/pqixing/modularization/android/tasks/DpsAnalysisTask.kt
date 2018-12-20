@@ -70,6 +70,7 @@ open class DpsAnalysisTask : BaseTask() {
             if (ls.size < 2) return@forEachLine
             if (ls.size == 2) {//本地project类型依赖
                 result[ls[1]] = ls[0]
+                return@forEachLine
             }
             val key = "${ls[0]}:${ls[1]}"
 
