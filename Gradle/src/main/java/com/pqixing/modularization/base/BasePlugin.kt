@@ -13,7 +13,6 @@ import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.utils.ResultUtils
-import com.pqixing.tools.CheckUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import groovy.lang.GroovyClassLoader
@@ -39,27 +38,36 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     override var projectInfo: ProjectInfo = ProjectInfo()
         get() {
             if (pi == null) {
-                var infoStr = jsonFromEnv
-                if (CheckUtils.isEmpty(infoStr)) {
-                    try {
-                        val parseClass = GroovyClassLoader().parseClass(File(rootDir, FileNames.PROJECT_INFO))
-                        infoStr = JSON.toJSONString(parseClass.newInstance())
-                    } catch (e: Exception) {
 
-                    }
-
+                pi = try {
+                    val parseClass = GroovyClassLoader().parseClass(File(rootDir, FileNames.PROJECT_INFO))
+                    JSON.parseObject(JSON.toJSONString(parseClass.newInstance()), ProjectInfo::class.java)
+                } catch (e: Exception) {
+                    ProjectInfo()
                 }
-                if (!CheckUtils.isEmpty(infoStr)) {
-                    try {
-                        pi = JSON.parseObject(infoStr, ProjectInfo::class.java)
-                    } catch (e: Exception) {
-                    }
-
-                }
-                if (pi == null) pi = ProjectInfo()
+                loadProjectInfo(pi!!)
+                Tools.println(JSON.toJSONString(pi))
             }
             return pi!!
         }
+
+    /**
+     * 从系统配置中加载对应的变量
+     */
+    private fun loadProjectInfo(pi: ProjectInfo) {
+        pi.javaClass.fields.forEach {
+            val value = TextUtils.getSystemEnv(it.name) ?: return@forEach
+            try {
+                it.isAccessible = true
+                when (it.type) {
+                    Boolean::class.java -> it.setBoolean(pi, value.toBoolean())
+                    String::class.java -> it.set(pi, value)
+                }
+            } catch (e: Exception) {
+                Tools.println("loadProjectInfo Exception -> $e")
+            }
+        }
+    }
 
     private val jsonFromEnv: String
         get() {
