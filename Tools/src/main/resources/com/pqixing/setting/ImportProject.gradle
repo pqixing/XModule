@@ -166,6 +166,7 @@ public class ImportProject {
         }
         codeRoot = codeRoot.replace('"', "")
         codeRootDir = codeRoot.startsWith("../") ? getDir(rootDir, codeRoot) : new File(codeRoot)
+        println("codeRootDir -> $codeRoot : $codeRootDir.absolutePath")
         gradle.ext.codeRootDir = codeRootDir
     }
 

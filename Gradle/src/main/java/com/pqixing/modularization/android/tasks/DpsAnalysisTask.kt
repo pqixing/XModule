@@ -2,6 +2,7 @@ package com.pqixing.modularization.android.tasks
 
 import com.pqixing.Tools
 import com.pqixing.git.Components
+import com.pqixing.git.GitUtils
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
@@ -32,17 +33,17 @@ open class DpsAnalysisTask : BaseTask() {
     val plugin = AndroidPlugin.getPluginByProject(project)
     val groupName = ManagerPlugin.getManagerExtends().groupName
     val dir = File(plugin.cacheDir, "report")
-    //    val temp =File(AndroidPlugin.getPluginByProject(project).buildDir,"DependencyReport.txt")
-    val temp = File(dir, "DpsReport.bak")
+    val temp = File(AndroidPlugin.getPluginByProject(project).buildDir, "DependencyReport.txt")
+    //    val temp = File(dir, "DpsReport.bak")
     val versions = TreeMap<String, String>()
 
 
     val compareFile = File(dir, Keys.TXT_DPS_COMPARE)
 
     init {
-//        val dpPrint = project.tasks.create("DependencyReport", org.gradle.api.tasks.diagnostics.DependencyReportTask::class.java)
-//        dpPrint.outputFile =temp
-//        this.dependsOn(dpPrint)
+        val dpPrint = project.tasks.create("DependencyReport", org.gradle.api.tasks.diagnostics.DependencyReportTask::class.java)
+        dpPrint.outputFile = temp
+        this.dependsOn(dpPrint)
     }
 
 
@@ -256,7 +257,7 @@ open class DpsAnalysisTask : BaseTask() {
             val moduleName = TextUtils.getModuleFromApi(d.name)
             if (!include.contains(moduleName)) include.addFirst(moduleName)
             val taskName = ":$moduleName:ToMaven" + if (TextUtils.checkIfApiModule(d.name)) "Api" else ""
-            if (!toMavens.contains(taskName)&&ProjectManager.findComponent(moduleName)?.type!=Components.TYPE_APPLICATION){
+            if (!toMavens.contains(taskName) && ProjectManager.findComponent(moduleName)?.type != Components.TYPE_APPLICATION) {
                 toMavens.add("./gradlew $taskName -DfocusInclude=AutoImport -DdependentModel=mavenOnly \n")
             }
         }
@@ -270,6 +271,8 @@ open class DpsAnalysisTask : BaseTask() {
         resultStr.append("cd \$curPath \n")
         FileUtils.writeText(File(dir, Keys.TXT_DPS_ANALYSIS), resultStr.toString())
         //拷贝一份到doc目录并且提交
+        FileUtils.copy(File(dir, Keys.TXT_DPS_ANALYSIS), File(FileManager.docRoot, "dependency/${project.name}"))
+        GitUtils.addAndPush(ProjectManager.findGit(ProjectManager.projectRoot.absolutePath), "dependency", "Add ${project.name} DpsAnalysisTask", true)
     }
 
     private fun getCollectionStr(include: Any): String {

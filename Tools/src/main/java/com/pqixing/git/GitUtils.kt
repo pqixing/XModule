@@ -76,6 +76,7 @@ object GitUtils {
     fun addAndPush(git: Git?, file: String, commitMsg: String, force: Boolean = false): Boolean {
         git ?: return false
         try {
+            git.pull().init().execute()
             git.add().addFilepattern(file).init().call()
             git.commit().setMessage(commitMsg).init().call()
             push(git, true)
