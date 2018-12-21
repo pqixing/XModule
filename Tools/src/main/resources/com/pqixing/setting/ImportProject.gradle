@@ -49,7 +49,7 @@ public class ImportProject {
 
     private void parseValue(String k, String v) {
         String key = k.replace("var ", "").replace("val ", "").replace("\"", "").trim()
-        String value = v.replace("+", ",").trim()
+        String value = v.replace("+", ",").replace("\"", "").trim()
         switch (key) {
             case "targetInclude": formatInclude(new File(value))
                 break

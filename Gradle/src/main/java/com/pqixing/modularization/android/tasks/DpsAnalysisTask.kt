@@ -247,7 +247,7 @@ open class DpsAnalysisTask : BaseTask() {
         //加载定点依赖的全部依赖
         topVertex.dps.forEach { loadDps(it, branch, dpsExt) }
         topoSort(allDps.first)
-        val resultStr = StringBuilder(Date().toLocaleString()).append("\n")
+        val resultStr = StringBuilder("#" + Date().toLocaleString()).append("\n")
 
         val include = LinkedList<String>()
         val toMavens = LinkedList<String>()
@@ -256,11 +256,18 @@ open class DpsAnalysisTask : BaseTask() {
             val moduleName = TextUtils.getModuleFromApi(d.name)
             if (!include.contains(moduleName)) include.addFirst(moduleName)
             val taskName = ":$moduleName:ToMaven" + if (TextUtils.checkIfApiModule(d.name)) "Api" else ""
-            if (!toMavens.contains(taskName)) toMavens.add(taskName)
+            if (!toMavens.contains(taskName)&&ProjectManager.findComponent(moduleName)?.type!=Components.TYPE_APPLICATION){
+                toMavens.add("./gradlew $taskName -DfocusInclude=AutoImport -DdependentModel=mavenOnly \n")
+            }
         }
         resultStr.append("include=${getCollectionStr(include)}\n")
         resultStr.append("SortByDegree=${getCollectionStr(allDps)} \n")
-        resultStr.append("ToMaven=${getCollectionStr(toMavens)}\n")
+        resultStr.append("curPath=$(pwd) \n")
+        resultStr.append("echo Start All ToMaven Task!! \n")
+        resultStr.append("cd ${project.rootDir.absolutePath} \n")
+        toMavens.forEach { resultStr.append(it) }
+        resultStr.append("echo End All ToMaven Task!!\n")
+        resultStr.append("cd \$curPath \n")
         FileUtils.writeText(File(dir, Keys.TXT_DPS_ANALYSIS), resultStr.toString())
         //拷贝一份到doc目录并且提交
     }
