@@ -63,6 +63,10 @@ public class ProjectInfo {
     public String buildDir = "";
 
     /**
+     * 部分重要操作需要的密码
+     */
+    public String password="";
+    /**
      * 运行类型,gradle,plugin
      */
     public String runPluginType = "gradle";
