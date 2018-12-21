@@ -357,7 +357,6 @@ open class DpsAnalysisTask : BaseTask() {
         try {
             project.apply(mapOf<String, String>("from" to libraryGradle.absolutePath))
         } catch (e: Exception) {
-            Tools.println("apply from -> ${libraryGradle.absolutePath} -> $e")
         }
 
         (if (api) dpsExt.apiCompiles else dpsExt.compiles).forEach {
