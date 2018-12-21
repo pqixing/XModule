@@ -4,6 +4,7 @@ import com.pqixing.Tools
 import com.pqixing.git.Components
 import com.pqixing.git.GitUtils
 import com.pqixing.help.XmlHelper
+import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.AndroidPlugin
@@ -119,7 +120,7 @@ open class DpsAnalysisTask : BaseTask() {
      * 解析出需要分析的文字
      */
     private fun trimUnUse(it: String): String {
-        return it.split("---").last().replace(Regex("(\\(.*?\\))|,"), "").trim()
+        return it.split("---").last().replace(Regex("(\\(.*?\\))|,| FAILED"), "").trim()
     }
 
     //DpsCompare.txt
@@ -263,7 +264,7 @@ open class DpsAnalysisTask : BaseTask() {
         }
         resultStr.append("include=${getCollectionStr(include)}\n")
         resultStr.append("SortByDegree=${getCollectionStr(allDps)} \n")
-        resultStr.append("curPath=$(pwd) \n")
+        resultStr.append("curPath=$(pwd) \n\n")
         resultStr.append("echo Start All ToMaven Task!! \n")
         resultStr.append("cd ${project.rootDir.absolutePath} \n")
         toMavens.forEach { resultStr.append(it) }
@@ -271,8 +272,8 @@ open class DpsAnalysisTask : BaseTask() {
         resultStr.append("cd \$curPath \n")
         FileUtils.writeText(File(dir, Keys.TXT_DPS_ANALYSIS), resultStr.toString())
         //拷贝一份到doc目录并且提交
-        FileUtils.copy(File(dir, Keys.TXT_DPS_ANALYSIS), File(FileManager.docRoot, "dependency/${project.name}"))
-        GitUtils.addAndPush(ProjectManager.findGit(ProjectManager.projectRoot.absolutePath), "dependency", "Add ${project.name} DpsAnalysisTask", true)
+        FileUtils.writeText(File(FileManager.docRoot, "dependency/${project.name}"), resultStr.toString())
+        GitUtils.addAndPush(ProjectManager.findGit(ProjectManager.projectRoot.absolutePath), FileNames.MANAGER, "Add ${project.name} DpsAnalysisTask", true)
     }
 
     private fun getCollectionStr(include: Any): String {
@@ -312,7 +313,7 @@ open class DpsAnalysisTask : BaseTask() {
     fun loadDps(module: String, branch: String, dpsExt: DpsExtends) {
 
         //如果已经处理过该模块的依赖，不重复处理
-        if (!checkModule(module) || allDps.any { it.name == module }) return
+        if (allDps.any { it.name == module } || ProjectManager.findComponent(TextUtils.getModuleFromApi(module)) == null) return
 
         val tempContainer = Vertex(module).apply { allDps.add(this) }.dps
         val compile = when (dependentModel) {
@@ -337,10 +338,9 @@ open class DpsAnalysisTask : BaseTask() {
         val api = TextUtils.checkIfApiModule(module)
         val mcp = ProjectManager.findComponent(TextUtils.getModuleFromApi(module)) ?: return false
 
-        val path = if (mcp.name == mcp.rootName) mcp.rootName else "${mcp.rootName}/${mcp.name}"
 
         //查出buildGradle
-        val buildGradle = File(FileManager.codeRootDir, "$path/build.gradle")
+        val buildGradle = File(FileManager.codeRootDir, "${mcp.getPath()}/build.gradle")
         val libraryGradle = File(FileManager.docRoot, "gradles/com.module.library.gradle")
         //文件不存，则解析失败
         if (!buildGradle.exists()) return false
@@ -357,6 +357,7 @@ open class DpsAnalysisTask : BaseTask() {
         try {
             project.apply(mapOf<String, String>("from" to libraryGradle.absolutePath))
         } catch (e: Exception) {
+            Tools.println("apply from -> ${libraryGradle.absolutePath} -> $e")
         }
 
         (if (api) dpsExt.apiCompiles else dpsExt.compiles).forEach {

@@ -101,20 +101,21 @@ object XmlHelper {
 
             val children = p.getAt(QName("submodule"))
             if (children.isEmpty()) {
-                addProject(projects, rootName, gitUrl, introduce, rootName, type)
+                addProject(projects, rootName, gitUrl, introduce, rootName, type,false)
             } else children.forEach { c ->
                 if(c is Node) {
                     val name = c.get("@name").toString()
                     val t = c.get("@type")?.toString() ?: Components.TYPE_LIBRARY
                     introduce = c.get("@introduce").toString()
-                    addProject(projects, name, gitUrl, introduce, rootName, t)
+                    addProject(projects, name, gitUrl, introduce, rootName, t,true)
                 }
             }
         }
     }
 
-    private inline fun addProject(projects: HashMap<String, Components>, name: String, gitUrl: String, introduce: String, rootName: String, type: String) {
+    private inline fun addProject(projects: HashMap<String, Components>, name: String, gitUrl: String, introduce: String, rootName: String, type: String,child:Boolean) {
         val project = Components(name, gitUrl, introduce, rootName, type)
+        project.child = child
         projects[name] = project
     }
 

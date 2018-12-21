@@ -107,7 +107,6 @@ object VersionManager : OnClear {
                 if (v >= last) return Pair(b, version)//.apply { Tools.println("getVersion -> $branch $module $inputVersion -> $first : $second")  }
             }
         }
-        Tools.println("getVersion -> $branch $module $inputVersion -> ")
         return Pair("", inputVersion)
     }
 
@@ -274,6 +273,7 @@ object VersionManager : OnClear {
         val groupUrl = extends.groupName.replace(".", "/")
         Tools.println("parseNetVersions  start ->")
         val start = System.currentTimeMillis()
+        versions.clear()
         parseNetVersions("$maven/$groupUrl", versions, extends.groupName)
         Tools.println("parseNetVersions  end -> ${System.currentTimeMillis() - start} ms")
         versions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
@@ -293,7 +293,13 @@ object VersionManager : OnClear {
     fun parseNetVersions(baseUrl: String, versions: HashMap<String, String>, groupName: String) {
         val prefix = "<a href=\""
         val r = Regex(".*?$prefix$baseUrl.*?</a>")
-        val lines = URL(baseUrl).readText().lines()
+
+        val lines = try {
+            URL(baseUrl).readText().lines()
+        } catch (e: Exception) {
+            Tools.println("parseNetVersions Exception -> $e")
+            emptyList<String>()
+        }
         kotlin.run outer@{
             lines.forEach { line ->
                 if (line.trim().matches(r)) {

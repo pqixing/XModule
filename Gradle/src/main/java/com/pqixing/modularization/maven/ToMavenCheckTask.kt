@@ -76,7 +76,7 @@ open class ToMavenCheckTask : BaseTask() {
     }
 
     private fun checkGitStatus(component: Components) {
-        val path = if (component.name == component.rootName) null else name
+        val path = if (component.child) component.name else null
         if (!GitUtils.checkIfClean(ProjectManager.findGit(File(FileManager.codeRootDir, component.rootName).absolutePath), path)) {
             Tools.printError("${component.rootName} Git status is not clean, please check your file!!")
         }

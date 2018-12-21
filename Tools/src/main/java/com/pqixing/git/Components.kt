@@ -34,11 +34,17 @@ class Components {
      */
     var lastLog: GitLog = GitLog()
     /**
+     * 是否是子级工程
+     */
+    var child = false
+    /**
      * 该组件类型
      */
     var type: String = TYPE_LIBRARY
 
     var hasInit = false
+
+    fun getPath() = if (child) "$rootName/$name" else rootName
 
     constructor(name: String, gitUrl: String, introduce: String, rootName: String, type: String) {
         this.name = name
