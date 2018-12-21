@@ -189,11 +189,12 @@ object VersionManager : OnClear {
     private fun indexCacheVersion(lastUpdate: Int, curVersions: HashMap<String, String>) {
         val lastLog = FileManager.docProject.lastLog
         //cacheMap中的最后更新时间与git版本号的最后更新时间不一致，尝试更新
-        if (lastLog.commitTime < lastUpdate) {
+        if (lastLog.commitTime > lastUpdate) {
             /**从日志中读取版本号**/
             val git = Git.open(GitUtils.findGitDir(FileManager.docRoot))
             run out@{
                 git.log().call().forEach { rev ->
+                    //如果当前记录比最后更新时间小，则无需再更新，因为已经在version里面了
                     if (rev.commitTime < lastUpdate) return@out
                     val message = rev.fullMessage.trim()
                     //如果是
