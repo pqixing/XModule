@@ -46,7 +46,6 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
                     ProjectInfo()
                 }
                 loadProjectInfo(pi!!)
-                Tools.println(JSON.toJSONString(pi))
             }
             return pi!!
         }

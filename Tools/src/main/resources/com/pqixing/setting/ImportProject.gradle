@@ -32,11 +32,7 @@ public class ImportProject {
     }
 
     void readFromEnv() {
-        System.getProperties().each { it ->
-            if (it.key.toString().startsWith("val")) {
-                parseValue(it.key.toString(), it.value.toString())
-            }
-        }
+        System.getProperties().each { parseValue(it.key.toString(), it.value.toString()) }
     }
     /**
      * 解析本地需要导入的工程
@@ -73,8 +69,7 @@ public class ImportProject {
                 value?.split(",")?.each { excludes.add(it.trim()) }
                 break
             case "codeRoot":
-                if (!value.isEmpty())
-                    codeRoot = value
+                if (!value.isEmpty()) codeRoot = value
                 break
             default: return
         }
@@ -90,10 +85,13 @@ public class ImportProject {
             println("$dpsName  version file :$f.absolutePath  not found , please run task DpsAnalysisTask")
             return
         }
-        //读取第一行
-        String[] map = f.text.readLines()[0].replaceAll("//.*", "").split("=")
-        if (map.length >= 2) parseValue(type, map[map.length - 1])
-
+        for (line in f.text.readLines()) {
+            def map = line.replaceAll("//.*", "").split("=")
+            if (map.length < 2) continue
+            String key = map[0].replace("var ", "").replace("val ", "").replace("\"", "").trim()
+            if (key != "include") continue
+            parseValue(type, map[map.length - 1])
+        }
     }
 
     /**
@@ -115,12 +113,18 @@ public class ImportProject {
 
     String makeIncludeTxt() {
         HashSet<String> resultInclude = new HashSet()
-        focusIncludes.each { key ->
+        for (key in focusIncludes) {
             String k = key.replace('"', "").trim()
-            if (!k.isEmpty()) {
-                resultInclude.add(k)
-            }
+            if (k.isEmpty()) continue
+            if (k == "AutoImport") {//自动导入，根据执行任务所需要的模块来导入对应的模块
+                for (task in gradle.startParameter.taskNames) {
+                    def tks = task.split(":")
+                    if (tks.length < 2) continue
+                    resultInclude.add(tks[tks.length - 2])
+                }
+            } else resultInclude.add(k)
         }
+
         if (resultInclude.isEmpty()) {
             includes.each { key ->
                 if (!key.isEmpty()) resultInclude.add(key)
@@ -138,7 +142,7 @@ public class ImportProject {
                 sb.append("\ninclude (':$key') \n    project(':$key').projectDir = new File('$dir','${value.replace("\\", "/")}')")
             }
         }
-
+        println("import -> $resultInclude")
         return sb.toString()
     }
 
