@@ -107,8 +107,8 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
          * 缺失了部分依赖
          */
         if (loseList.isNotEmpty()) {
-            if (plugin.projectInfo.allowLose) Tools.println("resolveDps -> lose dps -> $loseList")
-            else Tools.printError("resolveDps -> lose dps -> $loseList")
+            if (plugin.projectInfo.allowLose) Tools.println("ResolveDps -> lose dps -> $loseList")
+            else Tools.printError("ResolveDps -> lose dps -> $loseList")
         }
         val sb = java.lang.StringBuilder("dependencies {  // APP_TYPE : ${plugin.APP_TYPE} -> BUILD_TYPE : ${plugin.BUILD_TYPE}\n")
         includes.forEach { sb.append(it).append("\n") }

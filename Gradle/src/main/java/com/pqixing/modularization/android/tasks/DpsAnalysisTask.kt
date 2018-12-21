@@ -34,7 +34,7 @@ open class DpsAnalysisTask : BaseTask() {
     val dir = File(plugin.cacheDir, "report")
     //    val temp =File(AndroidPlugin.getPluginByProject(project).buildDir,"DependencyReport.txt")
     val temp = File(dir, "DpsReport.bak")
-    val versions = HashMap<String, String>()
+    val versions = TreeMap<String, String>()
 
 
     val compareFile = File(dir, Keys.TXT_DPS_COMPARE)
@@ -60,7 +60,7 @@ open class DpsAnalysisTask : BaseTask() {
             Tools.println("Can not find ${temp.absolutePath}")
             return
         }
-        val result = HashMap<String, String>()
+        val result = TreeMap<String, String>()
         var read = 0
 //        reportFile.forEachLine { it ->
         temp.forEachLine { it ->
@@ -92,7 +92,8 @@ open class DpsAnalysisTask : BaseTask() {
 
             result[key] = maxVersion(oldVersion, version)
         }
-        val resultStr = StringBuilder(Date().toLocaleString()).append("\n")
+        val resultStr = StringBuilder()
+        result["CreateTime"] = Date().toLocaleString()
         result.forEach { k, v ->
             val version = v.split("->").last().trim()
             resultStr.append("$k=$version\n")
@@ -142,6 +143,7 @@ open class DpsAnalysisTask : BaseTask() {
         val innerList = LinkedList<String>()
         val thirdList = LinkedList<String>()
 
+        val result = StringBuilder("Compare Dependencies Version : ${oldVersions.remove("CreateTime")} -> ${versions.remove("CreateTime")}\n")
         versions.forEach { k, n ->
 
             val o = oldVersions.remove(k)
@@ -162,15 +164,21 @@ open class DpsAnalysisTask : BaseTask() {
             (if (inner) innerList else thirdList).add(l)
         }
 
-        val result = StringBuilder("Inner dps compare-> \n")
+        result.append("Inner -> \n")
         innerList.sortedBy { it }.forEach { result.append(it) }
 
-        result.append("\nThird dps compare-> \n")
+        result.append("\nThird -> \n")
         thirdList.sortedBy { it }.forEach { result.append(it) }
-
         val rl = result.toString()
         Tools.println(rl)
         FileUtils.writeText(compareFile, rl)
+
+        clear()
+    }
+
+    private fun clear() {
+        versions.clear()
+        allDps.clear()
     }
 
     private fun removeGroup(key: String, inner: Boolean): String {
@@ -202,7 +210,7 @@ open class DpsAnalysisTask : BaseTask() {
         val params = UrlUtils.getParams(DpsManager.getPom(branch, module, version!!).name)
         val commitTime = params["commitTime"]?.toInt() ?: 0
         params["commitTime"] = Date(commitTime * 1000L).toLocaleString()
-        return "    ====> log : " + getCollectionStr(params).replace("\n"," ")
+        return "    ====> log : " + getCollectionStr(params).replace("\n", " ")
     }
 
     //生成 DpsAnalysis.txt
@@ -269,7 +277,6 @@ open class DpsAnalysisTask : BaseTask() {
         val queue = LinkedList<Vertex>()
         queue.offer(first)
         val circles = HashSet<String>()
-        Tools.println("topoSort -> $first")
         outer@ while (queue.isNotEmpty()) {
             //后进后出，深度优先查询
             val top = queue.last
@@ -295,7 +302,7 @@ open class DpsAnalysisTask : BaseTask() {
     fun loadDps(module: String, branch: String, dpsExt: DpsExtends) {
 
         //如果已经处理过该模块的依赖，不重复处理
-        if (allDps.any { it.name == module }) return
+        if (!checkModule(module) || allDps.any { it.name == module }) return
 
         val tempContainer = Vertex(module).apply { allDps.add(this) }.dps
         val compile = when (dependentModel) {
@@ -309,6 +316,8 @@ open class DpsAnalysisTask : BaseTask() {
         if (!compile) Tools.printError("DpsAnalysisTask Exception-> can not resolve dps for $module , mode :$dependentModel")
         tempContainer.forEach { loadDps(it, branch, dpsExt) }
     }
+
+    private fun checkModule(module: String) = module.startsWith("$groupName.")
 
     /**
      * 从本地获取依赖

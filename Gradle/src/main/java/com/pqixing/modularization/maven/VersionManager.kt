@@ -96,17 +96,18 @@ object VersionManager : OnClear {
             //如果传入的是固定的版本号,则只查询各分支是否存在此版本号，不做自动升级版本号处理
             if (TextUtils.isBaseVersion(version)) {
                 val v = branchVersion["$preKey$version"] ?: continue
-                return Pair(b, "$version.$v")
+                return Pair(b, "$version.$v")//.apply { Tools.println("getVersion -> $branch $module $inputVersion -> $first : $second")  }
             }
             if (TextUtils.isVersionCode(version)) {
-                val i = version.lastIndexOf('.')
-                if (i < 0) continue
-                val baseVersion = version.substring(0, i)
-                val last = version.substring(i + 1).toInt()
+                val i1 = version.lastIndexOf('.')
+                if (i1 < 0) continue
+                val baseVersion = version.substring(0, i1)
+                val last = version.substring(i1 + 1).toInt()
                 val v = branchVersion["$preKey$baseVersion"]?.toInt() ?: continue
-                if (v >= last) return Pair(b, version)
+                if (v >= last) return Pair(b, version)//.apply { Tools.println("getVersion -> $branch $module $inputVersion -> $first : $second")  }
             }
         }
+        Tools.println("getVersion -> $branch $module $inputVersion -> ")
         return Pair("", inputVersion)
     }
 
