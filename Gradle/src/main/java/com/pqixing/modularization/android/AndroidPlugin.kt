@@ -65,7 +65,7 @@ open class AndroidPlugin : BasePlugin() {
             if (BUILD_TYPE == Components.TYPE_APPLICATION || BUILD_TYPE == Components.TYPE_LIBRARY_SYNC) return listOf("com.module.library", "com.module.maven", "com.module.dev")
             return listOf("com.module.library", "com.module.maven")
         }
-    override val ignoreFields: Set<String> = setOf("scr/dev")
+    override val ignoreFields: Set<String> = emptySet()
 
     override fun linkTask(): List<Class<out Task>> {
         var tasks = mutableListOf(CleanCache::class.java, DpsAnalysisTask::class.java)
