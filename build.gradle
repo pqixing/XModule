@@ -12,12 +12,17 @@ buildscript {
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'//this
     }
 } //
+
+ext.localMavenUri = uri("$project.gradle.gradleUserHomeDir.absolutePath/.localRepo")
+//本地Maven调试
+ext.localBuild = true
+ext.buildModule = ["Gradle"]
+ext.buildGroup = 'com.github.pqixing.modularization'
+
+
 allprojects {
-    version = "0.0.3"
     repositories {
-        maven {
-            url uri("/home/pqixing/.repo")
-        }
+        if (localBuild) maven { url localMavenUri }
         jcenter()
         google()
         maven {
@@ -27,7 +32,7 @@ allprojects {
 }
 
 tasks.withType(Javadoc) {
-    options{
+    options {
         encoding "UTF-8"
         charSet 'UTF-8'
         links "http://docs.oracle.com/javase/7/docs/api"
@@ -35,7 +40,9 @@ tasks.withType(Javadoc) {
 }
 
 subprojects { p ->
-    if(p.name!="Tools") return
+    group = buildGroup
+    version = "0.0.9"
+    if (!buildModule.contains(p.name)) return
     apply plugin: 'java'
     apply plugin: 'maven'
 

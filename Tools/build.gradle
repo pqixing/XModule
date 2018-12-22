@@ -10,16 +10,13 @@ dependencies {
     implementation 'com.github.vidstige:jadb:+'
     compile "com.alibaba:fastjson:1.2.44"
 }
-
-sourceCompatibility = "8"
-targetCompatibility = "8"
 repositories {
     mavenCentral()
 }
 
 //添加
 //apply plugin: "maven"
-group = 'com.github.pqixing.modularization'
+//group = 'com.github.pqixing.modularization'
 //apply plugin: 'com.novoda.bintray-release'
 
 ////添加
@@ -78,17 +75,17 @@ afterEvaluate {
     }
 }
 
-
-// 上传到本地代码库
-//uploadArchives {
-//    repositories {
-//        mavenDeployer {
-//            repository(url: uri("/home/pqixing/.repo")) {
-//                authentication(userName: "", password: "")
-//            }
-//            pom.groupId = "com.pqixing.gradle" // 组名
-//            pom.artifactId = "tools"// 插件名
-//            pom.version = "0.1.1" // 版本号
-//        }
-//    }
-//}
+if (!localBuild) return
+apply plugin: 'java'
+apply plugin: 'maven'
+//上传到本地代码库
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: localMavenUri)
+            pom.groupId = "com.pqixing.gradle" // 组名
+            pom.artifactId = "tools"// 插件名
+            pom.version = "0.1" // 版本号
+        }
+    }
+}
