@@ -16,19 +16,17 @@ buildscript {
 ext.localMavenUri = uri("$project.gradle.gradleUserHomeDir.absolutePath/.localRepo")
 //本地Maven调试
 ext.localBuild = false
-ext.buildModule = ["Tools"]
+ext.buildModule = ["Tools","Gradle"]
 ext.buildGroup = 'com.github.pqixing.modularization'
+ext.buildVersion = "0.1"
 
 
 allprojects {
     repositories {
         if (localBuild) maven { url localMavenUri }
-        else maven { url "https://jitpack.io" }
+        maven { url "https://jitpack.io" }
         jcenter()
         google()
-        maven {
-            url "https://jitpack.io"
-        }
     }
 }
 
@@ -41,8 +39,8 @@ tasks.withType(Javadoc) {
 }
 
 subprojects { p ->
+    version = buildVersion
     group = buildGroup
-    version = "0.0.9"
     if (!buildModule.contains(p.name)) return
     apply plugin: 'java'
     apply plugin: 'maven'
