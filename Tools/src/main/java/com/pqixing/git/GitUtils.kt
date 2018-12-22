@@ -55,7 +55,7 @@ object GitUtils {
         git ?: return false
         return try {
             val localBranch = "refs/heads/$branchName"
-            git.branchDelete().setBranchNames(localBranch).setForce(true) .call()
+            git.branchDelete().setBranchNames(localBranch).setForce(true).call()
 
             val refSpec = RefSpec()
                     .setSource(null)
@@ -134,9 +134,16 @@ object GitUtils {
         if (b != null) {//如果已经存在分支，则直接切换过去
             return checkoutBranch(git, branchName, true)
         }
-        git.checkout().setCreateBranch(true).setName(branchName).setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM).init().execute()
-        //创建分支成功，提交
-        return branchName == git.repository.branch
+        //创建本地分支
+        val call = git.branchCreate().setName(branchName).init().call()
+        //提交远程分支
+        git.push().add(call).init().call();
+        //删除本地分支（以便于checkout远程分支，方便关联）,
+        git.branchDelete().setBranchNames(branchName).call()
+        //关联本地和远程分支
+        Tools.println("Create Branch ${git.repository.directory.parentFile.name} -> $branchName")
+        //创建分支成功，切换到对应分支
+        return tryCheckOut(git,branchName,git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call(),true)
     }
 
     /**
