@@ -1,4 +1,4 @@
-apply plugin: 'java-library'
+apply plugin: 'java'
 apply plugin: 'kotlin'
 
 dependencies {
@@ -72,17 +72,23 @@ def writeFile(String txt, File out) {
     writer.close()
 }
 
+afterEvaluate {
+    project.jar.doFirst {
 
-// 上传到本地代码库
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: uri("/home/pqixing/.repo")) {
-                authentication(userName: "", password: "")
-            }
-            pom.groupId = "com.pqixing.gradle" // 组名
-            pom.artifactId = "tools"// 插件名
-            pom.version = "0.1.1" // 版本号
-        }
     }
 }
+
+
+// 上传到本地代码库
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            repository(url: uri("/home/pqixing/.repo")) {
+//                authentication(userName: "", password: "")
+//            }
+//            pom.groupId = "com.pqixing.gradle" // 组名
+//            pom.artifactId = "tools"// 插件名
+//            pom.version = "0.1.1" // 版本号
+//        }
+//    }
+//}

@@ -28,11 +28,5 @@ public interface IExtHelper {
             ,String version
             ,String name);
 
-    /**
-     * 获取Android输出文件
-     * @param project
-     * @param type
-     * @return
-     */
     Map<String,File> getAndroidOut(Project project, String type);
 }

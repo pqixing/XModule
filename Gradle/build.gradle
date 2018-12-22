@@ -5,6 +5,26 @@ apply plugin: "groovy"
 apply plugin: "kotlin"
 sourceCompatibility = "8"
 targetCompatibility = "8"
+version = "0.0.3"
+sourceCompatibility = 1.8 // java 8 23
+targetCompatibility = 1.8
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+
 sourceSets {
     main.java.srcDirs += "src/groovy"
     test.java.srcDirs += "src/groovy"
@@ -40,8 +60,8 @@ dependencies {
     implementation 'com.github.vidstige:jadb:+'
     implementation "com.alibaba:fastjson:1.2.44"
 //    implementation "com.github.pqixing.modularization:Tools:0.0.8"
-    implementation "com.pqixing.gradle:tools:0.1.1"
-//    implementation project(":Tools")
+//    implementation "com.pqixing.gradle:tools:0.1.1"
+    implementation project(":Tools")
 
 }
 

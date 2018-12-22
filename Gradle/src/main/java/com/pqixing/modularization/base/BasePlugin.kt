@@ -129,15 +129,23 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
 
     fun createIgnoreFile() {
         val ignoreFile = project.file(FileNames.GIT_IGNORE)
-        val defSets = mutableSetOf<String>("build", "*.iml")
+        val defSets = mutableSetOf("build", "*.iml")
         defSets += ignoreFields
         val old = FileUtils.readText(ignoreFile) ?: ""
-        old.lines().forEach { line -> defSets.remove(line.trim()) }
+        old.lines().forEach { line -> defSets.remove(trimIgnoreKey(line.trim())) }
 
         if (defSets.isEmpty()) return
         val txt = StringBuilder(old)
         defSets.forEach { txt.append("\n$it") }
         FileUtils.writeText(ignoreFile, txt.toString())
+    }
+
+    fun trimIgnoreKey(key: String): String {
+        var start = 0
+        var end = key.length
+        if (key.startsWith("/")) start++
+        if (key.endsWith("/")) end--
+        return key.substring(start, end)
     }
 
     private fun initTools(project: Project) {
