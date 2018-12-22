@@ -18,7 +18,7 @@ ext.localMavenUri = uri("$project.gradle.gradleUserHomeDir.absolutePath/.localRe
 ext.localBuild = false
 ext.buildModule = ["Tools","Gradle"]
 ext.buildGroup = 'com.github.pqixing.modularization'
-ext.buildVersion = "0.1"
+ext.buildVersion = "0.10"
 
 
 allprojects {
