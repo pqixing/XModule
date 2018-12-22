@@ -23,6 +23,7 @@ ext.buildGroup = 'com.github.pqixing.modularization'
 allprojects {
     repositories {
         if (localBuild) maven { url localMavenUri }
+        else maven { url "https://jitpack.io" }
         jcenter()
         google()
         maven {
