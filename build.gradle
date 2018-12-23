@@ -4,12 +4,17 @@ buildscript {
     repositories {
         jcenter()
         google()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 //        classpath 'com.novoda:bintray-release:0.9'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'//this
+        classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.3.12"
     }
 } //
 
@@ -60,6 +65,6 @@ subprojects { p ->
 
     artifacts {
         archives sourcesJar
-        archives javadocJar
+//        archives javadocJar
     }
 }

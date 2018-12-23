@@ -1,16 +1,14 @@
+apply plugin: "org.jetbrains.intellij"
 apply plugin: 'kotlin'
-apply plugin: 'java-library'
+apply plugin: 'java'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation gradleApi()
     implementation localGroovy()
-    implementation project(":Tools")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    testImplementation 'junit:junit:4.12'
-}
-
-sourceCompatibility = "8"
-targetCompatibility = "8"
-repositories {
-    mavenCentral()
+    if (localBuild) {
+        implementation "com.pqixing.gradle:tools:0.1"
+    } else {
+        implementation "com.github.pqixing.modularization:Tools:0.11"
+    }
 }
