@@ -1,22 +1,20 @@
 <idea-plugin version="2">
-    <id>com.pqixing.modularization.codeCreator</id>
-    <name>CodeCreator</name>
-    <version>2.2</version>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <id>com.pqixing.modularization</id>
+    <name>Modularization</name>
+    <version>1.0</version>
+    <vendor email="pqixing86@gmail.com" url="https://github.com/pqixing/modularization">pqixing
+    </vendor>
 
-    <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
-    ]]></description>
+    <description>
+        Help to run modularization gradle plugin , provide ui operator for task!!
+    </description>
 
-    <change-notes><![CDATA[
-      Fix Task ToMaven For Tag : Not Update <br>
-      <em>most HTML tags may be used</em>
-    ]]>
+    <change-notes>
+        Help to run modularization gradle plugin , provide ui operator for task!!
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="141.0"/>
+    <idea-version since-build="141.0" />
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -29,80 +27,5 @@
     </extensions>
 
 
-    <actions>
-        <group class="com.dachen.creator.Modularization" popup="true" id="modularization" text="Modularization">
-            <add-to-group group-id="BuildMenu" anchor="first"/>
-            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
-            <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
-            <action id="ToMaven" class="com.dachen.creator.actions.ToMaven" text="ToMaven" description="ToMaven">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt COMMA"/>
-            </action>
-            <separator/>
-
-            <group class="com.dachen.creator.Code" popup="true" id="Code" text="Code">
-
-                <action id="CheckOut" class="com.dachen.creator.actions.CheckOut" text="CheckOut"
-                        description="CheckOut"/>
-
-                <action id="Update" class="com.dachen.creator.actions.UpdateCode" text="UpdateCode"
-                        description="UpdateCode"/>
-                <action id="FastMerge" class="com.dachen.creator.actions.FastMerge" text="FastMerge"
-                        description="FastMerge"/>
-
-
-                <action id="CreateBranch" class="com.dachen.creator.actions.DeleteBranch" text="DeleteBranch"
-                        description="CreateBranch"/>
-                <separator/>
-                <action id="newProject" class="com.dachen.creator.actions.NewProject" text="NewRoot"
-                        description="newProject"/>
-                <action id="NewModule" class="com.dachen.creator.actions.NewModule" text="CreateModule" description="CreateModule"/>
-
-                <action id="Clone" class="com.dachen.creator.actions.VersionTag" text="VersionTag"
-                        description="VersionTag"/>
-                <action id="IndexVersion" class="com.dachen.creator.actions.IndexVersion" text="VersionIndex" description="IndexVersion"/>
-
-                <action id="PushDocument" class="com.dachen.creator.actions.PushDocument" text="PushDocument"
-                        description="PushDocument"/>
-
-            </group>
-            <group class="com.dachen.creator.OpenFile" popup="true" id="file" text="OpenFile">
-                <action id="OpenInclude" class="com.dachen.creator.actions.Include" text="Include"
-                        description="OpenInclude">
-                    <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
-                </action>
-                <action id="OpenProperties" class="com.dachen.creator.actions.Properties" text="Properties"
-                        description="OpenProperties"/>
-
-                <action id="Dependencies" class="com.dachen.creator.actions.Dependencies" text="Dependencies"
-                        description="Dependencies"/>
-                <action id="ModuleConfig" class="com.dachen.creator.actions.ModuleConfig" text="ModuleConfig"
-                        description="ModuleConfig"/>
-            </group>
-            <separator/>
-            <action id="RunApp" class="com.dachen.creator.actions.RunModule" text="RunApp"
-                    description="RunModule"/>
-            <action id="BuildApp" class="com.dachen.creator.actions.BuildModule" text="BuildApp"
-                    description="BuildModule"/>
-
-            <action id="InstallApp" class="com.dachen.creator.actions.InstallApp" text="InstallApp"
-                    description="InstallApp"/>
-
-            <separator/>
-            <action id="DpsAnalyze" class="com.dachen.creator.actions.DependentList" text="DependentList"
-                    description="DpsAnalyze"/>
-            <action id="ClearCache" class="com.dachen.creator.actions.ClearCache" text="ClearCache"
-                    description="ClearCache"/>
-            <separator/>
-            <action id="com.libiao.routercreator" class="com.dachen.creator.actions.PathCreator" text="PathCreator"
-                    description="router auto create code"/>
-
-            <action id="com.libiao.mvpcreator" class="com.dachen.creator.actions.MvpCreator" text="MvpCreator"
-                    description="auto create MVP code"/>
-
-            <action id="com.libiao.modelcreator" class="com.dachen.creator.actions.ModelCreator" text="ModelCreator"
-                    description="auto create model code"/>
-        </group>
-        <!-- Add your actions here -->
-
-    </actions>
+    <actions></actions>
 </idea-plugin>
