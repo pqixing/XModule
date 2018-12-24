@@ -11,7 +11,7 @@ import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import java.io.File
 
-open class BuildApk : BaseTask() {
+open class BuildApkTask : BaseTask() {
     var outputFile: File? = null
 
     //解析出第一个Dev渠道的构建任务，防止有渠道包
@@ -30,7 +30,7 @@ open class BuildApk : BaseTask() {
 
             for (t in types) {
                 outputFile = androidOut[t] ?: continue
-                this@BuildApk.dependsOn("assemble${TextUtils.firstUp(t)}")
+                this@BuildApkTask.dependsOn("assemble${TextUtils.firstUp(t)}")
                 break
             }
 

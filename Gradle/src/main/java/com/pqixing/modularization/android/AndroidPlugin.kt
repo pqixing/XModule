@@ -9,10 +9,9 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.tasks.DpsAnalysisTask
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
-import com.pqixing.modularization.android.tasks.BuildApk
+import com.pqixing.modularization.android.tasks.BuildApkTask
 import com.pqixing.modularization.android.tasks.PrepareDevTask
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
@@ -71,9 +70,7 @@ open class AndroidPlugin : BasePlugin() {
         var tasks = mutableListOf(CleanCache::class.java, DpsAnalysisTask::class.java)
         if (APP_TYPE == Components.TYPE_LIBRARY || APP_TYPE == Components.TYPE_LIBRARY_API) tasks.addAll(listOf(PrepareDevTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java))
         if (APP_TYPE == Components.TYPE_LIBRARY_API) tasks.add(ToMavenApiTask::class.java)
-        if (APP_TYPE != Components.TYPE_APPLICATION) {
-            tasks.add(BuildApk::class.java)
-        }
+        tasks.add(BuildApkTask::class.java)
         return tasks
     }
 
