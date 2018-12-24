@@ -29,14 +29,9 @@ dependencies {
     implementation gradleApi()
     implementation localGroovy()
     testImplementation 'junit:junit:4.12'
-    implementation "com.alibaba:fastjson:1.2.44"
-//    implementation "com.android.tools.build:gradle:3.1.2"
-//    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-
-    implementation 'org.eclipse.jgit:org.eclipse.jgit:+'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
-    implementation 'com.github.vidstige:jadb:+'
-    implementation "com.alibaba:fastjson:1.2.44"
+    compile 'org.eclipse.jgit:org.eclipse.jgit:+'
+    compile 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
+    
     if (localBuild) {
         implementation "com.pqixing.gradle:tools:0.1"
     } else {

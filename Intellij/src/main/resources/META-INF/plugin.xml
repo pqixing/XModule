@@ -1,5 +1,5 @@
-<idea-plugin version="2">
-    <id>com.pqixing.modularization</id>
+<idea-plugin>
+    <id>com.pqixing.modularization.idea</id>
     <name>Modularization</name>
     <version>1.0</version>
     <vendor email="pqixing86@gmail.com" url="https://github.com/pqixing/modularization">pqixing
@@ -14,7 +14,7 @@
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="141.0" />
+    <idea-version since-build="148.0"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -26,6 +26,14 @@
         <!-- Add your extensions here -->
     </extensions>
 
+    <actions>
 
-    <actions></actions>
+        <action id="SecClarsssssss" class="com.dachen.creator.actions.ClearCache" text="ClearCache"
+            description="ClearCache">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt COMMA" />
+            <add-to-group group-id="BuildMenu" anchor="first" />
+            <add-to-group group-id="EditorPopupMenu" anchor="first" />
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="first" />
+        </action>
+    </actions>
 </idea-plugin>

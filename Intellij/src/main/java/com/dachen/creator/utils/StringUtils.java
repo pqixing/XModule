@@ -1,6 +1,4 @@
-package com.dachen.creator.utils
-
-import com.intellij.psi.impl.CheckUtil;
+package com.dachen.creator.utils;
 
 import java.util.List;
 import java.util.Locale;
@@ -64,15 +62,15 @@ public class StringUtils {
      * @return
      */
     public static String ls(List<String> s) {
-        if (s == null || s.isEmpty()) return ""
-        StringBuilder sb = new StringBuilder()
+        if (s == null || s.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder();
         for (String str:s){
-            sb.append(str).append(",")
+            sb.append(str).append(",");
         }
-        return sb.substring(0,sb.length()-1)
+        return sb.substring(0,sb.length()-1);
     }
 
     public static String listString(List<String> s) {
-        return "  ${ls(s).replace(",", "\n  ")}"
+        return "  "+ls(s).replace(",", "\n  ");
     }
 }

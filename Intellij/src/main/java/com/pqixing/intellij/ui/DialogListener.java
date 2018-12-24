@@ -1,4 +1,4 @@
-package com.dachen.creator.ui;
+package com.pqixing.intellij.ui;
 
 public interface DialogListener {
 

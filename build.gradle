@@ -20,7 +20,7 @@ buildscript {
 
 ext.localMavenUri = uri("$project.gradle.gradleUserHomeDir.absolutePath/.localRepo")
 //本地Maven调试
-ext.localBuild = false
+ext.localBuild = true
 ext.buildModule = ["Tools","Gradle"]
 ext.buildGroup = 'com.github.pqixing.modularization'
 ext.buildVersion = "0.12"

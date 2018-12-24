@@ -2,12 +2,12 @@ apply plugin: 'java'
 apply plugin: 'kotlin'
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation localGroovy()
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    compile localGroovy()
     testImplementation 'junit:junit:4.12'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit:+'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
-    implementation 'com.github.vidstige:jadb:+'
+    compileOnly 'org.eclipse.jgit:org.eclipse.jgit:+'
+    compileOnly 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
+//    compile 'com.github.vidstige:jadb:+'
     compile "com.alibaba:fastjson:1.2.44"
 }
 repositories {

@@ -1,4 +1,4 @@
-package com.dachen.creator.ui;
+package com.pqixing.intellij.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
