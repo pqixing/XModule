@@ -1,3 +1,7 @@
+import sun.security.provider.MD5
+
+import java.util.regex.Pattern
+
 //1.0
 /**
  *
@@ -22,6 +26,7 @@ public class ImportProject {
     HashSet<String> excludes = new HashSet<>()
     HashSet<String> dpsExcludes = new HashSet<>()
     HashSet<String> dpsIncludes = new HashSet<>()
+    StringBuilder introduces = new StringBuilder("\n")
     String codeRoot
     File codeRootDir
     Gradle gradle
@@ -104,11 +109,26 @@ public class ImportProject {
         gitNode.project.each { Node p ->
             String name = p.@name
             def childens = p.submodule
+            String introduce = p.@introduce
             if (childens.size() > 0) childens.each { Node s ->
                 String s_name = s.@name
+                introduce = s.@introduce
                 projectPaths.put(s_name, "$name/$s_name")
-            } else projectPaths.put(name, name)
+                introduces.append("    ${getIncludeLine(s_name, introduce)}")
+            } else {
+                projectPaths.put(name, name)
+                introduces.append("${getIncludeLine(name, introduce)}")
+            }
         }
+    }
+
+    String getIncludeLine(String includeKey, String introduce) {
+        StringBuilder sb = new StringBuilder(includeKey)
+        int space = 40 - sb.length()
+        for (int i = 0; i < space; i++) {
+            sb.append(" ")
+        }
+        return sb.append("= '$introduce' \n")
     }
 
     String makeIncludeTxt() {
@@ -143,7 +163,26 @@ public class ImportProject {
             }
         }
         println("import -> $resultInclude")
+        clearCache()
         return sb.toString()
+    }
+    /**
+     * 清理内存中无用数据
+     */
+    public void clearCache() {
+        introduces = null
+        projectPaths.clear()
+        includes.clear()
+        focusIncludes.clear()
+        excludes.clear()
+        dpsExcludes.clear()
+        dpsIncludes.clear()
+        projectPaths = null
+        includes = null
+        focusIncludes = null
+        excludes = null
+        dpsExcludes = null
+        dpsIncludes = null
     }
 
     public void formatDps() {
@@ -154,10 +193,25 @@ public class ImportProject {
     String save() {
         formatXml()
         formatInclude(new File(rootDir, includeKt))
+        appendProjectInfo(new File(rootDir, includeKt))
         readFromEnv()
         formatCodeRoot()
         formatDps()
         return makeIncludeTxt()
+    }
+
+    private void appendProjectInfo(File target) {
+        if (!target.exists()) return
+
+        Pattern compile = Pattern.compile("//Auto Code Start.*?//Auto Code End",Pattern.DOTALL)
+        String beforeTxt = target.text
+        String oldAutoCode = beforeTxt.find(compile)
+        println("appendProjectInfo ->  $oldAutoCode")
+        String autoCode = "//Auto Code Start -> https://github.com/pqixing/modularization${introduces.toString()}//Auto Code End"
+        //如果有变化
+        if (autoCode != oldAutoCode) {
+            target.write(oldAutoCode == null ? beforeTxt + "\n" + autoCode : beforeTxt.replaceAll(compile, autoCode))
+        }
     }
 
     private void formatCodeRoot() {

@@ -1,4 +1,4 @@
-package com.dachen.creator.actions;
+package com.pqixing.intellij.actions;
 
 import com.alibaba.fastjson.JSON;
 import com.intellij.openapi.actionSystem.AnAction;

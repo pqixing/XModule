@@ -14,7 +14,7 @@
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="148.0"/>
+    <idea-version since-build="148.0" />
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -27,13 +27,21 @@
     </extensions>
 
     <actions>
-
-        <action id="SecClarsssssss" class="com.dachen.creator.actions.ClearCache" text="ClearCache"
-            description="ClearCache">
-            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt COMMA" />
+        <group id="Modularization" class="com.pqixing.intellij.group.RootGroup" popup="true" text="Modularization">
             <add-to-group group-id="BuildMenu" anchor="first" />
             <add-to-group group-id="EditorPopupMenu" anchor="first" />
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first" />
-        </action>
+            <action id="ToMaven" class="com.pqixing.intellij.actions.ClearCache" text="ClearCache" />
+
+            <action id="ClearCache" class="com.pqixing.intellij.actions.ClearCache" text="ClearCache" />
+
+
+            <action id="com.libiao.mvpcreator" class="com.dachen.creator.actions.MvpCreator" text="MvpCreator"
+                description="auto create MVP code"/>
+            <action id="com.libiao.routercreator" class="com.dachen.creator.actions.PathCreator" text="RouterCreator"
+                description="router auto create code"/>
+            <action id="com.libiao.modelcreator" class="com.dachen.creator.actions.ModelCreator" text="ModelCreator"
+                description="auto create model code"/>
+        </group>
     </actions>
 </idea-plugin>
