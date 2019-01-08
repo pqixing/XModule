@@ -31,7 +31,7 @@
             <add-to-group group-id="BuildMenu" anchor="first" />
             <add-to-group group-id="EditorPopupMenu" anchor="first" />
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first" />
-            <action id="ToMaven" class="com.pqixing.intellij.actions.ClearCache" text="ClearCache" />
+            <action id="ImportAction" class="com.pqixing.intellij.actions.ImportAction" text="Import" />
 
             <action id="ClearCache" class="com.pqixing.intellij.actions.ClearCache" text="ClearCache" />
 

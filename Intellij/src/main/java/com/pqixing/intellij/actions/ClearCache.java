@@ -8,8 +8,6 @@ import com.intellij.openapi.ui.Messages;
 import com.pqixing.intellij.ui.Help;
 import com.pqixing.tools.TextUtils;
 
-;
-;
 
 public class ClearCache extends AnAction {
 
