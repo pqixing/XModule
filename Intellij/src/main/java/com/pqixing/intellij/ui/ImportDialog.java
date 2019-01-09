@@ -1,5 +1,8 @@
 package com.pqixing.intellij.ui;
 
+import java.awt.Dimension;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
@@ -29,38 +32,45 @@ public class ImportDialog extends JDialog {
     private JList jlSelect;
     private JList jlOther;
     private JList jlHistory;
-    private JButton btnClear;
+    private JComboBox importModel;
 
-    private List<Pair<String, String>> select = new ArrayList<>();
-    private List<Pair<String, String>> history = new ArrayList<>();
-    private List<Pair<String, String>> other = new ArrayList<>();
+    public List<Pair<String, String>> select = new ArrayList<>();
+    public List<Pair<String, String>> history = new ArrayList<>();
+    public List<Pair<String, String>> other = new ArrayList<>();
+
+
+    private Runnable onOk;
 
     public ImportDialog() {
+        this(null, null, null);
+    }
+
+    public ImportDialog(List<Pair<String, String>> s, List<Pair<String, String>> h, List<Pair<String, String>> o) {
         setContentPane(rootPanel);
-        setModal(true);
+        setModal(false);
         getRootPane().setDefaultButton(btnOK);
         setTitle("Import Module");
+        setLocation(400, 300);
 
         btnOK.addActionListener(e -> onOK());
 
-        btnCancel.addActionListener(e -> onCancel());
+        btnCancel.addActionListener(e -> dispose());
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                onCancel();
+                dispose();
             }
         });
 
         // call onCancel() on ESCAPE
-        rootPanel.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        rootPanel.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        other.add(new Pair<>("111", "111"));
-        other.add(new Pair<>("111", "222"));
-        other.add(new Pair<>("111", "333"));
-        other.add(new Pair<>("111", "344"));
-        other.add(new Pair<>("111", "355"));
+        if (select != null) this.select.addAll(s);
+        if (history != null) this.history.addAll(h);
+        if (other != null) this.other.addAll(o);
+
         SelctModel selctModel = new SelctModel(jlSelect, select);
         SelctModel historyModel = new SelctModel(jlHistory, history);
         SelctModel otherModel = new SelctModel(jlOther, other);
@@ -84,7 +94,7 @@ public class ImportDialog extends JDialog {
                 otherModel.addFilter(key);
             }
         });
-        dpModel.addItem("      ");
+        dpModel.addItem("dpModel");
         dpModel.addItem("mavenOnly");
         dpModel.addItem("mavenFirst");
         dpModel.addItem("localFirst");
@@ -93,6 +103,7 @@ public class ImportDialog extends JDialog {
 
     private ListModel setJListModel(JList list, SelctModel model, SelctModel targetModel) {
         list.setModel(model);
+        list.setPreferredSize(new Dimension(list.getWidth(), model.getDatas().size() * 25));
         list.setLayoutOrientation(JList.VERTICAL);
         list.setFixedCellHeight(25);
         list.addListSelectionListener(event -> {
@@ -110,13 +121,14 @@ public class ImportDialog extends JDialog {
             int end = Math.max(index[0], index[1]);
             index[0] = -1;
             index[1] = -1;
-            if(start<0) return;
+            if (start < 0) return;
             List<Pair<String, String>> datas = model.getDatas();
             ArrayList selectItems = new ArrayList<Pair<String, String>>();
             for (int i = start; i <= end; i++) {
                 selectItems.add(datas.remove(start));
             }
             targetModel.addDatas(selectItems);
+            list.setPreferredSize(new Dimension(list.getWidth(), model.getDatas().size() * 25));
             list.setModel(model);
         });
         return model;
@@ -164,11 +176,12 @@ public class ImportDialog extends JDialog {
                     }
                 }
             }
+            jList.setPreferredSize(new Dimension(jList.getWidth(), getDatas().size() * 25));
             jList.setModel(this);
         }
 
         public void addDatas(List<Pair<String, String>> datas) {
-            if (datas != null) this.datas.addAll(datas);
+            if (datas != null) this.datas.addAll(0, datas);
             addFilter(filterKey);
         }
 
@@ -181,18 +194,25 @@ public class ImportDialog extends JDialog {
         public String getElementAt(int i) {
             Pair<String, String> pair = getDatas().get(i);
             String prefix = (Math.min(index[0], index[1]) <= i && i <= Math.max(index[0], index[1])) ? "> " : "";
-            return "  " + prefix + pair.getFirst() + " (" + pair.getSecond() + ")";
+            return "  " + prefix + pair.getFirst() + "-" + pair.getSecond();
         }
     }
 
-
-    private void onOK() {
-        // add your code here
-        dispose();
+    public String getImportModel() {
+        return importModel.getSelectedItem().toString();
     }
 
-    private void onCancel() {
-        // add your code here if necessary
+    public String getDpModel() {
+        return dpModel.getSelectedItem().toString();
+    }
+
+    public ImportDialog setOkListener(Runnable runnable) {
+        this.onOk = runnable;
+        return this;
+    }
+
+    protected void onOK() {
+        if (onOk != null) onOk.run();
         dispose();
     }
 

@@ -15,11 +15,11 @@ import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.maven.VersionManager
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
-import org.gradle.internal.impldep.com.fasterxml.jackson.databind.util.LRUMap
 import java.io.File
 import java.lang.ref.WeakReference
 import java.net.URL
 import java.util.*
+import kotlin.collections.HashMap
 
 class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
     init {
@@ -32,7 +32,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
 
     companion object {
         //内存中只保留10跳
-        var pomCache: LRUMap<String, WeakReference<MavenPom>> = LRUMap(5,10)
+        var pomCache: HashMap<String, WeakReference<MavenPom>> = HashMap()
 
         /**
          * 获取仓库aar中，exclude的传递
@@ -55,7 +55,8 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
                 FileUtils.writeText(pomFile, ponTxt)
                 XmlHelper.parsePomEclude(ponTxt, extends.groupName)
             }
-            pomCache.put(pomKey, WeakReference(pom))
+//            pomCache.put(pomKey, WeakReference(pom))
+//            if (pomCache.size > 10) pomCache.clear()
             return pom
         }
     }
