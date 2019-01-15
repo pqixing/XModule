@@ -42,7 +42,7 @@ class ImportAction : AnAction() {
                 saveImport(dialog.select, importFile)
                 val dpModel = dialog.dpModel?.trim() ?: ""
                 val fileInfo = File(basePath, "ProjectInfo.java")
-                if (dpModel == "dpModel" && fileInfo.exists()) {
+                if (dpModel != "dpModel" && fileInfo.exists()) {
                     val replace = FileUtils.readText(fileInfo)!!.replace(Regex("String *dependentModel *=.*;"), "String dependentModel = \"$dpModel\";")
                     FileUtils.writeText(fileInfo, replace, true)
                 }

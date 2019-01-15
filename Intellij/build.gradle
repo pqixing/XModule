@@ -11,6 +11,8 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation localGroovy()
+    compile 'org.eclipse.jgit:org.eclipse.jgit:+'
+    compile 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
 //    compile 'com.github.vidstige:jadb:+'
     if (localBuild) {
         compile "com.pqixing.gradle:tools:0.1"
