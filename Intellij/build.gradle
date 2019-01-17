@@ -14,9 +14,5 @@ dependencies {
     compile 'org.eclipse.jgit:org.eclipse.jgit:+'
     compile 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
 //    compile 'com.github.vidstige:jadb:+'
-    if (localBuild) {
-        compile "com.pqixing.gradle:tools:0.1"
-    } else {
-        compile "com.github.pqixing.modularization:Tools:0.11"
-    }
+    compile project(":Tools")
 }
