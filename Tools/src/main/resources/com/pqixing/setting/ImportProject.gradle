@@ -162,7 +162,7 @@ public class ImportProject {
                 sb.append("\ninclude (':$key') \n    project(':$key').projectDir = new File('$dir','${value.replace("\\", "/")}')")
             }
         }
-        println("import -> $resultInclude")
+//        println("import -> $resultInclude")
         clearCache()
         return sb.toString()
     }
@@ -206,7 +206,7 @@ public class ImportProject {
         Pattern compile = Pattern.compile("//Auto Code Start.*?//Auto Code End",Pattern.DOTALL)
         String beforeTxt = target.text
         String oldAutoCode = beforeTxt.find(compile)
-        println("appendProjectInfo ->  $oldAutoCode")
+//        println("appendProjectInfo ->  $oldAutoCode")
         String autoCode = "//Auto Code Start -> https://github.com/pqixing/modularization${introduces.toString()}//Auto Code End"
         //如果有变化
         if (autoCode != oldAutoCode) {

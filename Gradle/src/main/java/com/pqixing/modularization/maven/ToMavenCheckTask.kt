@@ -16,6 +16,7 @@ import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
+import org.eclipse.jgit.api.Git
 import java.io.File
 import java.util.*
 

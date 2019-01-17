@@ -102,7 +102,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
                 }
                 if (!compile) loseList.add(dpc.moduleName)
                 val newVersion = VersionManager.getVersion(dpc.branch, dpc.moduleName, "+")
-                if (!newVersion.second.startsWith(dpc.version))
+                if (!newVersion.second.startsWith(dpc.version) && newVersion.second.trim() != "+")
                     dpsV.add("\n       Config Version : ${dpc.version} -> Last Version : ${newVersion.second} -> Match Branch : ${newVersion.first} -> ${dpc.moduleName} ")
             }
             if (dpsV.isNotEmpty())
