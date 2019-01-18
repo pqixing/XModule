@@ -25,7 +25,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
     </extensions>
-
+    <depends>Git4Idea</depends>
+    <depends>org.jetbrains.android</depends>
     <actions>
         <group id="Modularization" class="com.pqixing.intellij.group.RootGroup" popup="true" text="Modularization">
             <add-to-group group-id="BuildMenu" anchor="first" />

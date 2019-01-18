@@ -1,12 +1,19 @@
 package com.pqixing.intellij.actions
 
+import com.intellij.dvcs.repo.Repository
+import com.intellij.dvcs.repo.VcsRepositoryCreator
+import com.intellij.dvcs.repo.VcsRepositoryManager
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vcs.ProjectLevelVcsManager
+import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.vcsUtil.VcsUtil
 import com.pqixing.git.Components
+import com.pqixing.git.GitUtils
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.ImportDialog
@@ -40,24 +47,51 @@ class ImportAction : AnAction() {
         dialog.pack()
         dialog.isVisible = true
         dialog.setOkListener {
-            WriteCommandAction.runWriteCommandAction(e.project) {
-                //保存历史记录
-                saveHistory(dialog.historyModel.selectItems, historyFile)
-                saveImport(dialog.selctModel.selectItems, importFile)
-                val dpModel = dialog.dpModel?.trim() ?: ""
-                val fileInfo = File(basePath, "ProjectInfo.java")
-                if (dpModel != "dpModel" && fileInfo.exists()) {
-                    val replace = FileUtils.readText(fileInfo)!!.replace(Regex("String *dependentModel *=.*;"), "String dependentModel = \"$dpModel\";")
-                    FileUtils.writeText(fileInfo, replace, true)
-                }
+            checkGit(e, dialog.selctModel.selectItems.map { it.title }, alls) { onImport(e, dialog, historyFile, importFile, basePath, selects, alls) }
+        }
+    }
 
-                val importModel = dialog.importModel
-                var import = if (codeRoot.startsWith("..") && importModel == "Import") {
-                    importByIde(selects, dialog.selctModel.selectItems.map { it.title }, alls, basePath)
-                } else false
-                if (!import || importModel == "Sync") {
-                    ActionManager.getInstance().getAction("Android.SyncProject")?.actionPerformed(e)
-                }
+    private fun checkGit(e: AnActionEvent, items: List<String>, alls: HashMap<String, Components>, success: () -> Unit) {
+        val rootFile = VfsUtil.findFileByIoFile(File(project.basePath), true) ?: return
+        val instance = VcsRepositoryManager.getInstance(project);
+
+        val forFile = instance.getRepositoryForFile(rootFile, false)!!
+        forFile.update()
+        val rootBranchName = forFile.currentBranchName
+        System.out.println("root bracnch -> $rootBranchName")
+
+        val basePath = project.basePath
+        val map = items.map { alls[it]?.rootName }.toSet().map {
+            val rootDir = File(basePath, "$codeRoot$it")
+            if (!rootDir.exists()) Pair(it, "clone")
+            else {
+                val brach = instance.getRepositoryForFile(VfsUtil.findFileByIoFile(File(project.basePath), false)!!, false)?.currentBranchName
+                if (brach == rootBranchName) Pair(it, "normal")
+                else Pair(it, "ckeckout")
+            }
+        }
+        System.out.println(map)
+
+    }
+
+    private fun onImport(e: AnActionEvent, dialog: ImportDialog, historyFile: File, importFile: File, basePath: String, selects: ArrayList<String>, alls: HashMap<String, Components>) {
+        WriteCommandAction.runWriteCommandAction(project) {
+            //保存历史记录
+            saveHistory(dialog.historyModel.selectItems, historyFile)
+            saveImport(dialog.selctModel.selectItems, importFile)
+            val dpModel = dialog.dpModel?.trim() ?: ""
+            val fileInfo = File(basePath, "ProjectInfo.java")
+            if (dpModel != "dpModel" && fileInfo.exists()) {
+                val replace = FileUtils.readText(fileInfo)!!.replace(Regex("String *dependentModel *=.*;"), "String dependentModel = \"$dpModel\";")
+                FileUtils.writeText(fileInfo, replace, true)
+            }
+
+            val importModel = dialog.importModel
+            var import = if (codeRoot.startsWith("..") && importModel == "Import") {
+                importByIde(selects, dialog.selctModel.selectItems.map { it.title }, alls, basePath)
+            } else false
+            if (!import || importModel == "Sync") {
+                ActionManager.getInstance().getAction("Android.SyncProject")?.actionPerformed(e)
             }
         }
     }
