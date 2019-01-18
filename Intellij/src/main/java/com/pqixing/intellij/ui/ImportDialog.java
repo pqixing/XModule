@@ -1,16 +1,16 @@
 package com.pqixing.intellij.ui;
 
-import java.awt.Dimension;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import com.pqixing.intellij.adapter.JListInfo;
+import com.pqixing.intellij.adapter.JListSelectAdapter;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.AbstractListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -19,9 +19,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.ListModel;
-
-import kotlin.Pair;
 
 public class ImportDialog extends JDialog {
     private JPanel rootPanel;
@@ -34,18 +31,16 @@ public class ImportDialog extends JDialog {
     private JList jlHistory;
     private JComboBox importModel;
 
-    public List<Pair<String, String>> select = new ArrayList<>();
-    public List<Pair<String, String>> history = new ArrayList<>();
-    public List<Pair<String, String>> other = new ArrayList<>();
-
-
+    public ImportSelectAdapter selctModel;
+    public ImportSelectAdapter historyModel;
+    public ImportSelectAdapter otherModel;
     private Runnable onOk;
 
     public ImportDialog() {
         this(null, null, null);
     }
 
-    public ImportDialog(List<Pair<String, String>> s, List<Pair<String, String>> h, List<Pair<String, String>> o) {
+    public ImportDialog(List<JListInfo> select, List<JListInfo> history, List<JListInfo> other) {
         setContentPane(rootPanel);
         setModal(false);
         getRootPane().setDefaultButton(btnOK);
@@ -67,13 +62,9 @@ public class ImportDialog extends JDialog {
         // call onCancel() on ESCAPE
         rootPanel.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        if (select != null) this.select.addAll(s);
-        if (history != null) this.history.addAll(h);
-        if (other != null) this.other.addAll(o);
-
-        SelctModel selctModel = new SelctModel(jlSelect, select);
-        SelctModel historyModel = new SelctModel(jlHistory, history);
-        SelctModel otherModel = new SelctModel(jlOther, other);
+        selctModel = new ImportSelectAdapter(jlSelect, select);
+        historyModel = new ImportSelectAdapter(jlHistory, history);
+        otherModel = new ImportSelectAdapter(jlOther, other);
         setJListModel(jlSelect, selctModel, historyModel);
         setJListModel(jlHistory, historyModel, selctModel);
         setJListModel(jlOther, otherModel, selctModel);
@@ -90,8 +81,8 @@ public class ImportDialog extends JDialog {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 String key = tfImport.getText().trim();
-                historyModel.addFilter(key);
-                otherModel.addFilter(key);
+                historyModel.filterDatas(key);
+                otherModel.filterDatas(key);
             }
         });
         dpModel.addItem("dpModel");
@@ -101,54 +92,27 @@ public class ImportDialog extends JDialog {
         dpModel.addItem("localOnly");
     }
 
-    private ListModel setJListModel(JList list, SelctModel model, SelctModel targetModel) {
-        list.setModel(model);
-        list.setPreferredSize(new Dimension(list.getWidth(), model.getDatas().size() * 25));
-        list.setLayoutOrientation(JList.VERTICAL);
-        list.setFixedCellHeight(25);
-        list.addListSelectionListener(event -> {
-            int[] index = model.getIndex();
-            int nowSelect = list.getSelectedIndex();
-            if (index[0] == -1) {
-                index[0] = nowSelect;
-            }
-            if (event.getValueIsAdjusting()) {
-                index[1] = nowSelect;
-                list.validate();
-                return;
-            }
-            int start = Math.min(index[0], index[1]);
-            int end = Math.max(index[0], index[1]);
-            index[0] = -1;
-            index[1] = -1;
-            if (start < 0) return;
-            List<Pair<String, String>> datas = model.getDatas();
-            ArrayList selectItems = new ArrayList<Pair<String, String>>();
-            for (int i = start; i <= end; i++) {
-                selectItems.add(datas.remove(start));
-            }
-            targetModel.addDatas(selectItems);
-            list.setPreferredSize(new Dimension(list.getWidth(), model.getDatas().size() * 25));
-            list.setModel(model);
+    private void setJListModel(JList jList, ImportSelectAdapter model, ImportSelectAdapter targetModel) {
+        jList.setModel(model);
+        model.setSelectListener((jList1, adapter, items) -> {
+            targetModel.addDatas(items);
+            model.removeDatas(items);
+            return true;
         });
-        return model;
     }
 
 
-    private static class SelctModel extends AbstractListModel<String> {
-        List<Pair<String, String>> datas;
-        int[] index = new int[]{-1, -1};
-        JList jList;
+    public static class ImportSelectAdapter extends JListSelectAdapter {
+        List<JListInfo> sources = new ArrayList<>();
         private String filterKey;
-        List<Pair<String, String>> filters = new ArrayList<>();
 
-        public int[] getIndex() {
-            return index;
+        public ImportSelectAdapter(JList jList, List<JListInfo> datas) {
+            super(jList);
+            setDatas(datas);
         }
 
-        public SelctModel(JList jList, List<Pair<String, String>> datas) {
-            this.datas = datas == null ? new ArrayList<>() : datas;
-            this.jList = jList;
+        public List<JListInfo> getSelectItems() {
+            return super.getDatas();
         }
 
         @Override
@@ -156,45 +120,38 @@ public class ImportDialog extends JDialog {
             return false;
         }
 
-        public List<Pair<String, String>> getDatas() {
-            return filterKey == null || filterKey.isEmpty() ? datas : filters;
-        }
-
-        public void setDatas(List<Pair<String, String>> datas) {
-            this.datas.clear();
+        @Override
+        public void setDatas(List<JListInfo> datas) {
+            this.sources.clear();
             addDatas(datas);
-
         }
 
-        public void addFilter(String key) {
+        public void filterDatas(String key) {
             this.filterKey = key;
-            filters.clear();
+            List<JListInfo> datas = new LinkedList<>();
+            datas.clear();
             if (key != null && !key.isEmpty()) {
-                for (Pair<String, String> p : datas) {
+                for (JListInfo p : sources) {
                     if (p.toString().toLowerCase().contains(key)) {
-                        filters.add(p);
+                        datas.add(p);
                     }
                 }
+            } else datas.addAll(sources);
+            super.setDatas(datas);
+        }
+
+        public void addDatas(List<JListInfo> datas) {
+            if (datas != null) {
+                this.sources.addAll(0, datas);
+                filterDatas(filterKey);
             }
-            jList.setPreferredSize(new Dimension(jList.getWidth(), getDatas().size() * 25));
-            jList.setModel(this);
         }
 
-        public void addDatas(List<Pair<String, String>> datas) {
-            if (datas != null) this.datas.addAll(0, datas);
-            addFilter(filterKey);
-        }
-
-        @Override
-        public int getSize() {
-            return getDatas().size();
-        }
-
-        @Override
-        public String getElementAt(int i) {
-            Pair<String, String> pair = getDatas().get(i);
-            String prefix = (Math.min(index[0], index[1]) <= i && i <= Math.max(index[0], index[1])) ? "> " : "";
-            return "  " + prefix + pair.getFirst() + "-" + pair.getSecond();
+        public void removeDatas(List<JListInfo> datas) {
+            if (datas != null) {
+                sources.removeAll(datas);
+                filterDatas(filterKey);
+            }
         }
     }
 

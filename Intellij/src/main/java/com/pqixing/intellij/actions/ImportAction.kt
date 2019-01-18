@@ -4,9 +4,11 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.pqixing.git.Components
 import com.pqixing.help.XmlHelper
+import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.ImportDialog
 import com.pqixing.tools.FileUtils
 import java.io.File
@@ -30,16 +32,18 @@ class ImportAction : AnAction() {
         val selects = ArrayList<String>()
         readImport(importFile, selects)
         val dialog = ImportDialog(selects
-                .map { historys.remove(it);Pair(it, modules.remove(it)?.introduce ?: "") }, historys
-                .map { Pair(it, modules.remove(it)?.introduce ?: "") }, modules
-                .map { Pair(it.key, it.value.introduce) })
+                .map {
+                    historys.remove(it);JListInfo(it, modules.remove(it)?.introduce ?: "")
+                }, historys
+                .map { JListInfo(it, modules.remove(it)?.introduce ?: "") }, modules
+                .map { JListInfo(it.key, it.value.introduce) })
         dialog.pack()
         dialog.isVisible = true
         dialog.setOkListener {
             WriteCommandAction.runWriteCommandAction(e.project) {
                 //保存历史记录
-                saveHistory(dialog.history, historyFile)
-                saveImport(dialog.select, importFile)
+                saveHistory(dialog.historyModel.selectItems, historyFile)
+                saveImport(dialog.selctModel.selectItems, importFile)
                 val dpModel = dialog.dpModel?.trim() ?: ""
                 val fileInfo = File(basePath, "ProjectInfo.java")
                 if (dpModel != "dpModel" && fileInfo.exists()) {
@@ -49,7 +53,7 @@ class ImportAction : AnAction() {
 
                 val importModel = dialog.importModel
                 var import = if (codeRoot.startsWith("..") && importModel == "Import") {
-                    addModulesToXml(dialog.select, alls, basePath)
+                    importByIde(selects, dialog.selctModel.selectItems.map { it.title }, alls, basePath)
                 } else false
                 if (!import || importModel == "Sync") {
                     ActionManager.getInstance().getAction("Android.SyncProject")?.actionPerformed(e)
@@ -58,24 +62,27 @@ class ImportAction : AnAction() {
         }
     }
 
-    private fun addModulesToXml(select: List<Pair<String, String>>, alls: HashMap<String, Components>, basePath: String): Boolean {
-        val t = "<module fileurl=\"file://###PROJECT_DIR###/IML_PATH\" filepath=\"###PROJECT_DIR###/IML_PATH\" />\n"
-        val imls = StringBuilder("<modules>\n<module fileurl=\"file://###PROJECT_DIR###/${project.name}.iml\" filepath=\"###PROJECT_DIR###/${project.name}.iml\" />\n")
+    private fun importByIde(oldSecelt: List<String>, newSelect: List<String>, alls: HashMap<String, Components>, basePath: String): Boolean {
+        val manager = ModuleManager.getInstance(project);
+        val addModule = newSelect.toMutableList().apply { removeAll(oldSecelt) }
+        val removeModule = oldSecelt.toMutableList().apply { removeAll(newSelect) }
+        removeModule.forEach {
+            val m = manager.findModuleByName(it) ?: return@forEach
+            manager.disposeModule(m)
+        }
         var add = 0
-        select.forEach {
-            val components = alls[it.first] ?: return@forEach
-            val IML_PATH = "${codeRoot}${components.getPath()}/${components.name}.iml"
-            if (File(basePath, IML_PATH).exists()) {
-                imls.append(t.replace("IML_PATH", IML_PATH))
-                add++
+        addModule.forEach {
+            val components = alls[it] ?: return@forEach
+            val pathIml = File(basePath, "${codeRoot}${components.getPath()}/${components.name}.iml")
+            if (pathIml.exists()) {
+                try {
+                    manager.loadModule(pathIml.absolutePath)
+                    add++
+                } finally {
+                }
             }
         }
-        imls.append("</modules>")
-        val modules = File(basePath, ".idea/modules.xml")
-        val toRegex = "<modules>.*?</modules>".toRegex(RegexOption.DOT_MATCHES_ALL)
-        val result = FileUtils.readText(modules)?.replace(toRegex, imls.toString()) ?: return false
-        FileUtils.writeText(modules, result.replace("###", "$"))
-        return add == select.size
+        return add == addModule.size
     }
 
     private fun readImport(importFile: File, selects: ArrayList<String>) {
@@ -99,11 +106,11 @@ class ImportAction : AnAction() {
         }
     }
 
-    private fun saveImport(select: MutableList<Pair<String, String>>, importFile: File) {
+    private fun saveImport(select: MutableList<JListInfo>, importFile: File) {
         val sb = StringBuilder("val include=")
         val end = select.size
         for (i in 0 until select.size) {
-            sb.append(select[i].first)
+            sb.append(select[i].title)
             if (i < end - 1) sb.append("+")
         }
         var i = 0
@@ -114,11 +121,11 @@ class ImportAction : AnAction() {
         FileUtils.writeText(importFile, if (i == 0) "$sb\n$result" else result, true)
     }
 
-    private fun saveHistory(history: List<Pair<String, String>>, historyFile: File) {
+    private fun saveHistory(history: List<JListInfo>, historyFile: File) {
         val end = Math.min(15, history.size)
         val sb = StringBuilder()
         for (i in 0 until end) {
-            sb.append(history[i].first)
+            sb.append(history[i].title)
             if (i < end - 1) sb.append(",")
         }
         FileUtils.writeText(historyFile, sb.toString(), true)

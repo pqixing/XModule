@@ -8,7 +8,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -37,6 +36,7 @@ public class GitOperatorDialog extends JDialog implements ActionListener {
     private JCheckBox all;
     private JCheckBox reelection;
     private JLabel jlTitle;
+    private JCheckBox handle;
 
     public String operatorCommond = "";
     public JListSelectAdapter adapter;
@@ -70,7 +70,6 @@ public class GitOperatorDialog extends JDialog implements ActionListener {
         }
         adapter.setDatas(adapter.cover(list));
         jlRecords.setModel(adapter);
-        jlRecords.setCellRenderer(adapter);
     }
 
     private void onOK() {

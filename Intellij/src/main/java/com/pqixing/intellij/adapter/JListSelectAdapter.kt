@@ -4,20 +4,21 @@ import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Component
 import java.awt.Font
+import java.util.*
 import javax.swing.*
 import javax.swing.border.BevelBorder
 import javax.swing.event.ListSelectionEvent
 import javax.swing.event.ListSelectionListener
 
-class JListSelectAdapter(val jList: JList<*>) : AbstractListModel<JListInfo>(), ListCellRenderer<JListInfo>, ListSelectionListener {
+open class JListSelectAdapter(val jList: JList<JListInfo>) : AbstractListModel<JListInfo>(), ListCellRenderer<JListInfo>, ListSelectionListener {
     var startIndex = -1
     var endIndex = -1
+    public var selectListener: JlistSelectListener? = null
     var label = JLabel().apply {
-        font = Font("宋体", Font.PLAIN, 16)
+        font = Font("宋体", Font.PLAIN, 14)
         setSize(350, 30)
     }
     var panel = JPanel().apply {
-        setSize(250, 30)
         layout = BorderLayout()
         border = BevelBorder(BevelBorder.LOWERED)
         add(label)
@@ -36,27 +37,29 @@ class JListSelectAdapter(val jList: JList<*>) : AbstractListModel<JListInfo>(), 
         startIndex = -1
         jList.clearSelection()
         if (start < 0) return
-        if (reelection) for (i in start..end) {
-            with(datas[i]) {
-                select = !select
-            }
-        } else datas[nowSelect].select = !datas[nowSelect].select
-        jList.invalidate()
+        val t = LinkedList<JListInfo>()
+        if (reelection) for (i in start..end) t.add(datas[i]) else t.add(datas[nowSelect])
+        //如果外部处理了选择事件,则,内部不再选中
+        if (selectListener?.onItemSelect(jList, this, t) != true) {
+            t.forEach { it.select = !it.select }
+            jList.invalidate()
+        }
     }
 
-    val datas = mutableListOf<JListInfo>()
+    public val datas = mutableListOf<JListInfo>()
     var reelection = true
 
 
     init {
         jList.addListSelectionListener(this)
+        jList.cellRenderer = this
     }
 
-    fun setDatas(ds: List<JListInfo>) {
+    open fun setDatas(ds: List<JListInfo>) {
         datas.clear()
         datas.addAll(ds)
-        jList.setSize(jList.width, datas.size * 30)
         jList.model = this
+//        jList.setSize(jList.width, datas.size * 30+15)
     }
 
     fun cover(ds: List<String>) = ds.map { JListInfo(title = it) }
@@ -65,7 +68,6 @@ class JListSelectAdapter(val jList: JList<*>) : AbstractListModel<JListInfo>(), 
     override fun getSize(): Int = datas.size
 
     override fun getListCellRendererComponent(p0: JList<out JListInfo>?, info: JListInfo, p2: Int, p3: Boolean, p4: Boolean): Component? {
-//        jPanel.background = Color.RED
         label.apply {
 
             isOpaque = true
@@ -81,7 +83,7 @@ class JListSelectAdapter(val jList: JList<*>) : AbstractListModel<JListInfo>(), 
                 3 -> "--- "
                 else -> "     "
             }
-            text = prefix + info.title
+            text = prefix + info.title + "   " + info.log
             val revers = endIndex != -1 && p2 in Math.min(startIndex, endIndex)..Math.max(startIndex, endIndex)
             val select = if (revers) !info.select else info.select
             background = if (select) Color.LIGHT_GRAY else Color.WHITE
@@ -90,5 +92,22 @@ class JListSelectAdapter(val jList: JList<*>) : AbstractListModel<JListInfo>(), 
     }
 }
 
+interface JlistSelectListener {
+    fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean
+}
 
-data class JListInfo(var title: String = "", var log: String = "", var staue: Int = 0, var select: Boolean = false)
+class JListInfo(var title: String = "", var log: String = "", var staue: Int = 0, var select: Boolean = false) {
+    val infoId = i++
+    override fun equals(other: Any?): Boolean {
+        return (other as? JListInfo)?.infoId == infoId
+    }
+
+    override fun toString(): String {
+        return "JListInfo(title='$title', log='$log', staue=$staue, select=$select, infoId=$infoId)"
+    }
+
+    companion object {
+        var i = 1
+    }
+
+}

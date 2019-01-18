@@ -9,219 +9,204 @@
       <maximumSize width="2147483647" height="2147483647"/>
       <minimumSize width="368" height="100"/>
       <opaque value="true"/>
-      <preferredSize width="600" height="400"/>
+      <preferredSize width="800" height="400"/>
     </properties>
     <border type="none"/>
     <children>
-      <grid id="94766" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="7e8de" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none"/>
         <children>
-          <grid id="9538f" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+          <scrollpane id="44958">
             <constraints>
-              <grid row="0" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="8" fill="2" indent="0" use-parent-layout="false">
+                <preferred-size width="265" height="-1"/>
+              </grid>
             </constraints>
-            <properties/>
-            <border type="none"/>
+            <properties>
+              <horizontalScrollBarPolicy value="31"/>
+              <toolTipText value="Select"/>
+              <verticalScrollBarPolicy value="20"/>
+            </properties>
+            <border type="none" title="Select"/>
             <children>
-              <component id="e7465" class="javax.swing.JButton" binding="btnOK">
-                <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="OK"/>
-                </properties>
-              </component>
-              <component id="5723f" class="javax.swing.JButton" binding="btnCancel">
-                <constraints>
-                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="Cancel"/>
-                </properties>
-              </component>
-              <hspacer id="7f75b">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-              </hspacer>
-              <component id="b8ca8" class="javax.swing.JComboBox" binding="importModel">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
+              <component id="675f0" class="javax.swing.JList" binding="jlSelect">
+                <constraints/>
                 <properties>
                   <model>
-                    <item value="Import"/>
-                    <item value="Sync"/>
+                    <item value="test1"/>
                   </model>
+                  <name value="Select"/>
+                  <preferredSize width="-1" height="-1"/>
+                  <toolTipText value="Select"/>
                 </properties>
               </component>
             </children>
-          </grid>
+          </scrollpane>
+          <scrollpane id="5f25c">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="2" indent="0" use-parent-layout="false">
+                <preferred-size width="265" height="-1"/>
+              </grid>
+            </constraints>
+            <properties>
+              <horizontalScrollBarPolicy value="31"/>
+            </properties>
+            <border type="none" title="History"/>
+            <children>
+              <component id="ea678" class="javax.swing.JList" binding="jlHistory">
+                <constraints/>
+                <properties>
+                  <opaque value="true"/>
+                  <preferredSize width="-1" height="0"/>
+                  <toolTipText value="History"/>
+                </properties>
+              </component>
+            </children>
+          </scrollpane>
+          <scrollpane id="a853f">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="4" fill="2" indent="0" use-parent-layout="false">
+                <preferred-size width="265" height="-1"/>
+              </grid>
+            </constraints>
+            <properties>
+              <horizontalScrollBarPolicy value="31"/>
+              <verticalScrollBarPolicy value="20"/>
+            </properties>
+            <border type="none" title="Other"/>
+            <children>
+              <component id="7f797" class="javax.swing.JList" binding="jlOther">
+                <constraints/>
+                <properties>
+                  <alignmentX value="0.5"/>
+                  <layoutOrientation value="0"/>
+                  <model>
+                    <item value="me=&quot;barcodeScannerCore&quot; introduce=&quot;barcodeScannerCore地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;casediscusslibrary&quot; introduce=&quot;casediscusslibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;caselibrary&quot; introduce=&quot;caselibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;cmsLiveLibrary&quot; introduce=&quot;cmsLiveLibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;communitylibrary&quot; introduce=&quot;communitylibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;consultation-lib&quot; introduce=&quot;consultation-lib地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;cordovaLib&quot; introduce=&quot;cordovaLib地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;dachendatabaselibrary&quot; introduce=&quot;dachendatabaselibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;dCommonLibrary&quot; introduce=&quot;dCommonLibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;dmzxinglib&quot; introduce=&quot;dmzxinglib地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;greendaogenerator&quot; introduce=&quot;greendaogenerator地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;healthplanlibrary&quot; introduce=&quot;healthplanlibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;ImVideo&quot; introduce=&quot;ImVideo地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;incomeLibrary&quot; introduce=&quot;incomeLibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;informationcenterlibrary&quot; introduce=&quot;informationcenterlibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;jcvideoplayer-lib&quot; introduce=&quot;jcvideoplayer-lib地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;MPChartLib&quot; introduce=&quot;MPChartLib地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;mupdflibrary&quot; introduce=&quot;mupdflibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;mutuallibrary&quot; introduce=&quot;mutuallibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;nicevideoplayer&quot; introduce=&quot;nicevideoplayer地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;numberPickerLibrary&quot; introduce=&quot;numberPickerLibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;pickerView_Library&quot; introduce=&quot;pickerView_Library地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;pinyin-lib&quot; introduce=&quot;pinyin-lib地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;pullToRefreshViewsLibrary&quot; introduce=&quot;pullToRefreshViewsLibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;qalibrary&quot; introduce=&quot;qalibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;paylibrary&quot; introduce=&quot;paylibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;redpackage&quot; introduce=&quot;redpackage地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;reviewlibrary&quot; introduce=&quot;reviewlibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;rtmpResourceLib&quot; introduce=&quot;rtmpResourceLib地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;rTRoutineLib&quot; introduce=&quot;rTRoutineLib地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;surveylibrary&quot; introduce=&quot;surveylibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;textcopyaLibrary&quot; introduce=&quot;textcopyaLibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;videoConferencingLibrary&quot; introduce=&quot;videoConferencingLibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;vitamioLibrary&quot; introduce=&quot;vitamioLibrary地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;wechatpicker&quot; introduce=&quot;wechatpicker地址管理&quot;/&gt;"/>
+                    <item value="&lt;submodule name=&quot;yqqxunfei&quot; introduce=&quot;yqqxunfei地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;ysqxunfei&quot; introduce=&quot;ysqxunfei地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;openbridges&quot; introduce=&quot;原生桥&quot; /&gt;"/>
+                    <item value="&lt;/project&gt;"/>
+                    <item value="&lt;project name=&quot;DachenBase&quot; introduce=&quot;DachenBase仓库根目录&quot;&gt;"/>
+                    <item value="&lt;submodule name=&quot;dccommon&quot; introduce=&quot;dccommon地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;dcnet&quot; introduce=&quot;dcnet地址管理&quot; /&gt;"/>
+                    <item value="&lt;submodule name=&quot;dcuser&quot; i"/>
+                  </model>
+                  <preferredSize width="-1" height="600"/>
+                  <toolTipText value="Others"/>
+                  <visibleRowCount value="15"/>
+                </properties>
+              </component>
+            </children>
+          </scrollpane>
         </children>
       </grid>
-      <grid id="5b9b6" layout-manager="BorderLayout" hgap="0" vgap="0">
+      <grid id="77c33" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="0" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none"/>
         <children>
-          <grid id="77c33" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
-            <constraints border-constraint="North"/>
+          <component id="b72ef" class="javax.swing.JTextField" binding="tfImport">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="28"/>
+              </grid>
+            </constraints>
             <properties/>
-            <border type="none"/>
-            <children>
-              <component id="b72ef" class="javax.swing.JTextField" binding="tfImport">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                    <preferred-size width="150" height="28"/>
-                  </grid>
-                </constraints>
-                <properties/>
-              </component>
-              <component id="6899b" class="javax.swing.JComboBox" binding="dpModel">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                    <preferred-size width="-1" height="25"/>
-                  </grid>
-                </constraints>
-                <properties>
-                  <model/>
-                </properties>
-              </component>
-            </children>
-          </grid>
-          <grid id="7e8de" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
-            <constraints border-constraint="Center"/>
-            <properties/>
-            <border type="none"/>
-            <children>
-              <scrollpane id="44958">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="200" height="-1"/>
-                  </grid>
-                </constraints>
-                <properties>
-                  <horizontalScrollBarPolicy value="31"/>
-                  <toolTipText value="Select"/>
-                  <verticalScrollBarPolicy value="20"/>
-                </properties>
-                <border type="none" title="Select"/>
-                <children>
-                  <component id="675f0" class="javax.swing.JList" binding="jlSelect">
-                    <constraints/>
-                    <properties>
-                      <model>
-                        <item value="test1"/>
-                      </model>
-                      <name value="Select"/>
-                      <preferredSize width="-1" height="-1"/>
-                      <toolTipText value="Select"/>
-                    </properties>
-                  </component>
-                </children>
-              </scrollpane>
-              <scrollpane id="5f25c">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="200" height="-1"/>
-                  </grid>
-                </constraints>
-                <properties>
-                  <horizontalScrollBarPolicy value="31"/>
-                </properties>
-                <border type="none" title="History"/>
-                <children>
-                  <component id="ea678" class="javax.swing.JList" binding="jlHistory">
-                    <constraints/>
-                    <properties>
-                      <opaque value="true"/>
-                      <preferredSize width="-1" height="0"/>
-                      <toolTipText value="History"/>
-                    </properties>
-                  </component>
-                </children>
-              </scrollpane>
-              <scrollpane id="a853f">
-                <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="200" height="0"/>
-                  </grid>
-                </constraints>
-                <properties>
-                  <horizontalScrollBarPolicy value="31"/>
-                  <verticalScrollBarPolicy value="20"/>
-                </properties>
-                <border type="none" title="Other"/>
-                <children>
-                  <component id="7f797" class="javax.swing.JList" binding="jlOther">
-                    <constraints/>
-                    <properties>
-                      <alignmentX value="0.5"/>
-                      <layoutOrientation value="0"/>
-                      <model>
-                        <item value="me=&quot;barcodeScannerCore&quot; introduce=&quot;barcodeScannerCore地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;casediscusslibrary&quot; introduce=&quot;casediscusslibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;caselibrary&quot; introduce=&quot;caselibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;cmsLiveLibrary&quot; introduce=&quot;cmsLiveLibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;communitylibrary&quot; introduce=&quot;communitylibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;consultation-lib&quot; introduce=&quot;consultation-lib地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;cordovaLib&quot; introduce=&quot;cordovaLib地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;dachendatabaselibrary&quot; introduce=&quot;dachendatabaselibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;dCommonLibrary&quot; introduce=&quot;dCommonLibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;dmzxinglib&quot; introduce=&quot;dmzxinglib地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;greendaogenerator&quot; introduce=&quot;greendaogenerator地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;healthplanlibrary&quot; introduce=&quot;healthplanlibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;ImVideo&quot; introduce=&quot;ImVideo地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;incomeLibrary&quot; introduce=&quot;incomeLibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;informationcenterlibrary&quot; introduce=&quot;informationcenterlibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;jcvideoplayer-lib&quot; introduce=&quot;jcvideoplayer-lib地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;MPChartLib&quot; introduce=&quot;MPChartLib地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;mupdflibrary&quot; introduce=&quot;mupdflibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;mutuallibrary&quot; introduce=&quot;mutuallibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;nicevideoplayer&quot; introduce=&quot;nicevideoplayer地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;numberPickerLibrary&quot; introduce=&quot;numberPickerLibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;pickerView_Library&quot; introduce=&quot;pickerView_Library地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;pinyin-lib&quot; introduce=&quot;pinyin-lib地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;pullToRefreshViewsLibrary&quot; introduce=&quot;pullToRefreshViewsLibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;qalibrary&quot; introduce=&quot;qalibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;paylibrary&quot; introduce=&quot;paylibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;redpackage&quot; introduce=&quot;redpackage地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;reviewlibrary&quot; introduce=&quot;reviewlibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;rtmpResourceLib&quot; introduce=&quot;rtmpResourceLib地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;rTRoutineLib&quot; introduce=&quot;rTRoutineLib地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;surveylibrary&quot; introduce=&quot;surveylibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;textcopyaLibrary&quot; introduce=&quot;textcopyaLibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;videoConferencingLibrary&quot; introduce=&quot;videoConferencingLibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;vitamioLibrary&quot; introduce=&quot;vitamioLibrary地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;wechatpicker&quot; introduce=&quot;wechatpicker地址管理&quot;/&gt;"/>
-                        <item value="&lt;submodule name=&quot;yqqxunfei&quot; introduce=&quot;yqqxunfei地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;ysqxunfei&quot; introduce=&quot;ysqxunfei地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;openbridges&quot; introduce=&quot;原生桥&quot; /&gt;"/>
-                        <item value="&lt;/project&gt;"/>
-                        <item value="&lt;project name=&quot;DachenBase&quot; introduce=&quot;DachenBase仓库根目录&quot;&gt;"/>
-                        <item value="&lt;submodule name=&quot;dccommon&quot; introduce=&quot;dccommon地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;dcnet&quot; introduce=&quot;dcnet地址管理&quot; /&gt;"/>
-                        <item value="&lt;submodule name=&quot;dcuser&quot; i"/>
-                      </model>
-                      <preferredSize width="-1" height="-1"/>
-                      <toolTipText value="Others"/>
-                      <visibleRowCount value="15"/>
-                    </properties>
-                  </component>
-                </children>
-              </scrollpane>
-            </children>
-          </grid>
+          </component>
+          <component id="6899b" class="javax.swing.JComboBox" binding="dpModel">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="-1" height="25"/>
+              </grid>
+            </constraints>
+            <properties>
+              <model/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="9538f" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="2" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="e7465" class="javax.swing.JButton" binding="btnOK">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="OK"/>
+            </properties>
+          </component>
+          <component id="5723f" class="javax.swing.JButton" binding="btnCancel">
+            <constraints>
+              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Cancel"/>
+            </properties>
+          </component>
+          <hspacer id="7f75b">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </hspacer>
+          <component id="b8ca8" class="javax.swing.JComboBox" binding="importModel">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <model>
+                <item value="Import"/>
+                <item value="Sync"/>
+              </model>
+            </properties>
+          </component>
         </children>
       </grid>
     </children>
