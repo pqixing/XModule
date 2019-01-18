@@ -66,16 +66,19 @@ open class JListSelectAdapter(val jList: JList<JListInfo>) : AbstractListModel<J
     override fun getElementAt(p0: Int): JListInfo = datas[p0]
 
     override fun getSize(): Int = datas.size
+    val wanming = Color(236,117,0)
+    val error = Color(236,0,0)
+    val success = Color(0,187,18)
+    val normal = Color(20,160,120)
 
     override fun getListCellRendererComponent(p0: JList<out JListInfo>?, info: JListInfo, p2: Int, p3: Boolean, p4: Boolean): Component? {
         label.apply {
-
-            isOpaque = true
             info.staue = p2 % 4
             foreground = when (info.staue) {
-                1 -> Color.BLUE
-                2 -> Color.RED
-                else -> Color.BLACK
+                1 -> wanming
+                2 -> success
+                3 -> error
+                else -> normal
             }
             val prefix = when (info.staue) {
                 1 -> "√  "
@@ -86,7 +89,9 @@ open class JListSelectAdapter(val jList: JList<JListInfo>) : AbstractListModel<J
             text = prefix + info.title + "   " + info.log
             val revers = endIndex != -1 && p2 in Math.min(startIndex, endIndex)..Math.max(startIndex, endIndex)
             val select = if (revers) !info.select else info.select
-            background = if (select) Color.LIGHT_GRAY else Color.WHITE
+            isOpaque = select
+
+            if(select) background =  Color.LIGHT_GRAY
         }
         return panel
     }
