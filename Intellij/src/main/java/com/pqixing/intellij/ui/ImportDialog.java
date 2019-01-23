@@ -30,6 +30,7 @@ public class ImportDialog extends JDialog {
     private JList jlOther;
     private JList jlHistory;
     private JComboBox importModel;
+    public JComboBox codeRoot;
 
     public ImportSelectAdapter selctModel;
     public ImportSelectAdapter historyModel;
@@ -37,10 +38,10 @@ public class ImportDialog extends JDialog {
     private Runnable onOk;
 
     public ImportDialog() {
-        this(null, null, null);
+        this(null, null, null, null);
     }
 
-    public ImportDialog(List<JListInfo> select, List<JListInfo> history, List<JListInfo> other) {
+    public ImportDialog(List<JListInfo> select, List<JListInfo> history, List<JListInfo> other, List<String> codeRoots) {
         setContentPane(rootPanel);
         setModal(false);
         getRootPane().setDefaultButton(btnOK);
@@ -90,6 +91,7 @@ public class ImportDialog extends JDialog {
         dpModel.addItem("mavenFirst");
         dpModel.addItem("localFirst");
         dpModel.addItem("localOnly");
+        if (codeRoot != null) codeRoots.forEach(s -> this.codeRoot.addItem(s));
     }
 
     private void setJListModel(JList jList, ImportSelectAdapter model, ImportSelectAdapter targetModel) {

@@ -1,28 +1,30 @@
 package com.pqixing.intellij.actions
 
-import com.intellij.dvcs.repo.Repository
-import com.intellij.dvcs.repo.VcsRepositoryCreator
-import com.intellij.dvcs.repo.VcsRepositoryManager
+import com.intellij.dvcs.ui.DvcsBundle
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vcs.ProjectLevelVcsManager
-import com.intellij.openapi.vfs.VfsUtil
-import com.intellij.vcsUtil.VcsUtil
 import com.pqixing.git.Components
-import com.pqixing.git.GitUtils
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.ImportDialog
+import com.pqixing.intellij.utils.Git4IdeHelper
 import com.pqixing.tools.FileUtils
+import com.pqixing.tools.PropertiesUtils
+import git4idea.commands.GitLineHandlerListener
+import git4idea.commands.GitStandardProgressAnalyzer
 import java.io.File
+import java.util.*
 
 
 class ImportAction : AnAction() {
-    private var codeRoot = "../"
+    private var codeRoot = "main"
     lateinit var project: Project
     override fun actionPerformed(e: AnActionEvent) {
         val basePath = e.project?.basePath ?: return
@@ -34,51 +36,79 @@ class ImportAction : AnAction() {
         val historyFile = File(basePath, ".idea/caches/import.txt")
         val importFile = File(basePath, "import.kt")
 
-        val historys = FileUtils.readText(historyFile)?.split(",")?.toMutableList()
-                ?: mutableListOf()
+        val p = PropertiesUtils.readProperties(historyFile)
+        val historys = p.getProperty("import")?.split(",")?.toMutableList() ?: mutableListOf()
+        val codeRoots = p.getProperty("codeRoot")?.split(",")?.toMutableList() ?: mutableListOf()
         val selects = ArrayList<String>()
         readImport(importFile, selects)
+        codeRoots.remove(codeRoot)
+        codeRoots.add(0, codeRoot)
+
         val dialog = ImportDialog(selects
                 .map {
                     historys.remove(it);JListInfo(it, modules.remove(it)?.introduce ?: "")
                 }, historys
                 .map { JListInfo(it, modules.remove(it)?.introduce ?: "") }, modules
-                .map { JListInfo(it.key, it.value.introduce) })
+                .map { JListInfo(it.key, it.value.introduce) }, codeRoots)
         dialog.pack()
         dialog.isVisible = true
-        dialog.setOkListener {
-            checkGit(e, dialog.selctModel.selectItems.map { it.title }, alls) { onImport(e, dialog, historyFile, importFile, basePath, selects, alls) }
-        }
-    }
+        dialog.setOkListener(object : Task.Backgroundable(project, DvcsBundle.message("cloning.repository", "http://192.168.3.200/android/Document.git")) {
+            override fun run(indicator: ProgressIndicator) {
+                val dir = File(project.basePath, "../test2")
+                if (!dir.exists()) dir.mkdirs()
+                val indicator = ProgressManager.getInstance().progressIndicator
+                indicator.isIndeterminate = false
+                val progressListener = GitStandardProgressAnalyzer.createListener(indicator)
+                //                    Git4IdeHelper.getGit().clone(project,dir,"http://192.168.3.200/android/Document.git","Document",progressListener)
+                val repo = Git4IdeHelper.getRepo(File(basePath, "../MedicalProject"), this@ImportAction.project);
+                val remote = repo.remotes.find { it.name == "origin" } ?: repo.remotes.first()
+                var result = Git4IdeHelper.getGit().fetch(repo, remote, Collections.singletonList(GitLineHandlerListener { p0, p1 -> System.out.println(p0 + p1) }))
+                if (result.exitCode == 0) {
 
-    private fun checkGit(e: AnActionEvent, items: List<String>, alls: HashMap<String, Components>, success: () -> Unit) {
-        val rootFile = VfsUtil.findFileByIoFile(File(project.basePath), true) ?: return
-        val instance = VcsRepositoryManager.getInstance(project);
-
-        val forFile = instance.getRepositoryForFile(rootFile, false)!!
-        forFile.update()
-        val rootBranchName = forFile.currentBranchName
-        System.out.println("root bracnch -> $rootBranchName")
-
-        val basePath = project.basePath
-        val map = items.map { alls[it]?.rootName }.toSet().map {
-            val rootDir = File(basePath, "$codeRoot$it")
-            if (!rootDir.exists()) Pair(it, "clone")
-            else {
-                val brach = instance.getRepositoryForFile(VfsUtil.findFileByIoFile(File(project.basePath), false)!!, false)?.currentBranchName
-                if (brach == rootBranchName) Pair(it, "normal")
-                else Pair(it, "ckeckout")
+                    result = Git4IdeHelper.getGit().merge(repo, "${remote.name}/${repo.currentBranch?.name}", emptyList())
+                }
+                System.out.println("-----------" + result.toString())
             }
-        }
-        System.out.println(map)
 
+            override fun onSuccess() {
+            }
+        }::queue)
     }
 
-    private fun onImport(e: AnActionEvent, dialog: ImportDialog, historyFile: File, importFile: File, basePath: String, selects: ArrayList<String>, alls: HashMap<String, Components>) {
+//    private fun checkGit(e: AnActionEvent, items: List<String>, alls: HashMap<String, Components>, success: () -> Unit) {
+//        val rootFile = VfsUtil.findFileByIoFile(File(project.basePath), true) ?: return
+//        val instance = VcsRepositoryManager.getInstance(project);
+//
+//        val forFile = instance.getRepositoryForFile(rootFile, false)!!
+//        forFile.update()
+//
+//        instance.removeExternalRepository()
+//        instance.addExternalRepository()
+//        val rootBranchName = forFile.currentBranchName
+//        System.out.println("root bracnch -> $rootBranchName")
+//        val repo =  GitRepositoryImpl.getInstance(rootFile,project,false);
+//        GitImpl().fetch()
+//        val basePath = project.basePath
+//        val map = items.map { alls[it]?.rootName }.toSet().map {
+//            val rootDir = File(basePath, "$codeRoot$it")
+//            if (!rootDir.exists()) Pair(it, "clone")
+//            else {
+//                val brach = instance.getRepositoryForFile(VfsUtil.findFileByIoFile(File(project.basePath), false)!!, false)?.currentBranchName
+//                if (brach == rootBranchName) Pair(it, "normal")
+//                else Pair(it, "ckeckout")
+//            }
+//        }
+//        System.out.println(map)
+//
+//    }
+
+    private fun onImport(e: AnActionEvent, dialog: ImportDialog, historyFile: File, importFile: File, basePath: String, selects: ArrayList<String>, alls: HashMap<String, Components>, codeRoots: MutableList<String>) {
         WriteCommandAction.runWriteCommandAction(project) {
+            var curRoot = dialog.codeRoot.selectedItem?.toString()?.trim()
+            if (curRoot?.isNotEmpty() != true) curRoot = "main"
             //保存历史记录
-            saveHistory(dialog.historyModel.selectItems, historyFile)
-            saveImport(dialog.selctModel.selectItems, importFile)
+            saveHistory(dialog.historyModel.selectItems, historyFile, curRoot, codeRoots)
+            saveImport(dialog.selctModel.selectItems, importFile, curRoot)
             val dpModel = dialog.dpModel?.trim() ?: ""
             val fileInfo = File(basePath, "ProjectInfo.java")
             if (dpModel != "dpModel" && fileInfo.exists()) {
@@ -107,7 +137,7 @@ class ImportAction : AnAction() {
         var add = 0
         addModule.forEach {
             val components = alls[it] ?: return@forEach
-            val pathIml = File(basePath, "${codeRoot}${components.getPath()}/${components.name}.iml")
+            val pathIml = File(basePath, "../$codeRoot${components.getPath()}/${components.name}.iml")
             if (pathIml.exists()) {
                 try {
                     manager.loadModule(pathIml.absolutePath)
@@ -127,8 +157,7 @@ class ImportAction : AnAction() {
             val key = map[0].replace("var ", "").replace("val ", "").replace("\"", "").trim()
             if (key == "codeRoot") {
                 codeRoot = map[1].replace("\"", "").trim()
-                if (codeRoot.isEmpty()) codeRoot = "../"
-                if (!codeRoot.endsWith("/")) codeRoot = "$codeRoot/"
+                if (codeRoot.isEmpty()) codeRoot = "main"
             }
             if (key != "include") continue
             map[1].replace("+", ",")
@@ -140,28 +169,39 @@ class ImportAction : AnAction() {
         }
     }
 
-    private fun saveImport(select: MutableList<JListInfo>, importFile: File) {
+    private fun saveImport(select: MutableList<JListInfo>, importFile: File, curRoot: String) {
         val sb = StringBuilder("val include=")
         val end = select.size
         for (i in 0 until select.size) {
             sb.append(select[i].title)
             if (i < end - 1) sb.append("+")
         }
-        var i = 0
-        val result = Regex("\n *val *include.*").replace(FileUtils.readText(importFile)
-                ?: "") {
-            if (i++ == 0) "\n" + sb.toString() else "\n//${it.value.replace("\n", "")}"
+        var result = FileUtils.readText(importFile) ?: ""
+        for (m in mapOf("include" to sb.toString(), "codeRoot" to "val codeRoot=$curRoot")) {
+            var i = 0
+            result = Regex("\n *val *${m.key}.*").replace(result) {
+                if (i++ == 0) "\n" + m.value else "\n//${it.value.replace("\n", "")}"
+            }
+            if (i == 0) result = m.value + "\n" + result
         }
-        FileUtils.writeText(importFile, if (i == 0) "$sb\n$result" else result, true)
+
+        FileUtils.writeText(importFile, result, true)
     }
 
-    private fun saveHistory(history: List<JListInfo>, historyFile: File) {
+    private fun saveHistory(history: List<JListInfo>, historyFile: File, curRoot: String, codeRoots: MutableList<String>) {
+        codeRoots.remove(curRoot)
+        codeRoots.add(0, curRoot)
         val end = Math.min(15, history.size)
-        val sb = StringBuilder()
+        val sb = StringBuilder("import=")
         for (i in 0 until end) {
             sb.append(history[i].title)
             if (i < end - 1) sb.append(",")
         }
+        sb.append("\ncodeRoot=")
+        for (c in codeRoots) {
+            sb.append("$c,")
+        }
+        sb.deleteCharAt(sb.length - 1)
         FileUtils.writeText(historyFile, sb.toString(), true)
     }
 }

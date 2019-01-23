@@ -32,7 +32,7 @@
             <add-to-group group-id="BuildMenu" anchor="first" />
             <add-to-group group-id="EditorPopupMenu" anchor="first" />
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first" />
-            <action id="ImportAction" class="com.pqixing.intellij.actions.ImportAction" text="Import Module" >
+            <action id="ImportAction" class="com.pqixing.intellij.actions.ImportAction" text="Import" >
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
             </action>
             <action id="ToMavenAction" class="com.pqixing.intellij.actions.ToMavenAction" text="ToMaven" />
