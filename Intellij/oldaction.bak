@@ -58,7 +58,7 @@
             <separator/>
             <action id="DpsAnalyze" class="com.dachen.creator.actions.DependentList" text="DependentList"
                     description="DpsAnalyze"/>
-            <action id="ClearCache" class="com.pqixing.intellij.actions.ClearCache" text="ClearCache"
+            <action id="ClearCache" class="com.pqixing.intellij.actions.RunAction" text="ClearCache"
                     description="ClearCache"/>
             <separator/>
             <action id="com.libiao.routercreator" class="com.dachen.creator.actions.PathCreator" text="PathCreator"

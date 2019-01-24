@@ -1,4 +1,4 @@
-package com.pqixing.git
+package com.pqixing.modularization.utils
 
 import com.pqixing.Tools
 import com.pqixing.interfaces.ICredential
@@ -11,7 +11,7 @@ import java.io.File
 object GitUtils {
     lateinit var credentials: ICredential
     fun init(credentials: ICredential) {
-        this.credentials = credentials
+        GitUtils.credentials = credentials
     }
 
     fun open(file: File?): Git? {
@@ -143,7 +143,7 @@ object GitUtils {
         //关联本地和远程分支
         Tools.println("Create Branch ${git.repository.directory.parentFile.name} -> $branchName")
         //创建分支成功，切换到对应分支
-        return tryCheckOut(git,branchName,git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call(),true)
+        return tryCheckOut(git, branchName, git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call(), true)
     }
 
     /**

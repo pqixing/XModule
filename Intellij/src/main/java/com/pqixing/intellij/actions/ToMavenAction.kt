@@ -17,7 +17,6 @@ class ToMavenAction : AnAction() {
         dialog.pack()
         dialog.isVisible = true
         val module = e.getData(DataKey.create<Module>("module"))
-
 //        val dpsSort = loadAndSortDps(module)
     }
 //

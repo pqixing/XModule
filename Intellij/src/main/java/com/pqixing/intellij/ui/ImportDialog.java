@@ -28,20 +28,18 @@ public class ImportDialog extends JDialog {
     private JComboBox dpModel;
     private JList jlSelect;
     private JList jlOther;
-    private JList jlHistory;
     private JComboBox importModel;
     public JComboBox codeRoot;
 
     public ImportSelectAdapter selctModel;
-    public ImportSelectAdapter historyModel;
     public ImportSelectAdapter otherModel;
     private Runnable onOk;
 
     public ImportDialog() {
-        this(null, null, null, null);
+        this(null, null, null);
     }
 
-    public ImportDialog(List<JListInfo> select, List<JListInfo> history, List<JListInfo> other, List<String> codeRoots) {
+    public ImportDialog(List<JListInfo> select, List<JListInfo> other, List<String> codeRoots) {
         setContentPane(rootPanel);
         setModal(false);
         getRootPane().setDefaultButton(btnOK);
@@ -64,10 +62,8 @@ public class ImportDialog extends JDialog {
         rootPanel.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         selctModel = new ImportSelectAdapter(jlSelect, select);
-        historyModel = new ImportSelectAdapter(jlHistory, history);
         otherModel = new ImportSelectAdapter(jlOther, other);
-        setJListModel(jlSelect, selctModel, historyModel);
-        setJListModel(jlHistory, historyModel, selctModel);
+        setJListModel(jlSelect, selctModel, otherModel);
         setJListModel(jlOther, otherModel, selctModel);
 
         tfImport.addKeyListener(new KeyListener() {
@@ -82,7 +78,7 @@ public class ImportDialog extends JDialog {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 String key = tfImport.getText().trim();
-                historyModel.filterDatas(key);
+                selctModel.filterDatas(key);
                 otherModel.filterDatas(key);
             }
         });
@@ -103,6 +99,10 @@ public class ImportDialog extends JDialog {
         });
     }
 
+    public String getCodeRootStr() {
+        Object item = codeRoot.getSelectedItem();
+        return item == null || item.toString().trim().isEmpty() ? "main" : item.toString();
+    }
 
     public static class ImportSelectAdapter extends JListSelectAdapter {
         List<JListInfo> sources = new ArrayList<>();
@@ -129,16 +129,15 @@ public class ImportDialog extends JDialog {
         }
 
         public void filterDatas(String key) {
-            this.filterKey = key;
+            this.filterKey = key == null ? "" : key.trim().toLowerCase();
             List<JListInfo> datas = new LinkedList<>();
             datas.clear();
-            if (key != null && !key.isEmpty()) {
-                for (JListInfo p : sources) {
-                    if (p.toString().toLowerCase().contains(key)) {
-                        datas.add(p);
-                    }
+            if (!filterKey.isEmpty()) for (JListInfo p : sources) {
+                if (p.toString().toLowerCase().contains(filterKey)) {
+                    datas.add(p);
                 }
-            } else datas.addAll(sources);
+            }
+            else datas.addAll(sources);
             super.setDatas(datas);
         }
 

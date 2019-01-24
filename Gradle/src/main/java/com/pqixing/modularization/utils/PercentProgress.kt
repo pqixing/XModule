@@ -1,11 +1,8 @@
-package com.pqixing.git
+package com.pqixing.modularization.utils
 
 import com.pqixing.Tools
 import com.pqixing.interfaces.ILog
-import com.sun.org.apache.xml.internal.security.Init
-
 import org.eclipse.jgit.lib.ProgressMonitor
-import java.text.DecimalFormat
 
 class PercentProgress @JvmOverloads constructor(private val logger: ILog? = Tools.logger, val space: Float = 1500f) : ProgressMonitor {
     private var title: String? = null

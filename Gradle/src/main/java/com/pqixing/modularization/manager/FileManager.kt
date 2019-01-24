@@ -11,7 +11,9 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.IPlugin
 import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.iterface.IExtHelper
+import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.tools.FileUtils
+import org.apache.tools.ant.util.DOMUtils.appendText
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
 

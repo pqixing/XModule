@@ -1,4 +1,4 @@
-package com.pqixing.interfaces;
+package com.pqixing.modularization.utils;
 
 public interface ICredential {
     fun getUserName():String

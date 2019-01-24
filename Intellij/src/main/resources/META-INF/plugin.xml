@@ -37,7 +37,7 @@
             </action>
             <action id="ToMavenAction" class="com.pqixing.intellij.actions.ToMavenAction" text="ToMaven" />
 
-            <action id="ClearCache" class="com.pqixing.intellij.actions.ClearCache" text="ClearCache" />
+            <action id="RunAction" class="com.pqixing.intellij.actions.RunAction" text="RunAction" />
 
 
             <action id="com.libiao.mvpcreator" class="com.dachen.creator.actions.MvpCreator" text="MvpCreator"

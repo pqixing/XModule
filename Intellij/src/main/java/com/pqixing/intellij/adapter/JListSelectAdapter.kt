@@ -16,7 +16,7 @@ open class JListSelectAdapter(val jList: JList<JListInfo>) : AbstractListModel<J
     public var selectListener: JlistSelectListener? = null
     var label = JLabel().apply {
         font = Font("宋体", Font.PLAIN, 14)
-        setSize(350, 30)
+        setSize(300, 30)
     }
     var panel = JPanel().apply {
         layout = BorderLayout()
@@ -59,7 +59,7 @@ open class JListSelectAdapter(val jList: JList<JListInfo>) : AbstractListModel<J
         datas.clear()
         datas.addAll(ds)
         jList.model = this
-//        jList.setSize(jList.width, datas.size * 30+15)
+        jList.setSize(jList.width, datas.size * 30+15)
     }
 
     fun cover(ds: List<String>) = ds.map { JListInfo(title = it) }

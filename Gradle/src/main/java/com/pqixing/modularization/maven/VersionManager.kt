@@ -10,6 +10,7 @@ import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
+import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.PropertiesUtils
 import com.pqixing.tools.TextUtils

@@ -1,7 +1,6 @@
 package com.pqixing.git
 
 import com.pqixing.Tools
-import org.eclipse.jgit.api.Git
 import java.io.File
 
 /**

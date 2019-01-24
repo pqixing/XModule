@@ -22,18 +22,20 @@ compileTestKotlin {
         jvmTarget = "1.8"
     }
 }
+System.out.println("---------------> ")
 
 // 添加依赖
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation gradleApi()
     implementation localGroovy()
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     testImplementation 'junit:junit:4.12'
-    compile 'org.eclipse.jgit:org.eclipse.jgit:+'
-    compile 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:+'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
     
     if (localBuild) {
-        implementation "com.pqixing.gradle:tools:0.1"
+        implementation project(":Tools")
     } else {
         implementation "com.github.pqixing.modularization:Tools:0.11"
     }

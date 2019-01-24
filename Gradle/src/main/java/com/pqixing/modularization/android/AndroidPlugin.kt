@@ -23,6 +23,7 @@ import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.internal.impldep.org.apache.http.util.TextUtils
 import java.io.File
 import java.lang.StringBuilder
 

@@ -4,10 +4,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 
-
 import java.io.File;
 
-import git4idea.GitUtil;
 import git4idea.commands.Git;
 import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryImpl;

@@ -8,6 +8,9 @@ import com.pqixing.git.init
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.interfaces.OnClear
+import com.pqixing.modularization.utils.GitUtils
+import com.pqixing.modularization.utils.execute
+import com.pqixing.modularization.utils.init
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.Git
 import org.gradle.api.Project

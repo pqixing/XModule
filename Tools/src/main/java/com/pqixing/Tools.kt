@@ -1,7 +1,5 @@
 package com.pqixing
 
-import com.pqixing.git.GitUtils
-import com.pqixing.interfaces.ICredential
 import com.pqixing.interfaces.ILog
 import com.pqixing.tools.FileUtils
 
@@ -16,10 +14,9 @@ object Tools {
     lateinit var logger: ILog
     var init = false
     @JvmStatic
-    fun init(logger: ILog, rootDir: String, credentials: ICredential) {
+    fun init(logger: ILog, rootDir: String) {
         Tools.rootDir = rootDir
         Tools.logger = logger
-        GitUtils.init(credentials)
         FileUtils.init(Tools::class.java)
         init = true
     }

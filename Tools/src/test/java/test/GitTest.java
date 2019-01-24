@@ -6,7 +6,6 @@ import com.pqixing.git.GitUtils;
 import com.pqixing.git.PercentProgress;
 import com.pqixing.interfaces.ICredential;
 import com.pqixing.interfaces.ILog;
-import com.pqixing.shell.Shell;
 
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.DiffCommand;
@@ -26,7 +25,6 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class GitTest {
     @Test
