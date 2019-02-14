@@ -21,7 +21,7 @@ buildscript {
 ext.localMavenUri = uri("$project.gradle.gradleUserHomeDir.absolutePath/.localRepo")
 //本地Maven调试
 ext.localBuild = true
-ext.buildModule = ["Tools","Gradle"]
+ext.buildModule = ["Gradle"]
 ext.buildGroup = 'com.github.pqixing.modularization'
 ext.buildVersion = "0.12"
 
@@ -44,12 +44,11 @@ tasks.withType(Javadoc) {
 }
 
 subprojects { p ->
+    if (!buildModule.contains(p.name)) return
     version = buildVersion
     group = buildGroup
-    if (!buildModule.contains(p.name)) return
-    apply plugin: 'java'
     apply plugin: 'maven'
-
+    apply plugin: 'java'
     sourceCompatibility = 1.8 // java 8 23
     targetCompatibility = 1.8
 
