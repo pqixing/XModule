@@ -29,6 +29,7 @@ dependencies {
     implementation files("../libs/Tools.jar")
     implementation gradleApi()
     implementation localGroovy()
+    implementation "com.alibaba:fastjson:1.2.44"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     testImplementation 'junit:junit:4.12'
     implementation 'org.eclipse.jgit:org.eclipse.jgit:+'

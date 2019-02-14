@@ -1,11 +1,11 @@
 package com.pqixing.modularization.manager.tasks
 
 import com.pqixing.Tools
-import com.pqixing.git.GitUtils
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.maven.VersionManager
+import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 
 open class CreateBranchTask : BaseTask() {

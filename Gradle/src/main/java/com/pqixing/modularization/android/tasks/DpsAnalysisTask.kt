@@ -2,7 +2,7 @@ package com.pqixing.modularization.android.tasks
 
 import com.pqixing.Tools
 import com.pqixing.git.Components
-import com.pqixing.git.GitUtils
+import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper

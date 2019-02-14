@@ -1,7 +1,6 @@
 package com.pqixing.modularization.maven
 
 import com.pqixing.Tools
-import com.pqixing.git.GitUtils
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys

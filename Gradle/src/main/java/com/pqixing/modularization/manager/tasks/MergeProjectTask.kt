@@ -1,14 +1,14 @@
 package com.pqixing.modularization.manager.tasks
 
 import com.pqixing.Tools
-import com.pqixing.git.GitUtils
-import com.pqixing.git.init
+import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.maven.VersionManager
 import com.pqixing.modularization.utils.ResultUtils
+import com.pqixing.modularization.utils.init
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.MergeResult
 import java.io.File

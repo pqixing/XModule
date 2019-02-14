@@ -1,7 +1,8 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.Tools
-import com.pqixing.interfaces.ICredential
+import com.pqixing.git.Components
+import com.pqixing.modularization.manager.GitCredential
 import org.eclipse.jgit.api.*
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.transport.RefSpec
@@ -9,10 +10,7 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
 
 object GitUtils {
-    lateinit var credentials: ICredential
-    fun init(credentials: ICredential) {
-        GitUtils.credentials = credentials
-    }
+    val credentials: ICredential = GitCredential()
 
     fun open(file: File?): Git? {
         if (file?.exists() == false) return null
@@ -268,6 +266,22 @@ fun <T> GitCommand<T>.execute(): T? = try {
 //    FileUtils.delete(File(repository.directory, "index.lock"))
     Tools.println(e.toString())
     null
+}
+
+fun Components.loadGitInfo(git: Git) {
+    val repo = git.repository
+    lastLog.branch = repo.branch
+    val command = git.log().setMaxCount(1)
+    if (rootName != name) command.addPath(name)
+    lastLog.gitDir = repo.directory
+    command.call().forEach { rev ->
+        lastLog.author = rev.authorIdent.name
+        lastLog.commitTime = rev.commitTime
+        lastLog.message = rev.fullMessage
+        lastLog.hash = rev.name
+    }
+    hasInit = true
+    Tools.println("LoadGitInfo $name -> branch : ${lastLog.branch} log : ${lastLog.message}")
 }
 
 

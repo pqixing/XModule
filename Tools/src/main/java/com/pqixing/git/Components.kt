@@ -52,22 +52,6 @@ class Components {
         this.type = type
     }
 
-//    fun loadGitInfo(git: Git) {
-//        val repo = git.repository
-//        lastLog.branch = repo.branch
-//        val command = git.log().setMaxCount(1)
-//        if (rootName != name) command.addPath(name)
-//        lastLog.gitDir = repo.directory
-//        command.call().forEach { rev ->
-//            lastLog.author = rev.authorIdent.name
-//            lastLog.commitTime = rev.commitTime
-//            lastLog.message = rev.fullMessage
-//            lastLog.hash = rev.name
-//        }
-//        hasInit = true
-//        Tools.println("LoadGitInfo $name -> branch : ${lastLog.branch} log : ${lastLog.message}")
-//    }
-
     override fun toString(): String {
         return "Components(name='$name', gitUrl='$gitUrl', introduce='$introduce', rootName='$rootName', type='$type', hasInit=$hasInit)"
     }

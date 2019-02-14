@@ -1,7 +1,7 @@
 package com.pqixing.modularization.manager
 
-import com.pqixing.interfaces.ICredential
-import com.pqixing.modularization.base.BasePlugin
+import com.pqixing.modularization.utils.ICredential
+
 
 class GitCredential : ICredential {
 

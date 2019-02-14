@@ -2,7 +2,7 @@ package com.pqixing.modularization.maven
 
 import com.pqixing.Tools
 import com.pqixing.git.Components
-import com.pqixing.git.GitUtils
+import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.AndroidPlugin

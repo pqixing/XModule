@@ -1,12 +1,12 @@
 package com.pqixing.modularization.maven
 
-import com.pqixing.git.execute
-import com.pqixing.git.init
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.utils.ResultUtils
+import com.pqixing.modularization.utils.execute
+import com.pqixing.modularization.utils.init
 import org.eclipse.jgit.api.Git
 
 open class ToMavenTask : BaseTask() {

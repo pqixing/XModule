@@ -4,14 +4,13 @@ package com.pqixing.modularization.base
 import com.alibaba.fastjson.JSON
 import com.pqixing.ProjectInfo
 import com.pqixing.Tools
-import com.pqixing.interfaces.ICredential
 import com.pqixing.interfaces.ILog
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
-import com.pqixing.modularization.Keys
 import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.FileManager
+import com.pqixing.modularization.utils.ICredential
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
@@ -156,11 +155,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
                         ?: "", exitCode)
 
                 override fun println(l: String?) = System.out.println(l)
-            }, project.rootDir.absolutePath, object : ICredential {
-                override fun getUserName() = projectInfo?.gitUserName ?: ""
-
-                override fun getPassWord() = projectInfo?.gitPassWord ?: ""
-            })
+            }, project.rootDir.absolutePath)
         }
     }
 

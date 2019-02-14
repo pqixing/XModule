@@ -2,9 +2,6 @@ package com.pqixing.modularization.manager
 
 import com.pqixing.ProjectInfoFiles
 import com.pqixing.git.Components
-import com.pqixing.git.GitUtils
-import com.pqixing.git.execute
-import com.pqixing.git.init
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.base.BasePlugin
@@ -12,9 +9,8 @@ import com.pqixing.modularization.base.IPlugin
 import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.utils.GitUtils
+import com.pqixing.modularization.utils.loadGitInfo
 import com.pqixing.tools.FileUtils
-import org.apache.tools.ant.util.DOMUtils.appendText
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
 
 /**

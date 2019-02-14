@@ -1,6 +1,6 @@
 package com.pqixing.modularization.manager.tasks
 
-import com.pqixing.git.GitUtils
+import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.utils.ResultUtils
