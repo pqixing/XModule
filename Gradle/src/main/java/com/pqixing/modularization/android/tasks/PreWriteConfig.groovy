@@ -5,7 +5,7 @@
 //import com.pqixing.modularization.base.BaseExtension
 //import com.pqixing.modularization.common.BuildConfig
 //import com.pqixing.modularization.git.GitConfig
-//import com.pqixing.modularization.ProjectInfo
+//import com.pqixing.modularization.templet
 //import com.pqixing.modularization.android.dps.Dependencies
 //import com.pqixing.modularization.modularization.FileUtils
 //import com.pqixing.tools.TextUtils
@@ -31,7 +31,7 @@
 //    LinkedList<String> getOutFiles() {
 //
 //        def buildConfig = wrapper.getExtends(BuildConfig)
-//        def moduleConfig = wrapper.getExtends(ProjectInfo)
+//        def moduleConfig = wrapper.getExtends(templet)
 //        def gitConfig = wrapper.getExtends(GitConfig)
 //        def dependent = wrapper.getExtends(Dependencies)
 //

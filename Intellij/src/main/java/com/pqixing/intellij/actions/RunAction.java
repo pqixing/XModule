@@ -1,5 +1,6 @@
 package com.pqixing.intellij.actions;
 
+import com.intellij.dvcs.repo.VcsRepositoryManager;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -20,9 +21,11 @@ public class RunAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
 //        Project project = e.getProject();
-//        VirtualFile fileByIoFile = VfsUtil.findFileByIoFile(new File(project.getBasePath(),"ProjectInfo.java"), false);
+//        VirtualFile fileByIoFile = VfsUtil.findFileByIoFile(new File(project.getBasePath(),"templet.java"), false);
         if (action == null) action = Messages.showInputDialog("Input Action Id", "RunAction", null);
         ActionManager.getInstance().getAction(action).actionPerformed(e);
+        VcsRepositoryManager instance = VcsRepositoryManager.getInstance(e.getProject());
+        instance.getRepositories()
 //        new Task.Backgroundable(e.getProject(), DvcsBundle.message("cloning.repository", "http://192.168.3.200/android/Document.git")) {
 //
 //            @Override

@@ -16,7 +16,7 @@ interface IPlugin {
     val rootDir: File
 
     val project: Project
-    val projectInfo: ProjectInfo?
+    val config: ProjectInfo
     fun getTask(taskClass: Class<out Task>): Set<Task>
     fun linkTask(): List<Class<out Task>>
 

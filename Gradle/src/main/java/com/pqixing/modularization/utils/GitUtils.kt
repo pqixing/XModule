@@ -1,8 +1,8 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.Tools
-import com.pqixing.git.Components
 import com.pqixing.modularization.manager.GitCredential
+import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.*
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.transport.RefSpec
@@ -243,6 +243,14 @@ object GitUtils {
         return url.substring(s, if (e == -1) url.length else e)
     }
 
+    fun close(git: Git?) {
+        git ?: return
+        val gitLock = File(git.repository.directory, "index.lock")
+        git.close()
+        if (gitLock.exists())//执行完成后，删除index.lock文件，防止其他集成无法操作
+            FileUtils.delete(gitLock)
+    }
+
 }
 
 fun <T> GitCommand<T>.init(provider: UsernamePasswordCredentialsProvider? = null): GitCommand<T> {
@@ -267,21 +275,21 @@ fun <T> GitCommand<T>.execute(): T? = try {
     Tools.println(e.toString())
     null
 }
-
-fun Components.loadGitInfo(git: Git) {
-    val repo = git.repository
-    lastLog.branch = repo.branch
-    val command = git.log().setMaxCount(1)
-    if (rootName != name) command.addPath(name)
-    lastLog.gitDir = repo.directory
-    command.call().forEach { rev ->
-        lastLog.author = rev.authorIdent.name
-        lastLog.commitTime = rev.commitTime
-        lastLog.message = rev.fullMessage
-        lastLog.hash = rev.name
-    }
-    hasInit = true
-    Tools.println("LoadGitInfo $name -> branch : ${lastLog.branch} log : ${lastLog.message}")
-}
+//
+//fun Components.loadGitInfo(git: Git) {
+//    val repo = git.repository
+//    lastLog.branch = repo.branch
+//    val command = git.log().setMaxCount(1)
+//    if (rootName != name) command.addPath(name)
+//    lastLog.gitDir = repo.directory
+//    command.call().forEach { rev ->
+//        lastLog.author = rev.authorIdent.name
+//        lastLog.commitTime = rev.commitTime
+//        lastLog.message = rev.fullMessage
+//        lastLog.hash = rev.name
+//    }
+//    hasInit = true
+//    Tools.println("LoadGitInfo $name -> branch : ${lastLog.branch} log : ${lastLog.message}")
+//}
 
 

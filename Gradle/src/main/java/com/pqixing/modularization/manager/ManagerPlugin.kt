@@ -1,11 +1,11 @@
 package com.pqixing.modularization.manager
 
 import com.pqixing.Tools
+import com.pqixing.interfaces.ILog
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.manager.tasks.*
-import com.pqixing.modularization.maven.VersionTagTask
-import com.pqixing.modularization.maven.VersionIndexTask
+import com.pqixing.modularization.utils.ResultUtils
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import org.gradle.api.Project
@@ -25,38 +25,27 @@ open class ManagerPlugin : BasePlugin() {
         get() = setOf(FileNames.PROJECT_INFO, FileNames.IMPORT_KT)
 
     @Override
-    override fun linkTask() = listOf(CloneProjectTask::class.java
+    override fun linkTask() = listOf(
+            CloneProjectTask::class.java
             , CreateBranchTask::class.java
-            , CheckOutTask::class.java
-            , PullProjectTask::class.java
-            , MergeProjectTask::class.java
-            , PushProjectTask::class.java
-            , CleanProjectTask::class.java
-            , VersionIndexTask::class.java
-            , VersionTagTask::class.java
             , DeleteBranchTask::class.java)
 
-    var error: String = ""
     override fun apply(project: Project) {
-        plugin = this
         val startTime = System.currentTimeMillis()
+        plugin = this
+        initTools(project)
         super.apply(project)
-        error = FileManager.checkFileExist(this)
-
+        FileManager.checkFileExist(this)
 
         project.gradle.beforeProject {
             //在每个工程开始同步之前，检查状态，下载，切换分支等等
-            ProjectManager.checkProject(it, projectInfo)
+            ProjectManager.checkProject(it, config)
         }
         project.afterEvaluate {
             val extends = getExtends(ManagerExtends::class.java)
             extHelper.setExtValue(project, "groupName", extends.groupName)
-            FileManager.checkDocument(this)
-
-            if (error.isNotEmpty()) {
-                ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, error)
-            }
             extends.checkVail()
+            FileManager.checkDocument(this)
 
             project.allprojects { p ->
                 extHelper.addRepositories(p, extends.dependMaven)
@@ -71,10 +60,19 @@ open class ManagerPlugin : BasePlugin() {
         })
     }
 
+    private fun initTools(project: Project) {
+        Tools.init(object : ILog {
+            override fun printError(exitCode: Int, l: String?) = ResultUtils.writeResult(l
+                    ?: "", exitCode)
+
+            override fun println(l: String?) = System.out.println(l)
+        }, project.rootDir.absolutePath)
+    }
+
     companion object {
         private lateinit var plugin: ManagerPlugin
 
-        fun getManagerPlugin() = plugin
-        fun getManagerExtends() = plugin.getExtends(ManagerExtends::class.java)
+        fun getPlugin() = plugin
+        fun getExtends() = plugin.getExtends(ManagerExtends::class.java)
     }
 }

@@ -1,42 +1,39 @@
 package com.pqixing.modularization.manager.tasks
 
 import com.pqixing.Tools
+import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.maven.VersionManager
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
+import java.io.File
 
 open class CreateBranchTask : BaseTask() {
     init {
         //先更新版本信息，以免出现问题
-        this.dependsOn("CloneProject", "PullProject")
-        project.getTasksByName("PullProject", false).forEach { it.mustRunAfter("CloneProject") }
+        this.dependsOn("CloneProject")
     }
 
     override fun runTask() {
-        val info = ManagerPlugin.getManagerPlugin().projectInfo
-
-        var targetBranch = info.taskBranch
-        if (targetBranch.isEmpty()) targetBranch = ProjectManager.rootBranch
-
-        val gits = ProjectManager.findAllGitPath().values.filter { it.exists() }.toMutableList()
-        gits.add(0, ProjectManager.projectRoot)
-        gits.forEach {
-            if (!GitUtils.checkIfClean(ProjectManager.findGit(it.absolutePath))) {
-                Tools.printError("CreateBranchTask -> ${it.name}  checkIfClean :false, please check your file!")
-            }
+        val extends = ManagerPlugin.getExtends()
+        val info = extends.config
+        if (info.screctKey != Keys.SCRECTKEY) {
+            Tools.printError("DeleteBranch Exception -> check password error!!!")
         }
+        var targetBranch = info.taskBranch
 
         val fail = ArrayList<String>()
-        gits.forEach {
-            if (!it.exists()) return@forEach
-            val create = GitUtils.createBranch(ProjectManager.findGit(it.absolutePath), targetBranch)
-            if (!create) fail.add(it.name)
-        }
-        //创建分支成功时，同时打上版本标签
-        if (fail.isEmpty()) VersionManager.createVersionTag()
+        val rootDir = ManagerPlugin.getPlugin().rootDir
+        ProjectManager.projectXml.projects
+                .map { File(ProjectManager.codeRootDir, it.name) }
+                .toMutableList().apply {
+                    add(rootDir)
+                }.forEach {
+                    val git = GitUtils.open(it) ?: return@forEach
+                    if (!GitUtils.checkIfClean(git) || !GitUtils.createBranch(git, targetBranch)) fail.add(it.name)
+                }
         ResultUtils.writeResult("CreateBranchTask -> $fail", fail.size)
     }
 }

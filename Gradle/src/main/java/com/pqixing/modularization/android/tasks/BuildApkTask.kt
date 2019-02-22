@@ -21,7 +21,7 @@ open class BuildApkTask : BaseTask() {
             val plugin = AndroidPlugin.getPluginByProject(project)
 
             val types = arrayListOf("dev", "inTest", "outTest", "release")
-            val apkType = plugin.projectInfo.buildApkType
+            val apkType = plugin.config.buildApkType
             if (apkType.isNotEmpty()) {
                 types.remove(apkType)
                 types.add(0, apkType)
@@ -42,7 +42,7 @@ open class BuildApkTask : BaseTask() {
         if (outputFile == null || !outputFile!!.exists() || !outputFile!!.name.endsWith(".apk")) {
             Tools.printError("Can not fount apk with path :${outputFile?.absolutePath}")
         } else {
-            var buildApkPath = AndroidPlugin.getPluginByProject(project).projectInfo.buildApkPath
+            var buildApkPath = AndroidPlugin.getPluginByProject(project).config.buildApkPath
             if (buildApkPath.isEmpty()) buildApkPath = outputFile!!.absolutePath
             else FileUtils.copy(outputFile!!, File(buildApkPath))
 

@@ -1,9 +1,7 @@
 package com.pqixing.modularization;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 public class Keys {
+    public static final String SCRECTKEY = "k1234";
     public static final String UPDATE_TIME = "update_time";
     public static final String UPDATE_LOG = "update_log";
     public static final String UPDATE_VERSION = "update_version";

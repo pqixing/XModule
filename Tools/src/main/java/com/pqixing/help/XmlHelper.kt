@@ -1,14 +1,15 @@
 package com.pqixing.help
 
-import com.pqixing.git.Components
+import com.pqixing.model.ProjectModel
+import com.pqixing.model.ProjectXmlModel
+import com.pqixing.model.SubModule
+import com.pqixing.model.SubModuleType
 import com.pqixing.tools.CheckUtils
 import groovy.util.Node
 import groovy.util.NodeList
 import groovy.util.XmlParser
 import groovy.xml.QName
 import java.io.File
-import java.util.*
-import kotlin.collections.HashSet
 
 object XmlHelper {
 
@@ -85,38 +86,38 @@ object XmlHelper {
     }
 
     @JvmStatic
-    fun parseProjectXml(txt: File, projects: HashMap<String, Components>) {
+    fun parseProjectXml(txt: File): ProjectXmlModel {
+
         val node = XmlParser().parseText(txt.readText())
         val baseUrl = node.get("@baseUrl").toString()
+        val xmlModel = ProjectXmlModel(baseUrl)
         node.getAt(QName("project")).forEach {
             val p: Node = it as? Node ?: return@forEach
 
             val rootName = p.get("@name").toString()
             var introduce = p.get("@introduce").toString()
-            var type = p.get("@type")?.toString() ?: Components.TYPE_LIBRARY
+            val type = p.get("@type")?.toString() ?: SubModuleType.TYPE_LIBRARY
 
             //该工程的git地址
             var gitUrl: String = p.get("@url")?.toString() ?: ""
-            if (CheckUtils.isEmpty(gitUrl)) gitUrl = "$baseUrl/${rootName}.git"
+            if (CheckUtils.isEmpty(gitUrl)) gitUrl = "$baseUrl/$rootName.git"
+            val project = ProjectModel(rootName, introduce, gitUrl)
+            xmlModel.projects.add(project)
 
             val children = p.getAt(QName("submodule"))
             if (children.isEmpty()) {
-                addProject(projects, rootName, gitUrl, introduce, rootName, type,false)
+                project.submodules.add(SubModule(project, rootName, introduce, rootName, type))
             } else children.forEach { c ->
-                if(c is Node) {
+                if (c is Node) {
                     val name = c.get("@name").toString()
-                    val t = c.get("@type")?.toString() ?: Components.TYPE_LIBRARY
+                    val t = c.get("@type")?.toString() ?: SubModuleType.TYPE_LIBRARY
                     introduce = c.get("@introduce").toString()
-                    addProject(projects, name, gitUrl, introduce, rootName, t,true)
+                    project.submodules.add(SubModule(project, name, introduce, "$rootName/$name", t))
                 }
             }
         }
-    }
 
-    private inline fun addProject(projects: HashMap<String, Components>, name: String, gitUrl: String, introduce: String, rootName: String, type: String,child:Boolean) {
-        val project = Components(name, gitUrl, introduce, rootName, type)
-        project.child = child
-        projects[name] = project
+        return xmlModel
     }
 
     /**

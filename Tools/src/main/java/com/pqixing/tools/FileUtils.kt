@@ -2,6 +2,7 @@ package com.pqixing.tools
 
 import com.pqixing.Tools
 import java.io.File
+import java.util.regex.Pattern
 
 object FileUtils {
     lateinit var clazz: Class<*>
@@ -61,4 +62,17 @@ object FileUtils {
         return true
 
     }
+
+    @JvmStatic
+    fun moveDir(from: File, to: File): Boolean {
+        if (!from.exists()) return false
+        if (from.isDirectory) from.listFiles().forEach { moveDir(it, File(to, it.name)) }
+        else {
+            to.parentFile.mkdirs()
+            from.renameTo(to)
+        }
+        return true
+    }
+
+    fun replace(start: String, end: String, content: String, source: String) = source.replace(Regex("$start.*?$end", RegexOption.DOT_MATCHES_ALL), "$start$content$end")
 }

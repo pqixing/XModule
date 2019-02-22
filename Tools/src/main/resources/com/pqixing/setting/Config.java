@@ -4,31 +4,37 @@
  * 工程配置文件
  * 所有模块，以：加模块名称 extc setting = ":dComm"+":dcNet"
  */
-public class ProjectInfo {
+public class Config {
 
     /**
-     * manager 的用户名称
+     * 导入工程,多个工程之间,用 , 号分隔
+     * 前缀含义 E#  exclude 当前工程
+     * D#   dpsInclude  导入该工程的所有依赖工程,如需生效,需要对该工程执行一次DPSAnalis
+     * ED#  dpsExclude
+     * eg: include="demo1,D#demo2,ED#demo3"
+     * 如果 include字段为空,或等于Auto,则,获取当前需要执行的任务,来自动确定需要导入的工程
      */
-    public String gitUserName = null;
+    public String include = "";
 
     /**
-     * manager 密码
+     * 本地目录的根目录，用来查找本地目录，以及下载Clone
      */
-    public String gitPassWord = null;
+    public String codeRoot = "src";
 
     /**
-     * 检测分支是否一致，不一致时进行切换
+     * 用户名称,可用于git和maven上传时使用
      */
-    public boolean syncBranch = true;
-    /**
-     * 强制切换分支，慎用，可能会导致未保存数据丢失
-     */
-    public boolean focusCheckOut = false;
+    public String userName = "";
 
     /**
-     * 是否更新代码
+     * 用户密码,可用于git和maven上传时使用
      */
-    public boolean updateCode = false;
+    public String passWord = "";
+
+    /**
+     * 跨分支工程依赖，默认不允许
+     */
+    public boolean allowDpDiff = false;
 
     /**
      * 是否拦截依赖缺少的异常 , 默认true
@@ -65,29 +71,29 @@ public class ProjectInfo {
     /**
      * 部分重要操作需要的密码
      */
-    public String password="";
+    public String screctKey = "";
     /**
-     * 运行类型,gradle,plugin
+     * 运行类型,gradle,plugin,ide
      */
-    public String runPluginType = "gradle";
+    public String syncType = "gradle";
 
     /**
-     * Git 相关Task读取分支的地方
+     * Task任务运行产物拷贝至指定目录,请注意dir 或者 file类型
+     */
+    public String taskResultFile = "";
+
+    /**
+     * 同步根目录的build.gradle文件(使用doc目录下的文件进行覆盖)
+     */
+    public boolean syncBuildFile = true;
+
+    /**
+     * 运行task任务时,目标分支
      */
     public String taskBranch = "";
 
     /**
-     * 打Tag版本号标签时，需要指定包含那些分支的版本号。 默认包含 matchingFallbacks
-     * 多个分支名称使用 逗号隔开 etc a1,a2,a3
+     * 打标签时,需要tag的分支
      */
-    public String tagBranchs ="";
-
-
-    //BuildApk任务依赖的task任务，传空，则 优先 dev -> inTest -> outTest -> release
-    public String buildApkType = "";
-
-    /**
-     * BuildApk生成文件后的输出路径，设置了，则build结束后，会拷贝一份文件到该路径上
-     */
-    public String buildApkPath = "";
+    public String tagBranchs = "";
 }

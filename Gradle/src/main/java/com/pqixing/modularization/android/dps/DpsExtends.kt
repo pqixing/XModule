@@ -3,10 +3,7 @@ package com.pqixing.modularization.android.dps
 import com.pqixing.Tools
 import com.pqixing.git.Components
 import com.pqixing.modularization.base.BaseExtension
-import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.modularization.manager.ProjectManager
 import groovy.lang.Closure
 import org.gradle.api.Project
 import java.util.*
@@ -15,7 +12,7 @@ open class DpsExtends(project: Project,val components:Components) : BaseExtensio
     internal var compiles = HashSet<DpComponents>()
     internal var devCompiles = HashSet<DpComponents>()
     internal var apiCompiles = HashSet<DpComponents>()
-    val manager = ManagerPlugin.getManagerExtends()
+    val manager = ManagerPlugin.getExtends()
 
     /**
      * 上传到Maven的版本
@@ -23,7 +20,7 @@ open class DpsExtends(project: Project,val components:Components) : BaseExtensio
     var toMavenVersion = ""
     get() {
         if(field.isEmpty()) {
-            field = ManagerPlugin.getManagerExtends().baseVersion
+            field = ManagerPlugin.getExtends().baseVersion
         }
         return field
     }

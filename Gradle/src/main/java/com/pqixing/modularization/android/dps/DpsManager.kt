@@ -1,9 +1,9 @@
 package com.pqixing.modularization.android.dps
 
 import com.pqixing.Tools
-import com.pqixing.git.Components
 import com.pqixing.help.MavenPom
 import com.pqixing.help.XmlHelper
+import com.pqixing.model.SubModuleType
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BasePlugin
@@ -16,10 +16,8 @@ import com.pqixing.modularization.maven.VersionManager
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import java.io.File
-import java.lang.ref.WeakReference
 import java.net.URL
 import java.util.*
-import kotlin.collections.HashMap
 
 class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
     init {
@@ -32,19 +30,19 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
 
     companion object {
         //内存中只保留10跳
-        var pomCache: HashMap<String, WeakReference<MavenPom>> = HashMap()
+        var pomCache: LinkedList<Pair<String, MavenPom>> = LinkedList()
 
         /**
          * 获取仓库aar中，exclude的传递
          */
         fun getPom(branch: String, module: String, version: String): MavenPom {
-            val plugin = ManagerPlugin.getManagerPlugin()
+            val plugin = ManagerPlugin.getPlugin()
             val extends = plugin.getExtends(ManagerExtends::class.java)
             val groupMaven = extends.groupMaven
             val group = "${extends.groupName}.$branch"
             val pomUrl = "$groupMaven/${group.replace(".", "/")}/$module/$version/$module-$version.pom"
             val pomKey = TextUtils.numOrLetter(pomUrl)
-            var pom = pomCache[pomKey]?.get()
+            var pom = pomCache.find { it.first == pomKey }?.apply { pomCache.remove(this);pomCache.addFirst(this) }?.second
             if (pom != null) return pom
 
             val pomDir = File(plugin.getGradle().gradleHomeDir, "pomCache")
@@ -55,16 +53,17 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
                 FileUtils.writeText(pomFile, ponTxt)
                 XmlHelper.parsePomEclude(ponTxt, extends.groupName)
             }
-//            pomCache.put(pomKey, WeakReference(pom))
-//            if (pomCache.size > 10) pomCache.clear()
+            pomCache.addFirst(Pair(pomKey, pom))
+            //最多保留30条记录
+            if (pomCache.size > 30) pomCache.removeLast()
             return pom
         }
     }
 
     //组件工程
     val components = ProjectManager.findComponent(plugin.project.name)!!
-    val compileModel = plugin.projectInfo?.dependentModel ?: "mavenOnly"
-    val managerExtends = ManagerPlugin.getManagerExtends()
+    val compileModel = plugin.config?.dependentModel ?: "mavenOnly"
+    val managerExtends = ManagerPlugin.getExtends()
 
     val loseList = mutableListOf<String>()
     //处理依赖
@@ -74,18 +73,18 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
 
         onSelfCompile(includes, excludes)
         val dps = HashSet<DpComponents>()
-        if (plugin.APP_TYPE == Components.TYPE_APPLICATION) {
+        if (plugin.APP_TYPE == SubModuleType.TYPE_APPLICATION) {
             dps.addAll(dpsExt.compiles)
         } else {
             when (plugin.BUILD_TYPE) {
-                Components.TYPE_LIBRARY_API -> dps.addAll(dpsExt.apiCompiles)
-                Components.TYPE_LIBRARY -> dps.addAll(dpsExt.compiles)
-                Components.TYPE_LIBRARY_SYNC, Components.TYPE_APPLICATION -> {
+                SubModuleType.TYPE_LIBRARY_API -> dps.addAll(dpsExt.apiCompiles)
+                SubModuleType.TYPE_LIBRARY -> dps.addAll(dpsExt.compiles)
+                SubModuleType.TYPE_LIBRARY_SYNC, SubModuleType.TYPE_APPLICATION -> {
                     dps.addAll(dpsExt.compiles)
                     dps.addAll(dpsExt.apiCompiles)
                     dps.addAll(dpsExt.devCompiles)
                 }
-                Components.TYPE_LIBRARY_LOCAL -> {
+                SubModuleType.TYPE_LIBRARY_LOCAL -> {
                     dps.addAll(dpsExt.compiles)
                     dps.addAll(dpsExt.apiCompiles)
                 }
@@ -113,7 +112,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
          * 缺失了部分依赖
          */
         if (loseList.isNotEmpty()) {
-            if (plugin.projectInfo.allowLose) Tools.println("ResolveDps -> lose dps -> $loseList")
+            if (plugin.config.allowLose) Tools.println("ResolveDps -> lose dps -> $loseList")
             else Tools.printError("ResolveDps -> lose dps -> $loseList")
         }
         val sb = java.lang.StringBuilder("dependencies {  // APP_TYPE : ${plugin.APP_TYPE} -> BUILD_TYPE : ${plugin.BUILD_TYPE}\n")
@@ -131,21 +130,21 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
     private fun onSelfCompile(includes: ArrayList<String>, excludes: HashSet<String>) {
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         //如果是api模块作为独立运行时，移除api模块代码（因为主模块默认已经包含了api的代码）
-        if (plugin.APP_TYPE == Components.TYPE_LIBRARY_API) {
+        if (plugin.APP_TYPE == SubModuleType.TYPE_LIBRARY_API) {
             when (plugin.BUILD_TYPE) {
-                Components.TYPE_APPLICATION, Components.TYPE_LIBRARY_SYNC, Components.TYPE_LIBRARY_LOCAL -> {
+                SubModuleType.TYPE_APPLICATION, SubModuleType.TYPE_LIBRARY_SYNC, SubModuleType.TYPE_LIBRARY_LOCAL -> {
                     //添加本地Api路径
-                    addBranchExclude(components.lastLog.branch, TextUtils.getApiModuleName(components.name), excludes, 0)
+                    addBranchExclude(SubModuleType.lastLog.branch, TextUtils.getApiModuleName(SubModuleType.name), excludes, 0)
                     extHelper.addSourceDir(plugin.project, plugin.getApiPath())
                 }
-                Components.TYPE_LIBRARY -> addMavenCompile(DpsExtends.SCOP_API, components.lastLog.branch, TextUtils.getApiModuleName(components.name), dpsExt.toMavenVersion, includes, excludes, HashSet())
+                SubModuleType.TYPE_LIBRARY -> addMavenCompile(DpsExtends.SCOP_API, SubModuleType.lastLog.branch, TextUtils.getApiModuleName(SubModuleType.name), dpsExt.toMavenVersion, includes, excludes, HashSet())
                 //打包Api时，设置java目录只有Api
-                Components.TYPE_LIBRARY_API -> extHelper.setApiSourceDir(plugin.project, plugin.getApiPath(), plugin.getApiManifestPath())
+                SubModuleType.TYPE_LIBRARY_API -> extHelper.setApiSourceDir(plugin.project, plugin.getApiPath(), plugin.getApiManifestPath())
             }
         }
 
         //如果不是打包API，添加自动生成代码的source目录
-        if (plugin.BUILD_TYPE != Components.TYPE_LIBRARY_API) {
+        if (plugin.BUILD_TYPE != SubModuleType.TYPE_LIBRARY_API) {
             extHelper.addSourceDir(plugin.project, File(plugin.cacheDir, "java").absolutePath)
         }
     }
@@ -162,13 +161,13 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
         var compile = true
 
         //如果是App类型工程，则以app直接依赖的版本为准，忽略依赖传递中带来的版本变化
-        val config = if (plugin.APP_TYPE == Components.TYPE_APPLICATION) "; force = true ;" else ""
+        val config = if (plugin.APP_TYPE == SubModuleType.TYPE_APPLICATION) "; force = true ;" else ""
         //如果是Api类型的模块，只依赖api工程，不直接依赖模块代码
-        if (dpc.type == Components.TYPE_LIBRARY_API) {
+        if (dpc.type == SubModuleType.TYPE_LIBRARY_API) {
             compile = addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_API), dpc.branch, TextUtils.getApiModuleName(dpc.moduleName), dpc.version, includes, excludes, HashSet(), config) and compile
 
             //如果是作为本地运行时，则把编译对应的模块
-            if (plugin.BUILD_TYPE == Components.TYPE_APPLICATION) {
+            if (plugin.BUILD_TYPE == SubModuleType.TYPE_APPLICATION) {
                 compile = addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_RUNTIME), dpc.branch, dpc.moduleName, dpc.version, includes, excludes, HashSet(), config) and compile
             }
 
@@ -228,15 +227,15 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
     private fun onLocalCompile(dpc: DpComponents, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
         val localProject = plugin.project.rootProject.allprojects.find { it.name == dpc.moduleName }
                 ?: return false
-        val branch = components.lastLog.branch
+        val branch = SubModuleType.lastLog.branch
         //如果该依赖没有本地导入，不进行本地依赖
-        val dpComponents = ProjectManager.checkProject(localProject, plugin.projectInfo!!)
+        val dpComponents = ProjectManager.checkProject(localProject, plugin.config!!)
                 ?: return false
         dpc.localCompile = true
         //本地project默认依赖debug
-        if (dpComponents.type == Components.TYPE_LIBRARY_API) {
+        if (dpSubModuleType.type == SubModuleType.TYPE_LIBRARY_API) {
             //只有App运行时，才需要打包该工程，避免循环依赖
-            if (plugin.BUILD_TYPE == Components.TYPE_APPLICATION) {
+            if (plugin.BUILD_TYPE == SubModuleType.TYPE_APPLICATION) {
                 includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_RUNTIME)} ( project(path : ':${dpc.moduleName}')) { ${excludeStr(excludes = dpc.excludes)} }")
                 addBranchExclude(branch, dpc.moduleName, excludes)
                 //移除依赖传递中带来的api依赖，保留自身添加的api依赖

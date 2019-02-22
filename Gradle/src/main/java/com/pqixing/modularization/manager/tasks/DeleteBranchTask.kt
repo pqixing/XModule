@@ -1,12 +1,14 @@
 package com.pqixing.modularization.manager.tasks
 
 import com.pqixing.Tools
+import com.pqixing.modularization.Keys
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
-import com.pqixing.modularization.maven.VersionManager
 import com.pqixing.modularization.utils.ResultUtils
+import java.io.File
 
 open class DeleteBranchTask : BaseTask() {
     init {
@@ -15,23 +17,25 @@ open class DeleteBranchTask : BaseTask() {
     }
 
     override fun runTask() {
-        val info = ManagerPlugin.getManagerPlugin().projectInfo
-        if (info.password != "delete") {
+        val extends = ManagerPlugin.getExtends()
+        val info = extends.config
+        if (info.screctKey != Keys.SCRECTKEY) {
             Tools.printError("DeleteBranch Exception -> check password error!!!")
         }
         var targetBranch = info.taskBranch
-        if (targetBranch == ProjectManager.rootBranch) Tools.printError("DeleteBranchTask Exception -> Can not delete current branch $targetBranch , please change branch before delete!!")
+        if (targetBranch == extends.docRepoBranch) Tools.printError("DeleteBranchTask Exception -> Can not delete current branch $targetBranch , please change branch before delete!!")
         if (targetBranch == "master") Tools.printError("DeleteBranchTask Exception -> Can not delete master !!")
 
-        val gits = ProjectManager.findAllGitPath().values.filter { it.exists() }.toMutableList()
-        gits.add(0, ProjectManager.projectRoot)
-
         val fail = ArrayList<String>()
-        gits.forEach {
-            if (!it.exists()) return@forEach
-            val create = GitUtils.delete(ProjectManager.findGit(it.absolutePath), targetBranch)
-            if (!create) fail.add(it.name)
-        }
+        val rootDir = ManagerPlugin.getPlugin().rootDir
+        ProjectManager.projectXml.projects
+                .map { File(ProjectManager.codeRootDir, it.name) }
+                .toMutableList().apply {
+                    add(rootDir)
+                }.forEach {
+                    val git = GitUtils.open(it) ?: return@forEach
+                    if (!GitUtils.pull(git) || !GitUtils.delete(git, targetBranch)) fail.add(it.name)
+                }
         ResultUtils.writeResult("DeleteBranchTask -> $fail", fail.size)
     }
 }

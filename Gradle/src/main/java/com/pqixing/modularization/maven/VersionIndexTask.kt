@@ -19,6 +19,6 @@ open class VersionIndexTask : BaseTask() {
 
     override fun end() {
         //执行完成，输出文件路径
-        ResultUtils.writeResult(File(FileManager.docRoot, "versions/version.properties").absolutePath)
+        ResultUtils.writeResult(File(FileManager.templetRoot, "versions/version.properties").absolutePath)
     }
 }

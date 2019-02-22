@@ -70,7 +70,7 @@ class ImportAction : AnAction() {
 
     private fun saveDpModel(dialog: ImportDialog, basePath: String) {
         val dpModel = dialog.dpModel?.trim() ?: ""
-        val fileInfo = File(basePath, "ProjectInfo.java")
+        val fileInfo = File(basePath, "templet.java")
         if (dpModel != "dpModel" && fileInfo.exists()) {
             val replace = FileUtils.readText(fileInfo)!!.replace(
                     Regex("String *dependentModel *=.*;"), "String dependentModel = \"$dpModel\";")

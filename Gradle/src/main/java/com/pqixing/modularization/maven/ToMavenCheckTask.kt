@@ -16,7 +16,6 @@ import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
-import org.eclipse.jgit.api.Git
 import java.io.File
 import java.util.*
 
@@ -33,7 +32,7 @@ open class ToMavenCheckTask : BaseTask() {
     }
 
     override fun runTask() {
-        val extends = ManagerPlugin.getManagerExtends()!!
+        val extends = ManagerPlugin.getExtends()!!
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
         val plugin = AndroidPlugin.getPluginByProject(project)
@@ -97,7 +96,7 @@ open class ToMavenCheckTask : BaseTask() {
         //检查Maven仓库最后的一个版本的信息
         var lastVersion = v
         var matchBranch = curLog.branch
-        val match = ManagerPlugin.getManagerExtends().matchingFallbacks
+        val match = ManagerPlugin.getExtends().matchingFallbacks
         var i = match.indexOf(matchBranch)
         while (v < 0 && i < match.size) {
             matchBranch = if (i < 0) curLog.branch else match[i]

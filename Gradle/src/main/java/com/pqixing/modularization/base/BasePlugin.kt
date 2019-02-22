@@ -1,26 +1,19 @@
 package com.pqixing.modularization.base
 
 
-import com.alibaba.fastjson.JSON
-import com.pqixing.ProjectInfo
-import com.pqixing.Tools
-import com.pqixing.interfaces.ILog
+import com.pqixing.Config
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.FileManager
-import com.pqixing.modularization.utils.ICredential
-import com.pqixing.modularization.utils.ResultUtils
+import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.tools.FileUtils
-import com.pqixing.tools.TextUtils
-import groovy.lang.GroovyClassLoader
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.invocation.Gradle
 import java.io.File
-import java.util.*
 
 /**
  * Created by pqixing on 17-12-20.
@@ -32,47 +25,10 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
 
     protected abstract val applyFiles: List<String>
 
-    private val tasks = HashMap<String, Task>()
+    override val config: Config
+        get() = ManagerPlugin.getExtends().config
 
-    override var projectInfo: ProjectInfo = ProjectInfo()
-        get() {
-            if (pi == null) {
-
-                pi = try {
-                    val parseClass = GroovyClassLoader().parseClass(File(rootDir, FileNames.PROJECT_INFO))
-                    JSON.parseObject(JSON.toJSONString(parseClass.newInstance()), ProjectInfo::class.java)
-                } catch (e: Exception) {
-                    ProjectInfo()
-                }
-                loadProjectInfo(pi!!)
-            }
-            return pi!!
-        }
-
-    /**
-     * 从系统配置中加载对应的变量
-     */
-    private fun loadProjectInfo(pi: ProjectInfo) {
-        pi.javaClass.fields.forEach {
-            val value = TextUtils.getSystemEnv(it.name) ?: return@forEach
-            try {
-                it.isAccessible = true
-                when (it.type) {
-                    Boolean::class.java -> it.setBoolean(pi, value.toBoolean())
-                    String::class.java -> it.set(pi, value)
-                }
-            } catch (e: Exception) {
-                Tools.println("loadProjectInfo Exception -> $e")
-            }
-        }
-    }
-
-    private val jsonFromEnv: String
-        get() {
-            val infoStr = TextUtils.getSystemEnv("ProjectInfo") ?: return ""
-            return String(Base64.getDecoder().decode(infoStr.toByteArray()))
-        }
-
+    fun getMyName() = ""
     override val project: Project
         get() = p
     override val rootDir: File
@@ -99,10 +55,9 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
 
     protected fun initProject(project: Project) {
         this.p = project
-        initTools(project)
         createIgnoreFile()
 
-        val file = File(FileManager.docRoot, "gradles")
+        val file = File(FileManager.templetRoot, "gradles")
         extHelper.setExtValue(project, "gradles", file.absolutePath)
 
         callBeforeApplyMould()
@@ -148,26 +103,15 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         return key.substring(start, end)
     }
 
-    private fun initTools(project: Project) {
-        if (!Tools.init) {
-            Tools.init(object : ILog {
-                override fun printError(exitCode: Int, l: String?) = ResultUtils.writeResult(l
-                        ?: "", exitCode)
 
-                override fun println(l: String?) = System.out.println(l)
-            }, project.rootDir.absolutePath)
-        }
-    }
 
     companion object {
-        var pi: ProjectInfo? = null
         val listeners = mutableSetOf<OnClear>()
         fun addClearLister(l: OnClear) {
             listeners.add(l)
         }
 
         fun onClear() {
-            pi = null
             listeners.forEach { it.clear() }
         }
     }

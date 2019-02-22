@@ -13,7 +13,7 @@ open class PrepareDevTask : BaseTask() {
 
     override fun runTask() {
         val devDir = File(project.projectDir, "src/dev")
-        val from = File(FileManager.docRoot, "android")
+        val from = File(FileManager.templetRoot, "android")
 
         val manifest = "AndroidManifest.xml"
         File(devDir, manifest).apply {

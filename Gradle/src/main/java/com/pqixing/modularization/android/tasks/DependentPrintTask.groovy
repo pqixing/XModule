@@ -7,7 +7,7 @@
 //import com.pqixing.modularization.base.BaseTask
 //import com.pqixing.modularization.common.BuildConfig
 //import com.pqixing.modularization.git.GitConfig
-//import com.pqixing.modularization.ProjectInfo
+//import com.pqixing.modularization.templet
 //import com.pqixing.modularization.maven.MavenType
 //import com.pqixing.modularization.modularization.FileUtils
 //import com.pqixing.modularization.modularization.MavenUtils
@@ -31,7 +31,7 @@
 //    void start() {
 //        buildConfig = wrapper.getExtends(BuildConfig.class)
 //        outDir = new File(buildConfig.outDir, Keys.DIR_DEPENDENT)
-//        mavenType = wrapper.getExtends(ProjectInfo).mavenType
+//        mavenType = wrapper.getExtends(templet).mavenType
 //        File androidDp = new File(wrapper.getExtends(BuildConfig).outDir, "$Keys.DIR_DEPENDENT/$Keys.FILE_ANDROID_DP")
 //        def strList = new LinkedList<String>()
 //        androidDp.eachLine {

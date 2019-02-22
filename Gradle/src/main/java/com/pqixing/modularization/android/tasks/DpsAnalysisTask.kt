@@ -1,9 +1,9 @@
 package com.pqixing.modularization.android.tasks
 
 import com.pqixing.Tools
-import com.pqixing.git.Components
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.help.XmlHelper
+import com.pqixing.model.SubModuleType
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
@@ -32,7 +32,7 @@ import kotlin.collections.HashSet
  */
 open class DpsAnalysisTask : BaseTask() {
     val plugin = AndroidPlugin.getPluginByProject(project)
-    val groupName = ManagerPlugin.getManagerExtends().groupName
+    val groupName = ManagerPlugin.getExtends().groupName
     val dir = File(plugin.cacheDir, "report")
     val temp = File(AndroidPlugin.getPluginByProject(project).buildDir, "DependencyReport.txt")
     //    val temp = File(dir, "DpsReport.bak")
@@ -53,7 +53,7 @@ open class DpsAnalysisTask : BaseTask() {
     val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
     var dependentModel: String = ""
         get() {
-            return AndroidPlugin.getPluginByProject(project).projectInfo.dependentModel
+            return AndroidPlugin.getPluginByProject(project).config.dependentModel
         }
 
     //生成DpsReport.txt
@@ -224,11 +224,11 @@ open class DpsAnalysisTask : BaseTask() {
         allDps.add(topVertex)
 
         //如果是Api类型，先添加api模块依赖
-        if (plugin.APP_TYPE == Components.TYPE_LIBRARY_API) {
+        if (plugin.APP_TYPE == SubModuleType.TYPE_LIBRARY_API) {
             topVertex.dps.add(TextUtils.getApiModuleName(project.name))
         }
 
-        val app = plugin.APP_TYPE == Components.TYPE_APPLICATION
+        val app = plugin.APP_TYPE == SubModuleType.TYPE_APPLICATION
 
         with(mutableListOf<DpComponents>()) {
             addAll(dpsExt.compiles)
@@ -238,7 +238,7 @@ open class DpsAnalysisTask : BaseTask() {
                 if (app) topVertex.dps.add(it.moduleName)
 
                 //如果该依赖模块是Api类型，则，依赖添加对应的Api类型依赖，而不是直接依赖该工程本身
-                val name = TextUtils.getModuleName(it.moduleName, ProjectManager.findComponent(it.moduleName)?.type == Components.TYPE_LIBRARY_API)
+                val name = TextUtils.getModuleName(it.moduleName, ProjectManager.findComponent(it.moduleName)?.type == SubModuleType.TYPE_LIBRARY_API)
                 topVertex.dps.add(name)
             }
         }
@@ -258,7 +258,7 @@ open class DpsAnalysisTask : BaseTask() {
             val moduleName = TextUtils.getModuleFromApi(d.name)
             if (!include.contains(moduleName)) include.addFirst(moduleName)
             val taskName = ":$moduleName:ToMaven" + if (TextUtils.checkIfApiModule(d.name)) "Api" else ""
-            if (!toMavens.contains(taskName) && ProjectManager.findComponent(moduleName)?.type != Components.TYPE_APPLICATION) {
+            if (!toMavens.contains(taskName) && ProjectManager.findComponent(moduleName)?.type != SubModuleType.TYPE_APPLICATION) {
                 toMavens.add("./gradlew $taskName -DfocusInclude=AutoImport -DdependentModel=mavenOnly \n")
             }
         }
@@ -272,7 +272,7 @@ open class DpsAnalysisTask : BaseTask() {
         resultStr.append("cd \$curPath \n")
         FileUtils.writeText(File(dir, Keys.TXT_DPS_ANALYSIS), resultStr.toString())
         //拷贝一份到doc目录并且提交
-        FileUtils.writeText(File(FileManager.docRoot, "dependency/${project.name}"), resultStr.toString())
+        FileUtils.writeText(File(FileManager.templetRoot, "dependency/${project.name}"), resultStr.toString())
         GitUtils.addAndPush(ProjectManager.findGit(ProjectManager.projectRoot.absolutePath), FileNames.MANAGER, "Add ${project.name} DpsAnalysisTask", true)
     }
 
@@ -341,7 +341,7 @@ open class DpsAnalysisTask : BaseTask() {
 
         //查出buildGradle
         val buildGradle = File(FileManager.codeRootDir, "${mcp.getPath()}/build.gradle")
-        val libraryGradle = File(FileManager.docRoot, "gradles/com.module.library.gradle")
+        val libraryGradle = File(FileManager.templetRoot, "gradles/com.module.library.gradle")
         //文件不存，则解析失败
         if (!buildGradle.exists()) return false
 
@@ -362,7 +362,7 @@ open class DpsAnalysisTask : BaseTask() {
         (if (api) dpsExt.apiCompiles else dpsExt.compiles).forEach {
             val t = ProjectManager.findComponent(it.moduleName) ?: return@forEach
             //如果是Api类型，直接依赖模块对应的api，而不是该模块本身
-            dpsContainer.add(TextUtils.getModuleName(it.moduleName, t.type == Components.TYPE_LIBRARY_API))
+            dpsContainer.add(TextUtils.getModuleName(it.moduleName, t.type == SubModuleType.TYPE_LIBRARY_API))
         }
         //解析build.gradle文件，加载本地配置的依赖数据
         Tools.println("loadDpsFromLocal $module dps -> $dpsContainer")

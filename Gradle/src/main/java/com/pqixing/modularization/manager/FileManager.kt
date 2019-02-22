@@ -1,16 +1,16 @@
 package com.pqixing.modularization.manager
 
-import com.pqixing.ProjectInfoFiles
-import com.pqixing.git.Components
+import com.pqixing.Templet
+import com.pqixing.Templet.setting
+import com.pqixing.Tools.rootDir
 import com.pqixing.modularization.FileNames
-import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.IPlugin
 import com.pqixing.modularization.interfaces.OnClear
-import com.pqixing.modularization.iterface.IExtHelper
+import com.pqixing.modularization.manager.ExceptionManager.EXCEPTION_SYNC
 import com.pqixing.modularization.utils.GitUtils
-import com.pqixing.modularization.utils.loadGitInfo
 import com.pqixing.tools.FileUtils
+import org.eclipse.jgit.api.Git
 import java.io.File
 
 /**
@@ -22,40 +22,12 @@ object FileManager : OnClear {
     }
 
     override fun clear() {
-        cacheRoot = null
-        codeRootDir = null
     }
 
-    /**
-     * 本地doc工程的信息
-     */
-    lateinit var docProject: Components
-
-    var codeRootDir: File? = null
-        get() {
-            if (field == null) {
-                field = JGroovyHelper.getImpl(IExtHelper::class.java).getExtValue(ManagerPlugin.getManagerPlugin().project.gradle, FileNames.CODE_ROOT) as File?
-            }
-            return field
-        }
-
-    var cacheRoot: File? = null
-        get() {
-            if (field == null) {
-                field = File(ManagerPlugin.getManagerPlugin().cacheDir, FileNames.MODULARIZATION)
-            }
-            return field
-        }
-    var docRoot: File? = null
-        get() {
-            if (field == null) {
-                field = File(ManagerPlugin.getManagerPlugin().rootDir, FileNames.MANAGER)
-            }
-            return field
-        }
+    lateinit var templetRoot: File
 
     fun getProjectXml(): File {
-        return File(docRoot, FileNames.PROJECT_XML)
+        return File(templetRoot, FileNames.PROJECT_XML)
     }
 
     /**
@@ -64,34 +36,21 @@ object FileManager : OnClear {
      * ${cacheDir}/ImportProject.gradle  若不存在或有更新，替换文件
      * setting.gradle  若不包含指定代码，添加代码
      * include.kt   若不存在，生成模板
-     * ProjectInfo.groovy  若不存在，生成模板
+     * templet.groovy  若不存在，生成模板
      */
-    fun checkFileExist(plugin: IPlugin): String {
-        var error = ""
-        with(File(plugin.rootDir, FileNames.IMPORT_KT)) {
-            if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource("setting/import.kt"))
-        }
-        with(File(plugin.rootDir, FileNames.PROJECT_INFO)) {
-            if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource("setting/ProjectInfo.java"))
+    fun checkFileExist(plugin: IPlugin) {
+        val rootDir = plugin.rootDir
+        Templet.setting.forEach { s ->
+            val f = File(rootDir, s)
+            if (!f.exists() || s.endsWith(".gradle")) FileUtils.writeText(f, FileUtils.getTextFromResource("setting/$s"), true)
         }
 
-        with(File(plugin.rootDir, FileNames.SETTINGS_GRADLE)) {
-            var e = "setting change"
-            if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource("setting/settings.gradle"))
-            else if (readText().lines().find { it.trim().endsWith("//END") } == null) {
-                appendText(FileUtils.getTextFromResource("setting/settings.gradle"))
-            } else {
-                e = ""
-            }
-            error += e
-            Unit
+        with(File(plugin.rootDir, "." + Templet._gitignore)) {
+            if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource(Templet._gitignore))
         }
-        with(File(plugin.cacheDir, FileNames.IMPORTPROJECT_GRADLE)) {
-            val importProject = FileUtils.getTextFromResource("setting/${FileNames.IMPORTPROJECT_GRADLE}")
-            FileUtils.writeText(this, importProject, true)
-//            error += "ImportProject.gradle has update!! try sync again"
-        }
-        return error
+        val settingFile = File(plugin.rootDir, Templet.settings_gradle)
+        val replace = FileUtils.replace("//Auto Code Start", "//Auto Code End", FileUtils.getTextFromResource(Templet.settings_gradle), settingFile.readText())
+        FileUtils.writeText(settingFile, replace, true)
     }
 
 
@@ -99,39 +58,44 @@ object FileManager : OnClear {
      * 检查本地Document目录
      * Document 目录用来存放一些公共的配置文件
      */
-    fun checkDocument(plugin: IPlugin) = with(plugin) {
-        val docRoot = docRoot!!
+    fun checkDocument(plugin: ManagerPlugin) {
+        val extends = ManagerPlugin.getExtends()
+        val docGit = GitUtils.open(plugin.rootDir) ?: createDocGit(plugin)
+        extends.docRepoBranch = docGit.repository.branch
 
-        val extends = plugin.getExtends(ManagerExtends::class.java)
-        val git = ProjectManager.findGit(plugin.projectDir.absolutePath)?.apply {
-            GitUtils.pull(this)
+        var i = mutableListOf<String>()
+        Templet.templet.map { "templet/$it" }.forEach { s ->
+            val f = File(rootDir, s)
+            if (!f.exists()) {
+                i.add(s)
+                com.pqixing.tools.FileUtils.writeText(f, com.pqixing.tools.FileUtils.getTextFromResource(s), true)
+            }
         }
+        if (i.isNotEmpty()) {
+            GitUtils.addAndPush(docGit, ".", "add file $i", true)
+        }
+        GitUtils.close(docGit)
 
-        val filter = ProjectInfoFiles.files.filter { copyIfNull(it, docRoot) }
-        //初始化dco目录的信息
-        docProject = Components(FileNames.MANAGER, "", "LogManager", FileNames.ROOT, Components.TYPE_DOCUMENT)
-        if (git == null) return@with
-        docProject.loadGitInfo(git)
-
-        if (extends.branch.isEmpty()) {
-            extends.branch = docProject.lastLog.branch
+        //更新编译相关文件
+        if (extends.config.syncBuildFile) {
+            FileUtils.writeText(File(rootDir, "build.gradle"), File(rootDir, "templet/build.gradle").readText(), true)
+            FileUtils.writeText(File(rootDir, "gradle.properties"), File(rootDir, "templet/gradle.properties").readText(), true)
+            FileUtils.writeText(File(rootDir, "gradle/wrapper/gradle-wrapper.properties"), File(rootDir, "templet/gradle-wrapper.properties").readText(), true)
         }
-        ProjectManager.rootBranch = extends.branch
-        //如果有新增文件，提交
-        if (filter.isNotEmpty()) {
-            GitUtils.addAndPush(git, ".", "add file $filter",true)
-        }
-        git.close()
+        templetRoot = File(rootDir, "templet")
     }
 
-    /**
-     * 如果工程目录下没有文件，拷贝
-     */
-    private fun copyIfNull(fileName: String, docRoot: File): Boolean {
-        val outFile = fileName.replace("ProjectInfo/", "")
-        val f = File(docRoot, outFile)
-        if (f.exists()) return false
-        FileUtils.writeText(f, FileUtils.getTextFromResource(fileName))
-        return true
+    private fun createDocGit(plugin: ManagerPlugin): Git {
+        val extends = ManagerPlugin.getExtends()
+        val tempDoc = File(plugin.rootDir, "tempDoc")
+        //clone the dir
+        val clone = GitUtils.clone(extends.docRepoUrl, tempDoc)
+        if (clone == null) ExceptionManager.thow(EXCEPTION_SYNC, "can not clone doc project!!")
+
+        //move doc to root dir
+        FileUtils.moveDir(tempDoc, plugin.rootDir)
+        FileUtils.delete(tempDoc)
+        return clone!!
     }
+
 }

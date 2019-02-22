@@ -99,14 +99,14 @@ open class AndroidPlugin : BasePlugin() {
 
     private fun writeEmptyManifest() {
         FileUtils.writeText(File(getApiManifestPath())
-                , "<manifest package=\"${ManagerPlugin.getManagerExtends().groupName}.${TextUtils.getApiModuleName(project.name)}\" />"
+                , "<manifest package=\"${ManagerPlugin.getExtends().groupName}.${TextUtils.getApiModuleName(project.name)}\" />"
                 , true)
     }
 
     private fun compatOldPlugin(dpsExt: DpsExtends) {
 //
         val javaCacheDir = File(cacheDir, "java")
-        val groupName = ManagerPlugin.getManagerExtends().groupName
+        val groupName = ManagerPlugin.getExtends().groupName
         val configStr = StringBuilder("package auto.$groupName.${TextUtils.numOrLetter(project.name).toLowerCase()};\n")
                 .append("public class ${TextUtils.className(project.name)}Config { \n")
         //Config文件输出

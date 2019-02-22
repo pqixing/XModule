@@ -3,9 +3,11 @@ package com.pqixing.modularization.manager.tasks
 import com.pqixing.Tools
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
+import java.io.File
 
 open class CloneProjectTask : BaseTask() {
 
@@ -13,9 +15,8 @@ open class CloneProjectTask : BaseTask() {
     val fails = ArrayList<String>()
     val exists = ArrayList<String>()
 
-    override fun runTask() = ProjectManager.findAllGitPath().forEach {
-        val dir = it.value
-        val gitUrl = it.key
+    override fun runTask() = ProjectManager.projectXml.projects.forEach {
+        val dir = File(ProjectManager.codeRootDir, it.name)
         if (GitUtils.isGitDir(dir)) {
             exists.add(dir.name)
             return@forEach
@@ -23,10 +24,9 @@ open class CloneProjectTask : BaseTask() {
         if (dir.exists()) {
             FileUtils.delete(dir)
         }
-        Tools.println("          start clone-> ${dir.name} $gitUrl")
-        val git = GitUtils.clone(gitUrl, dir, ProjectManager.rootBranch)
-        ProjectManager.setGit(dir.absolutePath, git)
-        (if (GitUtils.isGitDir(dir)) clones else fails).add("\n${dir.name}:$gitUrl")
+        Tools.println("          start clone-> ${dir.name} ${it.url}")
+        GitUtils.clone(it.url, dir, ManagerPlugin.getExtends().docRepoBranch)?.close()
+        (if (GitUtils.isGitDir(dir)) clones else fails).add("\n${dir.name}:${it.url}")
     }
 
     override fun end() {

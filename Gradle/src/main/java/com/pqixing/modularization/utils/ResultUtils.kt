@@ -17,7 +17,7 @@ object ResultUtils {
      * @param exitCode 退出标记 0 表示正常退出，1表示异常退出
      */
     fun writeResult(msg: String, exitCode: Int = 0) {
-        val plugin = ManagerPlugin.getManagerPlugin()
+        val plugin = ManagerPlugin.getPlugin()
         val ideFile = File(plugin.cacheDir, "ide.log")
         val log = "${Keys.PREFIX_IDE_LOG}?${Keys.RUN_TASK_ID}=${getProperty(Keys.RUN_TASK_ID)
                 ?: System.currentTimeMillis()}&exitCode=$exitCode&msg=$msg"
