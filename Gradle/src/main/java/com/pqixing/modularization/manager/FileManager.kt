@@ -45,8 +45,8 @@ object FileManager : OnClear {
             if (!f.exists() || s.endsWith(".gradle")) FileUtils.writeText(f, FileUtils.getTextFromResource("setting/$s"), true)
         }
 
-        with(File(plugin.rootDir, "." + Templet._gitignore)) {
-            if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource(Templet._gitignore))
+        with(File(plugin.rootDir, "." + Templet.gitignore)) {
+            if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource(Templet.gitignore))
         }
         val settingFile = File(plugin.rootDir, Templet.settings_gradle)
         val replace = FileUtils.replace("//Auto Code Start", "//Auto Code End", FileUtils.getTextFromResource(Templet.settings_gradle), settingFile.readText())

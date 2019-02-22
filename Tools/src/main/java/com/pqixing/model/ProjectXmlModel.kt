@@ -32,6 +32,7 @@ data class ProjectModel(val name: String, val introduce: String, val url: String
 data class SubModule(val project: ProjectModel, val name: String, val introduce: String, val path: String, var type: String = SubModuleType.TYPE_LIBRARY) {
     fun getBranch() = project.branch
     fun findApi() = project.submodules.find { it.name == "${name}_api" }
+    fun isApiModule() = type == SubModuleType.TYPE_LIBRARY_API
 }
 
 object SubModuleType {

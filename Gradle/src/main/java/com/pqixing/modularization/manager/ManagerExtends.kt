@@ -34,7 +34,7 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
     /**
      *
      */
-    var docRepoBranch=""
+    var docRepoBranch = ""
     /**
      * 文档工程用户名,不配置默认使用ProjectInfo中
      */

@@ -25,10 +25,10 @@ object ProjectManager : OnClear {
 
     var projectRoot: File = ManagerPlugin.getPlugin().projectDir
 
-    var codeRootDir: File = File(".")
+    var codeRootDir: File = File("_empty")
         get() {
-            if (field.name != "src") {
-                field = File(ManagerPlugin.getPlugin().rootDir, "src")
+            if (field.name == "_empty") {
+                field = File(ManagerPlugin.getPlugin().rootDir, ManagerPlugin.getExtends().config.codeRoot)
             }
             return field
         }
@@ -44,15 +44,14 @@ object ProjectManager : OnClear {
         //不在配置文件的git工程，不进行管理
         val subModule = projectXml.findSubModuleByName(project.name) ?: return null
 
+        val extends = ManagerPlugin.getExtends()
         val projectDir = File(codeRootDir, subModule.project.name)
-        val moduleDir = File(codeRootDir, subModule.path)
 
-        val docRepoBranch = ManagerPlugin.getExtends().docRepoBranch
+        val docRepoBranch = extends.docRepoBranch
         var mBranch = subModule.project.branch
-        if (mBranch.isEmpty()) if (!moduleDir.exists() || !checkRootDir(moduleDir, projectDir)) {//下载工程
+        if (mBranch.isEmpty()) if (GitUtils.isGitDir(projectDir)) Git.open(projectDir)
+        else {
             GitUtils.clone(subModule.project.url, projectDir)
-        } else {
-            Git.open(projectDir)
         }?.apply {
             mBranch = this.repository.branch
             subModule.project.branch = mBranch
@@ -61,15 +60,30 @@ object ProjectManager : OnClear {
         if (mBranch != docRepoBranch) {
             Tools.println("${subModule.name} branch is $mBranch , do not match doc branch $docRepoBranch")
         }
-        return subModule
-    }
-
-    fun checkRootDir(moduleDir: File, projectDir: File): Boolean {
-        //如果根目录不是git目录,先删除
-        if (!GitUtils.isGitDir(projectDir) || moduleDir.listFiles().size < 3) {
-            FileUtils.delete(projectDir)
-            return false
+        //如果是Api工程,检查基础模块在不在
+        if (subModule.isApiModule()) {
+            val moduleDir = File(codeRootDir, subModule.path)
+            with(File(moduleDir, "build.gradle")) {
+                if (!exists()) FileUtils.writeText(this, "apply plugin: 'com.module.android' \n apply from: \"\$gradles/com.module.ktolin.gradle\"")
+            }
+            with(File(moduleDir, "AndroidManifest.xml")) {
+                if (!exists()) FileUtils.writeText(this, "apply from: \"\$gradles/com.module.ktolin.gradle\"")
+            }
+            with(File(moduleDir, "java")) {
+                if (!exists()) this.mkdir()
+            }
+            with(File(moduleDir, "resources")) {
+                if (!exists()) this.mkdir()
+            }
+            //写入空清单文件
+            with(File(moduleDir, "AndroidManifest.xml")) {
+                if (exists()) {
+                    val emptyManifest = (FileUtils.readText(File(projectRoot, "templet/android/Empty_AndroidManifest.xml"))
+                            ?: "").replace("[groupName]", extends.groupName).replace("[projectName]", subModule.name)
+                    FileUtils.writeText(this, emptyManifest)
+                }
+            }
         }
-        return true
+        return subModule
     }
 }
