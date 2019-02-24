@@ -61,7 +61,6 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
     }
 
     //组件工程
-    val components = ProjectManager.findComponent(plugin.project.name)!!
     val compileModel = plugin.config?.dependentModel ?: "mavenOnly"
     val managerExtends = ManagerPlugin.getExtends()
 
@@ -71,25 +70,14 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
         val excludes: HashSet<String> = HashSet()
         val includes: ArrayList<String> = ArrayList()
 
-        onSelfCompile(includes, excludes)
+        onSelfCompile()
+
         val dps = HashSet<DpComponents>()
-        if (plugin.APP_TYPE == SubModuleType.TYPE_APPLICATION) {
-            dps.addAll(dpsExt.compiles)
-        } else {
-            when (plugin.BUILD_TYPE) {
-                SubModuleType.TYPE_LIBRARY_API -> dps.addAll(dpsExt.apiCompiles)
-                SubModuleType.TYPE_LIBRARY -> dps.addAll(dpsExt.compiles)
-                SubModuleType.TYPE_LIBRARY_SYNC, SubModuleType.TYPE_APPLICATION -> {
-                    dps.addAll(dpsExt.compiles)
-                    dps.addAll(dpsExt.apiCompiles)
-                    dps.addAll(dpsExt.devCompiles)
-                }
-                SubModuleType.TYPE_LIBRARY_LOCAL -> {
-                    dps.addAll(dpsExt.compiles)
-                    dps.addAll(dpsExt.apiCompiles)
-                }
-            }
+        dps.addAll(dpsExt.compiles)
+        if (plugin.justSync || plugin.buildAsApp) {
+            dps.addAll(dpsExt.devCompiles)
         }
+
         if (dps.isNotEmpty()) {
             val dpsV = mutableListOf<String>()
             dps.forEach { dpc ->
@@ -115,7 +103,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
             if (plugin.config.allowLose) Tools.println("ResolveDps -> lose dps -> $loseList")
             else Tools.printError("ResolveDps -> lose dps -> $loseList")
         }
-        val sb = java.lang.StringBuilder("dependencies {  // APP_TYPE : ${plugin.APP_TYPE} -> BUILD_TYPE : ${plugin.BUILD_TYPE}\n")
+        val sb = java.lang.StringBuilder("dependencies {  // isApp : ${plugin.isApp} -> buildAsApp : ${plugin.buildAsApp}\n")
         includes.forEach { sb.append(it).append("\n") }
         sb.append("}\n")
                 .append("configurations { \n")
@@ -127,26 +115,13 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
     /**
      * 处理自身的依赖，主要针对Library_api类型
      */
-    private fun onSelfCompile(includes: ArrayList<String>, excludes: HashSet<String>) {
+    private fun onSelfCompile() {
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
-        //如果是api模块作为独立运行时，移除api模块代码（因为主模块默认已经包含了api的代码）
-        if (plugin.APP_TYPE == SubModuleType.TYPE_LIBRARY_API) {
-            when (plugin.BUILD_TYPE) {
-                SubModuleType.TYPE_APPLICATION, SubModuleType.TYPE_LIBRARY_SYNC, SubModuleType.TYPE_LIBRARY_LOCAL -> {
-                    //添加本地Api路径
-                    addBranchExclude(SubModuleType.lastLog.branch, TextUtils.getApiModuleName(SubModuleType.name), excludes, 0)
-                    extHelper.addSourceDir(plugin.project, plugin.getApiPath())
-                }
-                SubModuleType.TYPE_LIBRARY -> addMavenCompile(DpsExtends.SCOP_API, SubModuleType.lastLog.branch, TextUtils.getApiModuleName(SubModuleType.name), dpsExt.toMavenVersion, includes, excludes, HashSet())
-                //打包Api时，设置java目录只有Api
-                SubModuleType.TYPE_LIBRARY_API -> extHelper.setApiSourceDir(plugin.project, plugin.getApiPath(), plugin.getApiManifestPath())
-            }
-        }
+        extHelper.addSourceDir(plugin.project, File(plugin.cacheDir, "java").absolutePath)
 
-        //如果不是打包API，添加自动生成代码的source目录
-        if (plugin.BUILD_TYPE != SubModuleType.TYPE_LIBRARY_API) {
-            extHelper.addSourceDir(plugin.project, File(plugin.cacheDir, "java").absolutePath)
-        }
+        //如果当前模块，有api模块，则，默认添加对api模块的依赖
+        val apiModule = plugin.subModule.findApi() ?: return
+        dpsExt.compile(apiModule.name)
     }
 
     /**
@@ -161,7 +136,8 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
         var compile = true
 
         //如果是App类型工程，则以app直接依赖的版本为准，忽略依赖传递中带来的版本变化
-        val config = if (plugin.APP_TYPE == SubModuleType.TYPE_APPLICATION) "; force = true ;" else ""
+        val config = if (plugin.buildAsApp) "; force = true ;" else ""
+        val dpModule = ProjectManager.projectXml.findSubModuleByName(dpc.moduleName)?:
         //如果是Api类型的模块，只依赖api工程，不直接依赖模块代码
         if (dpc.type == SubModuleType.TYPE_LIBRARY_API) {
             compile = addMavenCompile(getScope(dpc.dpType, DpsExtends.SCOP_API), dpc.branch, TextUtils.getApiModuleName(dpc.moduleName), dpc.version, includes, excludes, HashSet(), config) and compile

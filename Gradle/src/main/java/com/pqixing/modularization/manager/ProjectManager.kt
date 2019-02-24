@@ -36,7 +36,9 @@ object ProjectManager : OnClear {
     /**
      * 检查每个子工程的状态，分支信息等
      */
-    fun checkProject(project: Project, info: Config): SubModule? {
+    fun checkProject(project: Project): SubModule? {
+        val extends = ManagerPlugin.getExtends()
+        val info = extends.config
         val buildDir = info.buildDir.toString().trim()
         //重新设置build 目录
         project.buildDir = File(project.buildDir, if (buildDir.isEmpty()) "default" else buildDir)
@@ -44,7 +46,6 @@ object ProjectManager : OnClear {
         //不在配置文件的git工程，不进行管理
         val subModule = projectXml.findSubModuleByName(project.name) ?: return null
 
-        val extends = ManagerPlugin.getExtends()
         val projectDir = File(codeRootDir, subModule.project.name)
 
         val docRepoBranch = extends.docRepoBranch

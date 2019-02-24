@@ -1,7 +1,6 @@
 package com.pqixing.modularization.manager
 
 import com.pqixing.Templet
-import com.pqixing.Templet.setting
 import com.pqixing.Tools.rootDir
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin

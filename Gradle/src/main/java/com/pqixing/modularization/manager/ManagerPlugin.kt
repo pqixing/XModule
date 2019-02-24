@@ -39,7 +39,7 @@ open class ManagerPlugin : BasePlugin() {
 
         project.gradle.beforeProject {
             //在每个工程开始同步之前，检查状态，下载，切换分支等等
-            ProjectManager.checkProject(it, config)
+            ProjectManager.checkProject(it)
         }
         project.afterEvaluate {
             val extends = getExtends(ManagerExtends::class.java)

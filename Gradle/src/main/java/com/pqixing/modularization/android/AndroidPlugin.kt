@@ -1,16 +1,15 @@
 package com.pqixing.modularization.android
 
 
-import com.pqixing.git.Components
 import com.pqixing.model.SubModule
 import com.pqixing.model.SubModuleType
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.android.tasks.DpsAnalysisTask
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.android.tasks.BuildApkTask
+import com.pqixing.modularization.android.tasks.DpsAnalysisTask
 import com.pqixing.modularization.android.tasks.PrepareDevTask
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.iterface.IExtHelper
@@ -25,20 +24,21 @@ import com.pqixing.tools.TextUtils
 import org.gradle.api.Project
 import org.gradle.api.Task
 import java.io.File
-import java.lang.StringBuilder
 
 open class AndroidPlugin : BasePlugin() {
     override fun callBeforeApplyMould() {
         initSubModule(project)
 
+
         //根据情况进行不同的Android插件依赖
         project.apply(mapOf<String, String>("plugin" to if (buildAsApp) Keys.NAME_APP else Keys.NAME_LIBRARY))
+
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         extHelper.setExtValue(project, "ModuleName", project.name)
 
-        if (!isApp) {
-            project.apply(mapOf<String, String>("plugin" to "maven"))
-        }
+        if (!isApp) project.apply(mapOf<String, String>("plugin" to "maven"))
+        //如果是Library模块运行，设置ApplicationId
+        if (buildAsApp && !isApp) extHelper.setApplicationId(project, "${ManagerPlugin.getExtends().docRepoBranch}.${project.name}")
     }
 
     /**
@@ -49,36 +49,27 @@ open class AndroidPlugin : BasePlugin() {
      * 作为app运行  library工程也可以
      */
     var buildAsApp = false
+
+    /**
+     * 只是同步工程，不是编译任务
+     */
+    var justSync = false
+
     lateinit var subModule: SubModule
-    /**
-     * 改模块类型， app or library
-     */
-    var APP_TYPE: String = ""
-    /**
-     * 编译类型
-     */
-    var BUILD_TYPE: String = ""
 
-    /**
-     * 获取Api目录的路径
-     */
-    fun getApiPath(): String = File(projectDir, "src/main/api").absolutePath
-
-    fun getApiManifestPath(): String = File(cacheDir, "src/api/AndroidManifest.xml").absolutePath
 
     override val applyFiles: List<String>
         get() {
             if (isApp) return listOf("com.module.application")
-            //如果是独立运行，或者是本地同步时，增加
-            if (buildAsApp) return listOf("com.module.library", "com.module.dev")
+            //如果是独立运行，或者是本地同步时，包含dev分支
+            if (buildAsApp || justSync) return listOf("com.module.library", "com.module.dev")
             return listOf("com.module.library", "com.module.maven")
         }
     override val ignoreFields: Set<String> = emptySet()
 
     override fun linkTask(): List<Class<out Task>> {
         var tasks = mutableListOf(CleanCache::class.java, DpsAnalysisTask::class.java)
-        if (APP_TYPE == Components.TYPE_LIBRARY || APP_TYPE == Components.TYPE_LIBRARY_API) tasks.addAll(listOf(PrepareDevTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java))
-        if (APP_TYPE == Components.TYPE_LIBRARY_API) tasks.add(ToMavenApiTask::class.java)
+        if (subModule.type != SubModuleType.TYPE_APPLICATION) tasks.addAll(listOf(PrepareDevTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java))
         tasks.add(BuildApkTask::class.java)
         return tasks
     }
@@ -87,7 +78,7 @@ open class AndroidPlugin : BasePlugin() {
     override fun apply(project: Project) {
         project.extensions.extraProperties.set(project.name, this)
         //如果是空同步，不做任何处理
-        val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, project, ProjectManager.findComponent(project.name))
+        val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, project, ProjectManager.checkProject(project))
         super.apply(project)
         //创建配置读取
         val moduleConfig = CompatDps(project, dpsExt)
@@ -100,16 +91,8 @@ open class AndroidPlugin : BasePlugin() {
             dpsManager = DpsManager(this@AndroidPlugin, dpsExt)
             val dependencies = dpsManager.resolveDps()
             project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dependencies, true)))
-            if (BUILD_TYPE == Components.TYPE_LIBRARY_API) writeEmptyManifest()
             compatOldPlugin(dpsExt)
         }
-        extHelper.setExtValue(project, "JustApi", if (APP_TYPE == Components.TYPE_LIBRARY_API && BUILD_TYPE == Components.TYPE_LIBRARY_API) "Y" else "N")
-    }
-
-    private fun writeEmptyManifest() {
-        FileUtils.writeText(File(getApiManifestPath())
-                , "<manifest package=\"${ManagerPlugin.getExtends().groupName}.${TextUtils.getApiModuleName(project.name)}\" />"
-                , true)
     }
 
     private fun compatOldPlugin(dpsExt: DpsExtends) {
@@ -152,9 +135,13 @@ open class AndroidPlugin : BasePlugin() {
             buildAsApp = true
             return
         }
-        val rxForRun = Regex(":${project.name}:assemble.*?Dev")
-        val rxForBuildApk = ":${project.name}:BuildApk"
-        buildAsApp = getGradle().startParameter.taskNames.find { t -> t.matches(rxForRun) || t == rxForBuildApk } != null
+        val projectPre = ":${project.name}"
+        val filter = getGradle().startParameter.taskNames.filter { it.startsWith(projectPre) }.firstOrNull() ?: ""
+        if (filter.isEmpty() || filter.matches(Regex(":${project.name}:generate.*?Sources"))) {
+            justSync = true
+            return
+        }
+        buildAsApp = filter == ":${project.name}:BuildApk" || filter.matches(Regex(":${project.name}:assemble.*?Dev"))
     }
 
     companion object {

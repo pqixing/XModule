@@ -93,4 +93,9 @@ public class GExtHelper implements IExtHelper {
         }
         return variants
     }
+
+    @Override
+    void setApplicationId(@NotNull Project project, @NotNull String s) {
+        project.android.defaultConfig.applicationId = s
+    }
 }

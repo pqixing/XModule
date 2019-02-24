@@ -1,17 +1,16 @@
 package com.pqixing.modularization.android.dps
 
 import com.pqixing.Tools
-import com.pqixing.git.Components
+import com.pqixing.model.SubModule
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.manager.ManagerPlugin
 import groovy.lang.Closure
 import org.gradle.api.Project
 import java.util.*
 
-open class DpsExtends(project: Project,val components:Components) : BaseExtension(project) {
+open class DpsExtends(project: Project,val subModule:SubModule) : BaseExtension(project) {
     internal var compiles = HashSet<DpComponents>()
     internal var devCompiles = HashSet<DpComponents>()
-    internal var apiCompiles = HashSet<DpComponents>()
     val manager = ManagerPlugin.getExtends()
 
     /**
@@ -35,12 +34,12 @@ open class DpsExtends(project: Project,val components:Components) : BaseExtensio
         val split = name.split(":")
         when (split.size) {
             1 -> {
-                inner.branch = components.lastLog.branch
+                inner.branch = subModule.getBranch()
                 inner.moduleName = split[0]
                 inner.version = "+"
             }
             2 -> {
-                inner.branch = components.lastLog.branch
+                inner.branch = subModule.getBranch()
                 inner.moduleName = split[0]
                 inner.version = split[1]
             }
@@ -69,10 +68,6 @@ open class DpsExtends(project: Project,val components:Components) : BaseExtensio
         compile(moduleName, SCOP_API, compiles, closure)
     }
 
-    fun apiCompile(moduleName: String) = apiCompile(moduleName, null)
-    fun apiCompile(moduleName: String, closure: Closure<Any?>? = null) {
-        compile(moduleName, SCOP_API, apiCompiles, closure)
-    }
 
     fun devCompile(moduleName: String) = devCompile(moduleName, null)
     fun devCompile(moduleName: String, closure: Closure<Any?>? = null) {

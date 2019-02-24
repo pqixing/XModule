@@ -29,4 +29,6 @@ public interface IExtHelper {
             ,String name);
 
     Map<String,File> getAndroidOut(Project project, String type);
+
+    void setApplicationId(@NotNull Project project, @NotNull String s);
 }
