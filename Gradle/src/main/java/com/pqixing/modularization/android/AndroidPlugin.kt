@@ -1,8 +1,9 @@
 package com.pqixing.modularization.android
 
 
-import com.pqixing.Tools
 import com.pqixing.git.Components
+import com.pqixing.model.SubModule
+import com.pqixing.model.SubModuleType
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
@@ -28,19 +29,27 @@ import java.lang.StringBuilder
 
 open class AndroidPlugin : BasePlugin() {
     override fun callBeforeApplyMould() {
-        checkPluginType(project)
+        initSubModule(project)
 
         //根据情况进行不同的Android插件依赖
-        project.apply(mapOf<String, String>("plugin" to if (BUILD_TYPE == Components.TYPE_APPLICATION) Keys.NAME_APP else Keys.NAME_LIBRARY))
+        project.apply(mapOf<String, String>("plugin" to if (buildAsApp) Keys.NAME_APP else Keys.NAME_LIBRARY))
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
-        extHelper.setExtValue(project, "AsApp", if (BUILD_TYPE == Components.TYPE_APPLICATION) "Y" else "N")
         extHelper.setExtValue(project, "ModuleName", project.name)
 
-        if (APP_TYPE == Components.TYPE_LIBRARY || APP_TYPE == Components.TYPE_LIBRARY_API) {
+        if (!isApp) {
             project.apply(mapOf<String, String>("plugin" to "maven"))
         }
     }
 
+    /**
+     * application类型工程
+     */
+    var isApp = false
+    /**
+     * 作为app运行  library工程也可以
+     */
+    var buildAsApp = false
+    lateinit var subModule: SubModule
     /**
      * 改模块类型， app or library
      */
@@ -59,9 +68,9 @@ open class AndroidPlugin : BasePlugin() {
 
     override val applyFiles: List<String>
         get() {
-            if (APP_TYPE == Components.TYPE_APPLICATION) return listOf("com.module.application")
+            if (isApp) return listOf("com.module.application")
             //如果是独立运行，或者是本地同步时，增加
-            if (BUILD_TYPE == Components.TYPE_APPLICATION || BUILD_TYPE == Components.TYPE_LIBRARY_SYNC) return listOf("com.module.library", "com.module.maven", "com.module.dev")
+            if (buildAsApp) return listOf("com.module.library", "com.module.dev")
             return listOf("com.module.library", "com.module.maven")
         }
     override val ignoreFields: Set<String> = emptySet()
@@ -122,7 +131,7 @@ open class AndroidPlugin : BasePlugin() {
         FileUtils.writeText(File(javaCacheDir, filePath), configStr.toString(), true)
 
         val enterFile = File(javaCacheDir, "auto/com/pqixing/configs/Enter.java")
-        if (BUILD_TYPE == Components.TYPE_APPLICATION) {
+        if (buildAsApp) {
             val enterStr = StringBuilder("package auto.com.pqixing.configs;\n public class Enter { \n")
                     .append("public static final String  LAUNCH = \"${CONFIG}Launch\";\n")
                     .append("public static final String  CONFIG = \"${CONFIG}Config\";\n")
@@ -136,36 +145,16 @@ open class AndroidPlugin : BasePlugin() {
     /**
      * 检查插件类型
      */
-    private fun checkPluginType(project: Project) {
-        val components = ProjectManager.findComponent(project.name) ?: return
-        APP_TYPE = components.type
-        if (APP_TYPE == Components.TYPE_APPLICATION) {
-            BUILD_TYPE = Components.TYPE_APPLICATION
+    private fun initSubModule(project: Project) {
+        subModule = ProjectManager.projectXml.findSubModuleByName(project.name) ?: return
+        isApp = subModule.type == SubModuleType.TYPE_APPLICATION
+        if (isApp) {
+            buildAsApp = true
             return
         }
         val rxForRun = Regex(":${project.name}:assemble.*?Dev")
         val rxForBuildApk = ":${project.name}:BuildApk"
-        val rxToMaven = ":${project.name}:ToMaven"
-        val rxToMavenApi = ":${project.name}:ToMavenApi"
-        var match = mutableListOf<String>()
-        var assemble = false
-        for (t in getGradle().startParameter.taskNames) {
-            match.add(t)
-            assemble = assemble || t.contains(":assemble")
-            when {
-                t.matches(rxForRun) || t == rxForBuildApk -> BUILD_TYPE = Components.TYPE_APPLICATION
-                t.matches(rxForRun) -> BUILD_TYPE = Components.TYPE_APPLICATION
-                t == rxToMaven -> BUILD_TYPE = Components.TYPE_LIBRARY
-                t == rxToMavenApi -> BUILD_TYPE = Components.TYPE_LIBRARY_API
-                else -> match.remove(t)
-            }
-        }
-        if (match.size > 1) {
-            Tools.printError("Can not run those tasks at times -> $match")
-        }
-        if (match.size == 0) {
-            BUILD_TYPE = if (assemble) Components.TYPE_LIBRARY_LOCAL else Components.TYPE_LIBRARY_SYNC
-        }
+        buildAsApp = getGradle().startParameter.taskNames.find { t -> t.matches(rxForRun) || t == rxForBuildApk } != null
     }
 
     companion object {
