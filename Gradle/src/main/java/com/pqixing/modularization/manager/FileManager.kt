@@ -23,7 +23,13 @@ object FileManager : OnClear {
     override fun clear() {
     }
 
-    lateinit var templetRoot: File
+    var templetRoot: File = File("empty")
+    get() {
+        if(field.name == "empty"){
+            field = File(ManagerPlugin.getPlugin().rootDir,"templet")
+        }
+        return field
+    }
 
     fun getProjectXml(): File {
         return File(templetRoot, FileNames.PROJECT_XML)
@@ -48,7 +54,8 @@ object FileManager : OnClear {
             if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource(Templet.gitignore))
         }
         val settingFile = File(plugin.rootDir, Templet.settings_gradle)
-        val replace = FileUtils.replace("//Auto Code Start", "//Auto Code End", FileUtils.getTextFromResource(Templet.settings_gradle), settingFile.readText())
+        val source = if(settingFile.exists()) settingFile.readText() else ""
+        val replace = FileUtils.replaceOrInsert("//Auto Code Start", "//Auto Code End", FileUtils.getTextFromResource(Templet.settings_gradle), source)
         FileUtils.writeText(settingFile, replace, true)
     }
 

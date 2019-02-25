@@ -2,13 +2,14 @@ package com.pqixing.model
 
 class ProjectXmlModel(val baseUrl: String) {
     val projects = mutableListOf<ProjectModel>()
+    private val maps = HashMap<String, SubModule>()
     fun findSubModuleByName(name: String): SubModule? {
-        for (p in projects) {
+        if (maps.isEmpty()) for (p in projects) {
             for (m in p.submodules) {
-                if (name == m.name) return m
+                maps[m.name] = m
             }
         }
-        return null
+        return maps[name]
     }
 
     fun findProjectBySubName(name: String) = findSubModuleByName(name)?.project
@@ -38,6 +39,7 @@ data class SubModule(val project: ProjectModel, val name: String, val introduce:
 
     fun isApiModule() = type == SubModuleType.TYPE_LIBRARY_API
     private var api: SubModule? = null
+    var hasCheck = false
 }
 
 object SubModuleType {

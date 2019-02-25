@@ -71,12 +71,12 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
         if (docRepoUser.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "docRepoUser can not be null!!!")
         if (docRepoPsw.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "docRepoPsw can not be null!!!")
 
-        if (groupName.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "groupName can not be null!!!")
-        if (groupMaven.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "groupMaven can not be null!!!")
+//        if (groupName.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "groupName can not be null!!!")
+//        if (groupMaven.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "groupMaven can not be null!!!")
     }
 
     var config: com.pqixing.Config = try {
-        val parseClass = GroovyClassLoader().parseClass(File(rootDir, FileNames.PROJECT_INFO))
+        val parseClass = GroovyClassLoader().parseClass(File(rootDir, FileNames.USER_CONFIG))
         JSON.parseObject(JSON.toJSONString(parseClass.newInstance()), Config::class.java)
     } catch (e: Exception) {
         Config()

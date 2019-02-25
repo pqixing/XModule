@@ -22,31 +22,33 @@ open class ManagerPlugin : BasePlugin() {
 
     override val applyFiles: List<String> = listOf("com.module.manager", "com.module.git")
     override val ignoreFields: Set<String>
-        get() = setOf(FileNames.PROJECT_INFO, FileNames.IMPORT_KT)
+        get() = setOf(FileNames.USER_CONFIG, FileNames.IMPORT_KT)
 
     @Override
     override fun linkTask() = listOf(
             CloneProjectTask::class.java
+            , CleanProjectTask::class.java
+            , CheckOutTask::class.java
+            , PrepareMergeTask::class.java
             , CreateBranchTask::class.java
+            , PullProjectTask::class.java
             , DeleteBranchTask::class.java)
 
     override fun apply(project: Project) {
+        //在每个工程开始同步之前，检查状态，下载，切换分支等等
+        project.gradle.beforeProject { ProjectManager.checkProject(it) }
+
         val startTime = System.currentTimeMillis()
         plugin = this
         initTools(project)
         super.apply(project)
         FileManager.checkFileExist(this)
 
-        project.gradle.beforeProject {
-            //在每个工程开始同步之前，检查状态，下载，切换分支等等
-            ProjectManager.checkProject(it)
-        }
         project.afterEvaluate {
             val extends = getExtends(ManagerExtends::class.java)
             extHelper.setExtValue(project, "groupName", extends.groupName)
             extends.checkVail()
             FileManager.checkDocument(this)
-
             project.allprojects { p ->
                 extHelper.addRepositories(p, extends.dependMaven)
             }

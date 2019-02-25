@@ -1,5 +1,6 @@
 package com.pqixing.modularization.android.dps
 
+import com.pqixing.model.SubModule
 import com.pqixing.modularization.android.dps.DpsExtends.Companion.SCOP_RUNTIME
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.manager.ProjectManager
@@ -12,6 +13,10 @@ import org.gradle.api.Project
 
 class DpComponents(project: Project) : BaseExtension(project) {
 
+    /**
+     * 该依赖,在配置xml中的信息
+     */
+    lateinit var subModule: SubModule
     /**
      * 当前模块是否使用了本地依赖
      */

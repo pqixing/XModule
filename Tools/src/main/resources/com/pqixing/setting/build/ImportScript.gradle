@@ -1,4 +1,3 @@
-package com.pqixing.setting.build
 //version=1.0,date=2019.02.22
 try {
     new Script().runScript(rootDir, gradle)
@@ -57,12 +56,14 @@ class InCludes {
 
     public InCludes(File rootDir, Gradle gradle) {
         String value
-        for (String key : Arrays.asList("include", "codeRoot")) {
+        def list = Arrays.asList("include", "codeRoot")
+        for (String key : list) {
             try {
                 value = System.getProperty(key)
             } catch (Exception e) {
-                value = getValue(key)
             }
+            if (value == null) value = getValue(key,rootDir)
+            gradle.println("parse InCludes -> $key :$value")
             switch (key) {
                 case "include":
                     includes = parseInclude(value.trim(), rootDir, gradle)
@@ -70,8 +71,10 @@ class InCludes {
                 case "codeRoot":
                     codeRoot = value.isEmpty() ? "src" : value
                     break
+                default: gradle.println("not found  -> $value")
             }
         }
+        println("parse include = $includes codeRoot = $codeRoot")
     }
 
     private HashSet<String> parseInclude(String include, File rootDir, Gradle gradle) {
@@ -98,6 +101,7 @@ class InCludes {
             else if (v.startsWith("D#")) handleDps(list, rootDir, l, true)
             else if (v.startsWith("ED#")) handleDps(list, rootDir, l, false)
         }
+        return list
     }
 
     private void handleDps(HashSet<String> source, File rootDir, String module, boolean add) {
@@ -108,13 +112,15 @@ class InCludes {
         }
     }
 
-    private String getValue(String key) {
+    private String getValue(String key,File rootDir) {
         try {
             if (clazz == null) clazz = new GroovyClassLoader().parseClass(new File(rootDir, "Config.java"))
-            def field = clazz.getDeclaredField(key)
+
+            def field = clazz.getField(key)
             field.setAccessible(true)
-            return field.get(key).toString()
+            return field.get(clazz.newInstance()).toString()
         } catch (Exception e) {
+            key.println("Exception -> getValue key = $key ,$e ${clazz.fields.size()}")
             return ""
         }
     }

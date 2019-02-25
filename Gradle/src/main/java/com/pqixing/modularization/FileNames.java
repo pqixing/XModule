@@ -42,7 +42,7 @@ public class FileNames {
     /**
      * 配置文件
      */
-    public static final String PROJECT_INFO = "templet.java";
+    public static final String USER_CONFIG = "Config.java";
     /**
      * 配置文件
      */

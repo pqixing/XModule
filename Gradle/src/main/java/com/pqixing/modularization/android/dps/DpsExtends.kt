@@ -2,13 +2,18 @@ package com.pqixing.modularization.android.dps
 
 import com.pqixing.Tools
 import com.pqixing.model.SubModule
+import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.manager.ExceptionManager
 import com.pqixing.modularization.manager.ManagerPlugin
+import com.pqixing.modularization.manager.ProjectManager
 import groovy.lang.Closure
 import org.gradle.api.Project
 import java.util.*
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
-open class DpsExtends(project: Project,val subModule:SubModule) : BaseExtension(project) {
+open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : BaseExtension(plugin.project) {
     internal var compiles = HashSet<DpComponents>()
     internal var devCompiles = HashSet<DpComponents>()
     val manager = ManagerPlugin.getExtends()
@@ -17,18 +22,18 @@ open class DpsExtends(project: Project,val subModule:SubModule) : BaseExtension(
      * 上传到Maven的版本
      */
     var toMavenVersion = ""
-    get() {
-        if(field.isEmpty()) {
-            field = ManagerPlugin.getExtends().baseVersion
+        get() {
+            if (field.isEmpty()) {
+                field = ManagerPlugin.getExtends().baseVersion
+            }
+            return field
         }
-        return field
-    }
     /**
      * 上传到Maven的描述
      */
     var toMavenDesc = ""
 
-    private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null): DpComponents {
+    private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null) {
         val inner = DpComponents(project)
         //根据 ： 号分割
         val split = name.split(":")
@@ -56,11 +61,26 @@ open class DpsExtends(project: Project,val subModule:SubModule) : BaseExtension(
             closure.resolveStrategy = Closure.DELEGATE_ONLY
             closure.call()
         }
-        if(inner.version.isEmpty()||inner.version == "+"){
+        if (inner.version.isEmpty() || inner.version == "+") {
             inner.version = manager.baseVersion
         }
-        container.add(inner)
-        return inner
+        inner.subModule = ProjectManager.findSubModuleByName(inner.moduleName)!!
+        val apiModule = inner.subModule.findApi()
+        if (apiModule == null) {
+            container.add(inner)
+            return
+        }
+        val apiComponents = DpComponents(plugin.project).apply {
+            moduleName = apiModule.name
+            branch = inner.branch
+            version = inner.version
+            dpType = inner.dpType
+            this.scope = scope
+            subModule = apiModule
+        }
+        inner.scope = DpsExtends.SCOP_RUNTIME
+        container.add(apiComponents)
+        if (plugin.buildAsApp) container.add(inner)
     }
 
     fun compile(moduleName: String) = compile(moduleName, null)
@@ -71,7 +91,7 @@ open class DpsExtends(project: Project,val subModule:SubModule) : BaseExtension(
 
     fun devCompile(moduleName: String) = devCompile(moduleName, null)
     fun devCompile(moduleName: String, closure: Closure<Any?>? = null) {
-        compile(moduleName, SCOP_API, devCompiles, closure).dpType = "dev"
+        compile(moduleName, SCOP_API, devCompiles)
     }
 
     @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))

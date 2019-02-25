@@ -22,6 +22,7 @@ object ProjectManager : OnClear {
     }
 
     var projectXml: ProjectXmlModel = XmlHelper.parseProjectXml(FileManager.getProjectXml())
+    inline fun findSubModuleByName(name: String) = projectXml.findSubModuleByName(name)
 
     var projectRoot: File = ManagerPlugin.getPlugin().projectDir
 
@@ -45,6 +46,7 @@ object ProjectManager : OnClear {
 
         //不在配置文件的git工程，不进行管理
         val subModule = projectXml.findSubModuleByName(project.name) ?: return null
+        if (subModule.hasCheck) return subModule
 
         val projectDir = File(codeRootDir, subModule.project.name)
 
@@ -85,6 +87,7 @@ object ProjectManager : OnClear {
                 }
             }
         }
+        subModule.hasCheck = true
         return subModule
     }
 }

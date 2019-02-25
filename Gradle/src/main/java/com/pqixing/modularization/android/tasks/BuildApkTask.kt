@@ -1,7 +1,6 @@
 package com.pqixing.modularization.android.tasks
 
 import com.pqixing.Tools
-import com.pqixing.git.Components
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BaseTask
@@ -21,12 +20,12 @@ open class BuildApkTask : BaseTask() {
             val plugin = AndroidPlugin.getPluginByProject(project)
 
             val types = arrayListOf("dev", "inTest", "outTest", "release")
-            val apkType = plugin.config.buildApkType
-            if (apkType.isNotEmpty()) {
+            val apkType = TextUtils.getSystemEnv("buildApkType")
+            if (apkType?.isNotEmpty() == true) {
                 types.remove(apkType)
                 types.add(0, apkType)
             }
-            val androidOut = extHelper.getAndroidOut(project, if (plugin.BUILD_TYPE == Components.TYPE_APPLICATION) "application" else "library")
+            val androidOut = extHelper.getAndroidOut(project, if (plugin.buildAsApp) "application" else "library")
 
             for (t in types) {
                 outputFile = androidOut[t] ?: continue
@@ -42,7 +41,7 @@ open class BuildApkTask : BaseTask() {
         if (outputFile == null || !outputFile!!.exists() || !outputFile!!.name.endsWith(".apk")) {
             Tools.printError("Can not fount apk with path :${outputFile?.absolutePath}")
         } else {
-            var buildApkPath = AndroidPlugin.getPluginByProject(project).config.buildApkPath
+            var buildApkPath = AndroidPlugin.getPluginByProject(project).config.taskResultFile
             if (buildApkPath.isEmpty()) buildApkPath = outputFile!!.absolutePath
             else FileUtils.copy(outputFile!!, File(buildApkPath))
 

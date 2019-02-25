@@ -171,6 +171,7 @@ object VersionManager : OnClear {
     }
 
     private fun readCurVersions() {
+        if (curVersions.isNotEmpty()) return
         prepareVersions()
         curVersions[FileNames.MODULARIZATION] = FileNames.MODULARIZATION
 

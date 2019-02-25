@@ -1,19 +1,33 @@
-//package com.pqixing.modularization.manager.tasks
-//
-//import com.pqixing.modularization.utils.GitUtils
-//import com.pqixing.modularization.base.BaseTask
-//import com.pqixing.modularization.manager.ProjectManager
-//import com.pqixing.modularization.utils.ResultUtils
-//
-///**
-// * 切换分支
-// */
-//open class PullProjectTask : BaseTask() {
-//    override fun runTask() {
-//        val fail = ArrayList<String>()
-//        val gits = ProjectManager.findAllGitPath().values.filter { it.exists() }.toMutableList()
-//
-//        gits.forEach { if (it.exists() && !GitUtils.pull(ProjectManager.findGit(it.absolutePath))) fail.add(it.name) }
-//        ResultUtils.writeResult("PullProjectTask -> $fail", fail.size)
-//    }
-//}
+package com.pqixing.modularization.manager.tasks
+
+import com.pqixing.Tools
+import com.pqixing.modularization.Keys
+import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.utils.GitUtils
+import java.io.File
+
+/**
+ * 切换分支
+ */
+open class PullProjectTask : BaseTask() {
+    init {
+        group = Keys.GROUP_OTHER
+    }
+
+    override fun runTask() {
+        GitUtils.open(project.rootDir)?.apply {
+            GitUtils.pull(this)
+            close()
+        }
+        ProjectManager.projectXml.projects.forEach {
+            val dir = File(ProjectManager.codeRootDir, it.name)
+            if (!GitUtils.isGitDir(dir)) return@forEach
+            Tools.println("          start pull-> ${dir.name} ${it.url}")
+            GitUtils.open(dir)?.apply {
+                GitUtils.pull(this)
+                close()
+            }
+        }
+    }
+}

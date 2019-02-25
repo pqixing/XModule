@@ -23,10 +23,19 @@ compileTestKotlin {
         jvmTarget = "1.8"
     }
 }
+repositories {
+    flatDir {
+        dirs "libs"
+    }
+}
 
 // 添加依赖
 dependencies {
-    implementation files("../libs/Tools.jar")
+//    implementation files("../libs/Tools.jar")
+    if (localBuild) {
+        compileOnly project(":Tools")
+        implementation "com.pqixing.gradle:tools:0.1"
+    } else implementation "com.github.pqixing.modularization:Tools:0.12"
     implementation gradleApi()
     implementation localGroovy()
     implementation "com.alibaba:fastjson:1.2.44"

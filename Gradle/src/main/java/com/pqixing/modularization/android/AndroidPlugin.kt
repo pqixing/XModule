@@ -9,16 +9,10 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.android.tasks.BuildApkTask
-import com.pqixing.modularization.android.tasks.DpsAnalysisTask
-import com.pqixing.modularization.android.tasks.PrepareDevTask
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
-import com.pqixing.modularization.maven.CleanCache
-import com.pqixing.modularization.maven.ToMavenApiTask
-import com.pqixing.modularization.maven.ToMavenCheckTask
-import com.pqixing.modularization.maven.ToMavenTask
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import org.gradle.api.Project
@@ -27,8 +21,6 @@ import java.io.File
 
 open class AndroidPlugin : BasePlugin() {
     override fun callBeforeApplyMould() {
-        initSubModule(project)
-
 
         //根据情况进行不同的Android插件依赖
         project.apply(mapOf<String, String>("plugin" to if (buildAsApp) Keys.NAME_APP else Keys.NAME_LIBRARY))
@@ -68,17 +60,19 @@ open class AndroidPlugin : BasePlugin() {
     override val ignoreFields: Set<String> = emptySet()
 
     override fun linkTask(): List<Class<out Task>> {
-        var tasks = mutableListOf(CleanCache::class.java, DpsAnalysisTask::class.java)
-        if (subModule.type != SubModuleType.TYPE_APPLICATION) tasks.addAll(listOf(PrepareDevTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java))
-        tasks.add(BuildApkTask::class.java)
-        return tasks
+//        var tasks = mutableListOf(CleanCache::class.java, DpsAnalysisTask::class.java)
+//        if (subModule.type != SubModuleType.TYPE_APPLICATION) tasks.addAll(listOf(PrepareDevTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java))
+//        tasks.add(BuildApkTask::class.java)
+        return mutableListOf(BuildApkTask::class.java)
     }
 
     lateinit var dpsManager: DpsManager
     override fun apply(project: Project) {
+        this.p = project
+        initSubModule(project)
         project.extensions.extraProperties.set(project.name, this)
         //如果是空同步，不做任何处理
-        val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, project, ProjectManager.checkProject(project))
+        val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, this, ProjectManager.checkProject(project))
         super.apply(project)
         //创建配置读取
         val moduleConfig = CompatDps(project, dpsExt)

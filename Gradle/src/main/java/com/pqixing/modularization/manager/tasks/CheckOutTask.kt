@@ -1,35 +1,42 @@
-//package com.pqixing.modularization.manager.tasks
-//
-//import com.pqixing.Tools
-//import com.pqixing.modularization.utils.GitUtils
-//import com.pqixing.modularization.base.BaseTask
-//import com.pqixing.modularization.manager.ManagerPlugin
-//import com.pqixing.modularization.manager.ProjectManager
-//import com.pqixing.modularization.utils.ResultUtils
-//
-///**
-// * 切换分支
-// */
-//open class CheckOutTask : BaseTask() {
-//    override fun runTask() {
-//        val info = ManagerPlugin.getPlugin().config
-//        var targetBranch = info.taskBranch
-//        if (targetBranch.isEmpty()) targetBranch = ProjectManager.rootBranch
-//
-//        val fail = ArrayList<String>()
-//        val gits = ProjectManager.findAllGitPath().values.filter { it.exists() }.toMutableList()
-//        //判断rootBranch是否等于该分支
-//        if (ProjectManager.rootBranch != targetBranch) gits.add(0, ProjectManager.projectRoot)
-//
-//        gits.forEach {
-//            if (!GitUtils.checkIfClean(ProjectManager.findGit(it.absolutePath))) {
-//                Tools.printError("${it.name} -> checkIfClean :false, please check your file!")
-//            }
-//        }
-//        gits.forEach {
-//            val check = GitUtils.checkoutBranch(ProjectManager.findGit(it.absolutePath), targetBranch, true)
-//            if (!check) fail.add(it.name)
-//        }
-//        ResultUtils.writeResult("CheckOutTask -> $fail", fail.size)
-//    }
-//}
+package com.pqixing.modularization.manager.tasks
+
+import com.pqixing.modularization.Keys
+import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.manager.ManagerPlugin
+import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.utils.GitUtils
+import com.pqixing.modularization.utils.ResultUtils
+import java.io.File
+
+/**
+ * 切换分支
+ */
+open class CheckOutTask : BaseTask() {
+    init {
+        group = Keys.GROUP_OTHER
+    }
+
+    override fun runTask() {
+        val extends = ManagerPlugin.getExtends()
+        var targetBranch = extends.config.taskBranch ?: ""
+        if (targetBranch.isEmpty()) targetBranch = extends.docRepoBranch
+
+        val fail = ArrayList<String>()
+        GitUtils.open(project.rootDir)?.apply {
+            val check = GitUtils.checkoutBranch(this, targetBranch, true)
+            if (!check) fail.add(project.rootDir.name)
+            close()
+        }
+        ProjectManager.projectXml.projects.forEach {
+            val dir = File(ProjectManager.codeRootDir, it.name)
+            if (!GitUtils.isGitDir(dir)) return@forEach
+            GitUtils.open(dir)?.apply {
+                val check = GitUtils.checkoutBranch(this, targetBranch, true)
+                if (!check) fail.add(dir.name)
+                close()
+            }
+        }
+
+        ResultUtils.writeResult("CheckOutTask -> $fail", fail.size)
+    }
+}

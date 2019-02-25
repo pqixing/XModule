@@ -74,5 +74,11 @@ object FileUtils {
         return true
     }
 
-    fun replace(start: String, end: String, content: String, source: String) = source.replace(Regex("$start.*?$end", RegexOption.DOT_MATCHES_ALL), "$start$content$end")
+    fun replaceOrInsert(start: String, end: String, content: String, source: String): String {
+        val regex = Regex("$start.*?$end", RegexOption.DOT_MATCHES_ALL)
+        val targetTx = "$start\n$content\n$end"
+        return if (source.contains(regex)) {
+            source.replace(regex, targetTx)
+        } else "$source$targetTx"
+    }
 }
