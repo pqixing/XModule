@@ -5,6 +5,8 @@ import com.pqixing.interfaces.ILog
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.manager.tasks.*
+import com.pqixing.modularization.maven.VersionIndexTask
+import com.pqixing.modularization.maven.VersionTagTask
 import com.pqixing.modularization.utils.ResultUtils
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
@@ -32,6 +34,8 @@ open class ManagerPlugin : BasePlugin() {
             , PrepareMergeTask::class.java
             , CreateBranchTask::class.java
             , PullProjectTask::class.java
+            , VersionTagTask::class.java
+            , VersionIndexTask::class.java
             , DeleteBranchTask::class.java)
 
     override fun apply(project: Project) {

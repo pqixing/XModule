@@ -237,10 +237,10 @@ open class DpsAnalysisTask : BaseTask() {
             if (!include.contains(moduleName)) include.addFirst(moduleName)
             val taskName = ":$moduleName:ToMaven"
             if (!toMavens.contains(taskName)) {
-                toMavens.add("./gradlew $taskName -DfocusInclude=AutoImport -DdependentModel=mavenOnly \n")
+                toMavens.add("./gradlew $taskName -Dinclude=Auto -DdependentModel=mavenOnly -D-DbuildDir=maven \n")
             }
         }
-        resultStr.append("SortByDegree=${getCollectionStr(allDps)} \n")
+        resultStr.append("#SortByDegree=${getCollectionStr(allDps)} \n")
         resultStr.append("\ncurPath=$(pwd) \n\n")
         resultStr.append("echo Start All ToMaven Task!! \n")
         resultStr.append("cd ${project.rootDir.absolutePath} \n")

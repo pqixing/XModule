@@ -6,6 +6,7 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.iterface.IExtHelper
+import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.modularization.utils.execute
 import com.pqixing.modularization.utils.init
@@ -16,9 +17,9 @@ open class ToMavenTask : BaseTask() {
 
     init {
         if (plugin.subModule.type != SubModuleType.TYPE_APPLICATION) {
-            this.dependsOn("uploadArchives", "ToMavenCheck", "CleanCache")
-            project.getTasksByName("CleanCache", false)?.forEach { it.mustRunAfter("ToMavenCheck") }
-            project.getTasksByName("uploadArchives", false)?.forEach { it.mustRunAfter("CleanCache") }
+            this.dependsOn("uploadArchives", "ToMavenCheck", "clean")
+            project.getTasksByName("clean", false)?.forEach { it.mustRunAfter("ToMavenCheck") }
+            project.getTasksByName("uploadArchives", false)?.forEach { it.mustRunAfter("clean") }
         }
     }
 
@@ -33,7 +34,8 @@ open class ToMavenTask : BaseTask() {
         val artifactId = extHelper.getExtValue(project, Keys.LOG_MODULE)
 
         val commitMsg = "${Keys.PREFIX_TO_MAVEN}?${Keys.LOG_BRANCH}=$branch&${Keys.LOG_MODULE}=$artifactId&${Keys.LOG_VERSION}=$version"
-        val git = Git.open(project.rootDir)
+        val git = Git.open(VersionManager.repoGitDir)
+        GitUtils.pull(git)
         git.commit().setAllowEmpty(true).setMessage(commitMsg).init().execute()
         git.push().init().execute()
         ResultUtils.writeResult("$branch:$artifactId:$version")

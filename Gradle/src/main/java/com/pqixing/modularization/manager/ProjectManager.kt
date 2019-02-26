@@ -58,7 +58,7 @@ object ProjectManager : OnClear {
         }?.apply {
             mBranch = this.repository.branch
             subModule.project.branch = mBranch
-            close()
+            GitUtils.close(this)
         }
         if (mBranch != docRepoBranch) {
             Tools.println("${subModule.name} branch is $mBranch , do not match doc branch $docRepoBranch")

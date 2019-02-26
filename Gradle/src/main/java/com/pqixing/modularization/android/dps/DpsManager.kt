@@ -141,7 +141,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
         if (dpVersion.second == dpc.version) {
             c = " ;force = true ;"
         }
-        includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_RUNTIME)} ('${managerExtends.groupName}.${dpVersion.first}:${dpc.moduleName}:${dpVersion.second}') { ${excludeStr(excludes = dpc.excludes)} $c }")
+        includes.add("${getScope(dpc.dpType, dpc.scope)} ('${managerExtends.groupName}.${dpVersion.first}:${dpc.moduleName}:${dpVersion.second}') { ${excludeStr(excludes = dpc.excludes)} $c }")
         addBranchExclude(dpVersion.first, dpc.moduleName, excludes)
         excludes.addAll(getPom(dpVersion.first, dpc.moduleName, dpVersion.second).allExclude)
         return true
@@ -187,8 +187,8 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
         val branch = dpc.subModule.getBranch()
         //如果该依赖没有本地导入，不进行本地依赖
         dpc.localCompile = true
-        includes.add("${getScope(dpc.dpType, DpsExtends.SCOP_API)} ( project(path : ':${dpc.moduleName}'))  { ${excludeStr(excludes = dpc.excludes)} }")
-        addBranchExclude(branch, dpc.moduleName, excludes)
+        includes.add("${getScope(dpc.dpType, dpc.scope)} ( project(path : ':${dpc.moduleName}'))  { ${excludeStr(excludes = dpc.excludes)} }")
+        addBranchExclude(branch, dpc.moduleName, excludes,0)
         return true
     }
 

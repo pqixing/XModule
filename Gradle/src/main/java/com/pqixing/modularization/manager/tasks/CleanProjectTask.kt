@@ -2,6 +2,8 @@ package com.pqixing.modularization.manager.tasks
 
 import com.pqixing.Tools
 import com.pqixing.modularization.base.BaseTask
+import com.pqixing.tools.FileUtils
+import java.io.File
 
 open class CleanProjectTask : BaseTask() {
     override fun start() {
@@ -9,8 +11,10 @@ open class CleanProjectTask : BaseTask() {
     }
 
     override fun runTask() = project.allprojects { p ->
-        Tools.println("clean ${p.name} ... ")
-        p.buildDir.deleteOnExit()
+        if (p != p.rootProject) {
+            FileUtils.delete(File(p.projectDir, "build"))
+            Tools.println("clean ${p.name} ... ")
+        }
     }
 
 

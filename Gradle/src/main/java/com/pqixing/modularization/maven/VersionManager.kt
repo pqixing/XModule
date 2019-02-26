@@ -33,7 +33,7 @@ object VersionManager : OnClear {
         groupName = ""
     }
 
-    private var repoGitDir: File = File(ManagerPlugin.getPlugin().project.gradle.gradleUserHomeDir, "caches/docRepo")
+    var repoGitDir: File = File(ManagerPlugin.getPlugin().project.gradle.gradleUserHomeDir, "caches/docRepo")
 
     private var repoLastCommit = 0
 
@@ -285,7 +285,7 @@ object VersionManager : OnClear {
         PropertiesUtils.writeProperties(branchFile, tagVersions.toProperties())
         ResultUtils.writeResult(branchFile.absolutePath)
         val git = Git.open(repoGitDir)
-        GitUtils.addAndPush(git, FileNames.MANAGER, "createVersionTag $taskBranch ${Date().toLocaleString()}", true)
+        GitUtils.addAndPush(git, ".", "createVersionTag $taskBranch ${Date().toLocaleString()}", true)
         GitUtils.close(git)
         return true
     }
@@ -294,7 +294,7 @@ object VersionManager : OnClear {
      * 从网络获取最新的版本号信息
      */
     private fun indexVersionFromNet(outFile: File, versions: HashMap<String, String>) {
-
+        if(!GitUtils.isGitDir(repoGitDir)) prepareVersions()
         val plugin = ManagerPlugin.getPlugin()
         val extends = plugin.getExtends(ManagerExtends::class.java)
         val maven = extends.groupMaven

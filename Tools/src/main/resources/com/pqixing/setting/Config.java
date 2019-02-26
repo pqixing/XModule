@@ -19,7 +19,7 @@ public class Config {
     /**
      * 本地目录的根目录，用来查找本地目录，以及下载Clone
      */
-    public String codeRoot = "src";
+    public String codeRoot = "../CodeSrc";
 
     /**
      * 用户名称,可用于git和maven上传时使用
