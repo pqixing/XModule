@@ -32,7 +32,7 @@ object PropertiesUtils {
     }
 
     fun writeProperties(file: File, properties: Properties) {
-        if (!file.parentFile.exists()) file.mkdirs()
+        if (!file.exists()) file.parentFile.mkdirs()
         properties.store(file.outputStream(), "UTF-8")
     }
 }

@@ -42,7 +42,7 @@ class Script {
             setting.include(":${name}_api")
             setting.findProject(":${name}_api").projectDir = new File(projectDir, "src/api")
         }
-        setting.println("include -> project=$name path=$projectDir.absolutePath; type=$type")
+//        setting.println("include -> project=$name path=$projectDir.absolutePath; type=$type")
     }
 }
 
