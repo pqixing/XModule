@@ -1,14 +1,11 @@
 package com.pqixing.modularization.android.tasks
 
 import com.pqixing.Tools
-import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.SubModuleType
-import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.AndroidPlugin
-import com.pqixing.modularization.android.dps.DpComponents
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
@@ -244,14 +241,14 @@ open class DpsAnalysisTask : BaseTask() {
             }
         }
         resultStr.append("SortByDegree=${getCollectionStr(allDps)} \n")
-        resultStr.append("curPath=$(pwd) \n\n")
+        resultStr.append("\ncurPath=$(pwd) \n\n")
         resultStr.append("echo Start All ToMaven Task!! \n")
         resultStr.append("cd ${project.rootDir.absolutePath} \n")
         toMavens.forEach { resultStr.append(it) }
         resultStr.append("echo End All ToMaven Task!!\n")
         resultStr.append("cd \$curPath \n")
         FileUtils.writeText(File(dir, Keys.TXT_DPS_ANALYSIS), resultStr.toString())
-        FileUtils.writeText(File(plugin.rootDir, "build/${project.name}.dp"), getCollectionStr(include))
+        FileUtils.writeText(File(plugin.rootDir, "build/dps/${project.name}.dp"), getCollectionStr(include))
     }
 
     private fun getCollectionStr(include: Any): String {

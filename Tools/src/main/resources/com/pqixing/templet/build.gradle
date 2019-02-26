@@ -11,8 +11,6 @@ buildscript {
         maven {
             url "https://jitpack.io"
         }
-        if (localBuild) maven { url localMavenUri }
-        else maven { url "https://jitpack.io" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.0'
