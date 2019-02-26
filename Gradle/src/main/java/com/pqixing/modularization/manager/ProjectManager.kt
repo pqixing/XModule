@@ -40,11 +40,12 @@ object ProjectManager : OnClear {
         val extends = ManagerPlugin.getExtends()
         val info = extends.config
         val buildDir = info.buildDir.toString().trim()
-        //重新设置build 目录
-        project.buildDir = File(project.buildDir, if (buildDir.isEmpty()) "default" else buildDir)
-
         //不在配置文件的git工程，不进行管理
         val subModule = projectXml.findSubModuleByName(project.name) ?: return null
+        val apiModule = subModule.isApiModule()
+        //重新设置build 目录
+        project.buildDir = File(project.projectDir, "build/"+(if (buildDir.isEmpty()) "default" else buildDir))
+
         if (subModule.hasCheck) return subModule
 
         val projectDir = File(codeRootDir, subModule.project.name)
@@ -64,13 +65,10 @@ object ProjectManager : OnClear {
             Tools.println("${subModule.name} branch is $mBranch , do not match doc branch $docRepoBranch")
         }
         //如果是Api工程,检查基础模块在不在
-        if (subModule.isApiModule()) {
+        if (apiModule) {
             val moduleDir = File(codeRootDir, subModule.path)
             with(File(moduleDir, "build.gradle")) {
-                if (!exists()) FileUtils.writeText(this, "apply plugin: 'com.module.android' \n apply from: \"\$gradles/com.module.ktolin.gradle\"")
-            }
-            with(File(moduleDir, "AndroidManifest.xml")) {
-                if (!exists()) FileUtils.writeText(this, "apply from: \"\$gradles/com.module.ktolin.gradle\"")
+                if (!exists()) FileUtils.writeText(this, "apply plugin: 'com.module.android'\n endConfig()\n ")
             }
             with(File(moduleDir, "java")) {
                 if (!exists()) this.mkdir()
@@ -80,7 +78,7 @@ object ProjectManager : OnClear {
             }
             //写入空清单文件
             with(File(moduleDir, "AndroidManifest.xml")) {
-                if (exists()) {
+                if (!exists()) {
                     val emptyManifest = (FileUtils.readText(File(projectRoot, "templet/android/Empty_AndroidManifest.xml"))
                             ?: "").replace("[groupName]", extends.groupName).replace("[projectName]", subModule.name)
                     FileUtils.writeText(this, emptyManifest)

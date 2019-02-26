@@ -57,9 +57,10 @@ open class AndroidPlugin : BasePlugin() {
     override val applyFiles: List<String>
         get() {
             if (isApp) return listOf("com.module.application")
+            val libraryGradle = if (subModule.isApiModule()) "com.module.api" else "com.module.library"
             //如果是独立运行，或者是本地同步时，包含dev分支
-            if (buildAsApp || justSync) return listOf("com.module.library", "com.module.dev")
-            return listOf("com.module.library", "com.module.maven")
+            if (buildAsApp || justSync) return listOf(libraryGradle, "com.module.dev")
+            return listOf(libraryGradle, "com.module.maven")
         }
     override val ignoreFields: Set<String> = emptySet()
 
@@ -129,7 +130,7 @@ open class AndroidPlugin : BasePlugin() {
             return
         }
         val projectPre = ":${project.name}"
-        val filter = getGradle().startParameter.taskNames.filter { it.startsWith(projectPre) }.firstOrNull()
+        val filter = getGradle().startParameter.taskNames.firstOrNull { it.startsWith(projectPre) }
                 ?: ""
         if (filter.isEmpty() || filter.matches(Regex(":${project.name}:generate.*?Sources"))) {
             justSync = true
