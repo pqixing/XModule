@@ -40,7 +40,8 @@ open class PrepareMergeTask: BaseTask() {
         val byBranch = VersionManager.findAllModuleByBranch(checkBranch)
         Tools.println("All module by branch $checkBranch-> $byBranch")
 
-        val result = StringBuilder()
+        val result = StringBuilder("app=")
+
         ProjectManager.projectXml.projects.forEach { p ->
             p.submodules.forEach { s ->
                 if (s.type == SubModuleType.TYPE_APPLICATION) {
@@ -48,6 +49,7 @@ open class PrepareMergeTask: BaseTask() {
                 }
             }
         }
+        result.append("#library=")
         byBranch.forEach { result.append("$it,") }
         Tools.println("By merge $mergeBranch to $curBranch , Suggest import module :")
         ResultUtils.writeResult(result.toString())
