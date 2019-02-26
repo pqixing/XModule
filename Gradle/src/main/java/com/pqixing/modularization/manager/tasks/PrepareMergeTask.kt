@@ -31,14 +31,17 @@ open class PrepareMergeTask: BaseTask() {
         val curBranch = extends.docRepoBranch
         //需要合并到当前的指定分支
         val mergeBranch = extends.config.taskBranch
-        if (curBranch == mergeBranch) return
+        if (curBranch == mergeBranch) {
+            Tools.println("Merge branch is the same as local branch $curBranch")
+            return
+        }
         val curIndex = extends.matchingFallbacks.indexOf(curBranch)
         val mergeIndex = extends.matchingFallbacks.indexOf(mergeBranch)
         val checkBranch = if (mergeIndex <= curIndex) mergeBranch else curBranch
 
         //查找出,当前分支,所有上传过的模块,在合并前先导入AS
         val byBranch = VersionManager.findAllModuleByBranch(checkBranch)
-        Tools.println("All module by branch $checkBranch-> $byBranch")
+//        Tools.println("All module by branch $checkBranch-> $byBranch")
 
         val result = StringBuilder("app=")
 
