@@ -106,13 +106,13 @@ object XmlHelper {
 
             val children = p.getAt(QName("submodule"))
             if (children.isEmpty()) {
-                project.submodules.add(SubModule(project, rootName, introduce, rootName, type))
+                project.addSubModule(SubModule(project, rootName, introduce, rootName, type))
             } else children.forEach { c ->
                 if (c is Node) {
                     val name = c.get("@name").toString()
                     val t = c.get("@type")?.toString() ?: SubModuleType.TYPE_LIBRARY
                     introduce = c.get("@introduce").toString()
-                    project.submodules.add(SubModule(project, name, introduce, "$rootName/$name", t))
+                    project.addSubModule(SubModule(project, name, introduce, "$rootName/$name", t))
                 }
             }
         }

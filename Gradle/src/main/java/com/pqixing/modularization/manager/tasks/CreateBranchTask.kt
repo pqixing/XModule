@@ -3,6 +3,7 @@ package com.pqixing.modularization.manager.tasks
 import com.pqixing.Tools
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.maven.VersionManager
@@ -25,11 +26,10 @@ open class CreateBranchTask : BaseTask() {
         var targetBranch = info.taskBranch
 
         val fail = ArrayList<String>()
-        val rootDir = ManagerPlugin.getPlugin().rootDir
         ProjectManager.projectXml.projects
                 .map { File(ProjectManager.codeRootDir, it.name) }
                 .toMutableList().apply {
-                    add(rootDir)
+                    add(FileManager.templetRoot)
                 }.forEach {
                     val git = GitUtils.open(it) ?: return@forEach
                     if (!GitUtils.checkIfClean(git) || !GitUtils.createBranch(git, targetBranch)) fail.add(it.name)

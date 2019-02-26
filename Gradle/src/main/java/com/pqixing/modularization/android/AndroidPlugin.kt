@@ -9,10 +9,15 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.android.tasks.BuildApkTask
+import com.pqixing.modularization.android.tasks.DpsAnalysisTask
+import com.pqixing.modularization.android.tasks.PrepareDevTask
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.maven.CleanCache
+import com.pqixing.modularization.maven.ToMavenCheckTask
+import com.pqixing.modularization.maven.ToMavenTask
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import org.gradle.api.Project
@@ -26,7 +31,7 @@ open class AndroidPlugin : BasePlugin() {
         project.apply(mapOf<String, String>("plugin" to if (buildAsApp) Keys.NAME_APP else Keys.NAME_LIBRARY))
 
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
-        extHelper.setExtValue(project, "ModuleName", project.name)
+        extHelper.setExtValue(project, "moduleName", project.name)
 
         if (!isApp) project.apply(mapOf<String, String>("plugin" to "maven"))
         //如果是Library模块运行，设置ApplicationId
@@ -59,18 +64,13 @@ open class AndroidPlugin : BasePlugin() {
         }
     override val ignoreFields: Set<String> = emptySet()
 
-    override fun linkTask(): List<Class<out Task>> {
-//        var tasks = mutableListOf(CleanCache::class.java, DpsAnalysisTask::class.java)
-//        if (subModule.type != SubModuleType.TYPE_APPLICATION) tasks.addAll(listOf(PrepareDevTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java))
-//        tasks.add(BuildApkTask::class.java)
-        return mutableListOf(BuildApkTask::class.java)
-    }
+    override fun linkTask(): List<Class<out Task>> = mutableListOf(DpsAnalysisTask::class.java, PrepareDevTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java, BuildApkTask::class.java)
 
     lateinit var dpsManager: DpsManager
     override fun apply(project: Project) {
         this.p = project
-        initSubModule(project)
         project.extensions.extraProperties.set(project.name, this)
+        initSubModule(project)
         //如果是空同步，不做任何处理
         val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, this, ProjectManager.checkProject(project))
         super.apply(project)
@@ -130,7 +130,8 @@ open class AndroidPlugin : BasePlugin() {
             return
         }
         val projectPre = ":${project.name}"
-        val filter = getGradle().startParameter.taskNames.filter { it.startsWith(projectPre) }.firstOrNull() ?: ""
+        val filter = getGradle().startParameter.taskNames.filter { it.startsWith(projectPre) }.firstOrNull()
+                ?: ""
         if (filter.isEmpty() || filter.matches(Regex(":${project.name}:generate.*?Sources"))) {
             justSync = true
             return

@@ -7,6 +7,7 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.IPlugin
 import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.manager.ExceptionManager.EXCEPTION_SYNC
+import com.pqixing.modularization.manager.FileManager.templetRoot
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.Git
@@ -23,13 +24,7 @@ object FileManager : OnClear {
     override fun clear() {
     }
 
-    var templetRoot: File = File("empty")
-    get() {
-        if(field.name == "empty"){
-            field = File(ManagerPlugin.getPlugin().rootDir,"templet")
-        }
-        return field
-    }
+    val templetRoot: File = File(ManagerPlugin.getPlugin().rootDir, "templet")
 
     fun getProjectXml(): File {
         return File(templetRoot, FileNames.PROJECT_XML)
@@ -54,7 +49,7 @@ object FileManager : OnClear {
             if (!exists()) FileUtils.writeText(this, FileUtils.getTextFromResource(Templet.gitignore))
         }
         val settingFile = File(plugin.rootDir, Templet.settings_gradle)
-        val source = if(settingFile.exists()) settingFile.readText() else ""
+        val source = if (settingFile.exists()) settingFile.readText() else ""
         val replace = FileUtils.replaceOrInsert("//Auto Code Start", "//Auto Code End", FileUtils.getTextFromResource(Templet.settings_gradle), source)
         FileUtils.writeText(settingFile, replace, true)
     }
@@ -66,7 +61,7 @@ object FileManager : OnClear {
      */
     fun checkDocument(plugin: ManagerPlugin) {
         val extends = ManagerPlugin.getExtends()
-        val docGit = GitUtils.open(plugin.rootDir) ?: createDocGit(plugin)
+        val docGit = GitUtils.open(templetRoot) ?: createDocGit(plugin)
         extends.docRepoBranch = docGit.repository.branch
 
         var i = mutableListOf<String>()
@@ -77,9 +72,9 @@ object FileManager : OnClear {
                 com.pqixing.tools.FileUtils.writeText(f, com.pqixing.tools.FileUtils.getTextFromResource(s), true)
             }
         }
-        if (i.isNotEmpty()) {
-            GitUtils.addAndPush(docGit, ".", "add file $i", true)
-        }
+//        if (i.isNotEmpty()) {
+//            GitUtils.addAndPush(docGit, ".", "add file $i", true)
+//        }
         GitUtils.close(docGit)
 
         //更新编译相关文件
@@ -88,19 +83,21 @@ object FileManager : OnClear {
             FileUtils.writeText(File(rootDir, "gradle.properties"), File(rootDir, "templet/gradle.properties").readText(), true)
             FileUtils.writeText(File(rootDir, "gradle/wrapper/gradle-wrapper.properties"), File(rootDir, "templet/gradle-wrapper.properties").readText(), true)
         }
-        templetRoot = File(rootDir, "templet")
     }
 
     private fun createDocGit(plugin: ManagerPlugin): Git {
         val extends = ManagerPlugin.getExtends()
-        val tempDoc = File(plugin.rootDir, "tempDoc")
+        val tempDoc = templetRoot
+        if (tempDoc.exists()) {
+            FileUtils.delete(tempDoc)
+        }
         //clone the dir
         val clone = GitUtils.clone(extends.docRepoUrl, tempDoc)
         if (clone == null) ExceptionManager.thow(EXCEPTION_SYNC, "can not clone doc project!!")
 
         //move doc to root dir
-        FileUtils.moveDir(tempDoc, plugin.rootDir)
-        FileUtils.delete(tempDoc)
+//        FileUtils.moveDir(tempDoc, plugin.rootDir)
+//        FileUtils.delete(tempDoc)
         return clone!!
     }
 

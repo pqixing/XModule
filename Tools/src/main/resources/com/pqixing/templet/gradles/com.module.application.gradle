@@ -1,14 +1,15 @@
 apply from :"$gradles/com.module.android.gradle"
-
-buildTypes {
-    //生产测试环境
-    outTest {
-        initWith release
-        matchingFallbacks = ['release']
-    }
-    //测试环境
-    inTest {
-        initWith release
-        matchingFallbacks = ['release']
+android {
+    buildTypes {
+        //生产测试环境
+        outTest {
+            initWith release
+            matchingFallbacks = ['release']
+        }
+        //测试环境
+        inTest {
+            initWith release
+            matchingFallbacks = ['release']
+        }
     }
 }

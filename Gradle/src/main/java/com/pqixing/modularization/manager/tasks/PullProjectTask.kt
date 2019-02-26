@@ -3,6 +3,7 @@ package com.pqixing.modularization.manager.tasks
 import com.pqixing.Tools
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.utils.GitUtils
 import java.io.File
@@ -16,7 +17,7 @@ open class PullProjectTask : BaseTask() {
     }
 
     override fun runTask() {
-        GitUtils.open(project.rootDir)?.apply {
+        GitUtils.open(FileManager.templetRoot)?.apply {
             GitUtils.pull(this)
             close()
         }

@@ -27,11 +27,10 @@ open class DeleteBranchTask : BaseTask() {
         if (targetBranch == "master") Tools.printError("DeleteBranchTask Exception -> Can not delete master !!")
 
         val fail = ArrayList<String>()
-        val rootDir = ManagerPlugin.getPlugin().rootDir
         ProjectManager.projectXml.projects
                 .map { File(ProjectManager.codeRootDir, it.name) }
                 .toMutableList().apply {
-                    add(rootDir)
+                    add(FileManager.templetRoot)
                 }.forEach {
                     val git = GitUtils.open(it) ?: return@forEach
                     if (!GitUtils.pull(git) || !GitUtils.delete(git, targetBranch)) fail.add(it.name)

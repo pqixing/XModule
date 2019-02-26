@@ -1,6 +1,5 @@
 package com.pqixing.modularization.manager
 
-import com.pqixing.Config
 import com.pqixing.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.ProjectXmlModel
@@ -54,6 +53,7 @@ object ProjectManager : OnClear {
         var mBranch = subModule.project.branch
         if (mBranch.isEmpty()) if (GitUtils.isGitDir(projectDir)) Git.open(projectDir)
         else {
+            FileUtils.delete(projectDir)
             GitUtils.clone(subModule.project.url, projectDir)
         }?.apply {
             mBranch = this.repository.branch

@@ -120,7 +120,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
 
         //如果当前模块，有api模块，则，默认添加对api模块的依赖
         val apiModule = plugin.subModule.findApi() ?: return
-        dpsExt.compile(apiModule.name)
+        dpsExt.compile("${apiModule.name}:${dpsExt.toMavenVersion}")
     }
 
     /**
@@ -171,7 +171,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
             sb.append("    $prefix (")
             if (it.first != null) sb.append("group : '${it.first}',")
             if (it.second != null) sb.append("module : '${it.second}',")
-            sb.deleteCharAt(sb.length -  1)
+            sb.deleteCharAt(sb.length - 1)
             sb.append(") \n")
         }
         return sb.toString()

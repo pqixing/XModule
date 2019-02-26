@@ -2,6 +2,7 @@ package com.pqixing.modularization.manager.tasks
 
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.utils.GitUtils
@@ -22,7 +23,7 @@ open class CheckOutTask : BaseTask() {
         if (targetBranch.isEmpty()) targetBranch = extends.docRepoBranch
 
         val fail = ArrayList<String>()
-        GitUtils.open(project.rootDir)?.apply {
+        GitUtils.open(FileManager.templetRoot)?.apply {
             val check = GitUtils.checkoutBranch(this, targetBranch, true)
             if (!check) fail.add(project.rootDir.name)
             close()
