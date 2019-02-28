@@ -8,6 +8,7 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
+import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.ToMavenDialog
 import com.pqixing.intellij.utils.GradleUtils
@@ -26,7 +27,7 @@ class ToMavenAction : AnAction() {
 
         //需要ToMaven的模块
         val tModules = ModuleManager.getInstance(project).sortedModules
-                .filter { filters == null || it.name == moduleName || filters.contains(it.name) }
+                .filter { it.name != project.name && (filters == null || it.name == moduleName || filters.contains(it.name)) }
                 .map { JListInfo(it.name, "", 0, it.name == moduleName || it.name == "${moduleName}_api") }
 
 
@@ -55,6 +56,8 @@ class ToMavenAction : AnAction() {
             if (info.select && info.staue != 2) {
                 check = true
                 runTaskId = System.currentTimeMillis().toString()
+                info.staue = 2//正在执行
+                dialog.updateUI(false)
                 GradleUtils.runTask(project, listOf(":${info.title}:clean", ":${info.title}:ToMaven"), runTaskId = runTaskId, callback = this)
             } else {
                 check = false

@@ -87,6 +87,9 @@ class ImportAction : AnAction() {
         val manager = ModuleManager.getInstance(project)
         var fail = 0
         manager.modules.forEach { m ->
+            if (m.name == project.name) {
+                return@forEach
+            }
             val remove = includes.remove(m.name)
             if (remove == null) {
                 manager.disposeModule(m)

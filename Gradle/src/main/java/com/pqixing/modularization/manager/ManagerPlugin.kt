@@ -69,7 +69,7 @@ open class ManagerPlugin : BasePlugin() {
     private fun initTools(project: Project) {
         Tools.init(object : ILog {
             override fun printError(exitCode: Int, l: String?) = ResultUtils.writeResult(l
-                    ?: "", exitCode)
+                    ?: "", exitCode,true)
 
             override fun println(l: String?) = System.out.println(l)
         }, project.rootDir.absolutePath)

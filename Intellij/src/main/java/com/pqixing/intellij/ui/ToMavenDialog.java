@@ -13,8 +13,10 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -24,6 +26,7 @@ public class ToMavenDialog extends JDialog {
     private JButton buttonOK;
     private JList jList;
     private JButton all;
+    private JLabel jlProgress;
     JListSelectAdapter adapter;
     private Runnable onOk;
     private boolean allSelect;
@@ -71,7 +74,20 @@ public class ToMavenDialog extends JDialog {
      */
     public void updateUI(boolean okVisible) {
         buttonOK.setVisible(okVisible);
+        jlProgress.setVisible(!okVisible);
+        if (!okVisible) {
+
+            List<JListInfo> datas = adapter.getDatas();
+            int all = 0;
+            int done = 0;
+            for (JListInfo i : datas) {
+                if (i.getSelect()) all++;
+                if (i.getStaue() == 1) done++;
+            }
+            jlProgress.setText(done + "/" + all);
+        }
         adapter.updateUI();
+
     }
 
     private void onOK() {

@@ -123,7 +123,7 @@ open class ToMavenCheckTask : BaseTask() {
         val hash = params["hash"] ?: ""
         val commitTime = params["commitTime"]?.toInt() ?: 0
         if (hash == revCommit.name || revCommit.commitTime < commitTime) {
-            Tools.printError("$artifactId There are not change after last ToMaven!!!")
+            Tools.printError(" $artifactId  $baseVersion.$lastVersion The code are not change", 0)//距离上次提交没有变更时,视为成功
         }
     }
 

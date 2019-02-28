@@ -11,7 +11,7 @@ import com.pqixing.tools.UrlUtils
 import java.io.File
 
 object GradleUtils {
-    val defEnvs = mapOf(Pair("include", "Auto"), Pair("dependentModel", "mavenOnly"), Pair("buildDir", "ToMaven"))
+    val defEnvs = mapOf(Pair("include", "Auto"), Pair("dependentModel", "mavenOnly"), Pair("buildDir", "ToMaven"), Pair("syncType", "ide"))
     var GRADLE = ProjectSystemId("GRADLE")
 
     fun runTask(project: Project
@@ -21,16 +21,14 @@ object GradleUtils {
                 , runTaskId: String = System.currentTimeMillis().toString()
                 , envs: Map<String, String> = defEnvs
                 , callback: Runnable? = null) {
-        if (true) {
-            callback?.run()
-            return
-        }
+
         val settings = ExternalSystemTaskExecutionSettings()
         settings.executionName = "Running Task:$tasks"
         settings.taskNames = tasks
         settings.externalSystemIdString = GRADLE.id
         settings.externalProjectPath = project.basePath
         settings.env = envs.toMutableMap().apply { put("run_task_id", runTaskId) }
+        settings.vmOptions = getVmOpions(settings.env)
         ExternalSystemUtil.runTask(settings, DefaultRunExecutor.EXECUTOR_ID, project, GRADLE, object : TaskCallback {
             override fun onSuccess() {
                 callback?.run()
@@ -40,6 +38,14 @@ object GradleUtils {
                 callback?.run()
             }
         }, progressExecutionMode, activateToolWindowBeforeRun)
+    }
+
+    private fun getVmOpions(env: MutableMap<String, String>): String {
+        val option = StringBuilder()
+        env.forEach {
+            option.append("-D${it.key}=${it.value} ")
+        }
+        return option.toString()
     }
 
     /**
@@ -60,5 +66,5 @@ object GradleUtils {
         return Pair(false, "No Result")
     }
 
-    fun getLogFile(basePath: String) = File(basePath, "build/modularization/ide.log")
+    fun getLogFile(basePath: String) = File(basePath, ".idea/modularization.log")
 }

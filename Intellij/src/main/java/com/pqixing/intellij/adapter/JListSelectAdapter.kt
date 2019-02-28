@@ -84,13 +84,13 @@ open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boole
 
     override fun getListCellRendererComponent(p0: JList<out JListInfo>?, info: JListInfo, p2: Int, p3: Boolean, p4: Boolean): Component? {
         label.text = "   " + info.title
-        log.text = when (info.staue) {
-            1 -> "√  "
-            2 -> "--- "
-            3 -> "×  "
-            else -> "     "
-        } + info.log
-        log.foreground = if (info.staue == 3) error else Color.DARK_GRAY
+        log.text = info.log+when (info.staue) {
+            1 -> " √ "
+            2 -> "--"
+            3 -> " ×  "
+            else -> "   "
+        }
+        log.foreground = if (info.staue == 3) error else success
         log.isOpaque = info.staue == 3
 
         val revers = endIndex != -1 && p2 in Math.min(startIndex, endIndex)..Math.max(startIndex, endIndex)
