@@ -9,7 +9,7 @@
       <maximumSize width="2147483647" height="2147483647"/>
       <minimumSize width="368" height="100"/>
       <opaque value="true"/>
-      <preferredSize width="600" height="400"/>
+      <preferredSize width="800" height="400"/>
     </properties>
     <border type="none"/>
     <children>
@@ -24,7 +24,7 @@
           <scrollpane id="44958">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="8" fill="2" indent="0" use-parent-layout="false">
-                <preferred-size width="300" height="-1"/>
+                <preferred-size width="400" height="-1"/>
               </grid>
             </constraints>
             <properties>
@@ -41,7 +41,7 @@
                     <item value="test1"/>
                   </model>
                   <name value="Select"/>
-                  <preferredSize width="-1" height="-1"/>
+                  <preferredSize width="-1" height="600"/>
                   <toolTipText value="Select"/>
                 </properties>
               </component>
@@ -50,7 +50,7 @@
           <scrollpane id="a853f">
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="4" fill="2" indent="0" use-parent-layout="false">
-                <preferred-size width="300" height="-1"/>
+                <preferred-size width="400" height="-1"/>
               </grid>
             </constraints>
             <properties>
@@ -109,7 +109,7 @@
                     <item value="&lt;submodule name=&quot;dcnet&quot; introduce=&quot;dcnet地址管理&quot; /&gt;"/>
                     <item value="&lt;submodule name=&quot;dcuser&quot; i"/>
                   </model>
-                  <preferredSize width="-1" height="600"/>
+                  <preferredSize width="-1" height="2000"/>
                   <toolTipText value="Others"/>
                   <visibleRowCount value="15"/>
                 </properties>
@@ -213,7 +213,9 @@
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties/>
+            <properties>
+              <toolTipText value=""/>
+            </properties>
           </component>
           <component id="db42c" class="javax.swing.JTextField" binding="codeRoot">
             <constraints>

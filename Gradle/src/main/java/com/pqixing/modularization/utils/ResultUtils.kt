@@ -20,7 +20,7 @@ object ResultUtils {
         val plugin = ManagerPlugin.getPlugin()
         val ideFile = File(plugin.cacheDir, "ide.log")
         val log = "${Keys.PREFIX_IDE_LOG}?${Keys.RUN_TASK_ID}=${getProperty(Keys.RUN_TASK_ID)
-                ?: System.currentTimeMillis()}&exitCode=$exitCode&msg=$msg"
+                ?: System.currentTimeMillis()}&endTime=${System.currentTimeMillis()}&exitCode=$exitCode&msg=$msg"
 
         Tools.println(msg)
         if (ideFile.exists() && ideFile.length() > 102400) {
@@ -31,7 +31,7 @@ object ResultUtils {
         if (!ideFile.exists()) {
             FileUtils.writeText(ideFile, log)
         } else ideFile.appendText("\n" + log)
-        if(exitCode!=0){
+        if (exitCode != 0) {
             throw  GradleException(msg)
         }
     }

@@ -2,66 +2,64 @@ package com.pqixing.intellij.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.DataKey
+import com.intellij.openapi.externalSystem.task.TaskCallback
+import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ModuleRootManager
+import com.pqixing.intellij.adapter.JListInfo
+import com.pqixing.intellij.ui.ToMavenDialog
+import com.pqixing.intellij.utils.GradleUtils
+import java.io.File
 
 class ToMavenAction : AnAction() {
+    lateinit var project: Project
     override fun actionPerformed(e: AnActionEvent) {
-//        val dialog = ToMavenDialog()
-//        dialog.pack()
-//        dialog.isVisible = true
-//        val module = e.getData(DataKey.create<Module>("module"))
-//        val dpsSort = loadAndSortDps(module)
+        project = e.project ?: return
+
+        val module = e.getData(DataKey.create<Module>("module"))
+        val moduleName = module?.name ?: ""
+
+        val projectMode = /*"ProjectViewPopup".equals(place)||*/"MainMenu" == e.place || module == null || project.name == moduleName;
+        var filters = if (projectMode) null else ModuleRootManager.getInstance(module!!).dependencies.map { it.name }
+
+        //需要ToMaven的模块
+        val tModules = ModuleManager.getInstance(project).sortedModules
+                .filter { filters == null || it.name == moduleName || filters.contains(it.name) }
+                .map { JListInfo(it.name, "", 0, it.name == moduleName || it.name == "${moduleName}_api") }
+
+
+        val dialog = ToMavenDialog(tModules);
+        dialog.setOnOk { toMaven(dialog, tModules) }
+        dialog.pack()
+        dialog.isVisible = true
     }
-//
-//    private fun loadAndSortDps(module: Module?): List<String> {
-//
-//    }
-//
-//    /**
-//     * 获取依赖的模块名称
-//     *
-//     * @param module
-//     * @return
-//     */
-//    private fun getDps(module: Module): List<String> {
-//        var m:Module? = module
-//        while (m!=null){
-//
-//        }
-//        val levels = HashMap<String,Int>()
-//        loadModuleByLevel(0, module, levels)
-//        val newMaps = HashMap()
-//
-//        var lastDept = 0
-//        for (entry in levels.entrySet()) {
-//            val value = entry.value
-//            lastDept = Math.max(lastDept, value)
-//            var list = newMaps.get(value)
-//            if (list == null) {
-//                list = ArrayList<String>()
-//                newMaps.put(value, list)
-//            }
-//            list!!.add(entry.key)
-//        }
-//        val sortModles = ArrayList<String>()
-//        for (i in lastDept downTo 0) {
-//            val strings = newMaps.get(i)
-//            if (strings != null) sortModles.addAll(strings!!)
-//        }
-//        return sortModles
-//    }
-//
-//    private fun loadModuleByLevel(dept: Int, module: Module, levels: HashMap<String, Int>) {
-//        val modules = ModuleRootManager.getInstance(module).dependencies
-//        if (modules == null || modules.size == 0) return
-//        for (m in modules) {
-//            if (m == null) continue
-//            val name = m.name
-//            val oldDept = if (levels.containsKey(name)) levels[name] else 0
-//            levels[name] = Math.max(oldDept, dept)
-//        }
-//
-//        for (m in modules) {
-//            loadModuleByLevel(dept + 1, m, levels)
-//        }
-//    }
+
+    private fun toMaven(dialog: ToMavenDialog, tModules: List<JListInfo>) = object : Runnable {
+        var i = -1
+        var check = false//是否需要校验结果
+        var runTaskId = ""
+        val logFile = GradleUtils.getLogFile(project.basePath!!)
+        override fun run() {
+            if (check) {//检查上传的任务是否正确
+                val result = GradleUtils.getResult(logFile, runTaskId)
+                var succes = result.first
+                val jListInfo = tModules[i]
+                jListInfo.staue = if (succes) 1 else 3
+                jListInfo.log = result.second
+                dialog.updateUI(!succes)
+                if (!succes) return
+            }
+            val info = tModules[++i]
+            if (info.select && info.staue != 2) {
+                check = true
+                runTaskId = System.currentTimeMillis().toString()
+                GradleUtils.runTask(project, listOf(":${info.title}:clean", ":${info.title}:ToMaven"), runTaskId = runTaskId, callback = this)
+            } else {
+                check = false
+                runTaskId = ""
+            }
+        }
+    }.run()
 }

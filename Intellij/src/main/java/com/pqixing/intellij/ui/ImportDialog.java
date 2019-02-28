@@ -1,6 +1,5 @@
 package com.pqixing.intellij.ui;
 
-import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 
@@ -159,7 +158,7 @@ public class ImportDialog extends JDialog {
         private String filterKey;
 
         public ImportSelectAdapter(JList jList, List<JListInfo> datas) {
-            super(jList);
+            super(jList,false);
             setDatas(datas);
         }
 

@@ -63,7 +63,7 @@ public class GitOperatorDialog extends JDialog implements ActionListener {
         update.addActionListener(this);
         create.addActionListener(this);
         delete.addActionListener(this);
-        adapter = new JListSelectAdapter(jlRecords);
+        adapter = new JListSelectAdapter(jlRecords,true);
         ArrayList<String> list = new ArrayList<>();
         for (int i = 0; i < 300; i++) {
             list.add("item" + i);

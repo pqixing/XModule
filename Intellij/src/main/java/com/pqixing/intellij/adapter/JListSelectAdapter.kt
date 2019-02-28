@@ -10,18 +10,25 @@ import javax.swing.border.BevelBorder
 import javax.swing.event.ListSelectionEvent
 import javax.swing.event.ListSelectionListener
 
-open class JListSelectAdapter(val jList: JList<JListInfo>) : AbstractListModel<JListInfo>(), ListCellRenderer<JListInfo>, ListSelectionListener {
+open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boolean) : AbstractListModel<JListInfo>(), ListCellRenderer<JListInfo>, ListSelectionListener {
     var startIndex = -1
     var endIndex = -1
     public var selectListener: JlistSelectListener? = null
     var label = JLabel().apply {
         font = Font("宋体", Font.PLAIN, 14)
-        setSize(300, 30)
+//        setSize(100, 30)
+    }
+    var box = JCheckBox()
+    var log = JLabel().apply {
+        font = Font("宋体", Font.PLAIN, 14)
+        setSize(100, 30)
     }
     var panel = JPanel().apply {
         layout = BorderLayout()
         border = BevelBorder(BevelBorder.LOWERED)
-        add(label)
+        add(label, BorderLayout.CENTER)
+        add(box, BorderLayout.WEST)
+        add(log, BorderLayout.EAST)
     }
 
     override fun valueChanged(event: ListSelectionEvent) {
@@ -58,41 +65,37 @@ open class JListSelectAdapter(val jList: JList<JListInfo>) : AbstractListModel<J
     open fun setDatas(ds: List<JListInfo>) {
         datas.clear()
         datas.addAll(ds)
+        updateUI()
+    }
+
+    fun updateUI() {
         jList.model = this
-        jList.setSize(jList.width, datas.size * 30+15)
+        jList.setSize(jList.width, datas.size * 30 + 15)
     }
 
     fun cover(ds: List<String>) = ds.map { JListInfo(title = it) }
     override fun getElementAt(p0: Int): JListInfo = datas[p0]
 
     override fun getSize(): Int = datas.size
-    val wanming = Color(236,117,0)
-    val error = Color(236,0,0)
-    val success = Color(0,187,18)
-    val normal = Color(20,160,120)
+    val wanming = Color(236, 117, 0)
+    val error = Color(236, 0, 0)
+    val success = Color(0, 187, 18)
+    val normal = Color(20, 160, 120)
 
     override fun getListCellRendererComponent(p0: JList<out JListInfo>?, info: JListInfo, p2: Int, p3: Boolean, p4: Boolean): Component? {
-        label.apply {
-//            info.staue = p2 % 4
-            foreground = when (info.staue) {
-                1 -> wanming
-                2 -> success
-                3 -> error
-                else -> normal
-            }
-            val prefix = when (info.staue) {
-                1 -> "√  "
-                2 -> "×  "
-                3 -> "--- "
-                else -> "     "
-            }
-            text = prefix + info.title + "   " + info.log
-            val revers = endIndex != -1 && p2 in Math.min(startIndex, endIndex)..Math.max(startIndex, endIndex)
-            val select = if (revers) !info.select else info.select
-            isOpaque = select
+        label.text = "   " + info.title
+        log.text = when (info.staue) {
+            1 -> "√  "
+            2 -> "--- "
+            3 -> "×  "
+            else -> "     "
+        } + info.log
+        log.foreground = if (info.staue == 3) error else Color.DARK_GRAY
+        log.isOpaque = info.staue == 3
 
-            if(select) background =  Color.LIGHT_GRAY
-        }
+        val revers = endIndex != -1 && p2 in Math.min(startIndex, endIndex)..Math.max(startIndex, endIndex)
+        box.isSelected = if (revers) !info.select else info.select
+        box.isVisible = boxVisible
         return panel
     }
 }
