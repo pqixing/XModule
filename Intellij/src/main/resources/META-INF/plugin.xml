@@ -28,24 +28,31 @@
     <depends>Git4Idea</depends>
     <depends>org.jetbrains.android</depends>
     <actions>
-        <group id="Modularization" class="com.pqixing.intellij.group.RootGroup" popup="true" text="Modularization">
+        <group id="Modularization" popup="true" text="Modularization">
             <add-to-group group-id="BuildMenu" anchor="first" />
             <add-to-group group-id="EditorPopupMenu" anchor="first" />
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first" />
-            <action id="ImportAction" class="com.pqixing.intellij.actions.ImportAction" text="Import" >
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
+            <action id="ImportAction" class="com.pqixing.intellij.actions.ImportAction"
+                text="Import">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I" />
             </action>
-            <action id="ToMavenAction" class="com.pqixing.intellij.actions.ToMavenAction" text="ToMaven" />
+            <action id="ToMavenAction" class="com.pqixing.intellij.actions.ToMavenAction"
+                text="ToMaven" />
+            <action id="GitOperatorAction" class="com.pqixing.intellij.actions.GitOperatorAction"
+                text="GitOperator" />
 
-            <action id="RunAction" class="com.pqixing.intellij.actions.RunAction" text="RunAction" />
+            <action id="RunAction" class="com.pqixing.intellij.actions.RunAction"
+                text="RunAction" />
 
-
-            <action id="com.libiao.mvpcreator" class="com.dachen.creator.actions.MvpCreator" text="MvpCreator"
-                description="auto create MVP code"/>
-            <action id="com.libiao.routercreator" class="com.dachen.creator.actions.PathCreator" text="RouterCreator"
-                description="router auto create code"/>
-            <action id="com.libiao.modelcreator" class="com.dachen.creator.actions.ModelCreator" text="ModelCreator"
-                description="auto create model code"/>
+            <group id="Creator" popup="true" text="Creator">
+                <action id="com.libiao.mvpcreator" class="com.dachen.creator.actions.MvpCreator"
+                    text="MvpCreator" description="auto create MVP code" />
+                <action id="com.libiao.routercreator" class="com.dachen.creator.actions.PathCreator"
+                    text="RouterCreator" description="router auto create code" />
+                <action id="com.libiao.modelcreator" class="com.dachen.creator.actions.ModelCreator"
+                    text="ModelCreator" description="auto create model code" />
+            </group>
+            >
         </group>
     </actions>
 </idea-plugin>
