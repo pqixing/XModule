@@ -107,7 +107,7 @@ open class ToMavenCheckTask : BaseTask() {
         var matchBranch = branch
         val match = ManagerPlugin.getExtends().matchingFallbacks
         var i = match.indexOf(matchBranch)
-        while (v < 0 && i < match.size) {
+        while (lastVersion < 0 && i < match.size) {
             matchBranch = if (i < 0) branch else match[i]
             lastVersion = VersionManager.getNewerVersion(matchBranch, artifactId, baseVersion)
             i++
@@ -123,7 +123,7 @@ open class ToMavenCheckTask : BaseTask() {
         val hash = params["hash"] ?: ""
         val commitTime = params["commitTime"]?.toInt() ?: 0
         if (hash == revCommit.name || revCommit.commitTime < commitTime) {
-            Tools.printError(" $artifactId  $baseVersion.$lastVersion The code are not change", 0)//距离上次提交没有变更时,视为成功
+            Tools.printError("$matchBranch:$artifactId:$baseVersion.$lastVersion The code are not change", 0)//距离上次提交没有变更时,视为成功
         }
     }
 
