@@ -73,7 +73,7 @@ open class JListSelectAdapter(val jList: JList<JListInfo>) : AbstractListModel<J
 
     override fun getListCellRendererComponent(p0: JList<out JListInfo>?, info: JListInfo, p2: Int, p3: Boolean, p4: Boolean): Component? {
         label.apply {
-            info.staue = p2 % 4
+//            info.staue = p2 % 4
             foreground = when (info.staue) {
                 1 -> wanming
                 2 -> success

@@ -25,7 +25,6 @@ public class RunAction extends AnAction {
         if (action == null) action = Messages.showInputDialog("Input Action Id", "RunAction", null);
         ActionManager.getInstance().getAction(action).actionPerformed(e);
         VcsRepositoryManager instance = VcsRepositoryManager.getInstance(e.getProject());
-        instance.getRepositories()
 //        new Task.Backgroundable(e.getProject(), DvcsBundle.message("cloning.repository", "http://192.168.3.200/android/Document.git")) {
 //
 //            @Override

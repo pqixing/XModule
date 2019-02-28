@@ -24,9 +24,6 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
     var mavenPassWord = ""
         get() = if (field.isNotEmpty()) field else config.passWord
 
-
-    var branch = "master"
-
     /**
      * 文档工程地址
      */

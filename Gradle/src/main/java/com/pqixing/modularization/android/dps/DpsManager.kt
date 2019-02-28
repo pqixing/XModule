@@ -185,10 +185,14 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
                 ?: return false
         if (!dpc.subModule.hasCheck) ProjectManager.checkProject(localProject)
         val branch = dpc.subModule.getBranch()
+        if (branch != managerExtends.docRepoBranch && !plugin.config.allowDpDiff) {
+            Tools.println("onLocalCompile can not dependent other branch project!!!${dpc.moduleName} $branch")
+            return false
+        }
         //如果该依赖没有本地导入，不进行本地依赖
         dpc.localCompile = true
         includes.add("${getScope(dpc.dpType, dpc.scope)} ( project(path : ':${dpc.moduleName}'))  { ${excludeStr(excludes = dpc.excludes)} }")
-        addBranchExclude(branch, dpc.moduleName, excludes,0)
+        addBranchExclude(branch, dpc.moduleName, excludes, 0)
         return true
     }
 

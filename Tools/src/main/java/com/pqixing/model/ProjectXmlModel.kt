@@ -12,6 +12,10 @@ class ProjectXmlModel(val baseUrl: String) {
         return maps[name]
     }
 
+    fun allSubModules() = mutableSetOf<SubModule>().apply {
+        projects.forEach { this.addAll(it.submodules) }
+    }
+
     fun findProjectBySubName(name: String) = findSubModuleByName(name)?.project
 
 }

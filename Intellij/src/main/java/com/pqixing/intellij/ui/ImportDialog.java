@@ -1,5 +1,6 @@
 package com.pqixing.intellij.ui;
 
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 
@@ -8,6 +9,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,6 +19,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -29,20 +34,24 @@ public class ImportDialog extends JDialog {
     private JList jlSelect;
     private JList jlOther;
     private JComboBox importModel;
-    public JComboBox codeRoot;
+    public JTextField specificInclude;
+    public JTextField codeRoot;
+    private JLabel inputHint;
+    public JButton btnConfig;
+    private HashSet<JListInfo> allInfos = new HashSet<>();
 
     public ImportSelectAdapter selctModel;
     public ImportSelectAdapter otherModel;
     private Runnable onOk;
 
     public ImportDialog() {
-        this(null, null, null);
+        this(Collections.emptyList(), Collections.emptyList(), "", "../CodeSrc", "mavenOnly");
     }
 
-    public ImportDialog(List<JListInfo> select, List<JListInfo> other, List<String> codeRoots) {
+    public ImportDialog(List<JListInfo> select, List<JListInfo> other, String more, String codeRootStr, String dependentModel) {
         setContentPane(rootPanel);
         setModal(false);
-        getRootPane().setDefaultButton(btnOK);
+//        getRootPane().setDefaultButton(btnOK);
         setTitle("Import Module");
         setLocation(400, 300);
 
@@ -66,6 +75,10 @@ public class ImportDialog extends JDialog {
         setJListModel(jlSelect, selctModel, otherModel);
         setJListModel(jlOther, otherModel, selctModel);
 
+        for (JListInfo i : select) allInfos.add(i);
+        for (JListInfo i : other) allInfos.add(i);
+
+
         tfImport.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent keyEvent) {
@@ -77,17 +90,54 @@ public class ImportDialog extends JDialog {
 
             @Override
             public void keyReleased(KeyEvent keyEvent) {
+                System.out.println("keyReleased------>"+keyEvent.getKeyChar()+" "+keyEvent.getKeyCode());
                 String key = tfImport.getText().trim();
+                if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER) {//如果敲下的是回车键,清空当前输入内容,并且自动选择待选框的文本
+                    String prepareAdd = inputHint.getText().trim();
+                    JListInfo info = null;
+                    for (JListInfo i : allInfos) {
+                        if (i.getTitle().equals(prepareAdd)) {
+                            info = i;
+                            break;
+                        }
+                    }
+                    if (info != null) {//如果该模块存在,则快速添加
+                        if (selctModel.sources.contains(info)) {
+                            selctModel.removeDatas(Arrays.asList(info),"");
+                            otherModel.addDatas(Arrays.asList(info),"");
+                        } else {
+                            selctModel.addDatas(Arrays.asList(info),"");
+                            otherModel.removeDatas(Arrays.asList(info),"");
+                        }
+                    }
+
+                    inputHint.setText("");
+                    tfImport.setText("");
+                    return;
+                }
+                String result = null;
+                for (JListInfo i : allInfos) {
+                    String title = i.getTitle();
+                    if (!title.toLowerCase().contains(key.toLowerCase())) continue;
+                    if (key.equals(title) || title.length() < (result == null ? 100 : result.length())) {
+                        result = title;
+                    }
+                }
+                if (result != null) inputHint.setText(result);
                 selctModel.filterDatas(key);
                 otherModel.filterDatas(key);
             }
         });
-        dpModel.addItem("dpModel");
-        dpModel.addItem("mavenOnly");
-        dpModel.addItem("mavenFirst");
-        dpModel.addItem("localFirst");
-        dpModel.addItem("localOnly");
-        if (codeRoot != null) codeRoots.forEach(s -> this.codeRoot.addItem(s));
+        dpModel.addItem(dependentModel);
+        List<String> asList = Arrays.asList("mavenOnly", "mavenFirst", "localFirst", "localOnly");
+        for (String s : asList) {
+            if (s.equals(dependentModel)) continue;
+            dpModel.addItem(s);
+        }
+        specificInclude.setText(more);
+
+        codeRoot.setText(codeRootStr);
+
     }
 
     private void setJListModel(JList jList, ImportSelectAdapter model, ImportSelectAdapter targetModel) {
@@ -100,8 +150,8 @@ public class ImportDialog extends JDialog {
     }
 
     public String getCodeRootStr() {
-        Object item = codeRoot.getSelectedItem();
-        return item == null || item.toString().trim().isEmpty() ? "main" : item.toString();
+        String item = codeRoot.getText().trim();
+        return item.isEmpty() ? "../CodeSrc" : item;
     }
 
     public static class ImportSelectAdapter extends JListSelectAdapter {
@@ -142,6 +192,9 @@ public class ImportDialog extends JDialog {
         }
 
         public void addDatas(List<JListInfo> datas) {
+           addDatas(datas,filterKey);
+        }
+        public void addDatas(List<JListInfo> datas,String filterKey) {
             if (datas != null) {
                 this.sources.addAll(0, datas);
                 filterDatas(filterKey);
@@ -149,6 +202,9 @@ public class ImportDialog extends JDialog {
         }
 
         public void removeDatas(List<JListInfo> datas) {
+            removeDatas(datas,filterKey);
+        }
+        public void removeDatas(List<JListInfo> datas,String filterKey) {
             if (datas != null) {
                 sources.removeAll(datas);
                 filterDatas(filterKey);
