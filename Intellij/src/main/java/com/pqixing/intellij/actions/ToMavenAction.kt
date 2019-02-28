@@ -53,7 +53,7 @@ class ToMavenAction : AnAction() {
                 if (!succes) return
             }
             val info = tModules[++i]
-            if (info.select && info.staue != 2) {
+            if (info.select && info.staue != 1) {
                 check = true
                 runTaskId = System.currentTimeMillis().toString()
                 info.staue = 2//正在执行
