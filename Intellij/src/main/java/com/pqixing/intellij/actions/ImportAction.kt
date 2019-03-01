@@ -22,7 +22,8 @@ class ImportAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
-        val projectXml = XmlHelper.parseProjectXml(File(basePath, "templet/project.xml"))
+        val projectXmlFile = File(basePath, "templet/project.xml")
+        val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
         val configFile = File(basePath, "Config.java")
         val clazz = GroovyClassLoader().parseClass(configFile)
         val newInstance = clazz.newInstance()
@@ -56,6 +57,9 @@ class ImportAction : AnAction() {
         dialog.btnConfig.addActionListener {
             FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(configFile, false)!!, true)
             dialog.dispose()
+        }
+        dialog.btnXml.addActionListener {
+            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(projectXmlFile, false)!!, true)
         }
         dialog.setOkListener { WriteCommandAction.runWriteCommandAction(project, action) }
     }

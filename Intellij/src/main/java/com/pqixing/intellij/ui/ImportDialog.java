@@ -37,6 +37,7 @@ public class ImportDialog extends JDialog {
     public JTextField codeRoot;
     private JLabel inputHint;
     public JButton btnConfig;
+    public JButton btnXml;
     private HashSet<JListInfo> allInfos = new HashSet<>();
 
     public ImportSelectAdapter selctModel;
@@ -89,7 +90,6 @@ public class ImportDialog extends JDialog {
 
             @Override
             public void keyReleased(KeyEvent keyEvent) {
-                System.out.println("keyReleased------>"+keyEvent.getKeyChar()+" "+keyEvent.getKeyCode());
                 String key = tfImport.getText().trim();
                 if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER) {//如果敲下的是回车键,清空当前输入内容,并且自动选择待选框的文本
                     String prepareAdd = inputHint.getText().trim();
