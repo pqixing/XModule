@@ -1,6 +1,5 @@
 package com.pqixing.intellij.actions
 
-import com.android.internal.R.string.replace
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.command.WriteCommandAction
@@ -15,7 +14,6 @@ import com.pqixing.model.ProjectXmlModel
 import com.pqixing.tools.FileUtils
 import groovy.lang.GroovyClassLoader
 import java.io.File
-import java.lang.StringBuilder
 
 
 class ImportAction : AnAction() {
@@ -46,11 +44,11 @@ class ImportAction : AnAction() {
             saveConfig(configFile, dialog)
 
             val import = dialog.importModel == "Import"
-                    && importByIde(dialog.selctModel.selectItems
+                    && importByIde(smartSet, dialog.selctModel.selectItems
                     .map { Pair(it.title, getImlPath(codeRoot, projectXml, it.title)) }
                     .toMap(mutableMapOf()))
 //                    && dependentModel == dialog.dpModel//如果依赖方式改变了,需要同步处理
-                    && dialog.specificInclude.text.trim().isEmpty()//如果有特殊处理,需要同步
+                    && smartSet.toString() == dialog.specificInclude.text.trim()//如果有特殊导入有改变,需要同步
 
             //如果快速导入不成功,则,同步一次
             if (!import) RunAction("Android.SyncProject").actionPerformed(e)
@@ -83,22 +81,16 @@ class ImportAction : AnAction() {
     /**
      * 直接通过ide进行导入
      */
-    private fun importByIde(includes: MutableMap<String, String>): Boolean {
+    private fun importByIde(before: Set<String>, includes: MutableMap<String, String>): Boolean {
         val manager = ModuleManager.getInstance(project)
         var fail = 0
-        manager.modules.forEach { m ->
-            if (m.name == project.name) {
-                return@forEach
-            }
-            val remove = includes.remove(m.name)
-            if (remove == null) {
-                manager.disposeModule(m)
-            } else if (remove != m.moduleFilePath) {
-                manager.disposeModule(m)
-                fail += loadModule(manager, remove)
-            }
+
+        val set = before.toMutableSet()
+        includes.forEach { if (!set.remove(it.key)) fail += loadModule(manager, it.value) }
+
+        set.filter { !it.contains("#") }.forEach {
+            manager.disposeModule(manager.findModuleByName(it) ?: return@forEach)
         }
-        includes.forEach { fail += loadModule(manager, it.value) }
         return fail == 0
     }
 

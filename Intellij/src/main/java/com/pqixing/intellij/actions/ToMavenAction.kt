@@ -42,6 +42,7 @@ class ToMavenAction : AnAction() {
         var check = false//是否需要校验结果
         var runTaskId = ""
         val logFile = GradleUtils.getLogFile(project.basePath!!)
+        var excute = 0
         override fun run() {
             if (check) {//检查上传的任务是否正确
                 val result = GradleUtils.getResult(logFile, runTaskId)
@@ -52,16 +53,19 @@ class ToMavenAction : AnAction() {
                 dialog.updateUI(!succes)
                 if (!succes) return
             }
+            if(i>=tModules.size) return//执行完毕
             val info = tModules[++i]
             if (info.select && info.staue != 1) {
                 check = true
+                excute++
                 runTaskId = System.currentTimeMillis().toString()
                 info.staue = 2//正在执行
                 dialog.updateUI(false)
-                GradleUtils.runTask(project, listOf(":${info.title}:clean", ":${info.title}:ToMaven"), runTaskId = runTaskId, callback = this)
+                GradleUtils.runTask(project, listOf(":${info.title}:clean", ":${info.title}:ToMaven"), activateToolWindowBeforeRun = excute == 1, runTaskId = runTaskId, callback = this)
             } else {
                 check = false
                 runTaskId = ""
+                this.run()//循环运行
             }
         }
     }.run()
