@@ -2,7 +2,11 @@ package com.pqixing.intellij.actions
 
 import com.android.ddmlib.AndroidDebugBridge
 import com.android.ddmlib.IDevice
+import com.android.internal.R.attr.path
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataKey
@@ -42,7 +46,7 @@ open class BuildApkAction : AnAction() {
         val callBack = Runnable {
             val result = GradleUtils.getResult(GradleUtils.getLogFile(project.basePath!!), runTaskId)
             if (!result.first) {
-                Messages.showMessageDialog("Build Apk Fail !!", "BuildApk", null)
+                Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "BuildApk", "Build $moduleName Apk Fail !!", NotificationType.WARNING).notify(project)
                 return@Runnable
             }
             val apkDialog = InstallApkDialog(project, result.second, bridge)
@@ -50,7 +54,7 @@ open class BuildApkAction : AnAction() {
             apkDialog.isVisible = true
 //            AdbShellCommandsUtil.executeCommand()
         }
-        GradleUtils.runTask(project, listOf(":${module!!.name}:PrepareDev", ":${module!!.name}:BuildApk"), activateToolWindowBeforeRun = true, runTaskId = runTaskId, callback = callBack)
+        GradleUtils.runTask(project, listOf(":$moduleName:PrepareDev", ":$moduleName:BuildApk"), activateToolWindowBeforeRun = true, runTaskId = runTaskId, callback = callBack)
     }
 
     fun findBrige(): AndroidDebugBridge? {

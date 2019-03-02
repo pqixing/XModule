@@ -21,6 +21,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 import com.pqixing.intellij.utils.DachenHelper;
+import com.pqixing.intellij.utils.UiUtils;
 import com.pqixing.shell.Shell;
 
 import org.jetbrains.android.sdk.AndroidSdkUtils;
@@ -72,7 +73,6 @@ public class InstallApkDialog extends JDialog {
         this.androidDebugBridge = androidDebugBridge;
         buttonOK.addActionListener(e -> onOK());
         setTitle("Install Apk");
-        setLocation(400, 300);
 
         refresh.addActionListener(e -> refreshDatas());
 
@@ -113,6 +113,8 @@ public class InstallApkDialog extends JDialog {
         refreshDatas();
         if (apkPath != null) addApksUrls(apkPath);
         else loadApkUrls();
+
+        UiUtils.centerDialog(this);
     }
 
     /**

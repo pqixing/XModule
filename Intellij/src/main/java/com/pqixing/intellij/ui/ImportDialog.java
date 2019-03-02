@@ -2,6 +2,7 @@ package com.pqixing.intellij.ui;
 
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
+import com.pqixing.intellij.utils.UiUtils;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -53,7 +54,6 @@ public class ImportDialog extends JDialog {
         setModal(false);
 //        getRootPane().setDefaultButton(btnOK);
         setTitle("Import Module");
-        setLocation(400, 300);
 
         btnOK.addActionListener(e -> onOK());
 
@@ -135,6 +135,8 @@ public class ImportDialog extends JDialog {
         }
         specificInclude.setText(more);
         codeRoot.setText(codeRootStr);
+
+        UiUtils.centerDialog(this);
     }
 
     private void setJListModel(JList jList, ImportSelectAdapter model, ImportSelectAdapter targetModel) {

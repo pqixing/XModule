@@ -2,6 +2,7 @@ package com.pqixing.intellij.ui;
 
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
+import com.pqixing.intellij.utils.UiUtils;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -61,6 +62,8 @@ public class ToMavenDialog extends JDialog {
             }
             updateUI(buttonOK.isVisible());
         });
+
+        UiUtils.centerDialog(this);
     }
 
     public void setOnOk(Runnable onOk) {
