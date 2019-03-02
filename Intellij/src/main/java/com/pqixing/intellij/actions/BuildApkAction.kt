@@ -24,7 +24,7 @@ open class BuildApkAction : AnAction() {
         val module = e.getData(DataKey.create<Module>("module"))
         val moduleName = module?.name ?: ""
 
-        val projectMode = /*"ProjectViewPopup".equals(place)||*/"MainMenu" == e.place || module == null || project.name == moduleName;
+        val projectMode = /*"ProjectViewPopup".equals(place)||*/"MainMenu" == e.place || module == null || project.name.replace(" ","") == moduleName;
         val bridge = findBrige()
         if (bridge == null) {
             val exitCode = Messages.showOkCancelDialog("adb init fail , still build apk?", "ADB ERROR", null)
@@ -32,7 +32,7 @@ open class BuildApkAction : AnAction() {
         }
 
         if (projectMode) {
-            val apkDialog = InstallApkDialog(e.project, e.project!!.basePath, bridge)
+            val apkDialog = InstallApkDialog(e.project, e.project!!.basePath+"/build/apks", bridge)
             apkDialog.pack()
             apkDialog.isVisible = true
             return

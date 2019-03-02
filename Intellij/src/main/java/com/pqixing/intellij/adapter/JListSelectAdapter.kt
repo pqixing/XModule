@@ -84,7 +84,8 @@ open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boole
 
     override fun getListCellRendererComponent(p0: JList<out JListInfo>?, info: JListInfo, p2: Int, p3: Boolean, p4: Boolean): Component? {
         label.text = "   " + info.title
-        log.text = info.log + when (info.staue) {
+        val logStr = if(info.log.length>30) info.log.substring(info.log.length-30) else info.log
+        log.text = logStr + when (info.staue) {
             1 -> " √ "
             2 -> "--"
             3 -> " ×  "

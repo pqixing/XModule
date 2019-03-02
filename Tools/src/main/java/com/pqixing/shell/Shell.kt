@@ -27,7 +27,7 @@ object Shell {
 
     @JvmStatic
     fun runSync(cmd: String, dir: File? = null): LinkedList<String> {
-        Tools.logger?.println(START + cmd)
+        Tools.println(START + cmd)
         val r = LinkedList<String>()
         cmd.split("&").forEach {
             if (it.isNotEmpty()) {
@@ -36,7 +36,7 @@ object Shell {
                     val process = Runtime.getRuntime().exec(c, arrayOf(), dir)
                     r += handleResult(process)
                 } catch (e: Exception) {
-                    Tools.logger?.println(e.toString())
+                    Tools.println(e.toString())
                 }
             }
         }

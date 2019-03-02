@@ -7,14 +7,14 @@ object Tools : ILog {
     override fun println(l: String?) {
         if (logger != this) logger.println(l)
         else {
-            println(l)
+            System.out.println(l)
         }
     }
 
     override fun printError(exitCode: Int, l: String?) {
         if (logger != this) logger.printError(exitCode, l)
         else {
-            println(l)
+            System.out.println(l)
             System.exit(exitCode)
         }
     }

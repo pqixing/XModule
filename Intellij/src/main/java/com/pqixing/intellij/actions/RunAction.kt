@@ -3,9 +3,6 @@ package com.pqixing.intellij.actions
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.ui.Messages
-import com.pqixing.intellij.ui.InstallApkDialog
-import org.jetbrains.android.sdk.AndroidSdkUtils
 
 
 class RunAction : AnAction {
