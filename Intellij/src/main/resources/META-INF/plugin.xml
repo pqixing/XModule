@@ -43,7 +43,6 @@
                 <separator/>
                 <action id="Modularization.ReIndexVersion" class="com.pqixing.intellij.actions.ReIndexVersionAction" text="ReIndexVersion" />
                 <separator/>
-                <action id="Modularization.OpenNewRoot" class="com.pqixing.intellij.actions.OpenNewRootAction" text="OpenNewRoot" />
                 <action id="Modularization.NewModule" class="com.pqixing.intellij.actions.NewModuleAction" text="NewModule" />
             </group>
             <separator/>

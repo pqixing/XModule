@@ -12,7 +12,7 @@ import java.io.File
 
 open class BuildApkTask : BaseTask() {
     var outputFile: File? = null
-
+    var buildType = ""
     //解析出第一个Dev渠道的构建任务，防止有渠道包
     init {
         project.afterEvaluate { p ->
@@ -30,7 +30,7 @@ open class BuildApkTask : BaseTask() {
             for (t in types) {
                 outputFile = androidOut[t] ?: continue
                 this@BuildApkTask.dependsOn("assemble${TextUtils.firstUp(t)}")
-                Tools.println("BuildApk Type -> $t")
+                buildType = t
                 break
             }
 
@@ -38,7 +38,7 @@ open class BuildApkTask : BaseTask() {
     }
 
     override fun runTask() {
-
+        Tools.println("BuildApk Type -> $buildType")
         if (outputFile == null || !outputFile!!.exists() || !outputFile!!.name.endsWith(".apk")) {
             Tools.printError(-1,"Can not fount apk with path :${outputFile?.absolutePath}")
         } else {

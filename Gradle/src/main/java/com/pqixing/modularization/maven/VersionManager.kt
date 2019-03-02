@@ -268,8 +268,8 @@ object VersionManager : OnClear {
         val plugin = ManagerPlugin.getPlugin()
         val info = plugin.config
         val taskBranch = info.taskBranch
-        if (taskBranch.isEmpty()) {
-            Tools.printError(-1,"createVersionTag taskBranch is empty, please input taskBranch!!")
+        if (taskBranch.isEmpty() || taskBranch == "master") {
+            Tools.printError(-1, "createVersionTag taskBranch is empty, please input taskBranch!!")
             return false
         }
         //拷贝一份
@@ -294,7 +294,7 @@ object VersionManager : OnClear {
      * 从网络获取最新的版本号信息
      */
     private fun indexVersionFromNet(outFile: File, versions: HashMap<String, String>) {
-        if(!GitUtils.isGitDir(repoGitDir)) prepareVersions()
+        if (!GitUtils.isGitDir(repoGitDir)) prepareVersions()
         val plugin = ManagerPlugin.getPlugin()
         val extends = plugin.getExtends(ManagerExtends::class.java)
         val maven = extends.groupMaven

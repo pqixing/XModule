@@ -54,7 +54,7 @@ open class BuildApkAction : AnAction() {
             apkDialog.isVisible = true
 //            AdbShellCommandsUtil.executeCommand()
         }
-        GradleUtils.runTask(project, listOf(":$moduleName:PrepareDev", ":$moduleName:BuildApk"), activateToolWindowBeforeRun = true, runTaskId = runTaskId, callback = callBack)
+        GradleUtils.runTask(project, listOf(":$moduleName:PrepareDev", ":$moduleName:BuildApk"), activateToolWindowBeforeRun = true, runTaskId = runTaskId, callback = callBack,envs = mapOf(Pair("include",""), Pair("dependentModel","")))
     }
 
     fun findBrige(): AndroidDebugBridge? {

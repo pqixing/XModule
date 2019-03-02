@@ -14,6 +14,7 @@ import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.maven.VersionManager
+import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
@@ -122,6 +123,7 @@ open class DpsAnalysisTask : BaseTask() {
         val oldReport = File(project.projectDir, "DpsReport.txt")
         if (!oldReport.exists()) {
             Tools.println("Compare dps fail,please put the old report file on project dir and try again!!${oldReport.absolutePath}")
+            ResultUtils.writeResult(File(dir, Keys.TXT_DPS_REPORT).absolutePath)
             return
         }
         //加载旧的版本
@@ -166,10 +168,11 @@ open class DpsAnalysisTask : BaseTask() {
         result.append("\nThird -> \n")
         thirdList.sortedBy { it }.forEach { result.append(it) }
         val rl = result.toString()
-        Tools.println(rl)
+        if(!ResultUtils.ide) Tools.println(rl)
         FileUtils.writeText(compareFile, rl)
 
         clear()
+        ResultUtils.writeResult(compareFile.absolutePath, 0)
     }
 
     private fun clear() {
@@ -299,7 +302,7 @@ open class DpsAnalysisTask : BaseTask() {
         }
 
         //依赖解析失败，报错
-        if (!compile) Tools.printError(-1,"DpsAnalysisTask Exception-> can not resolve dps for $module , mode :$dependentModel")
+        if (!compile) Tools.printError(-1, "DpsAnalysisTask Exception-> can not resolve dps for $module , mode :$dependentModel")
         tempContainer.forEach { loadDps(it, branch, dpsExt) }
     }
 
