@@ -20,11 +20,11 @@ open class DeleteBranchTask : BaseTask() {
         val extends = ManagerPlugin.getExtends()
         val info = extends.config
         if (info.screctKey != Keys.SCRECTKEY) {
-            Tools.printError("DeleteBranch Exception -> check password error!!!")
+            Tools.printError(-1,"DeleteBranch Exception -> check password error!!!")
         }
         var targetBranch = info.taskBranch
-        if (targetBranch == extends.docRepoBranch) Tools.printError("DeleteBranchTask Exception -> Can not delete current branch $targetBranch , please change branch before delete!!")
-        if (targetBranch == "master") Tools.printError("DeleteBranchTask Exception -> Can not delete master !!")
+        if (targetBranch == extends.docRepoBranch) Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete current branch $targetBranch , please change branch before delete!!")
+        if (targetBranch == "master") Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete master !!")
 
         val fail = ArrayList<String>()
         ProjectManager.projectXml.projects

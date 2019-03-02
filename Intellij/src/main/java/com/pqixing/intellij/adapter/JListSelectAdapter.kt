@@ -11,19 +11,19 @@ import javax.swing.event.ListSelectionEvent
 import javax.swing.event.ListSelectionListener
 
 open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boolean) : AbstractListModel<JListInfo>(), ListCellRenderer<JListInfo>, ListSelectionListener {
-    var startIndex = -1
-    var endIndex = -1
+    private var startIndex = -1
+    private var endIndex = -1
     public var selectListener: JlistSelectListener? = null
-    var label = JLabel().apply {
+    private var label = JLabel().apply {
         font = Font("宋体", Font.PLAIN, 14)
 //        setSize(100, 30)
     }
-    var box = JCheckBox()
-    var log = JLabel().apply {
+    private var box = JCheckBox()
+    private var log = JLabel().apply {
         font = Font("宋体", Font.PLAIN, 14)
         setSize(100, 30)
     }
-    var panel = JPanel().apply {
+    private var panel = JPanel().apply {
         layout = BorderLayout()
         border = BevelBorder(BevelBorder.LOWERED)
         add(label, BorderLayout.CENTER)
@@ -84,7 +84,7 @@ open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boole
 
     override fun getListCellRendererComponent(p0: JList<out JListInfo>?, info: JListInfo, p2: Int, p3: Boolean, p4: Boolean): Component? {
         label.text = "   " + info.title
-        log.text = info.log+when (info.staue) {
+        log.text = info.log + when (info.staue) {
             1 -> " √ "
             2 -> "--"
             3 -> " ×  "

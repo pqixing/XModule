@@ -1,13 +1,11 @@
 package com.pqixing.modularization.manager
 
 import com.pqixing.Templet
-import com.pqixing.Tools.rootDir
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.IPlugin
 import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.manager.ExceptionManager.EXCEPTION_SYNC
-import com.pqixing.modularization.manager.FileManager.templetRoot
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.Git
@@ -24,7 +22,8 @@ object FileManager : OnClear {
     override fun clear() {
     }
 
-    val templetRoot: File = File(ManagerPlugin.getPlugin().rootDir, "templet")
+    val rootDir = ManagerPlugin.getPlugin().rootDir
+    val templetRoot: File = File(rootDir, "templet")
 
     fun getProjectXml(): File {
         return File(templetRoot, FileNames.PROJECT_XML)

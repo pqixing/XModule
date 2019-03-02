@@ -134,9 +134,7 @@ public class ImportDialog extends JDialog {
             dpModel.addItem(s);
         }
         specificInclude.setText(more);
-
         codeRoot.setText(codeRootStr);
-
     }
 
     private void setJListModel(JList jList, ImportSelectAdapter model, ImportSelectAdapter targetModel) {

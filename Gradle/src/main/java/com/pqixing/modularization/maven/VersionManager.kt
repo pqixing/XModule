@@ -269,7 +269,7 @@ object VersionManager : OnClear {
         val info = plugin.config
         val taskBranch = info.taskBranch
         if (taskBranch.isEmpty()) {
-            Tools.printError("createVersionTag taskBranch is empty, please input taskBranch!!")
+            Tools.printError(-1,"createVersionTag taskBranch is empty, please input taskBranch!!")
             return false
         }
         //拷贝一份

@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.pqixing.help.XmlHelper
@@ -61,7 +62,7 @@ class ImportAction : AnAction() {
         dialog.btnXml.addActionListener {
             FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(projectXmlFile, false)!!, true)
         }
-        dialog.setOkListener { WriteCommandAction.runWriteCommandAction(project, action) }
+        dialog.setOkListener { ProgressManager.getInstance().executeProcessUnderProgress(action,null) }
     }
 
     private inline fun getImlPath(codeRoot: String, projectXml: ProjectXmlModel, title: String) = "$basePath/$codeRoot/${projectXml.findSubModuleByName(title)?.path}/$title.iml"

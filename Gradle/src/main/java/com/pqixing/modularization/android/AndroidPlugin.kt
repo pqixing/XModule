@@ -130,7 +130,7 @@ open class AndroidPlugin : BasePlugin() {
             return
         }
         val projectPre = ":${project.name}"
-        val filter = getGradle().startParameter.taskNames.firstOrNull { it.startsWith(projectPre) }
+        val filter = getGradle().startParameter.taskNames.lastOrNull { it.startsWith(projectPre) }
                 ?: ""
         if (filter.isEmpty() || filter.matches(Regex(":${project.name}:generate.*?Sources"))) {
             justSync = true

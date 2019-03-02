@@ -299,7 +299,7 @@ open class DpsAnalysisTask : BaseTask() {
         }
 
         //依赖解析失败，报错
-        if (!compile) Tools.printError("DpsAnalysisTask Exception-> can not resolve dps for $module , mode :$dependentModel")
+        if (!compile) Tools.printError(-1,"DpsAnalysisTask Exception-> can not resolve dps for $module , mode :$dependentModel")
         tempContainer.forEach { loadDps(it, branch, dpsExt) }
     }
 

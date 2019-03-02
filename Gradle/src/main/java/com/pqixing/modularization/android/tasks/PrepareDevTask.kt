@@ -1,5 +1,7 @@
 package com.pqixing.modularization.android.tasks
 
+import com.pqixing.model.SubModuleType
+import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.utils.ResultUtils
@@ -12,6 +14,9 @@ open class PrepareDevTask : BaseTask() {
     }
 
     override fun runTask() {
+        if (AndroidPlugin.getPluginByProject(project).subModule.type == SubModuleType.TYPE_APPLICATION) {
+            return//如果是App类型,不需要设置运行
+        }
         val devDir = File(project.projectDir, "src/dev")
         val from = File(FileManager.templetRoot, "android")
 

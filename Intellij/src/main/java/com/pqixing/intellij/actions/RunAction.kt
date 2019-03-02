@@ -4,6 +4,8 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.Messages
+import com.pqixing.intellij.ui.InstallApkDialog
+import org.jetbrains.android.sdk.AndroidSdkUtils
 
 
 class RunAction : AnAction {
@@ -18,10 +20,11 @@ class RunAction : AnAction {
     }
 
     override fun actionPerformed(e: AnActionEvent) {
+        ActionManager.getInstance().getAction(action!!).actionPerformed(e)
+
         //        Project project = e.getProject();
         //        VirtualFile fileByIoFile = VfsUtil.findFileByIoFile(new File(project.getBasePath(),"templet.java"), false);
-        if (action == null) action = Messages.showInputDialog("Input Action Id", "RunAction", null)
-        ActionManager.getInstance().getAction(action!!).actionPerformed(e)
+//        if (action == null) action = Messages.showInputDialog("Input Action Id", "RunAction", null)
 //        val instance = VcsRepositoryManager.getInstance(e.project!!)
 //        val repo = Git4IdeHelper.getRepo(File("/Android/Code/CodeSrc/Document"), e.project)
 //        instance.addExternalRepository(VfsUtil.findFileByIoFile(File("/Android/Code/CodeSrc/Document"),false)!!,repo)

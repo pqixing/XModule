@@ -39,7 +39,7 @@ open class BuildApkTask : BaseTask() {
     override fun runTask() {
 
         if (outputFile == null || !outputFile!!.exists() || !outputFile!!.name.endsWith(".apk")) {
-            Tools.printError("Can not fount apk with path :${outputFile?.absolutePath}")
+            Tools.printError(-1,"Can not fount apk with path :${outputFile?.absolutePath}")
         } else {
             var buildApkPath = AndroidPlugin.getPluginByProject(project).config.taskResultFile
             if (buildApkPath.isEmpty()) buildApkPath = outputFile!!.absolutePath

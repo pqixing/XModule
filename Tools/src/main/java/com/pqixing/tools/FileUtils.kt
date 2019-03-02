@@ -2,13 +2,9 @@ package com.pqixing.tools
 
 import com.pqixing.Tools
 import java.io.File
-import java.util.regex.Pattern
 
 object FileUtils {
-    lateinit var clazz: Class<*>
-    fun init(clazz: Class<*>) {
-        this.clazz = clazz
-    }
+    var clazz: Class<*> = Tools::class.java
 
     @JvmStatic
     fun getTextFromResource(name: String): String {

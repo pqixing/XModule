@@ -53,7 +53,7 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
                 inner.moduleName = split[1]
                 inner.version = split[2]
             }
-            else -> Tools.printError("DpsExtends compile illegal name -> $name")
+            else -> Tools.printError(-1,"DpsExtends compile illegal name -> $name")
         }
         inner.scope = scope
         if (closure != null) {

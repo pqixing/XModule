@@ -3,9 +3,9 @@ package com.pqixing.modularization.manager
 import com.alibaba.fastjson.JSON
 import com.pqixing.Config
 import com.pqixing.Tools
-import com.pqixing.Tools.rootDir
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BaseExtension
+import com.pqixing.modularization.manager.FileManager.rootDir
 import com.pqixing.tools.TextUtils
 import groovy.lang.GroovyClassLoader
 import org.gradle.api.Project
