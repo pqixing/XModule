@@ -19,7 +19,7 @@ open class BuildApkTask : BaseTask() {
             val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
             val plugin = AndroidPlugin.getPluginByProject(project)
 
-            val types = arrayListOf("dev", "inTest", "outTest", "release")
+            val types = arrayListOf("dev", "debug","inTest", "outTest", "release")
             val apkType = TextUtils.getSystemEnv("buildApkType")
             if (apkType?.isNotEmpty() == true) {
                 types.remove(apkType)
