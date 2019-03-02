@@ -27,7 +27,7 @@ object DachenHelper {
             val di = l.indexOf(downloadTag)
             if (di > 0) {
                 val si = di + downloadTag.length + 1
-                result.put("$name-$updateTime".replace(" ", "-"), baseUrl + l.substring(si, l.indexOf("\"", si)))
+                result.put("$name-$updateTime".replace(" ", "-").replace(":","-"), baseUrl + l.substring(si, l.indexOf("\"", si)))
             }
         }
         return result

@@ -150,7 +150,7 @@ public class InstallApkDialog extends JDialog {
         }
         File apkFile = new File(apkUrl);
         if (!apkFile.exists() || !apkFile.isFile()) {
-            indicator.setText("Apk file not exists " + apkUrl);
+            jlResult.setText("Apk file not exists  + apkUrl");
             return null;
         }
         return apkUrl;
