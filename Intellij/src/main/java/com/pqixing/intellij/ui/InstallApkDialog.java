@@ -68,7 +68,7 @@ public class InstallApkDialog extends JDialog {
     public InstallApkDialog(Project project, String apkPath, AndroidDebugBridge androidDebugBridge) {
         this.project = project;
         setContentPane(contentPane);
-        setModal(true);
+        setModal(false);
         getRootPane().setDefaultButton(buttonOK);
         this.androidDebugBridge = androidDebugBridge;
         buttonOK.addActionListener(e -> onOK());
@@ -198,9 +198,9 @@ public class InstallApkDialog extends JDialog {
                 }
                 buttonOK.setVisible(false);
                 String path = getPath(indicator);
-                if (path != null) install(path, indicator);
+                if (path == null) return;
+                install(path, indicator);
                 indicator.setText("Install Finish");
-                jlResult.setText("");
                 buttonOK.setVisible(true);
                 new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Finish", path, NotificationType.INFORMATION).notify(project);
             }

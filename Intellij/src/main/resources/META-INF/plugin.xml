@@ -32,29 +32,31 @@
             <add-to-group group-id="BuildMenu" anchor="first" />
             <add-to-group group-id="EditorPopupMenu" anchor="first" />
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first" />
-            <action id="Modularization.Import" class="com.pqixing.intellij.actions.ImportAction"
-                text="Import">
+            <action id="Modularization.Import" class="com.pqixing.intellij.actions.ImportAction" text="Import">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I" />
             </action>
-            <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
-                text="ToMaven" />
-            <action id="Modularization.GitOperator"
-                class="com.pqixing.intellij.actions.GitOperatorAction" text="GitOperator" />
+            <separator/>
+            <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction" text="ToMaven" />
+            <separator/>
+            <group id="Modularization.Code" popup="true" text="ForCode">
+                <action id="Modularization.GitOperator" class="com.pqixing.intellij.actions.GitOperatorAction" text="GitOperator" />
+                <separator/>
+                <action id="Modularization.ReIndexVersion" class="com.pqixing.intellij.actions.ReIndexVersionAction" text="ReIndexVersion" />
+                <separator/>
+                <action id="Modularization.OpenNewRoot" class="com.pqixing.intellij.actions.OpenNewRootAction" text="OpenNewRoot" />
+                <action id="Modularization.NewModule" class="com.pqixing.intellij.actions.NewModuleAction" text="NewModule" />
+            </group>
+            <separator/>
+            <action id="Modularization.BuildApk" class="com.pqixing.intellij.actions.BuildApkAction" text="BuildApk" />
+            <separator/>
+            <action id="Modularization.DpsAnalyse" class="com.pqixing.intellij.actions.DpsAnalyseAction" text="DpsAnalyse" />
+            <separator/>
 
-            <action id="Modularization.RunAction" class="com.pqixing.intellij.actions.RunAction"
-                text="RunAction" />
-            <action id="Modularization.BuildApk" class="com.pqixing.intellij.actions.BuildApkAction"
-                text="BuildApk" />
 
-            <group id="Creator" popup="true" text="Creator">
-                <action id="Modularization.mvpcreator" class="com.dachen.creator.actions.MvpCreator"
-                    text="MvpCreator" description="auto create MVP code" />
-                <action id="Modularization.routercreator"
-                    class="com.dachen.creator.actions.PathCreator" text="RouterCreator"
-                    description="router auto create code" />
-                <action id="Modularization.modelcreator"
-                    class="com.dachen.creator.actions.ModelCreator" text="ModelCreator"
-                    description="auto create model code" />
+            <group id="Modularization.Creator" popup="true" text="CodeCreator">
+                <action id="Modularization.mvpcreator" class="com.dachen.creator.actions.MvpCreator" text="MvpCreator" description="auto create MVP code" />
+                <action id="Modularization.routercreator" class="com.dachen.creator.actions.PathCreator" text="RouterCreator" description="router auto create code" />
+                <action id="Modularization.modelcreator" class="com.dachen.creator.actions.ModelCreator" text="ModelCreator" description="auto create model code" />
             </group>
             >
         </group>

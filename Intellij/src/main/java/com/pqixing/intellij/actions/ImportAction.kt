@@ -1,5 +1,7 @@
 package com.pqixing.intellij.actions
 
+import com.android.internal.R.attr.action
+import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.command.WriteCommandAction
@@ -7,7 +9,9 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.util.messages.impl.Message
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.ImportDialog
@@ -24,8 +28,12 @@ class ImportAction : AnAction() {
         project = e.project ?: return
         basePath = project.basePath ?: return
         val projectXmlFile = File(basePath, "templet/project.xml")
-        val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
         val configFile = File(basePath, "Config.java")
+        if(!projectXmlFile.exists()||!configFile.exists()){
+            Messages.showMessageDialog("Project or Config file not exists!!","Miss File",null)
+            return
+        }
+        val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
         val clazz = GroovyClassLoader().parseClass(configFile)
         val newInstance = clazz.newInstance()
         val includes = clazz.getField("include").get(newInstance).toString()
@@ -53,7 +61,7 @@ class ImportAction : AnAction() {
                     && smartSet.toString() == dialog.specificInclude.text.trim()//如果有特殊导入有改变,需要同步
 
             //如果快速导入不成功,则,同步一次
-            if (!import) RunAction("Android.SyncProject").actionPerformed(e)
+            if (!import) ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
         }
         dialog.btnConfig.addActionListener {
             FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(configFile, false)!!, true)
@@ -65,7 +73,7 @@ class ImportAction : AnAction() {
         dialog.setOkListener { ProgressManager.getInstance().executeProcessUnderProgress(action,null) }
     }
 
-    private inline fun getImlPath(codeRoot: String, projectXml: ProjectXmlModel, title: String) = "$basePath/$codeRoot/${projectXml.findSubModuleByName(title)?.path}/$title.iml"
+    private fun getImlPath(codeRoot: String, projectXml: ProjectXmlModel, title: String) = "$basePath/$codeRoot/${projectXml.findSubModuleByName(title)?.path}/$title.iml"
 
     private fun saveConfig(configgFile: File, dialog: ImportDialog) {
         val dpModel = dialog.dpModel?.trim() ?: ""
