@@ -36,6 +36,6 @@ open class PrepareDevTask : BaseTask() {
     }
 
     override fun end() {
-        ResultUtils.writeResult("PrepareDevTask -> finish")
+//        ResultUtils.writeResult("PrepareDevTask -> finish")
     }
 }

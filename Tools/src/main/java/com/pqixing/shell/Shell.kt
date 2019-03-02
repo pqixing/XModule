@@ -88,7 +88,7 @@ object Shell {
                 if (afterRun[0] && afterRun[1]) {
                     break
                 }
-                if (System.currentTimeMillis() - lastLineTime > 1000 * 15) {
+                if (System.currentTimeMillis() - lastLineTime > 1000 * 30) {
                     Tools.logger?.println("process exit by time out")
                 }
                 continue

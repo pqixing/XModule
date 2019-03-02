@@ -5,6 +5,7 @@
     <application
         android:name="com.modularization.dev.DevApplication"
         android:label="[projectName]"
+        tools:replace="android:label"
         >
         <activity android:name="com.modularization.dev.DevActivity">
             <intent-filter>

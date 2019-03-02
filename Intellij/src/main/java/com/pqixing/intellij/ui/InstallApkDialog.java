@@ -72,6 +72,7 @@ public class InstallApkDialog extends JDialog {
         this.androidDebugBridge = androidDebugBridge;
         buttonOK.addActionListener(e -> onOK());
         setTitle("Install Apk");
+        setLocation(400, 300);
 
         refresh.addActionListener(e -> refreshDatas());
 
@@ -134,7 +135,7 @@ public class InstallApkDialog extends JDialog {
     }
 
     private void addApksUrls(String url) {
-        String key = url.length() > 60 ? ".." + url.substring(url.length() - 60) : url;
+        String key = url.length() > 50 ? ".." + url.substring(url.length() - 50) : url;
         apkUrls.put(key, url);
         jcPaths.addItem(key);
         jcPaths.setSelectedIndex(jcPaths.getItemCount() - 1);
@@ -196,6 +197,7 @@ public class InstallApkDialog extends JDialog {
                 buttonOK.setVisible(false);
                 String path = getPath(indicator);
                 if (path != null) install(path, indicator);
+                indicator.setText("Install Finish");
                 jlResult.setText("");
                 buttonOK.setVisible(true);
                 new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Finish", path, NotificationType.INFORMATION).notify(project);

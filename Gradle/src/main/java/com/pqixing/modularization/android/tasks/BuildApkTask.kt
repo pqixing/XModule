@@ -30,6 +30,7 @@ open class BuildApkTask : BaseTask() {
             for (t in types) {
                 outputFile = androidOut[t] ?: continue
                 this@BuildApkTask.dependsOn("assemble${TextUtils.firstUp(t)}")
+                Tools.println("BuildApk Type -> $t")
                 break
             }
 
