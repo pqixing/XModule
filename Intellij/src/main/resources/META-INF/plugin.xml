@@ -46,7 +46,7 @@
                 <action id="Modularization.NewModule" class="com.pqixing.intellij.actions.NewModuleAction" text="NewModule" />
             </group>
             <separator/>
-            <action id="Modularization.BuildApk" class="com.pqixing.intellij.actions.BuildApkAction" text="BuildApk" />
+            <action id="Modularization.BuildApk" class="com.pqixing.intellij.actions.BuildApkAction" text="InstallApk" />
             <separator/>
             <action id="Modularization.DpsAnalyse" class="com.pqixing.intellij.actions.DpsAnalyseAction" text="DpsAnalyse" />
             <separator/>

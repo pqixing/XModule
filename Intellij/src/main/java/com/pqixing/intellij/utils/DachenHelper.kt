@@ -7,6 +7,9 @@ import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
 object DachenHelper {
+    /**
+     * 2019-03-06 17:00
+     */
     fun loadApksForNet(): LinkedHashMap<String, String> {
         val baseUrl = "https://192.168.3.211:9000/"
         val updateTag = "<div class=\"desc\">"
@@ -27,7 +30,7 @@ object DachenHelper {
             val di = l.indexOf(downloadTag)
             if (di > 0) {
                 val si = di + downloadTag.length + 1
-                result.put("$name-$updateTime".replace(" ", "-").replace(":","-"), baseUrl + l.substring(si, l.indexOf("\"", si)))
+                result.put("$updateTime     $name", baseUrl + l.substring(si, l.indexOf("\"", si)))
             }
         }
         return result

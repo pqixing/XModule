@@ -225,8 +225,8 @@ public class ImportDialog extends JDialog {
     }
 
     protected void onOK() {
-        if (onOk != null) onOk.run();
         dispose();
+        if (onOk != null) onOk.run();
     }
 
     public static void main(String[] args) {

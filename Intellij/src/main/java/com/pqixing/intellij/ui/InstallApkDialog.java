@@ -65,12 +65,12 @@ public class InstallApkDialog extends JDialog {
     private Project project;
     private boolean loadNetApks = false;
 
-    public InstallApkDialog(Project project, String apkPath, AndroidDebugBridge androidDebugBridge) {
+    public InstallApkDialog(Project project, String apkPath) {
         this.project = project;
         setContentPane(contentPane);
         setModal(false);
         getRootPane().setDefaultButton(buttonOK);
-        this.androidDebugBridge = androidDebugBridge;
+        this.androidDebugBridge = AndroidSdkUtils.getDebugBridge(project);
         buttonOK.addActionListener(e -> onOK());
         setTitle("Install Apk");
 
@@ -124,7 +124,9 @@ public class InstallApkDialog extends JDialog {
         if (androidDebugBridge == null) return;
         devices.clear();
         for (IDevice d : androidDebugBridge.getDevices()) {
-            devices.put(new JListInfo(d.getAvdName() + "  " + d.getSerialNumber() + "  " + d.getState(), "", 0, false), d);
+            String avdName = d.getAvdName();
+            if(avdName==null) avdName = UiUtils.adbShellCommon(d,"getprop ro.product.brand",true)+"-"+UiUtils.adbShellCommon(d,"getprop ro.product.model",true);
+            devices.put(new JListInfo(avdName + "  " + d.getSerialNumber() + "  " + d.getState(), "", 0, false), d);
         }
         adapter.setDatas(new LinkedList<>(devices.keySet()));
     }
