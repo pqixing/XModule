@@ -64,7 +64,7 @@ public class NewImportDialog extends JDialog {
         setContentPane(contentPane);
         setModal(false);
 //        getRootPane().setDefaultButton(buttonOK);
-
+        setTitle("Import");
         buttonOK.addActionListener(e -> onOK());
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
