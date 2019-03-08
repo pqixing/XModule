@@ -3,6 +3,8 @@ package com.pqixing.intellij.actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataKey
+import com.intellij.openapi.application.Application
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.externalSystem.task.TaskCallback
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
@@ -16,6 +18,7 @@ import java.io.File
 
 class ToMavenAction : AnAction() {
     lateinit var project: Project
+    lateinit var dialog: ToMavenDialog
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
 
@@ -31,8 +34,12 @@ class ToMavenAction : AnAction() {
                 .map { JListInfo(it.name, "", 0, it.name == moduleName || it.name == "${moduleName}_api") }
 
 
-        val dialog = ToMavenDialog(tModules);
-        dialog.setOnOk { toMaven(dialog, tModules) }
+        dialog = ToMavenDialog(tModules);
+        dialog.jlTitle.text = "Prepare ToMaven for :$moduleName"
+        dialog.setOnOk {
+            dialog.isVisible = false
+            toMaven(dialog, tModules)
+        }
         dialog.pack()
         dialog.isVisible = true
     }
@@ -50,17 +57,27 @@ class ToMavenAction : AnAction() {
                 val jListInfo = tModules[i]
                 jListInfo.staue = if (succes) 1 else 3
                 jListInfo.log = result.second
-                dialog.updateUI(!succes)
-                if (!succes) return
+                if (!succes) {//失败是展示结果
+                    ApplicationManager.getApplication().invokeLater {
+                        dialog.updateUI(!succes)
+                        dialog.isVisible = true
+                    }
+                    return
+                }
             }
-            if(i>=tModules.size) return//执行完毕
+            if (i >= tModules.size-1) {
+                ApplicationManager.getApplication().invokeLater {
+                    dialog.updateUI(false)
+                    dialog.isVisible = true
+                }
+                return
+            }//执行完毕
             val info = tModules[++i]
             if (info.select && info.staue != 1) {
                 check = true
                 excute++
                 runTaskId = System.currentTimeMillis().toString()
                 info.staue = 2//正在执行
-                dialog.updateUI(false)
                 GradleUtils.runTask(project, listOf(":${info.title}:clean", ":${info.title}:ToMaven"), activateToolWindowBeforeRun = excute == 1, runTaskId = runTaskId, callback = this)
             } else {
                 check = false

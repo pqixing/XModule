@@ -1,8 +1,7 @@
 package com.pqixing.intellij.actions
 
-import android.os.SystemClock
-import com.android.internal.R.string.map
 import com.intellij.dvcs.repo.VcsRepositoryManager
+import com.intellij.ide.actions.ImportModuleAction.doImport
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -16,17 +15,14 @@ import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VfsUtil
-import com.intellij.refactoring.safeDelete.ImportSearcher.getImport
-import com.intellij.ui.plaf.beg.BegResources.m
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.ImportDialog
+import com.pqixing.intellij.ui.NewImportDialog
 import com.pqixing.intellij.utils.Git4IdeHelper
 import com.pqixing.model.ProjectXmlModel
 import com.pqixing.tools.FileUtils
 import groovy.lang.GroovyClassLoader
-import org.apache.batik.svggen.SVGStylingAttributes.set
-import org.jetbrains.annotations.NotNull
 import java.io.File
 
 
@@ -49,29 +45,24 @@ class ImportAction : AnAction() {
         var codeRoot = clazz.getField("codeRoot").get(newInstance).toString()
         val dependentModel = clazz.getField("dependentModel").get(newInstance).toString()
 
-        val smartSet = includes.replace("+", ",").split(",").mapNotNull { if (it.isEmpty()) null else it.trim() }.toSet()
-        val sortedBy = projectXml.allSubModules().map { JListInfo(it.name, it.introduce, 0, smartSet.contains(it.name)) }
-        val spec = StringBuilder()
-        smartSet.filter { it.contains("#") }.forEach {
-            if (it.isNotEmpty()) spec.append(it).append(",")
-        }
-        val dialog = ImportDialog(sortedBy.filter { it.select }, sortedBy.filter { !it.select }, spec.toString(), codeRoot, dependentModel)
+        val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
+        val infoMaps = projectXml.allSubModules().map { Pair(it.name, JListInfo(it.name, it.introduce)) }.toMap(mutableMapOf())
+        val repo = Git4IdeHelper.getRepo(File(basePath, "templet"), project)
+        val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
+        val localBranch = repo.currentBranchName ?: "master"
+        branchs.remove(localBranch)
+        branchs.add(0, localBranch)
+
+        val dialog = NewImportDialog(project, imports.toMutableList(), infoMaps.values.toMutableList(), branchs, dependentModel, codeRoot)
         dialog.pack()
         dialog.isVisible = true
         val importTask = object : Task.Backgroundable(project, "Start Import") {
             override fun run(indicator: ProgressIndicator) {
                 val codePath = File(basePath, dialog.codeRootStr).canonicalPath
                 saveConfig(configFile, dialog)
+                val includeMaps = getImport(projectXml, dialog.imports.filter { !it.contains("#") }.toMutableSet(), codePath, dialog.imports.filter { it.contains("#") })
+                val import = dialog.importModel == "Import" && importByIde(includeMaps)
 
-                val includeMaps = getImport(projectXml, dialog.selctModel.selectItems.map { it.title }.toMutableSet(), codePath, dialog.specificInclude.text.trim())
-                val import = dialog.importModel == "Import"
-                        && importByIde(includeMaps)
-//                        && dependentModel == dialog.dpModel//如果依赖方式改变了,需要同步处理
-
-
-                val rootBranch = Git4IdeHelper.getRepo(File(basePath, "templet"), project).currentBranch?.name
-                        ?: "master"
-//                val rootBranch = "TestMaster"
                 val maps = projectXml.allSubModules().filter { includeMaps.containsKey(it.name) }.map { Pair(codePath + "/" + it.project.name, it.project.url) }.toMap(mutableMapOf())
                 maps.forEach { map ->
                     File(map.key).apply {
@@ -79,7 +70,7 @@ class ImportAction : AnAction() {
                         if (exists()) FileUtils.delete(this)
                         indicator.text = "Clone... ${map.value} "
                         //下载master分支
-                        Git4IdeHelper.clone(project, this, map.value,rootBranch)
+                        Git4IdeHelper.clone(project, this, map.value, dialog.selectBranch)
                     }
                 }
 
@@ -97,34 +88,39 @@ class ImportAction : AnAction() {
                     if (gitPaths.isNotEmpty())
                         Messages.showMessageDialog("Those project had import but not in Version Control\n ${gitPaths.joinToString { "\n" + it }} \n Please check Setting -> Version Control After Sync!!", "Miss Vcs Control", null)
                 }
+
             }
         }
         dialog.btnConfig.addActionListener {
-            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(configFile, false)!!, true)
             dialog.dispose()
+            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(configFile, false)!!, true)
         }
-        dialog.btnXml.addActionListener {
+        dialog.btnProjectXml.addActionListener {
+            dialog.dispose()
             FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(projectXmlFile, false)!!, true)
         }
-        dialog.setOkListener { ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask)) }
+        dialog.setOnOk {
+            //切换根目录的分支
+            if (localBranch == dialog.selectBranch) ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
+            else Git4IdeHelper.checkout(project, dialog.selectBranch, mutableListOf(repo)) {
+                ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
+            }
+        }
     }
 
     /**
      * 解析需要导入的工程
      */
-    private fun getImport(projectXml: ProjectXmlModel, includes: MutableSet<String>, codePath: String, moreInclude: String): Map<String, String> {
-        if (moreInclude.isNotEmpty()) moreInclude.replace("+", ",")
-                .split(",")
-                .mapNotNull { if (it.trim().isEmpty()) null else it.trim() }
-                .sortedWith(Comparator { t, t1 ->
-                    (if (t.contains("#")) t.substring(0, 1) else "A").compareTo(if (t1.contains("#")) t1.substring(0, 1) else "A")
-                }).forEach { v ->
-                    val l = v.trim().replace(Regex(".*#"), "")
-                    if (!v.contains("#")) includes.add(l)
-                    else if (v.startsWith("E#")) includes.remove(l)
-                    else if (v.startsWith("D#")) includes.addAll(handleDps(File(basePath), l))
-                    else if (v.startsWith("ED#")) includes.removeAll(handleDps(File(basePath), l))
-                }
+    private fun getImport(projectXml: ProjectXmlModel, includes: MutableSet<String>, codePath: String, moreInclude: List<String>): Map<String, String> {
+        if (moreInclude.isNotEmpty()) moreInclude.sortedWith(Comparator { t, t1 ->
+            (if (t.contains("#")) t.substring(0, 1) else "A").compareTo(if (t1.contains("#")) t1.substring(0, 1) else "A")
+        }).forEach { v ->
+            val l = v.trim().replace(Regex(".*#"), "")
+            if (!v.contains("#")) includes.add(l)
+            else if (v.startsWith("E#")) includes.remove(l)
+            else if (v.startsWith("D#")) includes.addAll(handleDps(File(basePath), l))
+            else if (v.startsWith("ED#")) includes.removeAll(handleDps(File(basePath), l))
+        }
 
         return includes.map { Pair(it, getImlPath(codePath, projectXml, it)) }.toMap(mutableMapOf())
     }
@@ -134,19 +130,15 @@ class ImportAction : AnAction() {
 
     private fun getImlPath(codePath: String, projectXml: ProjectXmlModel, title: String) = "$codePath/${projectXml.findSubModuleByName(title)?.path}/$title.iml"
 
-    private fun saveConfig(configgFile: File, dialog: ImportDialog) {
+    private fun saveConfig(configgFile: File, dialog: NewImportDialog) {
         val dpModel = dialog.dpModel?.trim() ?: ""
         val codeRoot = dialog.codeRootStr.trim()
-        val includes = dialog.selctModel.selectItems.map { it.title }
+        val includes = dialog.imports
 
-        val includeBuilder = StringBuilder()
-        includes.forEach { if (it.isNotEmpty()) includeBuilder.append(it).append(",") }
-        includeBuilder.append(dialog.specificInclude.text)
-        val iss = includeBuilder.toString()
         var result = configgFile.readText()
         result = result.replace(Regex("String *dependentModel *=.*;"), "String dependentModel = \"$dpModel\";")
         result = result.replace(Regex("String *codeRoot *=.*;"), "String codeRoot = \"$codeRoot\";")
-        result = result.replace(Regex("String *include *=.*;"), "String include = \"$iss\";")
+        result = result.replace(Regex("String *include *=.*;"), "String include = \"${includes.joinToString { "$it," }}\";")
         FileUtils.writeText(configgFile, result, true)
     }
 

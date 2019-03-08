@@ -32,6 +32,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -58,7 +59,6 @@ public class InstallApkDialog extends JDialog {
     private JComboBox jcPaths;
     private JTextField jfParams;
     private JLabel jlResult;
-    protected AndroidDebugBridge androidDebugBridge;
     JListSelectAdapter adapter;
     private LinkedHashMap<String, String> apkUrls = new LinkedHashMap<>();
     private HashMap<JListInfo, IDevice> devices = new HashMap<>();
@@ -70,7 +70,6 @@ public class InstallApkDialog extends JDialog {
         setContentPane(contentPane);
         setModal(false);
         getRootPane().setDefaultButton(buttonOK);
-        this.androidDebugBridge = AndroidSdkUtils.getDebugBridge(project);
         buttonOK.addActionListener(e -> onOK());
         setTitle("Install Apk");
 
@@ -110,25 +109,40 @@ public class InstallApkDialog extends JDialog {
 
         adapter = new JListSelectAdapter(jlDevices, true);
         jlDevices.setModel(adapter);
-        refreshDatas();
+        mockData();
         if (apkPath != null) addApksUrls(apkPath);
         else loadApkUrls();
 
         UiUtils.centerDialog(this);
     }
 
+    private void mockData() {
+        ArrayList<JListInfo> infos = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            infos.add(new JListInfo("----------------------------", "", 0, false));
+        }
+        adapter.setDatas(infos);
+    }
+
     /**
      * 刷新数据
      */
     private void refreshDatas() {
-        if (androidDebugBridge == null) return;
+        AndroidDebugBridge bridge = AndroidSdkUtils.getDebugBridge(project);
+        if (bridge == null) return;
         devices.clear();
-        for (IDevice d : androidDebugBridge.getDevices()) {
+        for (IDevice d : bridge.getDevices()) {
             String avdName = d.getAvdName();
             if(avdName==null) avdName = UiUtils.adbShellCommon(d,"getprop ro.product.brand",true)+"-"+UiUtils.adbShellCommon(d,"getprop ro.product.model",true);
             devices.put(new JListInfo(avdName + "  " + d.getSerialNumber() + "  " + d.getState(), "", 0, false), d);
         }
         adapter.setDatas(new LinkedList<>(devices.keySet()));
+    }
+
+    @Override
+    public void setVisible(boolean b) {
+        if(b) refreshDatas();
+        super.setVisible(b);
     }
 
     private void loadApkUrls() {

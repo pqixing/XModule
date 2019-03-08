@@ -112,7 +112,7 @@ class JListInfo(var title: String = "", var log: String = "", var staue: Int = 0
     }
 
     override fun toString(): String {
-        return "JListInfo(title='$title', log='$log', staue=$staue, select=$select, infoId=$infoId)"
+        return "$title $log"
     }
 
     companion object {

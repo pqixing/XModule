@@ -28,6 +28,7 @@ public class ToMavenDialog extends JDialog {
     private JList jList;
     private JButton all;
     private JLabel jlProgress;
+    public JLabel jlTitle;
     JListSelectAdapter adapter;
     private Runnable onOk;
     private boolean allSelect;
