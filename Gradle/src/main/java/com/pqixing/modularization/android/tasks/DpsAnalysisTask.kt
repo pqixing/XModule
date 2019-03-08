@@ -32,7 +32,7 @@ open class DpsAnalysisTask : BaseTask() {
     val plugin = AndroidPlugin.getPluginByProject(project)
     val groupName = ManagerPlugin.getExtends().groupName
     val dir = File(plugin.cacheDir, "report")
-    val temp = File(AndroidPlugin.getPluginByProject(project).buildDir, "DependencyReport.txt")
+    val temp = File(dir, "DependencyReport.txt")
     //    val temp = File(dir, "DpsReport.bak")
     val versions = TreeMap<String, String>()
 
