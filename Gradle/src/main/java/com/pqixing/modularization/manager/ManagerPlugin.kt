@@ -31,7 +31,7 @@ open class ManagerPlugin : BasePlugin() {
             CloneProjectTask::class.java
             , CleanProjectTask::class.java
             , CheckOutTask::class.java
-            , PrepareMergeTask::class.java
+            , LoadAllBranchModuleTask::class.java
             , CreateBranchTask::class.java
             , PullProjectTask::class.java
             , VersionTagTask::class.java

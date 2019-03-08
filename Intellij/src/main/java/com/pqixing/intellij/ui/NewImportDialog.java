@@ -1,9 +1,11 @@
 package com.pqixing.intellij.ui;
 
+import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode;
 import com.intellij.openapi.project.Project;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 import com.pqixing.intellij.adapter.JlistSelectListener;
+import com.pqixing.intellij.utils.GradleUtils;
 import com.pqixing.intellij.utils.UiUtils;
 import com.pqixing.tools.PropertiesUtils;
 
@@ -15,6 +17,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -28,6 +31,8 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+
+import kotlin.Pair;
 
 public class NewImportDialog extends JDialog {
     public static final String BING_KEY = "syncRoot";
@@ -103,7 +108,22 @@ public class NewImportDialog extends JDialog {
 
     private void initLoadBranch() {
         btnBranchs.addActionListener(actionEvent -> {
-
+            String taskId = System.currentTimeMillis() + "";
+            GradleUtils.INSTANCE.runTask(project, Arrays.asList(":LoadAllBranchModule"), ProgressExecutionMode.IN_BACKGROUND_ASYNC, false, taskId, GradleUtils.INSTANCE.getDefEnvs(), new Runnable() {
+                @Override
+                public void run() {
+                    Pair<Boolean, String> result = GradleUtils.INSTANCE.getResult(GradleUtils.INSTANCE.getLogFile(project.getBasePath()), taskId);
+                    if (!result.getFirst()) return;
+                    String[] strings = result.getSecond().replace("#",",").split(",");
+                    if (strings.length > 0) {
+                        imports.clear();
+                        for (int i = 0; i < strings.length; i++) {
+                            if(!strings[i].isEmpty()) imports.add(strings[i]);
+                        }
+                        updateImports();
+                    }
+                }
+            });
         });
     }
 
@@ -116,7 +136,7 @@ public class NewImportDialog extends JDialog {
         //模拟选中,不然列表数据会异常
         for (int i = 0; i < allInfos.size(); i++) imports.add(TAG);
         selectAdapter = new JListSelectAdapter(jlSelect, true);
-        allAdapter = new ImportSelectAdapter(JlNotSelect, allInfos,imports);
+        allAdapter = new ImportSelectAdapter(JlNotSelect, allInfos, imports);
         selectAdapter.setSelectListener((jList, adapter, items) -> {
             for (JListInfo info : items) {
                 imports.remove(info.getTitle());
@@ -128,7 +148,7 @@ public class NewImportDialog extends JDialog {
             for (JListInfo info : items) {
                 info.setSelect(false);
                 if (!imports.contains(info.getTitle())) {
-                    imports.add(0,info.getTitle());
+                    imports.add(0, info.getTitle());
                 }
             }
             updateImports();
@@ -139,8 +159,9 @@ public class NewImportDialog extends JDialog {
 
     @Override
     public void setVisible(boolean b) {
-        if(b){
-            while (imports.remove(TAG)){}
+        if (b) {
+            while (imports.remove(TAG)) {
+            }
             updateImports();
         }
         super.setVisible(b);
@@ -200,7 +221,7 @@ public class NewImportDialog extends JDialog {
                     if (find != null) {
                         String importKey = key.replace(filterKey, "") + find.getTitle();
                         if (!imports.contains(importKey)) {
-                            imports.add(0,importKey);
+                            imports.add(0, importKey);
                             updateImports();
                         }
                         find.setSelect(false);
@@ -255,7 +276,8 @@ public class NewImportDialog extends JDialog {
         List<JListInfo> sources = new ArrayList<>();
         private String filterKey;
         private List<String> imports;
-        public ImportSelectAdapter(JList jList, List<JListInfo> datas,List<String> imports) {
+
+        public ImportSelectAdapter(JList jList, List<JListInfo> datas, List<String> imports) {
             super(jList, true);
             setDatas(datas);
             this.imports = imports;
@@ -302,7 +324,7 @@ public class NewImportDialog extends JDialog {
         private int findLikeScore(JListInfo p, String key) {
             String title = p.getTitle();
             int match = 100 - title.length();
-            if(title.contains(key)){
+            if (title.contains(key)) {
                 return 10000 * match;
             }
             if (p.getTitle().toLowerCase().contains(key.toLowerCase())) {

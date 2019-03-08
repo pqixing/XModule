@@ -18,7 +18,7 @@ import com.pqixing.modularization.utils.ResultUtils
  * 5，合并所有工程，列出所有冲突工程目录
  * 6，结合1，给出所有需要导入的模块列表（包含要重新编译和有冲突的工程模块），标记需要处理冲突的分支
  */
-open class PrepareMergeTask: BaseTask() {
+open class LoadAllBranchModuleTask: BaseTask() {
 
     init {
         group = Keys.GROUP_OTHER
@@ -28,22 +28,22 @@ open class PrepareMergeTask: BaseTask() {
     override fun runTask() {
         val extends = ManagerPlugin.getExtends()
         //当前分支
-        val curBranch = extends.docRepoBranch
+//        val curBranch = extends.docRepoBranch
         //需要合并到当前的指定分支
-        val mergeBranch = extends.config.taskBranch
-        if (curBranch == mergeBranch) {
-            Tools.println("Merge branch is the same as local branch $curBranch")
-            return
-        }
-        val curIndex = extends.matchingFallbacks.indexOf(curBranch)
-        val mergeIndex = extends.matchingFallbacks.indexOf(mergeBranch)
-        val checkBranch = if (mergeIndex <= curIndex) mergeBranch else curBranch
+        val checkBranch = extends.config.taskBranch
+//        if (curBranch == mergeBranch) {
+//            Tools.println("Merge branch is the same as local branch $curBranch")
+//            return
+//        }
+//        val curIndex = extends.matchingFallbacks.indexOf(curBranch)
+//        val mergeIndex = extends.matchingFallbacks.indexOf(mergeBranch)
+//        val checkBranch = if (mergeIndex <= curIndex) mergeBranch else curBranch
 
         //查找出,当前分支,所有上传过的模块,在合并前先导入AS
         val byBranch = VersionManager.findAllModuleByBranch(checkBranch)
 //        Tools.println("All module by branch $checkBranch-> $byBranch")
 
-        val result = StringBuilder("app=")
+        val result = StringBuilder("")
 
         ProjectManager.projectXml.projects.forEach { p ->
             p.submodules.forEach { s ->
@@ -52,9 +52,9 @@ open class PrepareMergeTask: BaseTask() {
                 }
             }
         }
-        result.append("#library=")
+        result.append("#")
         byBranch.forEach { result.append("$it,") }
-        Tools.println("By merge $mergeBranch to $curBranch , Suggest import module :")
+        Tools.println("Check $checkBranch , Suggest import module :")
         ResultUtils.writeResult(result.toString())
     }
 }
