@@ -1,6 +1,5 @@
 package com.pqixing.intellij.actions
 
-import com.intellij.internal.statistic.utils.merge
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.progress.ProgressIndicator
@@ -13,11 +12,10 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
 import com.pqixing.intellij.utils.Git4IdeHelper
-import com.pqixing.intellij.utils.Git4IdeHelper.getRepo
 import com.pqixing.model.ProjectXmlModel
 import com.pqixing.tools.FileUtils
-import cucumber.api.java.en_old.Ac
 import git4idea.GitUtil
+import git4idea.history.GitLogUtil
 import git4idea.repo.GitRepository
 import groovy.lang.GroovyClassLoader
 import java.io.File
@@ -31,6 +29,7 @@ abstract class BaseGitAction : AnAction() {
     lateinit var basePath: String
     lateinit var rootRepo: GitRepository
     lateinit var e: AnActionEvent
+    var cacheLog = mutableMapOf<String, String>()
     override fun actionPerformed(e: AnActionEvent) {
         this.e = e
         project = e.project ?: return
@@ -50,7 +49,7 @@ abstract class BaseGitAction : AnAction() {
         if (!checkUrls(urls)) return
         val allDatas = getAdapterList(urls)
 
-        rootRepo = Git4IdeHelper.getRepo(File("$basePath/templet"), project)
+        rootRepo = getRepo("$basePath/templet")!!
         val branches = Git4IdeHelper.getRepo(File("$basePath/templet"), project).branches
 
         val branchNames = mutableListOf<String>()
@@ -58,10 +57,53 @@ abstract class BaseGitAction : AnAction() {
         branchNames += branches.remoteBranches.map { it.name }
         val rootBranch = rootRepo.currentBranchName;
         val dialog = GitOperatorDialog(this.javaClass.simpleName.replace("Action", ""), rootBranch, allDatas)
+        dialog.setOnOperatorChange { updateLog(dialog) }
         initDialog(dialog)
         dialog.pack()
-        dialog.setOnOk { if (checkOnOk(allDatas, dialog)) doOk(dialog, allDatas, urls, rootBranch) else dialog.dispose() }
+        updateLog(dialog)
+        dialog.setOnOk {
+            if (checkOnOk(allDatas, dialog)) doOk(dialog, allDatas, urls, rootBranch) else dialog.dispose()
+        }
         dialog.isVisible = true
+    }
+
+    private fun updateLog(dialog: GitOperatorDialog) {
+        ProgressManager.getInstance().runProcess({
+            val cmd = dialog.operatorCmd
+            dialog.adapter.datas.forEach {
+                updateItemLog(it, cmd, cacheLog[cmd + it.title])
+                cacheLog[cmd + it.title] = it.log
+            }
+            dialog.updateUI()
+        }, null)
+    }
+
+    /**
+     * 更新状态
+     */
+    protected open fun updateItemLog(info: JListInfo, operatorCmd: String, cacheLog: String?) {
+        val repo = getRepo(info.title)
+        when (operatorCmd) {
+            "merge", "delete", "create" -> {
+                info.log = cacheLog ?: repo?.currentBranchName ?: "No Branch"
+                info.staue = if (rootRepo.currentBranchName == info.log) 0 else 3
+            }
+            "clone" -> {
+                info.log = cacheLog ?: repo?.currentBranchName ?: "Project No Exists"
+                info.staue = if (repo == null) 3 else 0
+            }
+            "update" -> {
+                info.log = cacheLog ?: repo?.let { it.currentBranchName + " : " + it.state.toString().toLowerCase() }
+                        ?: "Project No Exists"
+                info.staue = if (repo == null) 3 else 0
+            }
+            "push" -> {
+                info.log = cacheLog ?: repo?.let {
+                    it.currentBranchName + " : " + GitLogUtil.collectFullDetails(project, repo.root, "origin/${it.currentBranchName}..${it.currentBranchName}").size
+                } ?: "Project No Exists"
+                info.staue = if (repo == null) 3 else 0
+            }
+        }
     }
 
     protected open fun doOk(dialog: GitOperatorDialog, allDatas: MutableList<JListInfo>, urls: Map<String, String>, rootBranch: String?) {
@@ -112,7 +154,7 @@ abstract class BaseGitAction : AnAction() {
             r.staue = 3
             return
         }
-        val merge = Git4IdeHelper.merge(targetBranch, getRepo(r.title), dialog.gitListener)
+        val merge = Git4IdeHelper.merge(project, targetBranch, getRepo(r.title), dialog.gitListener)
         r.log = merge
         r.staue = if ("Up-To-Date" == merge || "Merge Success" == merge) 1 else 3
         dialog.updateUI()
@@ -124,7 +166,7 @@ abstract class BaseGitAction : AnAction() {
             r.staue = 3
             return
         }
-        val update = Git4IdeHelper.update(getRepo(r.title), dialog.gitListener)
+        val update = Git4IdeHelper.update(project, getRepo(r.title), dialog.gitListener)
         r.log = update
         r.staue = if ("Up-To-Date" == update || "Merge Success" == update) 1 else 3
         dialog.updateUI()
@@ -136,7 +178,7 @@ abstract class BaseGitAction : AnAction() {
             r.staue = 3
             return
         }
-        val update = Git4IdeHelper.push(getRepo(r.title), dialog.gitListener)
+        val update = Git4IdeHelper.push(project, getRepo(r.title), dialog.gitListener)
         r.log = update
         r.staue = if ("Success" == update) 1 else 3
         dialog.updateUI()
@@ -154,8 +196,12 @@ abstract class BaseGitAction : AnAction() {
         dialog.updateUI()
     }
 
+    /**
+     * 如果找不到
+     */
     protected fun getRepo(path: String): GitRepository? {
         var repository = allRepos[path]
+        if (!GitUtil.isGitRoot(path)) return null;
         if (repository == null) {
             repository = Git4IdeHelper.getRepo(File(path), project)
             allRepos[path] = repository

@@ -119,7 +119,7 @@ public class InstallApkDialog extends JDialog {
     private void mockData() {
         ArrayList<JListInfo> infos = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            infos.add(new JListInfo("----------------------------", "", 0, false));
+            infos.add(new JListInfo("------------------------", "", 0, false));
         }
         adapter.setDatas(infos);
     }
@@ -128,12 +128,12 @@ public class InstallApkDialog extends JDialog {
      * 刷新数据
      */
     private void refreshDatas() {
-        AndroidDebugBridge bridge = AndroidSdkUtils.getDebugBridge(project);
-        if (bridge == null) return;
         devices.clear();
-        for (IDevice d : bridge.getDevices()) {
+        AndroidDebugBridge bridge = AndroidSdkUtils.getDebugBridge(project);
+        if (bridge != null) for (IDevice d : bridge.getDevices()) {
             String avdName = d.getAvdName();
-            if(avdName==null) avdName = UiUtils.adbShellCommon(d,"getprop ro.product.brand",true)+"-"+UiUtils.adbShellCommon(d,"getprop ro.product.model",true);
+            if (avdName == null)
+                avdName = UiUtils.adbShellCommon(d, "getprop ro.product.brand", true) + "-" + UiUtils.adbShellCommon(d, "getprop ro.product.model", true);
             devices.put(new JListInfo(avdName + "  " + d.getSerialNumber() + "  " + d.getState(), "", 0, false), d);
         }
         adapter.setDatas(new LinkedList<>(devices.keySet()));
@@ -141,7 +141,7 @@ public class InstallApkDialog extends JDialog {
 
     @Override
     public void setVisible(boolean b) {
-        if(b) refreshDatas();
+        if (b) refreshDatas();
         super.setVisible(b);
     }
 

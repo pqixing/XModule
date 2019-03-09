@@ -21,3 +21,6 @@ buildscript {
 } //
 
 apply plugin : "com.module.manager"
+manager {
+    docRepoUrl = ""
+}

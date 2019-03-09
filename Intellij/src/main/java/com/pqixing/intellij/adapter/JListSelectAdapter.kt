@@ -18,9 +18,10 @@ open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boole
         font = Font("宋体", Font.PLAIN, 14)
 //        setSize(100, 30)
     }
+
     private var box = JCheckBox()
     private var log = JLabel().apply {
-        font = Font("宋体", Font.PLAIN, 14)
+        font = Font("宋体", Font.PLAIN, 12)
         setSize(100, 30)
     }
     private var panel = JPanel().apply {
@@ -84,14 +85,18 @@ open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boole
 
     override fun getListCellRendererComponent(p0: JList<out JListInfo>?, info: JListInfo, p2: Int, p3: Boolean, p4: Boolean): Component? {
         label.text = "   " + info.title
-        val logStr = if(info.log.length>30) info.log.substring(info.log.length-30) else info.log
+        val logStr = if (info.log.length > 30) info.log.substring(info.log.length - 30) else info.log
         log.text = logStr + when (info.staue) {
             1 -> " √ "
             2 -> "--"
             3 -> " ×  "
             else -> "   "
         }
-        log.foreground = if (info.staue == 3) error else success
+        log.foreground = when (info.staue) {
+            3 -> error
+            1 -> success
+            else -> wanming
+        }
         log.isOpaque = info.staue == 3
 
         val revers = endIndex != -1 && p2 in Math.min(startIndex, endIndex)..Math.max(startIndex, endIndex)

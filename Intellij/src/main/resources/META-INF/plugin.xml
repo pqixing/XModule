@@ -37,16 +37,17 @@
             </action>
             <separator/>
             <group id="Modularization.Code" popup="true" text="ForCode">
-                <action id="Modularization.GitCheckout" class="com.pqixing.intellij.actions.GitCheckoutAction" text="Checkout" />
                 <action id="Modularization.GitSync" class="com.pqixing.intellij.actions.GitSyncAction" text="GitSync" />
                 <separator/>
                 <action id="Modularization.GitState" class="com.pqixing.intellij.actions.GitStateAction" text="GitState" />
+                <separator/>
+                <action id="Modularization.GitCheckout" class="com.pqixing.intellij.actions.GitCheckoutAction" text="Checkout" />
                 <separator/>
                 <action id="Modularization.GitBranch" class="com.pqixing.intellij.actions.GitBranchAction" text="GitBranch" />
                 <separator/>
                 <action id="Modularization.NewModule" class="com.pqixing.intellij.actions.NewModuleAction" text="NewModule" />
                 <separator/>
-                <action id="Modularization.ReIndexVersion" class="com.pqixing.intellij.actions.ReIndexVersionAction" text="ReIndexVersion" />
+                <action id="Modularization.ReIndexVersion" class="com.pqixing.intellij.actions.ReIndexVersionAction" text="IndexVersion" />
             </group>
             <separator />
             <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction" text="ToMaven" />

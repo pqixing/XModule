@@ -1,12 +1,9 @@
 package com.pqixing.intellij.actions
 
-import com.intellij.openapi.ui.Messages
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
 import com.pqixing.intellij.utils.Git4IdeHelper
 import git4idea.GitUtil
-import git4idea.repo.GitRepository
-import java.io.File
 
 class GitCheckoutAction : BaseGitAction() {
     override fun checkUrls(urls: Map<String, String>): Boolean = true
@@ -21,12 +18,11 @@ class GitCheckoutAction : BaseGitAction() {
             JListInfo(it.key, select = true)
         }.toMutableList()
         allDatas.add(0, JListInfo("$basePath/templet", select = true))
-        allRepos.putAll(allDatas.filter { it.select }.map {
-            val repo = Git4IdeHelper.getRepo(File(it.title), project)
-            it.log = repo.currentBranchName ?: ""
-            Pair(it.title, repo)
-        })
         return allDatas
+    }
+
+    override fun updateItemLog(it: JListInfo, operatorCmd: String, cacheLog: String?) {
+        it.log = cacheLog ?: getRepo(it.title)?.currentBranchName ?: ""
     }
 
     override fun doOk(dialog: GitOperatorDialog, allDatas: MutableList<JListInfo>, urls: Map<String, String>, rootBranch: String?) {
@@ -43,5 +39,6 @@ class GitCheckoutAction : BaseGitAction() {
             GitStateAction(selectRepo).actionPerformed(e)
         }
     }
+
     override fun checkOnOk(allDatas: MutableList<JListInfo>, dialog: GitOperatorDialog): Boolean = true
 }

@@ -21,9 +21,10 @@ class GitBranchAction : BaseGitAction() {
 
     override fun initDialog(dialog: GitOperatorDialog) {
         dialog.adapter.boxVisible = false
-        dialog.setOperator("merge", "create", "delete")
+        dialog.setOperator("create", "merge", "delete")
         dialog.setTargetBranch(rootRepo.branches.remoteBranches.map { it.name }, true)
         dialog.allButton.isVisible = false//不允许反选
+        dialog.setOnOperatorChange { }//重新设置，不需要更新状态
     }
 
     override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> {
@@ -31,11 +32,6 @@ class GitBranchAction : BaseGitAction() {
             JListInfo(it.key, select = true)
         }.toMutableList()
         allDatas.add(0, JListInfo("$basePath/templet", select = true))
-        allRepos.putAll(allDatas.filter { it.select }.map {
-            val repo = Git4IdeHelper.getRepo(File(it.title), project)
-            it.log = repo.currentBranchName ?: ""
-            Pair(it.title, repo)
-        })
         return allDatas
     }
 
@@ -45,15 +41,12 @@ class GitBranchAction : BaseGitAction() {
             Messages.showMessageDialog(project, "Can not find local branch for root project!!", "Miss Branch", null)
             return false
         }
-        val targetBranch = dialog.targetBranch.substring(Math.max(0,dialog.targetBranch.lastIndexOf("/")))
+        val targetBranch = dialog.targetBranch.substring(Math.max(0, dialog.targetBranch.lastIndexOf("/")))
         if ("origin/$localBranch" == targetBranch) {
             Messages.showMessageDialog(project, "Target branch are not equals local branch!!", localBranch, null)
             return false
         }
-        val branchs = allDatas.mapNotNull {
-            val b = Git4IdeHelper.getRepo(File(it.title), project).currentBranchName
-            if (localBranch == b) null else "${it.title}  ->  $b"
-        }
+        val branchs = allDatas.mapNotNull { if (localBranch == it.log) null else "${it.title}  ->  ${it.log}" }
         if (branchs.isNotEmpty()) {
             Messages.showMessageDialog(project, "Those project branch are not equals local branch!! \n ${branchs.joinToString { it + "\n" }}", localBranch, null)
             return false

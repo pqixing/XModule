@@ -11,21 +11,13 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JToggleButton;
-import javax.swing.KeyStroke;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.JTextComponent;
 
 import git4idea.commands.GitLineHandlerListener;
+import org.jdesktop.swingx.JXRadioGroup;
 
 public class GitOperatorDialog extends JDialog {
     public JPanel contentPane;
@@ -50,6 +42,7 @@ public class GitOperatorDialog extends JDialog {
 
     public JListSelectAdapter adapter;
     public GitListener gitListener;
+    public Runnable onOperatorChange;
 
     public void setOnOk(Runnable onOk) {
         this.onOk = onOk;
@@ -57,7 +50,7 @@ public class GitOperatorDialog extends JDialog {
 
     public GitOperatorDialog(String title, String curBranch, List<JListInfo> datas) {
         setContentPane(contentPane);
-        setModal(true);
+        setModal(false);
         getRootPane().setDefaultButton(buttonOK);
         gitListener = new GitListener(tLog);
         UiUtils.centerDialog(this);
@@ -88,9 +81,27 @@ public class GitOperatorDialog extends JDialog {
         });
 
         jlTips.setText("All " + datas.size() + " Project");
+
+        initRadio();
+
     }
 
-    public void setTargetBranch(List<String> comboxs,boolean visible) {
+    public void setOnOperatorChange(Runnable onOperatorChange) {
+        this.onOperatorChange = onOperatorChange;
+    }
+
+    /**
+     *  初始化按钮
+     */
+    private void initRadio() {
+        ChangeListener l = e -> {
+            JRadioButton b = (JRadioButton) e.getSource();
+            if (onOperatorChange != null && b.isSelected()) onOperatorChange.run();
+        };
+        for (JRadioButton r : operators) r.addChangeListener(l);
+    }
+
+    public void setTargetBranch(List<String> comboxs, boolean visible) {
         jLTarget.setVisible(visible);
         cbBranch.setVisible(visible);
         if (comboxs != null) for (int i = 0; i < comboxs.size(); i++) {
@@ -114,6 +125,7 @@ public class GitOperatorDialog extends JDialog {
             else operators[i].setText(c);
         }
     }
+
 
     /**
      * 获取选中的命令

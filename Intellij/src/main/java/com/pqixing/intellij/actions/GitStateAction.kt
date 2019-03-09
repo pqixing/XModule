@@ -19,6 +19,7 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
 
         return true
     }
+
     constructor()
     constructor(repos: Map<String, GitRepository>) {
         allRepos.putAll(repos)
@@ -27,12 +28,16 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
     override fun checkUrls(urls: Map<String, String>): Boolean = true
 
     override fun initDialog(dialog: GitOperatorDialog) {
-        dialog.setTargetBranch(null,false)
+        dialog.setTargetBranch(null, false)
         dialog.jlTips.text = "Click item to resolve conflict"
         dialog.pOpertator.isVisible = false
         dialog.buttonOK.text = "Commit"
         dialog.adapter.boxVisible = false
         dialog.adapter.selectListener = this
+    }
+
+    override fun updateItemLog(it: JListInfo, operatorCmd: String, cacheLog: String?) {
+
     }
 
     override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> {
