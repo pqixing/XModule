@@ -5,10 +5,12 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.AbstractVcsHelper
+import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vfs.VfsUtil
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.adapter.JlistSelectListener
+import com.pqixing.intellij.ui.FileListDialog
 import com.pqixing.intellij.ui.GitOperatorDialog
 import com.pqixing.intellij.utils.GitHelper
 import git4idea.GitUtil
@@ -21,20 +23,30 @@ import java.io.File
 import javax.swing.JList
 
 class GitStateAction : BaseGitAction, JlistSelectListener {
-    val TIP = "U:UnTrack;  A:Add;  M:Modify;  C:Conflict;  P:Push";
+    val TIP = "A:All;  C:Conflict;  P:Push";
     var commitMsg = ""//提交的文本
     override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean {
         val info = items.last()
         val repo = getRepo(info.title) ?: return true
         val unMergeFiles = DvcsUtil.findVirtualFilesWithRefresh(GitChangeUtils.getUnmergedFiles(repo))
-        if (unMergeFiles.size == 0) {
-            if (info.staue == 3) updateItemLog(info, "", "")
-            Messages.showMessageDialog("There are no conflict to resolve; \n${info.title}", "No Conflict", null);
-            return true
-        }
-        ApplicationManager.getApplication().invokeAndWait {
+        if (!unMergeFiles.isEmpty()) {
             val files = AbstractVcsHelper.getInstance(project).showMergeDialog(unMergeFiles, GitVcs.getInstance(project).mergeProvider)
             unMergeFiles.removeAll(files)//删除所有合并后的文件
+        } else {//如果没有待合并的文件，打开文件列表，方便查看和修改
+            val changeFiles: List<String>? = GitHelper.state(project, repo)
+            if (changeFiles != null && changeFiles.isNotEmpty()) {
+                var datas = mutableListOf<JListInfo>()
+                var files = mutableListOf<File>()
+                changeFiles.forEach {
+                    val f = File(info.title, it.substring(3).trim())
+                    files.add(f)
+                    datas.add(JListInfo(f.name, it.substring(0, 2)))
+                }
+                FileListDialog(project, datas, files).apply {
+                    pack()
+                    isVisible = true
+                }
+            }
         }
         //更新状态值
         updateItemLog(info, "", "")
@@ -51,28 +63,22 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
 
     override fun initDialog(dialog: GitOperatorDialog) {
         dialog.setTargetBranch(null, false)
-        dialog.jlTips.text = "Click item to resolve conflict;"
+        dialog.jlTips.text = "Click item to resolve conflict or list files;   $TIP"
         dialog.pOpertator.isVisible = false
         dialog.buttonOK.text = "Commit"
         dialog.adapter.boxVisible = false
         dialog.adapter.selectListener = this
-        dialog.jlBranch.text = "${dialog.jlBranch.text}               $TIP"
+        dialog.jlBranch.text = dialog.jlBranch.text
         dialog.preferredSize = Dimension(600, 400)
     }
 
     override fun updateItemLog(info: JListInfo, operatorCmd: String, cacheLog: String?) {
         val repo = getRepo(info.title) ?: return
-        val branchName = repo.currentBranchName
-        val branchs = "$branchName:${repo.currentBranch?.findTrackedBranch(repo)?.name}"
-        val unPush = "P:" + GitLogUtil.collectFullDetails(project, repo.root, "origin/$branchName..$branchName").size
+        val branchs = "${repo.currentBranchName}:${repo.state.toString().toLowerCase()}"
         val unMergeCount = GitChangeUtils.getUnmergedFiles(repo).size
-        val unMerge = "C:$unMergeCount";
-
         //如果有冲突，编辑黄色
         info.staue = if (unMergeCount > 0) 3 else 0
-        info.log = "$unMerge;$unPush;$branchs"
-
-
+        info.log = "${(GitHelper.state(project, repo)?.size ?: -1)}; ${unMergeCount};$branchs"
     }
 
     override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> {

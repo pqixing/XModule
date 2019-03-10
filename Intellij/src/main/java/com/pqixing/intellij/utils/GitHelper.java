@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vcs.AbstractVcsHelper;
 import com.intellij.openapi.vcs.VcsException;
+import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.pqixing.intellij.ui.GitOperatorDialog;
@@ -26,10 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class GitHelper {
     public static final String LOCAL = "local";
@@ -339,15 +337,25 @@ public class GitHelper {
         GitCommandResult result = Git.getInstance().runCommand(handler);
         if (!result.success()) return result.getErrorOutputAsJoinedString();
 
-        GitEventDetector detector = new GitEventDetector("nothing to commit","working tree clean");
+        GitEventDetector detector = new GitEventDetector("nothing to commit", "working tree clean");
         handler = new GitLineHandler(project, repo.getRoot(), GitCommand.COMMIT);
         handler.setStdoutSuppressed(false);
-        handler.addParameters("-m", commitMsg.trim().isEmpty()?"Auto Commit":commitMsg);
+        handler.addParameters("-m", commitMsg.trim().isEmpty() ? "Auto Commit" : commitMsg);
         handler.endOptions();
         addListener(handler, listeners);
         handler.addLineListener(detector);
         result = getGit().runCommand(handler);
 
         return detector.hasHappened() || result.success() ? "Success" : result.getErrorOutputAsJoinedString();
+    }
+
+    public static List<String> state(Project project, GitRepository repo, GitLineHandlerListener... listeners) {
+        GitLineHandler handler = new GitLineHandler(project, repo.getRoot(), GitCommand.STATUS);
+        handler.addParameters("--porcelain");
+        addListener(handler, listeners);
+        handler.endOptions();
+        handler.setSilent(true);
+        GitCommandResult result = getGit().runCommand(handler);
+        return result.success() ? result.getOutput() : null;
     }
 }
