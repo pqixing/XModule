@@ -1,15 +1,12 @@
 package com.pqixing.intellij.actions
 
 import com.intellij.openapi.vfs.VfsUtil
-import com.pqixing.Templet.templet
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.adapter.JlistSelectListener
 import com.pqixing.intellij.ui.GitOperatorDialog
-import com.pqixing.intellij.utils.Git4IdeHelper
+import com.pqixing.intellij.utils.GitHelper
 import git4idea.GitUtil
-import git4idea.branch.GitBranchStateProvider
-import git4idea.branch.GitBranchUtil
 import git4idea.repo.GitRepository
 import java.io.File
 import javax.swing.JList
@@ -23,6 +20,7 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
     constructor()
     constructor(repos: Map<String, GitRepository>) {
         allRepos.putAll(repos)
+        createByMe = true
     }
 
     override fun checkUrls(urls: Map<String, String>): Boolean = true
@@ -42,8 +40,8 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
 
     override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> {
         if (allRepos.isEmpty()) {
-            allRepos.putAll(urls.filter { GitUtil.isGitRoot(it.key) }.map { Pair(it.key, Git4IdeHelper.getRepo(File(it.key), project)) })
-            allRepos.put("$basePath/templet", Git4IdeHelper.getRepo(File(basePath, "templet"), project))
+            allRepos.putAll(urls.filter { GitUtil.isGitRoot(it.key) }.map { Pair(it.key, GitHelper.getRepo(File(it.key), project)) })
+            allRepos.put("$basePath/templet", GitHelper.getRepo(File(basePath, "templet"), project))
         }
         return allRepos.map {
             JListInfo(

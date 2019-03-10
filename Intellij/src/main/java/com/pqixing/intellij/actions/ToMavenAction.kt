@@ -18,7 +18,6 @@ import java.io.File
 
 class ToMavenAction : AnAction() {
     lateinit var project: Project
-    lateinit var dialog: ToMavenDialog
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
 
@@ -34,7 +33,7 @@ class ToMavenAction : AnAction() {
                 .map { JListInfo(it.name, "", 0, it.name == moduleName || it.name == "${moduleName}_api") }
 
 
-        dialog = ToMavenDialog(tModules);
+        val dialog = ToMavenDialog(tModules);
         dialog.jlTitle.text = "Prepare ToMaven for :$moduleName"
         dialog.setOnOk {
             dialog.isVisible = false
@@ -65,7 +64,7 @@ class ToMavenAction : AnAction() {
                     return
                 }
             }
-            if (i >= tModules.size-1) {
+            if (i >= tModules.size - 1) {
                 ApplicationManager.getApplication().invokeLater {
                     dialog.updateUI(false)
                     dialog.isVisible = true

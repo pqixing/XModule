@@ -10,7 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
-import com.pqixing.intellij.utils.Git4IdeHelper;
+import com.pqixing.intellij.utils.GitHelper;
 import com.pqixing.intellij.utils.GradleUtils;
 import com.pqixing.intellij.utils.UiUtils;
 
@@ -37,7 +37,6 @@ import git4idea.GitRemoteBranch;
 import git4idea.branch.GitBranchesCollection;
 import git4idea.repo.GitRepository;
 import kotlin.Pair;
-import kotlin.reflect.jvm.internal.pcollections.HashPMap;
 
 public class VersionDialog extends JDialog {
     private JPanel contentPane;
@@ -72,7 +71,7 @@ public class VersionDialog extends JDialog {
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        GitRepository repo = Git4IdeHelper.getRepo(new File(project.getBasePath(), "templet"), project);
+        GitRepository repo = GitHelper.getRepo(new File(project.getBasePath(), "templet"), project);
         if (repo == null) {
             return;
         }

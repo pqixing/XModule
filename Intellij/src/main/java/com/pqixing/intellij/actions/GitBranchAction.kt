@@ -3,13 +3,11 @@ package com.pqixing.intellij.actions
 import com.intellij.openapi.ui.Messages
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
-import com.pqixing.intellij.utils.Git4IdeHelper
+import com.pqixing.intellij.utils.GitHelper
 import git4idea.GitUtil
-import git4idea.repo.GitRepository
-import java.io.File
 
 class GitBranchAction : BaseGitAction() {
-    override fun beforeActionRun() = key == Messages.showInputDialog("Please input key!!", "Password", null)
+    override fun beforeActionRun() = key == Messages.showPasswordDialog("Please input key!!", "Password")
     override fun checkUrls(urls: Map<String, String>): Boolean {
         val filter = urls.keys.filter { !GitUtil.isGitRoot(it) }
         if (filter.isNotEmpty()) {
@@ -22,7 +20,7 @@ class GitBranchAction : BaseGitAction() {
     override fun initDialog(dialog: GitOperatorDialog) {
         dialog.adapter.boxVisible = false
         dialog.setOperator("create", "merge", "delete")
-        dialog.setTargetBranch(rootRepo.branches.remoteBranches.map { it.name }, true)
+        dialog.setTargetBranch(getRepo(rootRepoPath)?.branches?.remoteBranches?.map { it.name }, true)
         dialog.allButton.isVisible = false//不允许反选
         dialog.setOnOperatorChange { }//重新设置，不需要更新状态
     }
@@ -36,17 +34,22 @@ class GitBranchAction : BaseGitAction() {
     }
 
     override fun checkOnOk(allDatas: MutableList<JListInfo>, dialog: GitOperatorDialog): Boolean {
-        val localBranch = rootRepo.currentBranchName
+        val localBranch = getRepo(rootRepoPath)?.currentBranchName
         if (localBranch == null) {
             Messages.showMessageDialog(project, "Can not find local branch for root project!!", "Miss Branch", null)
             return false
         }
-        val targetBranch = dialog.targetBranch.substring(Math.max(0, dialog.targetBranch.lastIndexOf("/")))
-        if ("origin/$localBranch" == targetBranch) {
-            Messages.showMessageDialog(project, "Target branch are not equals local branch!!", localBranch, null)
+        val operatorCmd = dialog.operatorCmd
+        //不允许操作master
+        if ("delete" == operatorCmd && "master" == GitHelper.findLocalBranchName(dialog.targetBranch)) {
+            Messages.showErrorDialog(project, "Can not delete branch : master", "Error")
             return false
         }
-        val branchs = allDatas.mapNotNull { if (localBranch == it.log) null else "${it.title}  ->  ${it.log}" }
+        if (localBranch == GitHelper.findLocalBranchName(dialog.targetBranch)) {
+            Messages.showMessageDialog(project, "Target branch are not  allow equals local branch!!", localBranch, null)
+            return false
+        }
+        val branchs = allDatas.mapNotNull { getRepo(it.title) }.mapNotNull { if (localBranch == it.currentBranchName) null else "${it.root.name}  ->  ${it.currentBranchName}" }
         if (branchs.isNotEmpty()) {
             Messages.showMessageDialog(project, "Those project branch are not equals local branch!! \n ${branchs.joinToString { it + "\n" }}", localBranch, null)
             return false

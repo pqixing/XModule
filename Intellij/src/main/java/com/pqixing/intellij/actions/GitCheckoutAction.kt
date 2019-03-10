@@ -2,14 +2,14 @@ package com.pqixing.intellij.actions
 
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
-import com.pqixing.intellij.utils.Git4IdeHelper
+import com.pqixing.intellij.utils.GitHelper
 import git4idea.GitUtil
 
 class GitCheckoutAction : BaseGitAction() {
     override fun checkUrls(urls: Map<String, String>): Boolean = true
 
     override fun initDialog(dialog: GitOperatorDialog) {
-        dialog.setTargetBranch(rootRepo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }, true)
+        dialog.setTargetBranch(getRepo(rootRepoPath)?.branches?.remoteBranches?.map { it.name.substring(it.name.lastIndexOf("/") + 1) }, true)
         dialog.pOpertator.isVisible = false
     }
 
@@ -35,8 +35,9 @@ class GitCheckoutAction : BaseGitAction() {
         val selectItem = allDatas.filter { it.select }.map { it.title }
         val selectRepo = allRepos.filter { selectItem.contains(it.key) }
         //切换完成,更新状态
-        Git4IdeHelper.checkout(project, dialog.targetBranch, selectRepo.values.toList()) {
+        GitHelper.checkout(project, dialog.targetBranch, selectRepo.values.toList()) {
             GitStateAction(selectRepo).actionPerformed(e)
+            afterDoOk(dialog)
         }
     }
 

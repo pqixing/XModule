@@ -6,9 +6,7 @@ import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 import com.pqixing.intellij.utils.UiUtils;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.util.List;
 
 import javax.swing.*;
@@ -37,6 +35,7 @@ public class GitOperatorDialog extends JDialog {
     public JPanel pOpertator;
     public JPanel pOk;
     public JPanel pHeader;
+    public JButton btnRevert;
     public Runnable onOk;
     public JRadioButton[] operators;
 
@@ -83,7 +82,9 @@ public class GitOperatorDialog extends JDialog {
         jlTips.setText("All " + datas.size() + " Project");
 
         initRadio();
-
+        btnRevert.addActionListener(e -> {
+            setLogModel(!pLog.isVisible());
+        });
     }
 
     public void setOnOperatorChange(Runnable onOperatorChange) {
@@ -91,7 +92,7 @@ public class GitOperatorDialog extends JDialog {
     }
 
     /**
-     *  初始化按钮
+     * 初始化按钮
      */
     private void initRadio() {
         ChangeListener l = e -> {
@@ -150,13 +151,18 @@ public class GitOperatorDialog extends JDialog {
         return trim;
     }
 
-    private void onOK() {
+    private void setLogModel(boolean log) {
         // add your code here
-        pLog.setVisible(true);
-        pOk.setVisible(false);
-        pOpertator.setVisible(false);
+        pLog.setVisible(log);
+        pOk.setVisible(!log);
+        pOpertator.setVisible(!log);
+    }
+
+    private void onOK() {
+        setLogModel(true);
         if (onOk != null) onOk.run();
     }
+
 
     private void onCancel() {
         // add your code here if necessary

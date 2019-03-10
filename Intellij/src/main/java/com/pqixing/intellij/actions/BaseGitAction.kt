@@ -11,7 +11,7 @@ import com.intellij.openapi.ui.Messages
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
-import com.pqixing.intellij.utils.Git4IdeHelper
+import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.model.ProjectXmlModel
 import com.pqixing.tools.FileUtils
 import git4idea.GitUtil
@@ -21,19 +21,19 @@ import groovy.lang.GroovyClassLoader
 import java.io.File
 
 abstract class BaseGitAction : AnAction() {
+    lateinit var project: Project
+    lateinit var basePath: String
+    lateinit var rootRepoPath: String
+    var createByMe = false;
     var allRepos = mutableMapOf<String, GitRepository>()
     val key = "k1234"
-    lateinit var project: Project
-    lateinit var projectXml: ProjectXmlModel
-    lateinit var codeRootDir: String
-    lateinit var basePath: String
-    lateinit var rootRepo: GitRepository
     lateinit var e: AnActionEvent
     var cacheLog = mutableMapOf<String, String>()
     override fun actionPerformed(e: AnActionEvent) {
         this.e = e
-        project = e.project ?: return
-        basePath = project.basePath ?: return
+        this.project = e.project ?: return
+        this.basePath = project.basePath ?: return
+        rootRepoPath = "$basePath/templet";
         if (!beforeActionRun()) return
         val projectXmlFile = File(basePath, "templet/project.xml")
         val configFile = File(basePath, "Config.java")
@@ -41,16 +41,17 @@ abstract class BaseGitAction : AnAction() {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
             return
         }
-        projectXml = XmlHelper.parseProjectXml(projectXmlFile)
+        if(!createByMe) resetCache()
+        val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
         val clazz = GroovyClassLoader().parseClass(configFile)
         var codeRoot = clazz.getField("codeRoot").get(clazz.newInstance()).toString()
-        codeRootDir = File(basePath, codeRoot).canonicalPath
+        val codeRootDir = File(basePath, codeRoot).canonicalPath
         val urls = projectXml.projects.map { Pair("$codeRootDir/${it.name}", it.url) }.toMap()
         if (!checkUrls(urls)) return
         val allDatas = getAdapterList(urls)
 
-        rootRepo = getRepo("$basePath/templet")!!
-        val branches = Git4IdeHelper.getRepo(File("$basePath/templet"), project).branches
+        val rootRepo = getRepo(rootRepoPath)!!
+        val branches = GitHelper.getRepo(File("$basePath/templet"), project).branches
 
         val branchNames = mutableListOf<String>()
         branchNames += branches.localBranches.map { it.name }
@@ -65,6 +66,12 @@ abstract class BaseGitAction : AnAction() {
             if (checkOnOk(allDatas, dialog)) doOk(dialog, allDatas, urls, rootBranch) else dialog.dispose()
         }
         dialog.isVisible = true
+    }
+
+    protected  open fun resetCache() {
+        allRepos.clear()
+        cacheLog.clear()
+
     }
 
     private fun updateLog(dialog: GitOperatorDialog) {
@@ -86,14 +93,14 @@ abstract class BaseGitAction : AnAction() {
         when (operatorCmd) {
             "merge", "delete", "create" -> {
                 info.log = cacheLog ?: repo?.currentBranchName ?: "No Branch"
-                info.staue = if (rootRepo.currentBranchName == info.log) 0 else 3
+                info.staue = if (getRepo(rootRepoPath)?.currentBranchName == info.log) 0 else 3
             }
             "clone" -> {
                 info.log = cacheLog ?: repo?.currentBranchName ?: "Project No Exists"
                 info.staue = if (repo == null) 3 else 0
             }
             "update" -> {
-                info.log = cacheLog ?: repo?.let { it.currentBranchName + " : " + it.state.toString().toLowerCase() }
+                info.log = cacheLog ?: repo?.currentBranch?.let { it.name + " : " + it.findTrackedBranch(repo)?.name }
                         ?: "Project No Exists"
                 info.staue = if (repo == null) 3 else 0
             }
@@ -117,11 +124,9 @@ abstract class BaseGitAction : AnAction() {
                     "clone" -> for (r in repos) clone(r, project, urls, rootBranch, dialog)
                     "update" -> for (r in repos) update(r, dialog)
                     "push" -> for (r in repos) push(r, dialog)
-                    "merge" -> if ("origin/$rootBranch" != dialog.targetBranch) for (r in repos) merge(dialog, dialog.targetBranch, r, project)
-                    "delete" -> {
-                    }
-                    "create" -> {
-                    }
+                    "merge" -> for (r in repos) merge(dialog, dialog.targetBranch, r, project)
+                    "delete" -> for (r in repos) delete(dialog, dialog.targetBranch, r, project)
+                    "create" -> for (r in repos) create(dialog, dialog.targetBranch, r, project)
                 }
                 indicator.text = "end $operatorCmd"
                 dialog.updateUI()
@@ -133,8 +138,37 @@ abstract class BaseGitAction : AnAction() {
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
     }
 
-    protected open fun afterDoOk(dialog: GitOperatorDialog) {
+    private fun create(dialog: GitOperatorDialog, targetBranch: String, r: JListInfo, project: Project) {
+        if (!GitUtil.isGitRoot(r.title)) {
+            r.log = "Project Not Exists"
+            r.staue = 3
+            return
+        }
+        val create = GitHelper.create(project, targetBranch, getRepo(r.title), dialog.gitListener)
+        r.log = create
+        r.staue = if (create == "Success") 1 else 3
+        dialog.updateUI()
+    }
 
+    private fun delete(dialog: GitOperatorDialog, targetBranch: String, r: JListInfo, project: Project?) {
+        if (!GitUtil.isGitRoot(r.title)) {
+            r.log = "Project Not Exists"
+            r.staue = 3
+            return
+        }
+        val delete = GitHelper.delete(project, targetBranch, getRepo(r.title), dialog.gitListener)
+        r.log = delete
+        r.staue = if (delete == "Success") 1 else 3
+        dialog.updateUI()
+
+    }
+
+    protected open fun afterDoOk(dialog: GitOperatorDialog) {
+        dialog.btnRevert.isVisible = true
+        cacheLog.clear()//清楚缓存记录
+        allRepos.clear()//清楚git，防止内存持续占用
+//        allRepos.forEach { it.value.update() }//更新git操作
+//        updateLog(dialog)//重新更新数据
     }
 
     protected open fun beforeActionRun(): Boolean = true
@@ -154,9 +188,9 @@ abstract class BaseGitAction : AnAction() {
             r.staue = 3
             return
         }
-        val merge = Git4IdeHelper.merge(project, targetBranch, getRepo(r.title), dialog.gitListener)
-        r.log = merge
-        r.staue = if ("Up-To-Date" == merge || "Merge Success" == merge) 1 else 3
+        val repo = getRepo(r.title)
+        r.log = if (!GitHelper.checkBranchExists(repo, targetBranch)) "Branch Not Exists" else GitHelper.merge(project, targetBranch, repo, dialog.gitListener)
+        r.staue = if ("Already up to date" == r.log || "Merge Success" == r.log) 1 else 3
         dialog.updateUI()
     }
 
@@ -166,9 +200,9 @@ abstract class BaseGitAction : AnAction() {
             r.staue = 3
             return
         }
-        val update = Git4IdeHelper.update(project, getRepo(r.title), dialog.gitListener)
+        val update = GitHelper.update(project, getRepo(r.title), dialog.gitListener)
         r.log = update
-        r.staue = if ("Up-To-Date" == update || "Merge Success" == update) 1 else 3
+        r.staue = if ("Already up to date" == update || "Merge Success" == update) 1 else 3
         dialog.updateUI()
     }
 
@@ -178,7 +212,7 @@ abstract class BaseGitAction : AnAction() {
             r.staue = 3
             return
         }
-        val update = Git4IdeHelper.push(project, getRepo(r.title), dialog.gitListener)
+        val update = GitHelper.push(project, getRepo(r.title), dialog.gitListener)
         r.log = update
         r.staue = if ("Success" == update) 1 else 3
         dialog.updateUI()
@@ -190,7 +224,7 @@ abstract class BaseGitAction : AnAction() {
             r.staue = 1
             return
         }
-        val clone = Git4IdeHelper.clone(project, File(r.title).apply { FileUtils.delete(this) }, urls.getValue(r.title), rootBranch, dialog.gitListener)
+        val clone = GitHelper.clone(project, File(r.title).apply { FileUtils.delete(this) }, urls.getValue(r.title), rootBranch, dialog.gitListener)
         r.log = if (clone == null) "Clone Fail" else "Clone Success"
         r.staue = if (clone == null) 3 else 1
         dialog.updateUI()
@@ -203,7 +237,7 @@ abstract class BaseGitAction : AnAction() {
         var repository = allRepos[path]
         if (!GitUtil.isGitRoot(path)) return null;
         if (repository == null) {
-            repository = Git4IdeHelper.getRepo(File(path), project)
+            repository = GitHelper.getRepo(File(path), project)
             allRepos[path] = repository
         }
         return repository

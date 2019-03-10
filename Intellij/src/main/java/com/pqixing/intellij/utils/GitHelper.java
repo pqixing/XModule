@@ -9,24 +9,29 @@ import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.pqixing.tools.FileUtils;
-import git4idea.*;
-import git4idea.branch.GitBranchUtil;
+import git4idea.GitLocalBranch;
+import git4idea.GitRemoteBranch;
+import git4idea.GitUtil;
+import git4idea.GitVcs;
 import git4idea.branch.GitBrancher;
-import git4idea.branch.GitBranchesCollection;
 import git4idea.changes.GitChangeUtils;
 import git4idea.commands.*;
 import git4idea.repo.GitRemote;
 import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryImpl;
+import kotlin.Triple;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static com.intellij.dvcs.DvcsUtil.findVirtualFilesWithRefresh;
-import static com.intellij.util.ObjectUtils.assertNotNull;
 
-public class Git4IdeHelper {
+public class GitHelper {
     public static final String LOCAL = "local";
     public static final String REMOTE = "remote";
     public static final String LOSE = "lose";
@@ -62,7 +67,7 @@ public class Git4IdeHelper {
         if (cloneBranch == null || cloneBranch.equals(repo.getCurrentBranchName())) return repo;
         for (GitRemoteBranch remoteBranch : repo.getBranches().getRemoteBranches()) {
             if (remoteBranch.getName().endsWith("/" + cloneBranch)) {
-                Git4IdeHelper.getGit().checkout(repo, remoteBranch.getName(), cloneBranch, true, true, listeners);
+                GitHelper.getGit().checkout(repo, remoteBranch.getName(), cloneBranch, true, true, listeners);
                 break;
             }
         }
@@ -76,8 +81,9 @@ public class Git4IdeHelper {
      * @return
      */
     public static String push(Project project, GitRepository repo, GitLineHandlerListener... listeners) {
+        callListener("Prepare push for " + repo.getRoot().getName(), listeners);
         String update = update(project, repo, listeners);
-        if (!"Up-To-Date".equals(update)) return update;
+        if (!"Already up to date".equals(update)) return update;
         GitLocalBranch branch = repo.getCurrentBranch();
         if (branch == null) return "Not Branch";
         GitCommandResult push = getGit().push(repo, GitRemote.ORIGIN, repo.getPresentableUrl(), branch.getName(), branch.findTrackedBranch(repo) == null, listeners);
@@ -86,6 +92,7 @@ public class Git4IdeHelper {
     }
 
     public static String update(Project project, GitRepository repo, GitLineHandlerListener... listeners) {
+        callListener("Prepare update for " + repo.getRoot().getName(), listeners);
         Git git = getGit();
         GitRemote remote = GitUtil.findRemoteByName(repo, GitRemote.ORIGIN);
         git.fetch(repo, remote, Arrays.asList(listeners));
@@ -93,30 +100,18 @@ public class Git4IdeHelper {
         return merge(project, "FETCH_HEAD", repo, listeners);
     }
 
-    public static Map<String, List<GitRepository>> sortGitRepoByBranch(final String targetBranch, List<GitRepository> repos) {
-        final String remoteBranchName = "origin/" + targetBranch;
+    public static Triple sortGitRepoByBranch(final String targetBranch, List<GitRepository> repos) {
         ArrayList<GitRepository> localBranchs = new ArrayList<>();
         ArrayList<GitRepository> remoteBranchs = new ArrayList<>();
         ArrayList<GitRepository> loseBranchs = new ArrayList<>();
         for (GitRepository repo : repos) {
-            if (targetBranch.equals(repo.getCurrentBranchName())) continue;
-
-            GitBranchesCollection branches = repo.getBranches();
-            if (branches.findBranchByName(targetBranch) != null) localBranchs.add(repo);
-            else if (branches.findBranchByName(remoteBranchName) != null) localBranchs.add(repo);
-            else {
-                getGit().fetch(repo, GitUtil.findRemoteByName(repo, GitRemote.ORIGIN), Collections.emptyList());
-                if (branches.findBranchByName(targetBranch) != null) localBranchs.add(repo);
-                else if (branches.findBranchByName(remoteBranchName) != null)
-                    localBranchs.add(repo);
-                else loseBranchs.add(repo);
-            }
+            String localBranch = repo.getCurrentBranchName();
+            if (targetBranch.equals(localBranch)) continue;
+            if (checkBranchExists(repo, findLocalBranchName(targetBranch))) localBranchs.add(repo);
+            else if (checkBranchExists(repo, findRemoteBranchName(targetBranch))) remoteBranchs.add(repo);
+            else loseBranchs.add(repo);
         }
-        HashMap<String, List<GitRepository>> map = new HashMap<>();
-        map.put(LOCAL, localBranchs);
-        map.put(REMOTE, remoteBranchs);
-        map.put(LOSE, loseBranchs);
-        return map;
+        return new Triple(localBranchs, remoteBranchs, loseBranchs);
     }
 
     /**
@@ -128,23 +123,28 @@ public class Git4IdeHelper {
      * @return
      */
     public static List<GitRepository> checkout(@NotNull final Project myProject, final String targetBranch, List<GitRepository> repos, Runnable allInAwtLater) {
-        Map<String, List<GitRepository>> map = sortGitRepoByBranch(targetBranch, repos);
+        Triple triple = sortGitRepoByBranch(targetBranch, repos);
         //开始切换分支
         GitBrancher brancher = GitBrancher.getInstance(myProject);
-        brancher.checkout(targetBranch, false, map.get(LOCAL), () -> {
-            List<GitRepository> remotes = map.get(REMOTE);
+        Runnable runRemote = () -> {
+            List<GitRepository> remotes = (List<GitRepository>) triple.getSecond();
             if (remotes.isEmpty()) allInAwtLater.run();
             else
                 brancher.checkoutNewBranchStartingFrom(targetBranch, "origin/" + targetBranch, remotes, allInAwtLater);
+        };
+        List<GitRepository> locals = (List<GitRepository>) triple.getFirst();
+        if (locals.isEmpty()) runRemote.run();
+        else brancher.checkout(targetBranch, false, locals, () -> {
+            runRemote.run();
         });
-        return map.get(LOSE);
+        return (List<GitRepository>) triple.getThird();
     }
 
     /**
      * 合并
      */
     public static String merge(Project project, final String mergeBranch, GitRepository repo, GitLineHandlerListener... listeners) {
-        //开始切换分支
+//        if (!checkBranchExists(repo, mergeBranch)) return "Branch Not Exists";
         try {
             String msg = System.currentTimeMillis() + "";
             GitCommandResult r = getGit().stashSave(repo, msg);
@@ -186,7 +186,7 @@ public class Git4IdeHelper {
             //有冲突未解决
             if (unMergeSize > 0) return "Merge Conflict";
             //没有冲突，并且更新到了最新
-            if (!hadConflict && updateToDate.hasHappened()) return "Up-To-Date";
+            if (!hadConflict && updateToDate.hasHappened()) return "Already up to date";
             //有冲突，已解决，或者，直接合并成功返回合并成功
             if (hadConflict || merge.success()) return "Merge Success";
             //其他情况，返回错误情况
@@ -230,6 +230,86 @@ public class Git4IdeHelper {
         return getGit().resetMerge(repo, null).success();
     }
 
+    @NotNull
+    public static String delete(@Nullable Project project, @NotNull String targetBranch, GitRepository repo, GitLineHandlerListener... listeners) {
+        callListener("Prepare delete " + targetBranch + " for " + repo.getRoot().getName(), listeners);
+        //删除本地存在的分支
+        String localBranchName = findLocalBranchName(targetBranch);
+        if (checkBranchExists(repo, localBranchName))
+            getGit().branchDelete(repo, findLocalBranchName(targetBranch), true, listeners);
+        String remoteBranchName = findRemoteBranchName(targetBranch);
+        if (checkBranchExists(repo, remoteBranchName)) {
+            GitEventDetector fail = new GitEventDetector("remote ref does not exist", "failed to push some refs to");
+            GitCommandResult result = getGit().runCommand(() -> {
+                final GitLineHandler h = new GitLineHandler(repo.getProject(), repo.getRoot(), GitCommand.PUSH);
+                h.setUrls(Collections.singleton(repo.getPresentableUrl()));
+                h.setSilent(false);
+                h.setStdoutSuppressed(false);
+                for (GitLineHandlerListener l : listeners) h.addLineListener(l);
+                h.addLineListener(fail);
+                //push删除指令
+                h.addParameters("origin", "--porcelain", "--delete", findLocalBranchName(targetBranch));
+                return h;
+            });
+            fail.detector(result.getErrorOutput());
+            if (fail.hasHappened()) return "Remote Branch Not Exists";
+            return result.success() ? "Success" : result.getErrorOutputAsJoinedString();
+        }
+        return "Remote Branch Not Exists";
+    }
+
+    public static boolean checkBranchExists(GitRepository repo, String name) {
+        boolean b = repo.getBranches().findBranchByName(name) != null;
+        if (!b && name.contains("origin")) {
+            getGit().fetch(repo, GitUtil.findRemoteByName(repo, GitRemote.ORIGIN), Collections.emptyList());
+            b = repo.getBranches().findBranchByName(name) != null;
+        }
+        return b;
+    }
+
+
+    public static String findLocalBranchName(String name) {
+        return name.contains("/") ? name.substring(name.lastIndexOf("/") + 1) : name;
+    }
+
+    public static String findRemoteBranchName(String name) {
+        return "origin/" + findLocalBranchName(name);
+    }
+
+    @NotNull
+    public static String create(@NotNull Project project, @NotNull String targetBranch, @Nullable GitRepository repo, GitLineHandlerListener... listeners) {
+        callListener("Prepare create " + targetBranch + " for " + repo.getRoot().getName(), listeners);
+        String remoteBranchName = findRemoteBranchName(targetBranch);
+        if (checkBranchExists(repo, remoteBranchName)) return "Branch Exists";
+        String localBranchName = findLocalBranchName(targetBranch);
+        boolean createByMe = false;
+        if (!checkBranchExists(repo, localBranchName)) {
+            for (GitLineHandlerListener l : listeners)
+                l.onLineAvailable("Create " + localBranchName + " from " + repo.getCurrentBranchName(), ProcessOutputTypes.STDOUT);
+            //创建本地分支
+            getGit().branchCreate(repo, findLocalBranchName(targetBranch), repo.getCurrentBranchName());
+            createByMe = true;
+        }
+
+        GitCommandResult result = getGit().runCommand(() -> {
+            final GitLineHandler h = new GitLineHandler(repo.getProject(), repo.getRoot(), GitCommand.PUSH);
+            h.setUrls(Collections.singleton(repo.getPresentableUrl()));
+            h.setSilent(false);
+            h.setStdoutSuppressed(false);
+            for (GitLineHandlerListener l : listeners) h.addLineListener(l);
+            //push删除指令
+            h.addParameters("origin", "--porcelain", localBranchName + ":" + localBranchName);
+            h.addParameters("--set-upstream");
+            h.addParameters("--force");
+            h.addParameters("--no-verify");
+            return h;
+        });
+        //创建成功，删除本地分支
+        if (createByMe) getGit().branchDelete(repo, findLocalBranchName(targetBranch), true, listeners);
+        return result.success() ? "Success" : result.getErrorOutputAsJoinedString();
+
+    }
+
 //    /**
 //     * 合并冲突代码
 //     *
@@ -246,5 +326,9 @@ public class Git4IdeHelper {
 //            AbstractVcsHelper.getInstance(project).showMergeDialog(ContainerUtilRt.newArrayList(fileByIoFile), vcs.getMergeProvider());
 //        }
 //    }
+
+    public static final void callListener(String s, GitLineHandlerListener... listeners) {
+        for (GitLineHandlerListener l : listeners) l.onLineAvailable(s, ProcessOutputTypes.STDOUT);
+    }
 
 }

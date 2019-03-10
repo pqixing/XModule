@@ -1,7 +1,6 @@
 package com.pqixing.intellij.actions
 
 import com.intellij.dvcs.repo.VcsRepositoryManager
-import com.intellij.ide.actions.ImportModuleAction.doImport
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -17,9 +16,8 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VfsUtil
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.ui.ImportDialog
 import com.pqixing.intellij.ui.NewImportDialog
-import com.pqixing.intellij.utils.Git4IdeHelper
+import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.model.ProjectXmlModel
 import com.pqixing.tools.FileUtils
 import groovy.lang.GroovyClassLoader
@@ -47,7 +45,7 @@ class ImportAction : AnAction() {
 
         val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
         val infoMaps = projectXml.allSubModules().map { Pair(it.name, JListInfo(it.name, it.introduce)) }.toMap(mutableMapOf())
-        val repo = Git4IdeHelper.getRepo(File(basePath, "templet"), project)
+        val repo = GitHelper.getRepo(File(basePath, "templet"), project)
         val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
         val localBranch = repo.currentBranchName ?: "master"
         branchs.remove(localBranch)
@@ -70,7 +68,7 @@ class ImportAction : AnAction() {
                         if (exists()) FileUtils.delete(this)
                         indicator.text = "Clone... ${map.value} "
                         //下载master分支
-                        Git4IdeHelper.clone(project, this, map.value, dialog.selectBranch)
+                        GitHelper.clone(project, this, map.value, dialog.selectBranch)
                     }
                 }
 
@@ -102,7 +100,7 @@ class ImportAction : AnAction() {
         dialog.setOnOk {
             //切换根目录的分支
             if (localBranch == dialog.selectBranch) ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
-            else Git4IdeHelper.checkout(project, dialog.selectBranch, mutableListOf(repo)) {
+            else GitHelper.checkout(project, dialog.selectBranch, mutableListOf(repo)) {
                 ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
             }
         }
