@@ -1,5 +1,6 @@
 package com.pqixing.intellij.utils;
 
+import com.intellij.dvcs.DvcsUtil;
 import com.intellij.execution.process.ProcessOutputTypes;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
@@ -8,6 +9,7 @@ import com.intellij.openapi.vcs.AbstractVcsHelper;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.pqixing.intellij.ui.GitOperatorDialog;
 import com.pqixing.tools.FileUtils;
 import git4idea.GitLocalBranch;
 import git4idea.GitRemoteBranch;
@@ -28,8 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static com.intellij.dvcs.DvcsUtil.findVirtualFilesWithRefresh;
 
 public class GitHelper {
     public static final String LOCAL = "local";
@@ -161,7 +161,7 @@ public class GitHelper {
             int unMergeSize = 0;
             if (conflict.hasHappened()) {
                 hadConflict = true;
-                List<VirtualFile> unMergeFiles = findVirtualFilesWithRefresh(GitChangeUtils.getUnmergedFiles(repo));
+                List<VirtualFile> unMergeFiles = DvcsUtil.findVirtualFilesWithRefresh(GitChangeUtils.getUnmergedFiles(repo));
 
                 do {
                     ApplicationManager.getApplication().invokeAndWait(() -> {
@@ -176,7 +176,7 @@ public class GitHelper {
             }
             if (saveStash) {
                 getGit().stashPop(repo);
-                List<VirtualFile> unMergeFiles = findVirtualFilesWithRefresh(GitChangeUtils.getUnmergedFiles(repo));
+                List<VirtualFile> unMergeFiles = DvcsUtil.findVirtualFilesWithRefresh(GitChangeUtils.getUnmergedFiles(repo));
                 if (!unMergeFiles.isEmpty()) ApplicationManager.getApplication().invokeAndWait(() -> {
                     List<VirtualFile> files = AbstractVcsHelper.getInstance(project).showMergeDialog(unMergeFiles, GitVcs.getInstance(project).getMergeProvider());
                     unMergeFiles.removeAll(files);//删除所有合并后的文件
@@ -206,9 +206,7 @@ public class GitHelper {
             handler.addParameters("-F", messageFile.getAbsolutePath());
         }
         handler.endOptions();
-        for (GitLineHandlerListener l : listeners) {
-            handler.addLineListener(l);
-        }
+        addListener(handler, listeners);
         getGit().runCommand(handler).throwOnError();
     }
 
@@ -224,9 +222,7 @@ public class GitHelper {
             exitCodes[0] = Messages.showYesNoDialog(msg, "Abort Merge", null);
         });
         if (exitCodes[0] != 0) return false;
-        for (GitLineHandlerListener l : listeners) {
-            l.onLineAvailable("abortMerge ----->", ProcessOutputTypes.STDOUT);
-        }
+        callListener("abortMerge ----->", listeners);
         return getGit().resetMerge(repo, null).success();
     }
 
@@ -245,7 +241,7 @@ public class GitHelper {
                 h.setUrls(Collections.singleton(repo.getPresentableUrl()));
                 h.setSilent(false);
                 h.setStdoutSuppressed(false);
-                for (GitLineHandlerListener l : listeners) h.addLineListener(l);
+                addListener(h, listeners);
                 h.addLineListener(fail);
                 //push删除指令
                 h.addParameters("origin", "--porcelain", "--delete", findLocalBranchName(targetBranch));
@@ -284,8 +280,7 @@ public class GitHelper {
         String localBranchName = findLocalBranchName(targetBranch);
         boolean createByMe = false;
         if (!checkBranchExists(repo, localBranchName)) {
-            for (GitLineHandlerListener l : listeners)
-                l.onLineAvailable("Create " + localBranchName + " from " + repo.getCurrentBranchName(), ProcessOutputTypes.STDOUT);
+            callListener("Create " + localBranchName + " from " + repo.getCurrentBranchName(), listeners);
             //创建本地分支
             getGit().branchCreate(repo, findLocalBranchName(targetBranch), repo.getCurrentBranchName());
             createByMe = true;
@@ -296,7 +291,7 @@ public class GitHelper {
             h.setUrls(Collections.singleton(repo.getPresentableUrl()));
             h.setSilent(false);
             h.setStdoutSuppressed(false);
-            for (GitLineHandlerListener l : listeners) h.addLineListener(l);
+            addListener(h, listeners);
             //push删除指令
             h.addParameters("origin", "--porcelain", localBranchName + ":" + localBranchName);
             h.addParameters("--set-upstream");
@@ -331,4 +326,28 @@ public class GitHelper {
         for (GitLineHandlerListener l : listeners) l.onLineAvailable(s, ProcessOutputTypes.STDOUT);
     }
 
+    public static final void addListener(GitLineHandler handler, GitLineHandlerListener... listeners) {
+        for (GitLineHandlerListener l : listeners) handler.addLineListener(l);
+    }
+
+    @NotNull
+    public static String addAndCommit(@NotNull Project project, @Nullable GitRepository repo, @NotNull String commitMsg, GitLineHandlerListener... listeners) {
+        callListener("Prepare commit " + commitMsg + " for " + repo.getRoot().getName(), listeners);
+        GitLineHandler handler = new GitLineHandler(project, repo.getRoot(), GitCommand.ADD);
+        handler.addParameters("*", "-f", "--ignore-errors", "-A");
+        addListener(handler, listeners);
+        GitCommandResult result = Git.getInstance().runCommand(handler);
+        if (!result.success()) return result.getErrorOutputAsJoinedString();
+
+        GitEventDetector detector = new GitEventDetector("nothing to commit","working tree clean");
+        handler = new GitLineHandler(project, repo.getRoot(), GitCommand.COMMIT);
+        handler.setStdoutSuppressed(false);
+        handler.addParameters("-m", commitMsg.trim().isEmpty()?"Auto Commit":commitMsg);
+        handler.endOptions();
+        addListener(handler, listeners);
+        handler.addLineListener(detector);
+        result = getGit().runCommand(handler);
+
+        return detector.hasHappened() || result.success() ? "Success" : result.getErrorOutputAsJoinedString();
+    }
 }

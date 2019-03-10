@@ -142,11 +142,13 @@ public class GitOperatorDialog extends JDialog {
             }
         }
 
-        return null;
+        return "";
     }
 
     public String getTargetBranch() {
-        String trim = cbBranch.getSelectedItem().toString().trim();
+        Object item = cbBranch.getSelectedItem();
+        if (item == null) return "master";
+        String trim = item.toString().trim();
         if (trim.isEmpty()) trim = "master";
         return trim;
     }
@@ -183,7 +185,7 @@ public class GitOperatorDialog extends JDialog {
 
         @Override
         public void onLineAvailable(String line, Key outputType) {
-            textField.setText(textField.getText() + "\n" + line);
+            textField.setText(textField.getText() + line + "\n");
             if (indicator != null) indicator.setText(line);
         }
     }

@@ -6,6 +6,7 @@ import com.pqixing.intellij.utils.GitHelper
 import git4idea.GitUtil
 
 class GitCheckoutAction : BaseGitAction() {
+
     override fun checkUrls(urls: Map<String, String>): Boolean = true
 
     override fun initDialog(dialog: GitOperatorDialog) {

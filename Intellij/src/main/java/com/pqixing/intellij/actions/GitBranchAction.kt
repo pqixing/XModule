@@ -1,5 +1,6 @@
 package com.pqixing.intellij.actions
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
@@ -7,6 +8,7 @@ import com.pqixing.intellij.utils.GitHelper
 import git4idea.GitUtil
 
 class GitBranchAction : BaseGitAction() {
+
     override fun beforeActionRun() = key == Messages.showPasswordDialog("Please input key!!", "Password")
     override fun checkUrls(urls: Map<String, String>): Boolean {
         val filter = urls.keys.filter { !GitUtil.isGitRoot(it) }

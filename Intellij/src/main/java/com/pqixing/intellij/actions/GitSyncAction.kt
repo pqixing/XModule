@@ -5,6 +5,7 @@ import com.pqixing.intellij.ui.GitOperatorDialog
 import git4idea.GitUtil
 
 class GitSyncAction : BaseGitAction() {
+
     override fun checkUrls(urls: Map<String, String>): Boolean=true
 
     override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> {

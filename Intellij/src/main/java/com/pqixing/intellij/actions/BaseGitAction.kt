@@ -41,14 +41,14 @@ abstract class BaseGitAction : AnAction() {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
             return
         }
-        if(!createByMe) resetCache()
+        if (!createByMe) resetCache()
         val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
         val clazz = GroovyClassLoader().parseClass(configFile)
         var codeRoot = clazz.getField("codeRoot").get(clazz.newInstance()).toString()
         val codeRootDir = File(basePath, codeRoot).canonicalPath
         val urls = projectXml.projects.map { Pair("$codeRootDir/${it.name}", it.url) }.toMap()
         if (!checkUrls(urls)) return
-        val allDatas = getAdapterList(urls)
+        val allDatas = getAdapterList(urls).apply { sortBy { it.title } }//按照标题排序
 
         val rootRepo = getRepo(rootRepoPath)!!
         val branches = GitHelper.getRepo(File("$basePath/templet"), project).branches
@@ -68,7 +68,7 @@ abstract class BaseGitAction : AnAction() {
         dialog.isVisible = true
     }
 
-    protected  open fun resetCache() {
+    protected open fun resetCache() {
         allRepos.clear()
         cacheLog.clear()
 
@@ -127,6 +127,7 @@ abstract class BaseGitAction : AnAction() {
                     "merge" -> for (r in repos) merge(dialog, dialog.targetBranch, r, project)
                     "delete" -> for (r in repos) delete(dialog, dialog.targetBranch, r, project)
                     "create" -> for (r in repos) create(dialog, dialog.targetBranch, r, project)
+                    else -> for (r in repos) onOtherOk(operatorCmd, dialog, dialog.targetBranch, r, project)
                 }
                 indicator.text = "end $operatorCmd"
                 dialog.updateUI()
@@ -137,6 +138,8 @@ abstract class BaseGitAction : AnAction() {
         }
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
     }
+
+    protected open fun onOtherOk(cmd: String, dialog: GitOperatorDialog, targetBranch: String, r: JListInfo, project: Project) {}
 
     private fun create(dialog: GitOperatorDialog, targetBranch: String, r: JListInfo, project: Project) {
         if (!GitUtil.isGitRoot(r.title)) {
