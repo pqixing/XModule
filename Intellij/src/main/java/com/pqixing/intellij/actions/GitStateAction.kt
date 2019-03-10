@@ -23,8 +23,9 @@ import java.io.File
 import javax.swing.JList
 
 class GitStateAction : BaseGitAction, JlistSelectListener {
-    val TIP = "A:All;  C:Conflict;  P:Push";
+    //    val TIP = "A:All;  C:Conflict;  P:Push";
     var commitMsg = ""//提交的文本
+
     override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean {
         val info = items.last()
         val repo = getRepo(info.title) ?: return true
@@ -59,11 +60,16 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
         createByMe = true
     }
 
+    override fun afterDoOk(dialog: GitOperatorDialog) {
+        super.afterDoOk(dialog)
+        dialog.btnRevert.isVisible = false
+    }
+
     override fun checkUrls(urls: Map<String, String>): Boolean = true
 
     override fun initDialog(dialog: GitOperatorDialog) {
         dialog.setTargetBranch(null, false)
-        dialog.jlTips.text = "Click item to resolve conflict or list files;   $TIP"
+        dialog.jlTips.text = "Click item to resolve conflict or list files;"
         dialog.pOpertator.isVisible = false
         dialog.buttonOK.text = "Commit"
         dialog.adapter.boxVisible = false

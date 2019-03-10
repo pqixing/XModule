@@ -332,7 +332,7 @@ public class GitHelper {
     public static String addAndCommit(@NotNull Project project, @Nullable GitRepository repo, @NotNull String commitMsg, GitLineHandlerListener... listeners) {
         callListener("Prepare commit " + commitMsg + " for " + repo.getRoot().getName(), listeners);
         GitLineHandler handler = new GitLineHandler(project, repo.getRoot(), GitCommand.ADD);
-        handler.addParameters("*", "-f", "--ignore-errors", "-A");
+        handler.addParameters("-f", "--ignore-errors", "-A");
         addListener(handler, listeners);
         GitCommandResult result = Git.getInstance().runCommand(handler);
         if (!result.success()) return result.getErrorOutputAsJoinedString();

@@ -26,6 +26,11 @@ class GitCheckoutAction : BaseGitAction() {
         it.log = cacheLog ?: getRepo(it.title)?.currentBranchName ?: ""
     }
 
+    override fun afterDoOk(dialog: GitOperatorDialog) {
+        super.afterDoOk(dialog)
+        dialog.btnRevert.isVisible = false
+    }
+
     override fun doOk(dialog: GitOperatorDialog, allDatas: MutableList<JListInfo>, urls: Map<String, String>, rootBranch: String?) {
 //        if (rootBranch == dialog.targetBranch) {
 //            dialog.dispose()
