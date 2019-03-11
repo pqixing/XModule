@@ -73,8 +73,8 @@ abstract class BaseGitAction : AnAction() {
     }
 
     protected open fun filterDatas(allDatas: MutableList<JListInfo>, operatorCmd: String): MutableList<JListInfo> = when (operatorCmd) {
-        "clone" -> allDatas.filter { !GitUtil.isGitRoot(it.title) }.toMutableList()
-        else -> allDatas.filter { GitUtil.isGitRoot(it.title) }.toMutableList()
+        "clone" -> allDatas.filter { !GitUtil.isGitRoot(File(it.title)) }.toMutableList()
+        else -> allDatas.filter { GitUtil.isGitRoot(File(it.title)) }.toMutableList()
     }
 
     protected open fun resetCache() {
@@ -152,7 +152,7 @@ abstract class BaseGitAction : AnAction() {
     protected open fun onOtherOk(cmd: String, dialog: GitOperatorDialog, targetBranch: String, r: JListInfo, project: Project) {}
 
     private fun create(dialog: GitOperatorDialog, targetBranch: String, r: JListInfo, project: Project) {
-        if (!GitUtil.isGitRoot(r.title)) {
+        if (!GitUtil.isGitRoot(File(r.title))) {
             r.log = "Project Not Exists"
             r.staue = 3
             return
@@ -164,7 +164,7 @@ abstract class BaseGitAction : AnAction() {
     }
 
     private fun delete(dialog: GitOperatorDialog, targetBranch: String, r: JListInfo, project: Project?) {
-        if (!GitUtil.isGitRoot(r.title)) {
+        if (!GitUtil.isGitRoot(File(r.title))) {
             r.log = "Project Not Exists"
             r.staue = 3
             return
@@ -202,7 +202,7 @@ abstract class BaseGitAction : AnAction() {
     abstract fun checkOnOk(allDatas: MutableList<JListInfo>, dialog: GitOperatorDialog): Boolean
 
     protected fun merge(dialog: GitOperatorDialog, targetBranch: String, r: JListInfo, project: Project) {
-        if (!GitUtil.isGitRoot(r.title)) {
+        if (!GitUtil.isGitRoot(File(r.title))) {
             r.log = "Project Not Exists"
             r.staue = 3
             return
@@ -214,7 +214,7 @@ abstract class BaseGitAction : AnAction() {
     }
 
     protected fun update(r: JListInfo, dialog: GitOperatorDialog) {
-        if (!GitUtil.isGitRoot(r.title)) {
+        if (!GitUtil.isGitRoot(File(r.title))) {
             r.log = "Project Not Exists"
             r.staue = 3
             return
@@ -226,7 +226,7 @@ abstract class BaseGitAction : AnAction() {
     }
 
     protected fun push(r: JListInfo, dialog: GitOperatorDialog) {
-        if (!GitUtil.isGitRoot(r.title)) {
+        if (!GitUtil.isGitRoot(File(r.title))) {
             r.log = "Project Not Exists"
             r.staue = 3
             return
@@ -238,7 +238,7 @@ abstract class BaseGitAction : AnAction() {
     }
 
     protected fun clone(r: JListInfo, project: Project, urls: Map<String, String>, rootBranch: String?, dialog: GitOperatorDialog) {
-        if (GitUtil.isGitRoot(r.title)) {
+        if (GitUtil.isGitRoot(File(r.title))) {
             r.log = "Project Exists"
             r.staue = 1
             return
@@ -254,7 +254,7 @@ abstract class BaseGitAction : AnAction() {
      */
     protected fun getRepo(path: String): GitRepository? {
         var repository = allRepos[path]
-        if (!GitUtil.isGitRoot(path)) return null;
+        if (!GitUtil.isGitRoot(File(path))) return null;
         if (repository == null) {
             repository = GitHelper.getRepo(File(path), project)
             allRepos[path] = repository

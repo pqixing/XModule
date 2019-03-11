@@ -4,6 +4,7 @@ import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
 import com.pqixing.intellij.utils.GitHelper
 import git4idea.GitUtil
+import java.io.File
 
 class GitCheckoutAction : BaseGitAction() {
 
@@ -14,7 +15,7 @@ class GitCheckoutAction : BaseGitAction() {
         dialog.pOpertator.isVisible = false
     }
 
-    override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> = super.getAdapterList(urls.filter { GitUtil.isGitRoot(it.key) })
+    override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> = super.getAdapterList(urls.filter { GitUtil.isGitRoot(File(it.key)) })
 
     override fun updateItemLog(it: JListInfo, operatorCmd: String, cacheLog: String?) {
         it.log = cacheLog ?: getRepo(it.title)?.currentBranchName ?: ""

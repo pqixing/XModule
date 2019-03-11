@@ -5,12 +5,13 @@ import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
 import com.pqixing.intellij.utils.GitHelper
 import git4idea.GitUtil
+import java.io.File
 
 class GitBranchAction : BaseGitAction() {
 
     override fun beforeActionRun() = key == Messages.showPasswordDialog("Please input key!!", "Password")
     override fun checkUrls(urls: Map<String, String>): Boolean {
-        val filter = urls.keys.filter { !GitUtil.isGitRoot(it) }
+        val filter = urls.keys.filter { !GitUtil.isGitRoot(File(it)) }
         if (filter.isNotEmpty()) {
             Messages.showMessageDialog(project, "Those project are not clone!!\n${filter.joinToString { it + "\n" }}", "Miss Project", null)
             return false
