@@ -5,7 +5,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.AbstractVcsHelper
-import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vfs.VfsUtil
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
@@ -13,10 +12,7 @@ import com.pqixing.intellij.adapter.JlistSelectListener
 import com.pqixing.intellij.ui.FileListDialog
 import com.pqixing.intellij.ui.GitOperatorDialog
 import com.pqixing.intellij.utils.GitHelper
-import git4idea.GitUtil
 import git4idea.GitVcs
-import git4idea.changes.GitChangeUtils
-import git4idea.history.GitLogUtil
 import git4idea.repo.GitRepository
 import java.awt.Dimension
 import java.io.File
@@ -29,7 +25,7 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
     override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean {
         val info = items.last()
         val repo = getRepo(info.title) ?: return true
-        val unMergeFiles = DvcsUtil.findVirtualFilesWithRefresh(GitChangeUtils.getUnmergedFiles(repo))
+        val unMergeFiles = DvcsUtil.findVirtualFilesWithRefresh(GitHelper.getUnmergedFiles(repo))
         if (!unMergeFiles.isEmpty()) {
             val files = AbstractVcsHelper.getInstance(project).showMergeDialog(unMergeFiles, GitVcs.getInstance(project).mergeProvider)
             unMergeFiles.removeAll(files)//删除所有合并后的文件
@@ -43,9 +39,11 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
                     files.add(f)
                     datas.add(JListInfo(f.name, it.substring(0, 2)))
                 }
-                FileListDialog(project, datas, files).apply {
-                    pack()
-                    isVisible = true
+                ApplicationManager.getApplication().invokeLater {
+                    FileListDialog(project, datas, files).apply {
+                        pack()
+                        isVisible = true
+                    }
                 }
             }
         }
@@ -81,7 +79,7 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
     override fun updateItemLog(info: JListInfo, operatorCmd: String, cacheLog: String?) {
         val repo = getRepo(info.title) ?: return
         val branchs = "${repo.currentBranchName}:${repo.state.toString().toLowerCase()}"
-        val unMergeCount = GitChangeUtils.getUnmergedFiles(repo).size
+        val unMergeCount = GitHelper.getUnmergedFiles(repo).size
         //如果有冲突，编辑黄色
         info.staue = if (unMergeCount > 0) 3 else 0
         info.log = "${(GitHelper.state(project, repo)?.size ?: -1)}; ${unMergeCount};$branchs"

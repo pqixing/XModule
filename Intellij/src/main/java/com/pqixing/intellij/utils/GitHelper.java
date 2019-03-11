@@ -5,29 +5,40 @@ import com.intellij.execution.process.ProcessOutputTypes;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vcs.AbstractVcsHelper;
 import com.intellij.openapi.vcs.VcsException;
-import com.intellij.openapi.vcs.changes.Change;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.pqixing.intellij.ui.GitOperatorDialog;
+import com.intellij.util.containers.ContainerUtil;
 import com.pqixing.tools.FileUtils;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+
 import git4idea.GitLocalBranch;
 import git4idea.GitRemoteBranch;
 import git4idea.GitUtil;
 import git4idea.GitVcs;
 import git4idea.branch.GitBrancher;
-import git4idea.changes.GitChangeUtils;
-import git4idea.commands.*;
+import git4idea.commands.Git;
+import git4idea.commands.GitCommand;
+import git4idea.commands.GitCommandResult;
+import git4idea.commands.GitLineHandler;
+import git4idea.commands.GitLineHandlerListener;
+import git4idea.commands.GitSimpleEventDetector;
 import git4idea.repo.GitRemote;
 import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryImpl;
+import git4idea.util.StringScanner;
 import kotlin.Triple;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.util.*;
 
 public class GitHelper {
     public static final String LOCAL = "local";
@@ -92,7 +103,7 @@ public class GitHelper {
     public static String update(Project project, GitRepository repo, GitLineHandlerListener... listeners) {
         callListener("Prepare update for " + repo.getRoot().getName(), listeners);
         Git git = getGit();
-        GitRemote remote = GitUtil.findRemoteByName(repo, GitRemote.ORIGIN);
+        GitRemote remote = findRemoteByName(repo, GitRemote.ORIGIN);
         git.fetch(repo, remote, Arrays.asList(listeners));
         git.remotePrune(repo, remote);
         return merge(project, "FETCH_HEAD", repo, listeners);
@@ -106,7 +117,8 @@ public class GitHelper {
             String localBranch = repo.getCurrentBranchName();
             if (targetBranch.equals(localBranch)) continue;
             if (checkBranchExists(repo, findLocalBranchName(targetBranch))) localBranchs.add(repo);
-            else if (checkBranchExists(repo, findRemoteBranchName(targetBranch))) remoteBranchs.add(repo);
+            else if (checkBranchExists(repo, findRemoteBranchName(targetBranch)))
+                remoteBranchs.add(repo);
             else loseBranchs.add(repo);
         }
         return new Triple(localBranchs, remoteBranchs, loseBranchs);
@@ -159,7 +171,7 @@ public class GitHelper {
             int unMergeSize = 0;
             if (conflict.hasHappened()) {
                 hadConflict = true;
-                List<VirtualFile> unMergeFiles = DvcsUtil.findVirtualFilesWithRefresh(GitChangeUtils.getUnmergedFiles(repo));
+                List<VirtualFile> unMergeFiles = DvcsUtil.findVirtualFilesWithRefresh(getUnmergedFiles(repo));
 
                 do {
                     ApplicationManager.getApplication().invokeAndWait(() -> {
@@ -174,11 +186,12 @@ public class GitHelper {
             }
             if (saveStash) {
                 getGit().stashPop(repo);
-                List<VirtualFile> unMergeFiles = DvcsUtil.findVirtualFilesWithRefresh(GitChangeUtils.getUnmergedFiles(repo));
-                if (!unMergeFiles.isEmpty()) ApplicationManager.getApplication().invokeAndWait(() -> {
-                    List<VirtualFile> files = AbstractVcsHelper.getInstance(project).showMergeDialog(unMergeFiles, GitVcs.getInstance(project).getMergeProvider());
-                    unMergeFiles.removeAll(files);//删除所有合并后的文件
-                });
+                List<VirtualFile> unMergeFiles = DvcsUtil.findVirtualFilesWithRefresh(getUnmergedFiles(repo));
+                if (!unMergeFiles.isEmpty())
+                    ApplicationManager.getApplication().invokeAndWait(() -> {
+                        List<VirtualFile> files = AbstractVcsHelper.getInstance(project).showMergeDialog(unMergeFiles, GitVcs.getInstance(project).getMergeProvider());
+                        unMergeFiles.removeAll(files);//删除所有合并后的文件
+                    });
                 unMergeSize = unMergeFiles.size();
             }
             //有冲突未解决
@@ -255,10 +268,14 @@ public class GitHelper {
     public static boolean checkBranchExists(GitRepository repo, String name) {
         boolean b = repo.getBranches().findBranchByName(name) != null;
         if (!b && name.contains("origin")) {
-            getGit().fetch(repo, GitUtil.findRemoteByName(repo, GitRemote.ORIGIN), Collections.emptyList());
+            getGit().fetch(repo, findRemoteByName(repo, GitRemote.ORIGIN), Collections.emptyList());
             b = repo.getBranches().findBranchByName(name) != null;
         }
         return b;
+    }
+
+    public static GitRemote findRemoteByName(GitRepository repo,String name){
+        return ContainerUtil.find(repo.getRemotes(), remote -> remote.getName().equals(name));
     }
 
 
@@ -298,7 +315,8 @@ public class GitHelper {
             return h;
         });
         //创建成功，删除本地分支
-        if (createByMe) getGit().branchDelete(repo, findLocalBranchName(targetBranch), true, listeners);
+        if (createByMe)
+            getGit().branchDelete(repo, findLocalBranchName(targetBranch), true, listeners);
         return result.success() ? "Success" : result.getErrorOutputAsJoinedString();
 
     }
@@ -357,5 +375,28 @@ public class GitHelper {
         handler.setSilent(true);
         GitCommandResult result = getGit().runCommand(handler);
         return result.success() ? result.getOutput() : null;
+    }
+
+    @NotNull
+    public static List<File> getUnmergedFiles(@NotNull GitRepository repository) throws VcsException {
+        GitCommandResult result = getGit().getUnmergedFiles(repository);
+        if (!result.success()) {
+            throw new VcsException(result.getErrorOutputAsJoinedString());
+        }
+
+        String output = StringUtil.join(result.getOutput(), "\n");
+        HashSet<String> unmergedPaths = ContainerUtil.newHashSet();
+        for (StringScanner s = new StringScanner(output); s.hasMoreData(); ) {
+            if (s.isEol()) {
+                s.nextLine();
+                continue;
+            }
+            s.boundedToken('\t');
+            String relative = s.line();
+            unmergedPaths.add(GitUtil.unescapePath(relative));
+        }
+
+        VirtualFile root = repository.getRoot();
+        return ContainerUtil.map(unmergedPaths, path -> new File(root.getPath(), path));
     }
 }
