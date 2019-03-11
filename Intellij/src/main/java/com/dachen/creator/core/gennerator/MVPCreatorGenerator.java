@@ -26,7 +26,7 @@ public class MVPCreatorGenerator {
 
     private static void genConstractFile( Project project, String classPrefix, String modulePath) {
         VirtualFile dbDir = getPackageByName(project, "contract", modulePath);
-        String name = classPrefix + "Contract.iterface";
+        String name = classPrefix + "Contract.java";
         VirtualFile virtualFile = dbDir.findChild(name);
         if(virtualFile == null) {
             // 没有就创建一个，第一次使用代码字符串创建个类
@@ -59,7 +59,7 @@ public class MVPCreatorGenerator {
 
     private static void genModelImplFile( Project project, String classPrefix, String modulePath) {
         VirtualFile dbDir = getPackageByName(project, "model", modulePath);
-        String name = classPrefix + "Model.iterface";
+        String name = classPrefix + "Model.java";
         VirtualFile virtualFile = dbDir.findChild(name);
         if(virtualFile == null) {
             // 没有就创建一个，第一次使用代码字符串创建个类
@@ -73,7 +73,7 @@ public class MVPCreatorGenerator {
 
     private static void genPresenerImplFile( Project project, String classPrefix, String modulePath) {
         VirtualFile dbDir = getPackageByName(project, "presenter", modulePath);
-        String name = classPrefix + "Presenter.iterface";
+        String name = classPrefix + "Presenter.java";
         VirtualFile virtualFile = dbDir.findChild(name);
         if(virtualFile == null) {
             // 没有就创建一个，第一次使用代码字符串创建个类
@@ -87,7 +87,7 @@ public class MVPCreatorGenerator {
 
     private static void genActivityFile( Project project, String classPrefix, String modulePath) {
         VirtualFile actDir = getPackageByName(project, "activity", modulePath);
-        String name = classPrefix + "Activity.iterface";
+        String name = classPrefix + "Activity.java";
         VirtualFile virtualFile = actDir.findChild(name);
         if(virtualFile == null) {
             // 没有就创建一个，第一次使用代码字符串创建个类
@@ -101,7 +101,7 @@ public class MVPCreatorGenerator {
 
     private static void genFragmentFile( Project project, String classPrefix, String modulePath) {
         VirtualFile dbDir = getPackageByName(project, "fragment", modulePath);
-        String name = classPrefix + "Fragment.iterface";
+        String name = classPrefix + "Fragment.java";
         VirtualFile virtualFile = dbDir.findChild(name);
         if(virtualFile == null) {
             // 没有就创建一个，第一次使用代码字符串创建个类

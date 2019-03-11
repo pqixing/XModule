@@ -93,7 +93,7 @@ public class AndroidUtils {
             dir = dir.getParent();
         }
         String path = dir.getPath().replace("/", ".");
-        String preText = "src.main.iterface";
+        String preText = "src.main.java";
         int preIndex = path.indexOf(preText) + preText.length() + 1;
         path = path.substring(preIndex);
         return path;
