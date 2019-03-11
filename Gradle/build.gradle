@@ -35,7 +35,7 @@ dependencies {
     if (localBuild) {
         compileOnly project(":Tools")
         implementation "com.pqixing.gradle:tools:0.1"
-    } else implementation "com.github.pqixing.modularization:Tools:0.12"
+    } else implementation "com.github.pqixing.modularization:Tools:$buildVersion"
     implementation gradleApi()
     implementation localGroovy()
     implementation "com.alibaba:fastjson:1.2.44"
