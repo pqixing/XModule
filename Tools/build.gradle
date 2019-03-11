@@ -54,10 +54,12 @@ if (!localBuild) return
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: localMavenUri)
+            repository(url: localMavenUri){
+                authentication(userName: "admin", password: "admin123")
+            }
             pom.groupId = "com.pqixing.gradle" // 组名
             pom.artifactId = "tools"// 插件名
-            pom.version = "0.1" // 版本号
+            pom.version = "0.3" // 版本号
         }
     }
 }

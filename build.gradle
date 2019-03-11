@@ -18,9 +18,9 @@ buildscript {
     }
 } //
 
-ext.localMavenUri = uri("$project.gradle.gradleUserHomeDir.absolutePath/.localRepo")
+ext.localMavenUri = "http://192.168.3.7:9527/nexus/content/repositories/AndroidDev/"
 //本地Maven调试
-ext.localBuild = false
+ext.localBuild = true
 ext.buildModule = ["Tools","Gradle"]
 ext.buildGroup = 'com.github.pqixing.modularization'
 ext.buildVersion = "0.20"
@@ -45,7 +45,7 @@ tasks.withType(Javadoc) {
 
 subprojects { p ->
     version = buildVersion
-    group = buildGroup
+    group = "$buildGroup:$p.name"
     apply plugin: 'maven'
     apply plugin: 'java'
     sourceCompatibility = 1.8 // java 8 23

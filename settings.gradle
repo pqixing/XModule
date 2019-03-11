@@ -1,1 +1,1 @@
-include ":Tools"//,":Gradle"//,":Intellij"
+include ":Tools",":Gradle"//,":Intellij"

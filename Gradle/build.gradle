@@ -30,11 +30,10 @@ repositories {
 // 添加依赖
 dependencies {
 //    implementation files("../libs/Tools.jar")
-//    if (localBuild) {
-//        compileOnly project(":Tools")
-//        implementation "com.pqixing.gradle:tools:0.1"
-//    } else implementation "com.github.pqixing.modularization:Tools:$buildVersion"
-    compile project(":Tools")
+    if (localBuild) {
+        compileOnly project(":Tools")
+        implementation "com.pqixing.gradle:tools:0.3"
+    } else implementation "com.github.pqixing.modularization:Tools:$buildVersion"
     implementation gradleApi()
     implementation localGroovy()
     implementation "com.alibaba:fastjson:1.2.44"
@@ -58,10 +57,12 @@ if (!localBuild) return
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: localMavenUri)
+            repository(url: localMavenUri){
+                authentication(userName: "admin", password: "admin123")
+            }
             pom.groupId = "com.pqixing.gradle" // 组名
             pom.artifactId = "modularization"// 插件名
-            pom.version = "0.1" // 版本号
+            pom.version = "0.3" // 版本号
         }
     }
 }
