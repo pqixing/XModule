@@ -1,9 +1,6 @@
 // 应用插件
-apply plugin: 'java'
 apply plugin: "groovy"
 apply plugin: "kotlin"
-apply plugin: 'maven'
-apply plugin: 'com.github.dcendents.android-maven'
 sourceSets {
     main.java.srcDirs += "src/groovy"
     test.java.srcDirs += "src/groovy"
@@ -36,7 +33,7 @@ dependencies {
 //        compileOnly project(":Tools")
 //        implementation "com.pqixing.gradle:tools:0.1"
 //    } else implementation "com.github.pqixing.modularization:Tools:$buildVersion"
-    implementation project(":Tools")
+    compile project(":Tools")
     implementation gradleApi()
     implementation localGroovy()
     implementation "com.alibaba:fastjson:1.2.44"
