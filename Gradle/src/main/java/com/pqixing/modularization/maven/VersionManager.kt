@@ -9,6 +9,7 @@ import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.manager.ExceptionManager
 import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
+import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.PropertiesUtils
@@ -18,6 +19,7 @@ import org.eclipse.jgit.api.Git
 import java.io.File
 import java.net.URL
 import java.util.*
+import java.util.Collections.emptyList
 import kotlin.Comparator
 
 object VersionManager : OnClear {
@@ -32,8 +34,8 @@ object VersionManager : OnClear {
         matchingFallbacks.clear()
         groupName = ""
     }
-
-    var repoGitDir: File = File(ManagerPlugin.getPlugin().project.gradle.gradleUserHomeDir, "caches/docRepo")
+    //rootGit的管理,放到Code目录下
+    var repoGitDir: File = File(ProjectManager.codeRootDir, ".docRepo")
 
     private var repoLastCommit = 0
 
@@ -267,7 +269,7 @@ object VersionManager : OnClear {
     fun createVersionTag(): Boolean {
         val plugin = ManagerPlugin.getPlugin()
         val info = plugin.config
-        val taskBranch = info.taskBranch
+        val taskBranch = info.taskBranch.substring(info.taskBranch.lastIndexOf("/")+1)//直接获取名称,不要origin
         if (taskBranch.isEmpty() || taskBranch == "master") {
             Tools.printError(-1, "createVersionTag taskBranch is empty, please input taskBranch!!")
             return false
@@ -311,7 +313,7 @@ object VersionManager : OnClear {
 
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
 
-        GitUtils.addAndPush(git, FileNames.MANAGER, "indexVersionFromNet ${Date().toLocaleString()}", true)
+        GitUtils.addAndPush(git, ".", "indexVersionFromNet ${Date().toLocaleString()}", true)
         GitUtils.close(git)
     }
 

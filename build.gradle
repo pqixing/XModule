@@ -23,7 +23,7 @@ ext.localMavenUri = "http://192.168.3.7:9527/nexus/content/repositories/AndroidD
 ext.localBuild = true
 ext.buildModule = ["Tools","Gradle"]
 ext.buildGroup = 'com.github.pqixing.modularization'
-ext.buildVersion = "0.20"
+ext.buildVersion = "1.0"
 
 
 allprojects {

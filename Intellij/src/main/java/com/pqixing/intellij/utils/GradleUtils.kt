@@ -28,7 +28,7 @@ object GradleUtils {
         settings.externalSystemIdString = GRADLE.id
         settings.externalProjectPath = project.basePath
         val env = defEnvs.toMutableMap().apply { putAll(envs);put("run_task_id", runTaskId) }.filter { it.value.isNotEmpty() }
-        settings.env = env
+//        settings.env = env
         settings.vmOptions = getVmOpions(env)
         ExternalSystemUtil.runTask(settings, DefaultRunExecutor.EXECUTOR_ID, project, GRADLE, object : TaskCallback {
             override fun onSuccess() {
