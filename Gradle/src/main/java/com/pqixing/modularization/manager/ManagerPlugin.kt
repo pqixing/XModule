@@ -36,7 +36,9 @@ open class ManagerPlugin : BasePlugin() {
             , PullProjectTask::class.java
             , VersionTagTask::class.java
             , VersionIndexTask::class.java
-            , DeleteBranchTask::class.java)
+            , DeleteBranchTask::class.java
+            , SyncBranchTask::class.java
+    )
 
     override fun apply(project: Project) {
         //在每个工程开始同步之前，检查状态，下载，切换分支等等
