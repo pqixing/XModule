@@ -15,17 +15,17 @@ class ReIndexVersionAction : AnAction() {
     lateinit var project: Project
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
-        val  rootRepoPath = "${project.basePath}/templet";
-        val file = File(rootRepoPath);
-        val gitRoot = GitUtil.isGitRoot(file)
-        Messages.showYesNoCancelDialog("End", "End", null)
-//        val exitCode = Messages.showYesNoCancelDialog("CreateVersionTag", "ReIndexVersion", null)
-//        if (exitCode == 0){
-//            val dialog = VersionDialog(project, null)
-//            dialog.pack()
-//            dialog.isVisible = true
-//        }
-//        else if (exitCode == 1) GradleUtils.runTask(project, Arrays.asList(":VersionIndex"))
+//        val  rootRepoPath = "${project.basePath}/templet";
+//        val file = File(rootRepoPath);
+//        val gitRoot = GitUtil.isGitRoot(file)
+//        Messages.showYesNoCancelDialog("End", "End", null)
+        val exitCode = Messages.showYesNoCancelDialog("CreateVersionTag", "ReIndexVersion", null)
+        if (exitCode == 0){
+            val dialog = VersionDialog(project, null)
+            dialog.pack()
+            dialog.isVisible = true
+        }
+        else if (exitCode == 1) GradleUtils.runTask(project, Arrays.asList(":VersionIndex"))
 
     }
 }

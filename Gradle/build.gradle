@@ -10,6 +10,7 @@ repositories {
     mavenCentral()
     jcenter()
     google()
+    if (localBuild) maven { url localMavenUri }
 }
 compileKotlin {
     kotlinOptions {
@@ -22,6 +23,7 @@ compileTestKotlin {
     }
 }
 repositories {
+
     flatDir {
         dirs "libs"
     }

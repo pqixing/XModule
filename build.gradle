@@ -31,7 +31,6 @@ allprojects {
         maven { url "https://jitpack.io" }
         jcenter()
         google()
-        if (localBuild) maven { url localMavenUri }
     }
 }
 
