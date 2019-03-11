@@ -28,7 +28,7 @@
     <depends>Git4Idea</depends>
     <depends>org.jetbrains.android</depends>
     <actions>
-        <group id="Modularization" popup="true" text="Modularization">
+        <group id="QxTools" popup="true" text="QBuild">
             <add-to-group group-id="BuildMenu" anchor="first" />
             <add-to-group group-id="EditorPopupMenu" anchor="first" />
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first" />

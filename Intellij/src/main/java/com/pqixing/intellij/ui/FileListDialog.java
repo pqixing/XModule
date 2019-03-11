@@ -5,17 +5,19 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
-import com.pqixing.intellij.adapter.JlistSelectListener;
 import com.pqixing.intellij.utils.UiUtils;
-import javafx.util.Pair;
-import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 public class FileListDialog extends JDialog {
     private JPanel contentPane;
