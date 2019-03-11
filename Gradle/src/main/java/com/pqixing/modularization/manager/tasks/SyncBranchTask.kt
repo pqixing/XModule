@@ -29,12 +29,11 @@ open class SyncBranchTask : BaseTask() {
         //更新相关的工程
         ProjectManager.projectXml.allSubModules().filter { modules.contains(it.name) }.map { it.project }.toSet().forEach {
             val dir = File(ProjectManager.codeRootDir, it.name)
-            if (!GitUtils.isGitDir(dir)) return@forEach
-            GitUtils.open(dir)?.apply {
+            if (GitUtils.isGitDir(dir)) GitUtils.open(dir)?.apply {
                 val check = GitUtils.checkoutBranch(this, targetBranch, true)&&GitUtils.pull(this)//更新
                 if (!check) fail.add(dir.name)
                 close()
-            }
+            }else GitUtils.clone(it.url,dir,targetBranch)
         }
 
         ResultUtils.writeResult("SyncBranch -> $fail", fail.size)
