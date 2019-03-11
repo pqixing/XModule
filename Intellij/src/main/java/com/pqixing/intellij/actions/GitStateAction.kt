@@ -88,17 +88,9 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
     }
 
     override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> {
-        if (allRepos.isEmpty()) {
-            allRepos.putAll(urls.filter { GitUtil.isGitRoot(it.key) }.map { Pair(it.key, GitHelper.getRepo(File(it.key), project)) })
-            allRepos.put("$basePath/templet", GitHelper.getRepo(File(basePath, "templet"), project))
-        }
-        return allRepos.map {
-            JListInfo(
-                    title = VfsUtil.urlToPath(it.key),
-                    log = it.value.currentBranchName ?: "",
-                    select = true
-            )
-        }.toMutableList()
+        val keys = allRepos.map { VfsUtil.urlToPath(it.key) }
+        val afterUrls = if (keys.isEmpty()) urls else urls.filter { keys.contains(it.key) }
+        return super.getAdapterList(afterUrls)
     }
 
     override fun checkOnOk(allDatas: MutableList<JListInfo>, dialog: GitOperatorDialog): Boolean {
@@ -109,7 +101,8 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
             dialog.isVisible = false
             return false
         }
-        commitMsg = Messages.showInputDialog(project, "Input msg to commit", "Commit", null) ?: "Commit By Ide"
+        commitMsg = Messages.showInputDialog(project, "Input msg to commit", "Commit", null)
+                ?: "Commit By Ide"
         if (commitMsg.trim().isEmpty()) commitMsg = "Commit By Ide";
         dialog.isVisible = true
         return true

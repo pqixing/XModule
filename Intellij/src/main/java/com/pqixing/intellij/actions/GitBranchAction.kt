@@ -1,6 +1,5 @@
 package com.pqixing.intellij.actions
 
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
@@ -25,14 +24,6 @@ class GitBranchAction : BaseGitAction() {
         dialog.setTargetBranch(getRepo(rootRepoPath)?.branches?.remoteBranches?.map { it.name }, true)
         dialog.allButton.isVisible = false//不允许反选
         dialog.setOnOperatorChange { }//重新设置，不需要更新状态
-    }
-
-    override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> {
-        val allDatas = urls.map {
-            JListInfo(it.key, select = true)
-        }.toMutableList()
-        allDatas.add(0, JListInfo("$basePath/templet", select = true))
-        return allDatas
     }
 
     override fun checkOnOk(allDatas: MutableList<JListInfo>, dialog: GitOperatorDialog): Boolean {

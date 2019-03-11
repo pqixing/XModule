@@ -14,13 +14,7 @@ class GitCheckoutAction : BaseGitAction() {
         dialog.pOpertator.isVisible = false
     }
 
-    override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> {
-        val allDatas = urls.filter { GitUtil.isGitRoot(it.key) }.map {
-            JListInfo(it.key, select = true)
-        }.toMutableList()
-        allDatas.add(0, JListInfo("$basePath/templet", select = true))
-        return allDatas
-    }
+    override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> = super.getAdapterList(urls.filter { GitUtil.isGitRoot(it.key) })
 
     override fun updateItemLog(it: JListInfo, operatorCmd: String, cacheLog: String?) {
         it.log = cacheLog ?: getRepo(it.title)?.currentBranchName ?: ""

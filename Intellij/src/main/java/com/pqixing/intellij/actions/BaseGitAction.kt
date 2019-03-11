@@ -58,14 +58,23 @@ abstract class BaseGitAction : AnAction() {
         branchNames += branches.remoteBranches.map { it.name }
         val rootBranch = rootRepo.currentBranchName;
         val dialog = GitOperatorDialog(this.javaClass.simpleName.replace("Action", ""), rootBranch, allDatas)
-        dialog.setOnOperatorChange { updateLog(dialog) }
+        dialog.setOnOperatorChange {
+            dialog.adapter.setDatas(filterDatas(allDatas, dialog.operatorCmd))
+            updateLog(dialog)
+        }
         initDialog(dialog)
         dialog.pack()
+        dialog.adapter.setDatas(filterDatas(allDatas, dialog.operatorCmd))
         updateLog(dialog)
         dialog.setOnOk {
             if (checkOnOk(allDatas, dialog)) doOk(dialog, allDatas, urls, rootBranch) else dialog.dispose()
         }
         dialog.isVisible = true
+    }
+
+    protected open fun filterDatas(allDatas: MutableList<JListInfo>, operatorCmd: String): MutableList<JListInfo> = when (operatorCmd) {
+        "clone" -> allDatas.filter { !GitUtil.isGitRoot(it.title) }.toMutableList()
+        else -> allDatas.filter { GitUtil.isGitRoot(it.title) }.toMutableList()
     }
 
     protected open fun resetCache() {
@@ -100,8 +109,9 @@ abstract class BaseGitAction : AnAction() {
                 info.staue = if (repo == null) 3 else 0
             }
             "update" -> {
-                info.log = cacheLog ?: repo?.currentBranch?.let { it.name + " : " + it.findTrackedBranch(repo)?.name }
-                        ?: "Project No Exists"
+                info.log = cacheLog
+                        ?: repo?.currentBranch?.let { it.name + " : " + it.findTrackedBranch(repo)?.name }
+                                ?: "Project No Exists"
                 info.staue = if (repo == null) 3 else 0
             }
             "push" -> {
@@ -181,7 +191,13 @@ abstract class BaseGitAction : AnAction() {
 
     abstract fun initDialog(dialog: GitOperatorDialog)
 
-    abstract fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo>
+    protected  open fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo>{
+        val allDatas = urls.map {
+            JListInfo(it.key, select = true)
+        }.toMutableList()
+        allDatas.add(0, JListInfo(rootRepoPath, select = true))
+        return allDatas
+    }
 
     abstract fun checkOnOk(allDatas: MutableList<JListInfo>, dialog: GitOperatorDialog): Boolean
 

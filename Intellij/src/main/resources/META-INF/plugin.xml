@@ -28,7 +28,7 @@
     <depends>Git4Idea</depends>
     <depends>org.jetbrains.android</depends>
     <actions>
-        <group id="QxTools" popup="true" text="QBuild">
+        <group id="QTools" popup="true" text="QTools">
             <add-to-group group-id="BuildMenu" anchor="first" />
             <add-to-group group-id="EditorPopupMenu" anchor="first" />
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first" />
