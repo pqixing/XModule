@@ -28,10 +28,10 @@ ext.buildVersion = "0.20"
 
 allprojects {
     repositories {
-        if (localBuild) maven { url localMavenUri }
         maven { url "https://jitpack.io" }
         jcenter()
         google()
+        if (localBuild) maven { url localMavenUri }
     }
 }
 
