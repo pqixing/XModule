@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -160,8 +161,11 @@ public class InstallApkDialog extends JDialog {
     }
 
     private String getPath(ProgressIndicator indicator) {
-        String key = jcPaths.getSelectedItem().toString().trim();
-        String apkUrl = apkUrls != null && apkUrls.containsKey(key) ? apkUrls.get(key) : key;
+        String apkUrl = jcPaths.getSelectedItem().toString().trim();
+        String key = apkUrl.replace(" ", "");
+        for (Map.Entry<String, String> entry : apkUrls.entrySet()) {
+            if (entry.getKey().replace(" ", "").equals(key)) apkUrl = entry.getValue();
+        }
         if (apkUrl.startsWith("http")) {//网络地址
             jlResult.setText("Download...");
             indicator.setText("Downloading " + apkUrl);
@@ -170,6 +174,7 @@ public class InstallApkDialog extends JDialog {
         File apkFile = new File(apkUrl);
         if (!apkFile.exists() || !apkFile.isFile()) {
             jlResult.setText("Apk file not exists  + apkUrl");
+            buttonOK.setVisible(true);
             return null;
         }
         return apkUrl;
