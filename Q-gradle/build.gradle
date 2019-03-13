@@ -33,7 +33,7 @@ repositories {
 dependencies {
 //    implementation files("../libs/Tools.jar")
     if (localBuild) {
-        compileOnly project(":Tools")
+        compileOnly project(":Q-tools")
         implementation "com.pqixing.gradle:tools:0.3"
     } else implementation "com.github.pqixing.modularization:Tools:$buildVersion"
     implementation gradleApi()

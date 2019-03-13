@@ -1,1 +1,1 @@
-include ":Tools",":Gradle",":Intellij"
+include ":Q-tools",":Q-gradle",":Q-ide"
