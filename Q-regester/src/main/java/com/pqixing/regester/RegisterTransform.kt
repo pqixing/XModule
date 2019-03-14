@@ -2,7 +2,9 @@ package com.pqixing.regester
 
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
+import com.android.utils.FileUtils
 import com.pqixing.regester.utils.ClassModify
+import groovyjarjarantlr.build.ANTLR.jarName
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.IOUtils
 import org.objectweb.asm.ClassReader
@@ -31,42 +33,55 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
     }
 
     override fun transform(transformInvocation: TransformInvocation) {
-        val provider = transformInvocation.outputProvider;
+        val start = System.currentTimeMillis()
+        val outputProvider = transformInvocation.outputProvider;
         val activitys = mutableSetOf<String>()
         val applikes = mutableSetOf<String>()
         var targetInjectJar: JarInput? = null
         transformInvocation.inputs.forEach { input ->
-            input.directoryInputs.forEach { handleDir(it.file, activitys, applikes) }
+            input.directoryInputs.forEach { dir ->
+                handleDir(dir.file, activitys, applikes)
+                //生成输出路径
+                val dest = outputProvider.getContentLocation(dir.name, dir.contentTypes, dir.scopes, Format.DIRECTORY)
+                FileUtils.copyDirectory(dir.file, dest)
+            }
             input.jarInputs.forEach { jar ->
-                if (jar.name.startsWith("com.pqixing.gradle.local:annotation:")) {
+                if (jar.name.startsWith("com.pqixing.android:annotation:")) {
                     targetInjectJar = jar
                     System.out.println("find target jar -> ${jar.name}")
-                } else if ((filters.isEmpty() || filters.find { jar.name.contains(it) } != null || jar.name.startsWith(":")
-                                /**本地工程**/
-                                ) && jar.file.absolutePath.endsWith(".jar")) {
-                    handleJar(jar, activitys, applikes)
-                } else System.out.println("UnHandle jar ->${jar.name}")
+                } else {
+                    if ((filters.isEmpty() || filters.find { jar.name.contains(it) } != null || jar.name.startsWith(":")
+                                    /**本地工程**/
+                                    ) && jar.file.absolutePath.endsWith(".jar")) {
+                        handleJar(jar, activitys, applikes)
+                    } else System.out.println("UnHandle jar ->${jar.name}")
+                    val dest = getDestFile(outputProvider, jar)
+                    FileUtils.copyFile(jar.file, dest)
+                }
             }
         }
-        injectCode(targetInjectJar, provider, activitys, applikes)
-        System.out.println("class name  activitys ->$activitys \napplikes-> $applikes")
-
+        injectCode(targetInjectJar, outputProvider, activitys, applikes)
+        System.out.println("$name transform end , count -> ${System.currentTimeMillis() - start}")
     }
 
-    private fun injectCode(jarInput: JarInput?, outputProvider: TransformOutputProvider, activitys: MutableSet<String>, applikes: MutableSet<String>) {
-        jarInput ?: return
-
+    private fun getDestFile(outputProvider: TransformOutputProvider, jarInput: JarInput): File {
         var jarName = jarInput.name
         var md5Name = DigestUtils.md5Hex(jarInput.file.absolutePath)
         if (jarName.endsWith(".jar")) {
             jarName = jarName.substring(0, jarName.length - 4)
         }
         //生成输出路径
-        val dest = outputProvider.getContentLocation(jarName + md5Name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
+        return outputProvider.getContentLocation(jarName + md5Name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
+    }
+
+    private fun injectCode(jarInput: JarInput?, outputProvider: TransformOutputProvider, activitys: MutableSet<String>, applikes: MutableSet<String>) {
+        jarInput ?: return
+        //生成输出路径
+        val dest = getDestFile(outputProvider, jarInput)
         val jarOutputStream = JarOutputStream(FileOutputStream(dest))
         val file = JarFile(jarInput.file)
         val enumeration = file.entries()
-        System.out.println("injectCode start ->${jarInput.file} \n out -> ${dest.absolutePath}")
+        System.out.println("injectCode start ->$activitys \n -> $applikes")
 
         while (enumeration.hasMoreElements()) {
             val jarEntry = enumeration.nextElement()
@@ -75,7 +90,7 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
             val stream = file.getInputStream(ZipEntry(entryName))
             val sourceClassBytes = IOUtils.toByteArray(stream)
             if (entryName == "com/pqixing/annotation/QLaunchManager.class") {
-                val bytes = ClassModify.transform(sourceClassBytes,"com/pqixing/annotation/QLaunchManager", activitys, applikes)
+                val bytes = ClassModify.transform(sourceClassBytes, "com/pqixing/annotation/QLaunchManager", activitys, applikes)
                 jarOutputStream.write(bytes)
             } else jarOutputStream.write(sourceClassBytes)
             stream.close()
@@ -91,7 +106,6 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
         dir.listFiles().forEach { f ->
             if (f.isDirectory) handleDir(f, activitys, applikes)
             else if (f.isFile && f.name.endsWith(".class") && !f.absolutePath.contains("$")) {
-                System.out.println("handleDir -> " + f.absolutePath)
                 val path = f.absolutePath
                 val className = path.substring(path.indexOf("/classes/") + 10, path.length - 6)
                 checkStream(f.inputStream(), className, activitys, applikes);
@@ -111,7 +125,6 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
             val entryName = jarEntry.name
             if (!entryName.endsWith(".class") || entryName.contains("&")) continue
             val stream = file.getInputStream(ZipEntry(entryName))
-            System.out.println("handleJar -> $entryName")
             checkStream(stream, entryName.substring(0, entryName.length - 6), activitys, applikes)
         }
         file.close()

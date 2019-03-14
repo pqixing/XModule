@@ -22,13 +22,13 @@ public class RegesterVisitor extends ClassVisitor {
 
     @Override
     public void visitOuterClass(String owner, String name, String desc) {
-        System.out.println("owner -> " + owner + " name " + name + " desc " + desc);
+//        System.out.println("owner -> " + owner + " name " + name + " desc " + desc);
         this.className = owner;
     }
 
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean b) {
-        System.out.println("visitAnnotation -> desc " + desc + " " + className + " c" + hashCode());
+//        System.out.println("visitAnnotation -> desc " + desc + " " + className + " c" + hashCode());
         AnnotationVisitor visitor = super.visitAnnotation(desc, b);
         String d = desc == null ? "" : desc;
         if (d.contains(A)) activitys.add(className);

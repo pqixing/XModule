@@ -29,7 +29,7 @@ public class ClassModify extends ClassVisitor {
         modify.activitys = activitys;
         modify.likes = likes;
         classReader.accept(modify, ClassReader.EXPAND_FRAMES);
-        System.out.println("Start transform ->  ");
+//        System.out.println("Start transform ->  ");
         return cw.toByteArray();
     }
 
@@ -113,12 +113,7 @@ class LoadTransformer extends GeneratorAdapter {
     @Override
     public void visitInsn(int opcode) {
         if (opcode == Opcodes.RETURN) {
-            // before return insert c.showTwo();
-//            super.visitVarInsn(Opcodes.ALOAD, 1); // variable c
-//
-//            super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-//                    pkg, "showTwo", "()V", false);
-            System.out.println(" visitInsn ->    "+pkg);
+//            System.out.println(" visitInsn ->    "+pkg);
             for (String key : activitys) {
                 super.visitFieldInsn(Opcodes.GETSTATIC, pkg, "activitys", "Ljava/util/HashSet;");
                 super.visitLdcInsn(key.replace("/","."));

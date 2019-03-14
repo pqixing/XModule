@@ -10,9 +10,9 @@ uploadArchives {
             repository(url: uri("/home/pqixing/.repo")){
                 authentication(userName: "admin", password: "admin123")
             }
-            pom.groupId = "com.pqixing.gradle.local" // 组名
+            pom.groupId = "com.pqixing.android" // 组名
             pom.artifactId = "annotation"// 插件名
-            pom.version = "0.1" // 版本号
+            pom.version = "0.8" // 版本号
         }
     }
 }
