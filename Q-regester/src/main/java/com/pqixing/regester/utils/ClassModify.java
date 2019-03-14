@@ -1,6 +1,8 @@
 package com.pqixing.regester.utils;
 
 
+import com.android.dx.rop.type.Type;
+
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -9,7 +11,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.util.Set;
-
 
 
 /**
@@ -116,14 +117,14 @@ class LoadTransformer extends GeneratorAdapter {
 //            System.out.println(" visitInsn ->    "+pkg);
             for (String key : activitys) {
                 super.visitFieldInsn(Opcodes.GETSTATIC, pkg, "activitys", "Ljava/util/HashSet;");
-                super.visitLdcInsn(key.replace("/","."));
-                super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/util/HashSet", "add", "(Ljava/lang/Object;)"+ org.objectweb.asm.Type.BOOLEAN_TYPE, false);
+                super.visitLdcInsn(key.replace("/", "."));
+                super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/util/HashSet", "add", "(Ljava/lang/Object;)" + org.objectweb.asm.Type.BOOLEAN_TYPE, false);
                 super.visitInsn(Opcodes.POP);
             }
             for (String key : likes) {
                 super.visitFieldInsn(Opcodes.GETSTATIC, pkg, "likes", "Ljava/util/HashSet;");
-                super.visitLdcInsn(key.replace("/","."));
-                super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/util/HashSet", "add", "(Ljava/lang/Object;)"+ org.objectweb.asm.Type.BOOLEAN_TYPE, false);
+                super.visitLdcInsn(key.replace("/", "."));
+                super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/util/HashSet", "add", "(Ljava/lang/Object;)" + org.objectweb.asm.Type.BOOLEAN_TYPE, false);
                 super.visitInsn(Opcodes.POP);
             }
         }
