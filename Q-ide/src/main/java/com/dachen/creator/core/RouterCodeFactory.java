@@ -59,11 +59,11 @@ public class RouterCodeFactory {
             String subFlag = "import ";
             String className = importStr.substring(importStr.indexOf(subFlag)+subFlag.length(), importStr.length()).replace(" ", "");
 
-            if("com.dachen.annotation.DcPath".equals(className) ||
-                    "com.dachen.annotation.DcServices".equals(className) ||
-                    "com.dachen.annotation.Key".equals(className) ||
-                    "com.dachen.annotation.Type".equals(className) ||
-                    "com.dachen.annotation.RouterPath".equals(className)){
+            if("com.dachen.regester.DcPath".equals(className) ||
+                    "com.dachen.regester.DcServices".equals(className) ||
+                    "com.dachen.regester.Key".equals(className) ||
+                    "com.dachen.regester.Type".equals(className) ||
+                    "com.dachen.regester.RouterPath".equals(className)){
                 continue;
             }
             importList.add(importStr + ";");

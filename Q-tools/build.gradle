@@ -1,4 +1,5 @@
 apply plugin: 'kotlin'
+apply plugin: 'java'
 //apply plugin: 'com.github.dcendents.android-maven'
 dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -49,7 +50,12 @@ def writeFile(String txt, File out) {
     writer.close()
 }
 
-if (!localBuild) return
+if (!localBuild) {
+    apply from: '../install.gradle'
+    apply from: '../bintray.gradle'
+    return 
+}
+apply plugin: 'maven'
 // 上传到本地代码库
 uploadArchives {
     repositories {

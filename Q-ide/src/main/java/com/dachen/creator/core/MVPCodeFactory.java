@@ -139,7 +139,7 @@ public class MVPCodeFactory {
         return StringUtils.formatSingleLine(0, "package " + AndroidUtils.getFilePackageName(dir) + ";") +
                 "\n" +
                 StringUtils.formatSingleLine(0, " import android.os.Bundle;") +
-                StringUtils.formatSingleLine(0, "import android.support.annotation.Nullable;") +
+                StringUtils.formatSingleLine(0, "import android.support.regester.Nullable;") +
                 StringUtils.formatSingleLine(0, "import android.view.LayoutInflater;") +
                 StringUtils.formatSingleLine(0, "import android.view.View;") +
                 StringUtils.formatSingleLine(0, "import android.view.ViewGroup;") +

@@ -1,7 +1,7 @@
 // 应用插件
 apply plugin: "groovy"
 apply plugin: "kotlin"
-//apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'java'
 sourceSets {
     main.java.srcDirs += "src/groovy"
     test.java.srcDirs += "src/groovy"
@@ -43,6 +43,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation 'org.eclipse.jgit:org.eclipse.jgit:+'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
+    implementation 'com.android.tools.build:gradle:3.3.2'
 }
 
 
@@ -53,8 +54,12 @@ afterEvaluate {
     classes.dependsOn compileKotlin
 }
 
-if (!localBuild) return
-
+if (!localBuild) {
+    apply from: '../install.gradle'
+    apply from: '../bintray.gradle'
+    return
+}
+apply plugin: 'maven'
 // 上传到本地代码库
 uploadArchives {
     repositories {

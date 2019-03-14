@@ -1,6 +1,7 @@
 package com.pqixing.modularization.impl
 
-
+import com.android.build.gradle.AppExtension
+import com.android.build.gradle.api.ApplicationVariant
 import com.pqixing.modularization.iterface.IExtHelper
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -88,6 +89,11 @@ public class GExtHelper implements IExtHelper {
     @Override
     Map<String, File> getAndroidOut(Project project, String type) {
         HashMap<String, File> variants = new HashMap<>()
+        def e = new AppExtension()
+        e.applicationVariants.all { ApplicationVariant app->
+            app.buildType.name
+            app.outputs.last()
+        }
         (type == "application" ? project.android.applicationVariants : project.android.libraryVariants).all {
             variants.put(it.name, it.outputs[0].outputFile)
         }

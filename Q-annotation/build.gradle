@@ -1,0 +1,18 @@
+apply plugin: 'java'
+apply plugin: "maven"
+dependencies {
+}
+apply plugin: 'maven'
+// 上传到本地代码库
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: uri("/home/pqixing/.repo")){
+                authentication(userName: "admin", password: "admin123")
+            }
+            pom.groupId = "com.pqixing.gradle.local" // 组名
+            pom.artifactId = "annotation"// 插件名
+            pom.version = "0.1" // 版本号
+        }
+    }
+}

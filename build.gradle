@@ -7,7 +7,6 @@ buildscript {
         maven {
             url "https://plugins.gradle.org/m2/"
         }
-        maven { url "https://jitpack.io" }
     }
 
     dependencies {
@@ -21,47 +20,13 @@ buildscript {
 ext.localMavenUri = "http://192.168.3.7:9527/nexus/content/repositories/AndroidDev/"
 //本地Maven调试
 ext.localBuild = true
-ext.buildModule = ["Tools","Gradle"]
 ext.buildGroup = 'com.github.pqixing.modularization'
 ext.buildVersion = "1.0"
 
 
 allprojects {
     repositories {
-        maven { url "https://jitpack.io" }
         jcenter()
         google()
-    }
-}
-
-tasks.withType(Javadoc) {
-    options {
-        encoding "UTF-8"
-        charSet 'UTF-8'
-        links "http://docs.oracle.com/javase/7/docs/api"
-    }
-}
-
-subprojects { p ->
-    version = buildVersion
-    group = "$buildGroup:$p.name"
-    apply plugin: 'maven'
-    apply plugin: 'java'
-    sourceCompatibility = 1.8 // java 8 23
-    targetCompatibility = 1.8
-
-    task sourcesJar(type: Jar, dependsOn: classes) {
-        classifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = 'javadoc'
-        from javadoc.destinationDir
-    }
-
-    artifacts {
-        archives sourcesJar
-        archives javadocJar
     }
 }
