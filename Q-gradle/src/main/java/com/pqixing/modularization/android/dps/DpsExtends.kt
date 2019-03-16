@@ -41,7 +41,7 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
             1 -> {
                 inner.branch = subModule.getBranch()
                 inner.moduleName = split[0]
-                inner.version = "+"
+                inner.version = ""
             }
             2 -> {
                 inner.branch = subModule.getBranch()
