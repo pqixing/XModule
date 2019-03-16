@@ -18,8 +18,10 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.swing.JButton;
@@ -109,19 +111,19 @@ public class NewImportDialog extends JDialog {
     private void initLoadBranch() {
         btnBranchs.addActionListener(actionEvent -> {
             String taskId = System.currentTimeMillis() + "";
-            GradleUtils.INSTANCE.runTask(project, Arrays.asList(":LoadAllBranchModule"), ProgressExecutionMode.IN_BACKGROUND_ASYNC, false, taskId, GradleUtils.INSTANCE.getDefEnvs(), new Runnable() {
-                @Override
-                public void run() {
-                    Pair<Boolean, String> result = GradleUtils.INSTANCE.getResult(GradleUtils.INSTANCE.getLogFile(project.getBasePath()), taskId);
-                    if (!result.getFirst()) return;
-                    String[] strings = result.getSecond().replace("#",",").split(",");
-                    if (strings.length > 0) {
-                        imports.clear();
-                        for (int i = 0; i < strings.length; i++) {
-                            if(!strings[i].isEmpty()) imports.add(strings[i]);
-                        }
-                        updateImports();
+            String branch = cbBranchs.getSelectedItem().toString().trim();
+            Map<String, String> envs = new HashMap<>(GradleUtils.INSTANCE.getDefEnvs());
+            envs.put("taskBranch", branch);
+            GradleUtils.INSTANCE.runTask(project, Arrays.asList(":LoadAllBranchModule"), ProgressExecutionMode.IN_BACKGROUND_ASYNC, false, taskId, envs, () -> {
+                Pair<Boolean, String> result = GradleUtils.INSTANCE.getResult(GradleUtils.INSTANCE.getLogFile(project.getBasePath()), taskId);
+                if (!result.getFirst()) return;
+                String[] strings = result.getSecond().replace("#", ",").split(",");
+                if (strings.length > 0) {
+                    imports.clear();
+                    for (int i = 0; i < strings.length; i++) {
+                        if (!strings[i].isEmpty()) imports.add(strings[i]);
                     }
+                    updateImports();
                 }
             });
         });
