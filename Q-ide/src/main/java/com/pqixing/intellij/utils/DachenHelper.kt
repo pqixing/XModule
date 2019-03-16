@@ -42,7 +42,7 @@ object DachenHelper {
      * 下载apk文件
      */
     fun downloadApk(project: Project, name: String, url: String): String {
-        val file = File(project.basePath, "build/apks/${name}.apk")
+        val file = File(project.basePath, "build/apks/${name.replace(Regex(" |-|_|:"),"")}.apk")
         try {
             file.parentFile.mkdirs()
             FileUtils.delete(file)

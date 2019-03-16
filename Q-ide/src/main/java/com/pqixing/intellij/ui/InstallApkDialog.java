@@ -9,6 +9,7 @@ import com.intellij.debugger.memory.utils.AndroidUtil;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -158,22 +159,28 @@ public class InstallApkDialog extends JDialog {
         apkUrls.put(key, url);
         jcPaths.addItem(key);
         jcPaths.setSelectedIndex(jcPaths.getItemCount() - 1);
+        jlResult.setText(url);
     }
 
     private String getPath(ProgressIndicator indicator) {
         String apkUrl = jcPaths.getSelectedItem().toString().trim();
-        String key = apkUrl.replace(" ", "");
+        String key = apkUrl;
         for (Map.Entry<String, String> entry : apkUrls.entrySet()) {
-            if (entry.getKey().replace(" ", "").equals(key)) apkUrl = entry.getValue();
+            if (entry.getKey().replace(" ", "").equals(key.replace(" ", ""))) {
+                apkUrl = entry.getValue();
+            }
         }
         if (apkUrl.startsWith("http")) {//网络地址
-            jlResult.setText("Download...");
-            indicator.setText("Downloading " + apkUrl);
-            apkUrl = DachenHelper.INSTANCE.downloadApk(project, key, apkUrl);
+            jlResult.setText("Download..." + apkUrl);
+            int of = key.lastIndexOf(" ");
+            indicator.setText("Download..." + apkUrl);
+            apkUrl = DachenHelper.INSTANCE.downloadApk(project, key.substring(Math.max(0, of)).trim(), apkUrl);
+            final  String u = apkUrl;
+            ApplicationManager.getApplication().invokeLater(() -> addApksUrls(u));
         }
         File apkFile = new File(apkUrl);
         if (!apkFile.exists() || !apkFile.isFile()) {
-            jlResult.setText("Apk file not exists  + apkUrl");
+            jlResult.setText("Apk file not exists " + apkUrl);
             buttonOK.setVisible(true);
             return null;
         }
@@ -181,7 +188,6 @@ public class InstallApkDialog extends JDialog {
     }
 
     private void install(String apkUrl, ProgressIndicator indicator) {
-        jlResult.setText("Install...");
         File adb = AndroidSdkUtils.getAdb(project);
         for (Map.Entry<JListInfo, IDevice> jd : devices.entrySet()) {
             if (!jd.getKey().getSelect()) continue;
@@ -190,13 +196,15 @@ public class InstallApkDialog extends JDialog {
             try {
                 jd.getKey().setLog("install...");
                 adapter.updateUI();
-                indicator.setText("install to " + jd.getKey().getTitle());
+                indicator.setText("install to " + jd.getKey().getTitle() + " " + apkUrl);
+                jlResult.setText("Install Apk: " + apkUrl);
                 LinkedList<String> list = Shell.runSync(adb.getAbsolutePath() + " -s " + jd.getValue().getSerialNumber() + " install " + jfParams.getText() + " " + apkUrl);
                 output = list.getLast();
                 success = output.trim().startsWith("Success");
             } catch (Exception e) {
                 success = false;
                 output = e.toString();
+                jlResult.setText(output);
             }
             jd.getKey().setLog(output);
             jd.getKey().setStaue(success ? 1 : 3);
