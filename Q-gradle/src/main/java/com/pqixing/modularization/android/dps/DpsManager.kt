@@ -88,7 +88,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
                 }
                 if (!compile) loseList.add(dpc.moduleName)
                 val newVersion = VersionManager.getVersion(dpc.branch, dpc.moduleName, "+")
-                if (!newVersion.second.startsWith(dpc.version) && newVersion.second.trim() != "+")
+                if (!newVersion.second.startsWith(dpc.version) && newVersion.second.trim() != "+" && dpc.version.trim() != "+")
                     dpsV.add("\n       Config Version : ${dpc.version} -> Last Version : ${newVersion.second} -> Match Branch : ${newVersion.first} -> ${dpc.moduleName} ")
             }
             if (dpsV.isNotEmpty())
@@ -100,7 +100,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
          */
         if (loseList.isNotEmpty()) {
             if (plugin.config.allowLose) Tools.println("ResolveDps -> lose dps -> $loseList")
-            else Tools.printError(-1,"ResolveDps -> lose dps -> $loseList")
+            else Tools.printError(-1, "ResolveDps -> lose dps -> $loseList")
         }
         val sb = java.lang.StringBuilder("dependencies {  // isApp : ${plugin.isApp} -> buildAsApp : ${plugin.buildAsApp}\n")
         includes.forEach { sb.append(it).append("\n") }

@@ -65,7 +65,7 @@ uploadArchives {
             }
             pom.groupId = "com.pqixing.gradle" // 组名
             pom.artifactId = "tools"// 插件名
-            pom.version = "0.3" // 版本号
+            pom.version = "0.6" // 版本号
         }
     }
 }

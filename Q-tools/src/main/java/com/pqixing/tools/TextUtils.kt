@@ -64,7 +64,7 @@ object TextUtils {
         collection.forEach { sb.append(it).append("##") }
         return sb.substring(0, sb.length - 2)
     }
-    fun isVersionCode(str: String?) = str?.matches(Regex("\\d*[.\\d]+")) ?: false
+    fun isVersionCode(str: String?) = str?.matches(Regex("\\d+(\\.\\d+){2,}")) ?: false
     /**
      * 是不是基础版本，etc 1.0
      */

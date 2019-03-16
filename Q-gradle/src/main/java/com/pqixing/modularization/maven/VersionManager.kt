@@ -96,12 +96,7 @@ object VersionManager : OnClear {
         for (i in start until matchingFallbacks.size) {
             val b = if (i < 0) branch else matchingFallbacks[i]
             val preKey = "$groupName.$b.$module."
-            val version = if (TextUtils.isBaseVersion(inputVersion)) inputVersion else findBaseVersion(inputVersion, preKey, branchVersion)
-            //如果传入的是固定的版本号,则只查询各分支是否存在此版本号，不做自动升级版本号处理
-            if (TextUtils.isBaseVersion(version)) {
-                val v = branchVersion["$preKey$version"] ?: continue
-                return Pair(b, "$version.$v")//.apply { Tools.println("getVersion -> $branch $module $inputVersion -> $first : $second")  }
-            }
+            var version = inputVersion
             if (TextUtils.isVersionCode(version)) {
                 val i1 = version.lastIndexOf('.')
                 if (i1 < 0) continue
@@ -109,6 +104,13 @@ object VersionManager : OnClear {
                 val last = version.substring(i1 + 1).toInt()
                 val v = branchVersion["$preKey$baseVersion"]?.toInt() ?: continue
                 if (v >= last) return Pair(b, version)//.apply { Tools.println("getVersion -> $branch $module $inputVersion -> $first : $second")  }
+            } else {
+                version = if (TextUtils.isBaseVersion(inputVersion)) inputVersion else findBaseVersion(inputVersion, preKey, branchVersion)
+                //如果传入的是固定的版本号,则只查询各分支是否存在此版本号，不做自动升级版本号处理
+                if (TextUtils.isBaseVersion(version)) {
+                    val v = branchVersion["$preKey$version"] ?: continue
+                    return Pair(b, "$version.$v")//.apply { Tools.println("getVersion -> $branch $module $inputVersion -> $first : $second")  }
+                }
             }
         }
         return Pair("", inputVersion)
@@ -206,7 +208,8 @@ object VersionManager : OnClear {
                 ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "can checkout to branch : _version")
             }
         }
-        repoLastCommit = git.log().setMaxCount(1).call().firstOrNull()?.commitTime ?: (System.currentTimeMillis() / 1000).toInt()
+        repoLastCommit = git.log().setMaxCount(1).call().firstOrNull()?.commitTime
+                ?: (System.currentTimeMillis() / 1000).toInt()
         GitUtils.close(git)
     }
 

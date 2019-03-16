@@ -61,7 +61,7 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
             closure.resolveStrategy = Closure.DELEGATE_ONLY
             closure.call()
         }
-        if (inner.version.isEmpty() || inner.version == "+") {
+        if (inner.version.isEmpty()) {
             inner.version = manager.baseVersion
         }
         inner.subModule = ProjectManager.findSubModuleByName(inner.moduleName)!!
