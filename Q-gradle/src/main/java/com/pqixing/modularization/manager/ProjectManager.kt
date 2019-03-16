@@ -6,6 +6,8 @@ import com.pqixing.model.ProjectXmlModel
 import com.pqixing.model.SubModule
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.interfaces.OnClear
+import com.pqixing.modularization.manager.ProjectManager.codeRootDir
+import com.pqixing.modularization.manager.ProjectManager.projectXml
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.Git
@@ -13,25 +15,27 @@ import org.gradle.api.Project
 import java.io.File
 
 object ProjectManager : OnClear {
+    override fun start() {
+        projectXml = XmlHelper.parseProjectXml(FileManager.getProjectXml())
+        projectRoot = ManagerPlugin.getPlugin().projectDir
+        codeRootDir = File(ManagerPlugin.getPlugin().rootDir, ManagerPlugin.getExtends().config.codeRoot)
+    }
+
     init {
         BasePlugin.addClearLister(this)
+        start()
     }
 
     override fun clear() {
     }
 
-    var projectXml: ProjectXmlModel = XmlHelper.parseProjectXml(FileManager.getProjectXml())
-    inline fun findSubModuleByName(name: String) = projectXml.findSubModuleByName(name)
+    lateinit var projectXml: ProjectXmlModel
 
-    var projectRoot: File = ManagerPlugin.getPlugin().projectDir
+    lateinit var projectRoot: File
 
-    var codeRootDir: File = File("_empty")
-        get() {
-            if (field.name == "_empty") {
-                field = File(ManagerPlugin.getPlugin().rootDir, ManagerPlugin.getExtends().config.codeRoot)
-            }
-            return field
-        }
+    lateinit var codeRootDir: File
+
+    fun findSubModuleByName(name: String) = projectXml.findSubModuleByName(name)
 
     /**
      * 检查每个子工程的状态，分支信息等
@@ -44,7 +48,7 @@ object ProjectManager : OnClear {
         val subModule = projectXml.findSubModuleByName(project.name) ?: return null
         val apiModule = subModule.isApiModule()
         //重新设置build 目录
-        project.buildDir = File(project.projectDir, "build/"+(if (buildDir.isEmpty()) "default" else buildDir))
+        project.buildDir = File(project.projectDir, "build/" + (if (buildDir.isEmpty()) "default" else buildDir))
 
         if (subModule.hasCheck) return subModule
 

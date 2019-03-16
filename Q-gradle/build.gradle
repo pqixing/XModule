@@ -69,7 +69,7 @@ uploadArchives {
             }
             pom.groupId = "com.pqixing.gradle" // 组名
             pom.artifactId = "modularization"// 插件名
-            pom.version = "0.3.5" // 版本号
+            pom.version = "0.3.5.1" // 版本号
         }
     }
 }

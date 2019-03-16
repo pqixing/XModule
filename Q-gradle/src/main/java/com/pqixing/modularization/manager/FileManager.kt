@@ -6,6 +6,8 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.base.IPlugin
 import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.manager.ExceptionManager.EXCEPTION_SYNC
+import com.pqixing.modularization.manager.FileManager.rootDir
+import com.pqixing.modularization.manager.FileManager.templetRoot
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.Git
@@ -15,19 +17,24 @@ import java.io.File
  * 管理文件的输出和读取
  */
 object FileManager : OnClear {
+    override fun start() {
+
+    }
+
     init {
         BasePlugin.addClearLister(this)
+        start()
     }
 
     override fun clear() {
     }
 
-    val rootDir = ManagerPlugin.getPlugin().rootDir
-    val templetRoot: File = File(rootDir, "templet")
+    val rootDir
+        get() = ManagerPlugin.getPlugin().rootDir
+    val templetRoot: File
+        get() = File(rootDir, "templet")
 
-    fun getProjectXml(): File {
-        return File(templetRoot, FileNames.PROJECT_XML)
-    }
+    fun getProjectXml()= File(templetRoot, FileNames.PROJECT_XML)
 
     /**
      * 检测需要导出的文件有没有被导出

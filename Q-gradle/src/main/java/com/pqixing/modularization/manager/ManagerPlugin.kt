@@ -41,6 +41,7 @@ open class ManagerPlugin : BasePlugin() {
     )
 
     override fun apply(project: Project) {
+
         //在每个工程开始同步之前，检查状态，下载，切换分支等等
         project.gradle.beforeProject { ProjectManager.checkProject(it) }
 
@@ -48,6 +49,8 @@ open class ManagerPlugin : BasePlugin() {
         plugin = this
         initTools(project)
         super.apply(project)
+        BasePlugin.onStart()
+
         FileManager.checkFileExist(this)
 
         project.afterEvaluate {

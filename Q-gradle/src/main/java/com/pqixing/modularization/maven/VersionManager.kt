@@ -22,6 +22,12 @@ import kotlin.Comparator
 object VersionManager : OnClear {
     init {
         BasePlugin.addClearLister(this)
+        start()
+    }
+    override fun start() {
+        BasePlugin.addClearLister(this)
+        matchingFallbacks.addAll(ManagerPlugin.getExtends().matchingFallbacks)
+        groupName = ManagerPlugin.getExtends().groupName
     }
 
     override fun clear() {
@@ -30,6 +36,7 @@ object VersionManager : OnClear {
         branchVersion.clear()
         matchingFallbacks.clear()
         groupName = ""
+        repoLastCommit = 0
     }
 
     //版本号的管理工程,迁回root目录下,方便调试和查看
@@ -38,16 +45,8 @@ object VersionManager : OnClear {
 
     private var repoLastCommit = 0
 
-    private val matchingFallbacks = mutableListOf<String>()
-        get() {
-            if (field.isEmpty()) field.addAll(ManagerPlugin.getExtends().matchingFallbacks)
-            return field
-        }
-    private var groupName = ""
-        get() {
-            if (field.isEmpty()) field = ManagerPlugin.getExtends().groupName
-            return field
-        }
+    val matchingFallbacks = mutableListOf<String>()
+    var groupName = ""
 
     /**
      * 当前最新的版本信息

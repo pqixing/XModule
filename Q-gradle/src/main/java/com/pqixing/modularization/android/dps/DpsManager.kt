@@ -22,10 +22,12 @@ import java.util.*
 class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
     init {
         BasePlugin.addClearLister(this)
+        start()
     }
 
     override fun clear() {
         pomCache.clear()
+        loseList.clear()
     }
 
     companion object {
@@ -61,10 +63,15 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
     }
 
     //组件工程
-    val compileModel = plugin.config?.dependentModel ?: "mavenOnly"
-    val managerExtends = ManagerPlugin.getExtends()
+    lateinit var compileModel: String
+    lateinit var managerExtends: ManagerExtends
 
     val loseList = mutableListOf<String>()
+    override fun start() {
+        compileModel = plugin.config?.dependentModel ?: "mavenOnly"
+        managerExtends = ManagerPlugin.getExtends()
+    }
+
     //处理依赖
     fun resolveDps(): String {
         val excludes: HashSet<String> = HashSet()

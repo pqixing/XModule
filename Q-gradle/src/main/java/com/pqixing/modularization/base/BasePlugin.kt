@@ -28,7 +28,6 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     override val config: Config
         get() = ManagerPlugin.getExtends().config
 
-    fun getMyName() = ""
     override val project: Project
         get() = p
     override val rootDir: File
@@ -66,7 +65,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
             if (f.exists() && f.isFile)
                 project.apply(mapOf<String, String>("from" to f.absolutePath))
         }
-        linkTask()?.forEach { onTaskCreate(it, BaseTask.task(project, it)) }
+        linkTask().forEach { onTaskCreate(it, BaseTask.task(project, it)) }
     }
 
     protected fun onTaskCreate(taskClass: Class<*>, task: Task) {
@@ -113,6 +112,9 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
 
         fun onClear() {
             listeners.forEach { it.clear() }
+        }
+        fun onStart(){
+            listeners.forEach { it.start() }
         }
     }
 }
