@@ -10,6 +10,7 @@ import com.pqixing.modularization.manager.ProjectManager.codeRootDir
 import com.pqixing.modularization.manager.ProjectManager.projectXml
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.tools.FileUtils
+import com.pqixing.tools.TextUtils
 import org.eclipse.jgit.api.Git
 import org.gradle.api.Project
 import java.io.File
@@ -74,11 +75,15 @@ object ProjectManager : OnClear {
             with(File(moduleDir, "build.gradle")) {
                 if (!exists()) FileUtils.writeText(this, "apply plugin: 'com.module.android'\n endConfig()\n ")
             }
-            with(File(moduleDir, "java")) {
-                if (!exists()) this.mkdir()
+            val name = TextUtils.numOrLetter(project.name)
+            val packageName = "${ManagerPlugin.getExtends().groupName.replace(".", "/")}/router/$name"
+            val className = "${TextUtils.firstUp(name)}Paths"
+            with(File(moduleDir, "java/$packageName/$className.java")) {
+                if (!exists()) FileUtils.writeText(this, "package ${packageName.replace("/", ".")};\nfinal class $className {}")
             }
-            with(File(moduleDir, "resources")) {
-                if (!exists()) this.mkdir()
+            with(File(moduleDir, "resources/values/strings.xml")) {
+                if (!exists()) FileUtils.writeText(this, "<resources></resources>")
+
             }
             //写入空清单文件
             with(File(moduleDir, "AndroidManifest.xml")) {
