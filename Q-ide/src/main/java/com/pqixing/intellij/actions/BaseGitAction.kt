@@ -67,7 +67,7 @@ abstract class BaseGitAction : AnAction() {
         dialog.adapter.setDatas(filterDatas(allDatas, dialog.operatorCmd))
         updateLog(dialog)
         dialog.setOnOk {
-            if (checkOnOk(allDatas, dialog)) doOk(dialog, allDatas, urls, rootBranch) else dialog.dispose()
+            if (checkOnOk(allDatas, dialog)) doOk(dialog, dialog.adapter.datas, urls, rootBranch) else dialog.dispose()
         }
         dialog.isVisible = true
     }
@@ -128,7 +128,7 @@ abstract class BaseGitAction : AnAction() {
             override fun run(indicator: ProgressIndicator) {
                 dialog.gitListener.setIndicator(indicator)
                 val operatorCmd = dialog.operatorCmd
-                val repos = allDatas.filter { it.select }
+                val repos = onOkData(allDatas)
                 indicator.text = "start $operatorCmd"
                 when (operatorCmd) {
                     "clone" -> for (r in repos) clone(r, project, urls, rootBranch, dialog)
@@ -148,6 +148,8 @@ abstract class BaseGitAction : AnAction() {
         }
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
     }
+
+    protected  open fun onOkData(allDatas: MutableList<JListInfo>) = allDatas.filter { it.select }
 
     protected open fun onOtherOk(cmd: String, dialog: GitOperatorDialog, targetBranch: String, r: JListInfo, project: Project) {}
 

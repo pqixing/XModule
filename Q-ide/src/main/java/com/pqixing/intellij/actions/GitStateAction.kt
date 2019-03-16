@@ -106,8 +106,10 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
         return true
     }
 
+    override fun onOkData(allDatas: MutableList<JListInfo>): List<JListInfo> =allDatas
+
     override fun onOtherOk(cmd: String, dialog: GitOperatorDialog, targetBranch: String, r: JListInfo, project: Project) {
-        val repo = getRepo(r.title);
+        val repo = getRepo(r.title)?:return;
         r.log = GitHelper.addAndCommit(project, repo, commitMsg, dialog.gitListener)
         r.staue = if (r.log == "Success") 1 else 3
     }
