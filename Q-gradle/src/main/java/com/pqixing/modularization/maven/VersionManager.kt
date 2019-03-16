@@ -20,14 +20,14 @@ import java.util.Collections.emptyList
 import kotlin.Comparator
 
 object VersionManager : OnClear {
+    val matchingFallbacks get() = ManagerPlugin.getExtends().matchingFallbacks.toMutableList()
+    val groupName get() = ManagerPlugin.getExtends().groupName
+
     init {
         BasePlugin.addClearLister(this)
-        start()
     }
+
     override fun start() {
-        BasePlugin.addClearLister(this)
-        matchingFallbacks.addAll(ManagerPlugin.getExtends().matchingFallbacks)
-        groupName = ManagerPlugin.getExtends().groupName
     }
 
     override fun clear() {
@@ -35,7 +35,6 @@ object VersionManager : OnClear {
         targetVersion.clear()
         branchVersion.clear()
         matchingFallbacks.clear()
-        groupName = ""
         repoLastCommit = 0
     }
 
@@ -45,8 +44,6 @@ object VersionManager : OnClear {
 
     private var repoLastCommit = 0
 
-    val matchingFallbacks = mutableListOf<String>()
-    var groupName = ""
 
     /**
      * 当前最新的版本信息
