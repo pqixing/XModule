@@ -15,6 +15,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.JTextComponent;
 
 import git4idea.commands.GitLineHandlerListener;
+
 import org.jdesktop.swingx.JXRadioGroup;
 
 public class GitOperatorDialog extends JDialog {
@@ -174,6 +175,7 @@ public class GitOperatorDialog extends JDialog {
     public static class GitListener implements GitLineHandlerListener {
         JTextComponent textField;
         ProgressIndicator indicator;
+        private String lastPercentLine = null;
 
         public void setIndicator(ProgressIndicator indicator) {
             this.indicator = indicator;
@@ -185,7 +187,20 @@ public class GitOperatorDialog extends JDialog {
 
         @Override
         public void onLineAvailable(String line, Key outputType) {
-            textField.setText(textField.getText() + line + "\n");
+            if (line.startsWith("Picked up _JAVA_OPTIONS:")) return;
+            int i = line.lastIndexOf(":");
+            if (i > 0) {
+                String start = line.substring(0, i);
+                if (lastPercentLine != null && line.startsWith(start)) {
+                    textField.setText(textField.getText().replace(lastPercentLine, line));
+                } else {
+                    textField.setText(textField.getText() + line + "\n");
+                }
+                lastPercentLine = line;
+            } else {
+                lastPercentLine = null;
+                textField.setText(textField.getText()+line + "\n");
+            }
             if (indicator != null) indicator.setText(line);
         }
     }

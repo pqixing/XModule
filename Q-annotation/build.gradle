@@ -7,12 +7,12 @@ apply plugin: 'maven'
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: uri("/home/pqixing/.repo")){
+            repository(url: "http://192.168.3.7:9527/nexus/content/repositories/releases/"){
                 authentication(userName: "admin", password: "admin123")
             }
             pom.groupId = "com.pqixing.android" // 组名
             pom.artifactId = "annotation"// 插件名
-            pom.version = "0.8" // 版本号
+            pom.version = "1.2" // 版本号
         }
     }
 }

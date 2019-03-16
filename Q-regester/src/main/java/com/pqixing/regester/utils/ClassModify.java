@@ -1,15 +1,17 @@
 package com.pqixing.regester.utils;
 
 
-import com.android.dx.rop.type.Type;
-
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Set;
 
 
@@ -34,6 +36,7 @@ public class ClassModify extends ClassVisitor {
         return cw.toByteArray();
     }
 
+
     public ClassModify(ClassVisitor cv) {
         super(Opcodes.ASM5, cv);
     }
@@ -46,6 +49,20 @@ public class ClassModify extends ClassVisitor {
         if (name.equals("loadInvokeClass"))
             v = new LoadTransformer(v, access, name, desc, pkg, activitys, likes);
         return v;
+    }
+
+        @Override
+    public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
+//        System.out.println("visitField  -> name = "+name +" desc ="+desc + "value = "+value );
+        switch (name) {
+            case "buildTimeStr":
+                value = DateFormat.getDateTimeInstance().format(new Date());
+                break;
+            case "buildTime":
+                value = System.currentTimeMillis();
+                break;
+        }
+        return super.visitField(access, name, desc, signature, value);
     }
 //
 //    /**
@@ -111,10 +128,18 @@ class LoadTransformer extends GeneratorAdapter {
         this.likes = likes;
     }
 
+
+
+
     @Override
     public void visitInsn(int opcode) {
         if (opcode == Opcodes.RETURN) {
 //            System.out.println(" visitInsn ->    "+pkg);
+//            super.visitFieldInsn(Opcodes.GETSTATIC, pkg, "buildTimeStr", "Lcom/pqixing/annotation/ObjectSet;");
+//            super.visitLdcInsn(DateFormat.getDateTimeInstance().format(new Date()));
+//            super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/pqixing/annotation/ObjectSet", "setO", "(Ljava/lang/Object;)"+ Type.VOID_TYPE, false);
+//            super.visitInsn(Opcodes.POP);
+
             for (String key : activitys) {
                 super.visitFieldInsn(Opcodes.GETSTATIC, pkg, "activitys", "Ljava/util/HashSet;");
                 super.visitLdcInsn(key.replace("/", "."));

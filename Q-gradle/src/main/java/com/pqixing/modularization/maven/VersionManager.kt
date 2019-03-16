@@ -6,10 +6,7 @@ import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.interfaces.OnClear
-import com.pqixing.modularization.manager.ExceptionManager
-import com.pqixing.modularization.manager.ManagerExtends
-import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.manager.*
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.PropertiesUtils
@@ -34,8 +31,10 @@ object VersionManager : OnClear {
         matchingFallbacks.clear()
         groupName = ""
     }
-    //rootGit的管理,放到Code目录下
-    var repoGitDir: File = File(ProjectManager.codeRootDir, ".docRepo")
+
+    //版本号的管理工程,迁回root目录下,方便调试和查看
+    var repoGitDir: File = File(".")
+        get() = File(FileManager.rootDir, "build/version")
 
     private var repoLastCommit = 0
 
@@ -207,8 +206,7 @@ object VersionManager : OnClear {
                 ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "can checkout to branch : _version")
             }
         }
-        repoLastCommit = git.log().setMaxCount(1).call().firstOrNull()?.commitTime
-                ?: (System.currentTimeMillis() / 1000).toInt()
+        repoLastCommit = git.log().setMaxCount(1).call().firstOrNull()?.commitTime ?: (System.currentTimeMillis() / 1000).toInt()
         GitUtils.close(git)
     }
 
@@ -269,7 +267,7 @@ object VersionManager : OnClear {
     fun createVersionTag(): Boolean {
         val plugin = ManagerPlugin.getPlugin()
         val info = plugin.config
-        val taskBranch = info.taskBranch.substring(info.taskBranch.lastIndexOf("/")+1)//直接获取名称,不要origin
+        val taskBranch = info.taskBranch.substring(info.taskBranch.lastIndexOf("/") + 1)//直接获取名称,不要origin
         if (taskBranch.isEmpty() || taskBranch == "master") {
             Tools.printError(-1, "createVersionTag taskBranch is empty, please input taskBranch!!")
             return false

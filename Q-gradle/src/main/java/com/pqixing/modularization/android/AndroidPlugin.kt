@@ -85,7 +85,7 @@ open class AndroidPlugin : BasePlugin() {
             dpsManager = DpsManager(this@AndroidPlugin, dpsExt)
             val dependencies = dpsManager.resolveDps()
             project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dependencies, true)))
-            compatOldPlugin(dpsExt)
+//            compatOldPlugin(dpsExt)//无需再兼容
         }
     }
 
