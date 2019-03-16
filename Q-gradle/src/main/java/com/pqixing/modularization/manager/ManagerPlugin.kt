@@ -41,12 +41,12 @@ open class ManagerPlugin : BasePlugin() {
     )
 
     override fun apply(project: Project) {
+        plugin = this
 
         //在每个工程开始同步之前，检查状态，下载，切换分支等等
         project.gradle.beforeProject { ProjectManager.checkProject(it) }
 
         val startTime = System.currentTimeMillis()
-        plugin = this
         initTools(project)
         super.apply(project)
         BasePlugin.onStart()
