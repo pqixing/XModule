@@ -166,7 +166,7 @@ public class RouterCodeFactory {
                 "\t\t\t\t}")
                 + "\n");
         codeSb.append(StringUtils.formatSingleLine(4,
-                "public final iterface.lang.Object start(android.content.Context context) {\n" +
+                "public final java.lang.Object start(android.content.Context context) {\n" +
                 "\t\t\t\t\t\treturn com.dachen.router.DcRouter.build(THIS).with(bundle).navigation(context);\n" +
                 "\t\t\t\t}")
                 + "\n");
@@ -275,7 +275,7 @@ public class RouterCodeFactory {
         }else if("Type.SHORT".equalsIgnoreCase(type)){
             rType = "short#bundle.putShort#bundle.getShort";
         }else if("Type.SERIALIZABLE".equalsIgnoreCase(type)){
-            rType = "iterface.io.Serializable#bundle.putSerializable#bundle.getSerializable";
+            rType = "java.io.Serializable#bundle.putSerializable#bundle.getSerializable";
         }else if("Type.BUNDLE".equalsIgnoreCase(type)){
             rType = "android.os.Bundle#bundle.putBundle#bundle.getBundle";
         }else if("Type.DOUBLE".equalsIgnoreCase(type)){
