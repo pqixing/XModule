@@ -4,14 +4,10 @@ import com.pqixing.Tools
 import com.pqixing.model.SubModule
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BaseExtension
-import com.pqixing.modularization.manager.ExceptionManager
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.tools.TextUtils
 import groovy.lang.Closure
-import org.gradle.api.Project
-import java.util.*
-import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 
 open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : BaseExtension(plugin.project) {
     internal var compiles = HashSet<DpComponents>()
@@ -32,6 +28,10 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
      * 上传到Maven的描述
      */
     var toMavenDesc = ""
+        get() {
+            val desc = TextUtils.getSystemEnv("toMavenDesc")
+            return if (desc?.isNotEmpty() == true) desc else field
+        }
 
     private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null) {
         val inner = DpComponents(project)
@@ -53,7 +53,7 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
                 inner.moduleName = split[1]
                 inner.version = split[2]
             }
-            else -> Tools.printError(-1,"DpsExtends compile illegal name -> $name")
+            else -> Tools.printError(-1, "DpsExtends compile illegal name -> $name")
         }
         inner.scope = scope
         if (closure != null) {

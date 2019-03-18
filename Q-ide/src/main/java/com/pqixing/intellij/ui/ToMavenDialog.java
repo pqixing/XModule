@@ -11,17 +11,14 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 public class ToMavenDialog extends JDialog {
     private JPanel contentPane;
@@ -31,6 +28,7 @@ public class ToMavenDialog extends JDialog {
     private JLabel jlProgress;
     public JLabel jlTitle;
     private JComboBox cbUncheck;
+    private JTextField tvDesc;
     JListSelectAdapter adapter;
     private Runnable onOk;
     private boolean allSelect;
@@ -96,6 +94,9 @@ public class ToMavenDialog extends JDialog {
 
     }
 
+    public String getDesc(){
+        return tvDesc.getText().trim();
+    }
     public String getUnCheckCode(){
         return cbUncheck.getSelectedItem().toString().split(":")[0].trim();
     }

@@ -3,18 +3,14 @@ package com.pqixing.intellij.actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataKey
-import com.intellij.openapi.application.Application
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.externalSystem.task.TaskCallback
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
-import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.ToMavenDialog
 import com.pqixing.intellij.utils.GradleUtils
-import java.io.File
 
 class ToMavenAction : AnAction() {
     lateinit var project: Project
@@ -51,6 +47,7 @@ class ToMavenAction : AnAction() {
         var excute = 0
         var envs = GradleUtils.defEnvs.toMutableMap().apply {
             put("toMavenUnCheck", dialog.unCheckCode)
+            put("toMavenDesc", dialog.desc)
         }
 
         override fun run() {
