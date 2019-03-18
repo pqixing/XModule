@@ -13,6 +13,7 @@ import com.pqixing.modularization.iterface.IExtHelper
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.utils.GitUtils
+import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
 import org.eclipse.jgit.api.Git
@@ -27,6 +28,15 @@ open class ToMavenCheckTask : BaseTask() {
     init {
         group = ""
     }
+
+    /**
+     * toMaven时,忽略检查项目
+     * 0:UnCheck null
+     * 1:UnCheck branch 不校验新分支第一次提交是否需要升级版本号
+     * 2:UnCheck version  不校验是否和上次代码是否相同,允许提交重复
+     * 3:UnCheck change  不检验本地是否存在未提交修改
+     */
+    var unCheck = 0
 
     override fun start() {
 
@@ -44,7 +54,7 @@ open class ToMavenCheckTask : BaseTask() {
 
         val open = GitUtils.open(File(ProjectManager.codeRootDir, subModule.project.name))
         if (open == null) {
-            Tools.printError(-1,"${subModule.project.name} Git open fail, please check")
+            Tools.printError(-1, "${subModule.project.name} Git open fail, please check")
             return
         }
 
@@ -62,7 +72,7 @@ open class ToMavenCheckTask : BaseTask() {
         val v = VersionManager.getNewerVersion(branch, artifactId, baseVersion)
         val revCommit = loadGitInfo(open, subModule)
         if (revCommit == null) {
-            Tools.printError(-1,"${subModule.name} Can not load git info!!")
+            Tools.printError(-1, "${subModule.name} Can not load git info!!")
             return
         }
         checkLastLog(revCommit, artifactId, branch, baseVersion, v)
@@ -86,7 +96,7 @@ open class ToMavenCheckTask : BaseTask() {
 
     private fun checkGitStatus(git: Git, subModule: SubModule) {
         if (!GitUtils.checkIfClean(git, getRelativePath(subModule.path))) {
-            Tools.printError(-1,"${subModule.name} Git status is not clean, please check your file!!")
+            Tools.println(unCheck - 3, "${subModule.name} Git status is not clean, please check your file!!")
         }
     }
 
@@ -117,31 +127,32 @@ open class ToMavenCheckTask : BaseTask() {
 
         //如果匹配到的版本不是当前分支，则提示升级版本号
         if (matchBranch != branch) {
-            Tools.printError(-1,"$artifactId Not allow user the same base version on new branch , please update before ToMaven!!!")
+            Tools.println(unCheck - 1, "$artifactId Not allow user the same base version on new branch , please update before ToMaven!!!")
+
         }
         val params = UrlUtils.getParams(DpsManager.getPom(matchBranch, artifactId, "$baseVersion.$lastVersion").name)
         val hash = params["hash"] ?: ""
         val commitTime = params["commitTime"]?.toInt() ?: 0
         if (hash == revCommit.name || revCommit.commitTime < commitTime) {
-            Tools.printError(0,"$matchBranch:$artifactId:$baseVersion.$lastVersion The code are not change")//距离上次提交没有变更时,视为成功
+            Tools.println(unCheck - 2, "$matchBranch:$artifactId:$baseVersion.$lastVersion The code are not change")//距离上次提交没有变更时,视为成功
         }
     }
 
 
     private fun checkBaseVersion(baseVersion: String) {
-        if (!TextUtils.isBaseVersion(baseVersion)) Tools.printError(-1,"ToMavenCheckTask $baseVersion is not base version, try x.x etc: 1.0")
+        if (!TextUtils.isBaseVersion(baseVersion)) Tools.printError(-1, "ToMavenCheckTask $baseVersion is not base version, try x.x etc: 1.0")
     }
 
     private fun checkLoseDps(loseList: MutableList<String>) {
         if (loseList.isNotEmpty()) {
-            Tools.printError(-1,"${project.name}  There are some dependency lose!! -> $loseList")
+            Tools.printError(-1, "${project.name}  There are some dependency lose!! -> $loseList")
         }
     }
 
     private fun checkLocalDps(compiles: HashSet<DpComponents>) {
         val map = compiles.filter { it.localCompile }.map { it.moduleName }
         if (map.isNotEmpty()) {
-            Tools.printError(-1,"${project.name} Contain local project, please remove it before upload -> $map")
+            Tools.printError(-1, "${project.name} Contain local project, please remove it before upload -> $map")
         }
     }
 

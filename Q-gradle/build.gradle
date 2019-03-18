@@ -34,7 +34,7 @@ dependencies {
 //    implementation files("../libs/Tools.jar")
     if (localBuild) {
         compileOnly project(":Q-tools")
-        implementation "com.pqixing.gradle:tools:0.6"
+        implementation "com.pqixing.gradle:tools:0.7"
     } else implementation "com.github.pqixing.modularization:Tools:$buildVersion"
     implementation gradleApi()
     implementation localGroovy()

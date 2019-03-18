@@ -96,4 +96,12 @@ public class Config {
      * 打标签时,需要tag的分支
      */
     public String tagBranchs = "";
+    /**
+     * toMaven时,忽略检查项目
+     * 0:UnCheck null
+     * 1:UnCheck branch 不校验新分支第一次提交是否需要升级版本号
+     * 2:UnCheck version  不校验是否和上次代码是否相同,允许提交重复
+     * 3:UnCheck change  不检验本地是否存在未提交修改
+     */
+    public String toMavenUnCheck = "0";
 }
