@@ -39,7 +39,11 @@ open class ToMavenCheckTask : BaseTask() {
     var unCheck = 0
 
     override fun start() {
-
+        try {
+            unCheck = ManagerPlugin.getExtends().config.toMavenUnCheck.toInt()
+        } catch (e: Exception) {
+            Tools.println(e.toString())
+        }
     }
 
     override fun runTask() {
