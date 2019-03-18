@@ -76,7 +76,7 @@ object ProjectManager : OnClear {
                 if (!exists()) FileUtils.writeText(this, "apply plugin: 'com.module.android'\n endConfig()\n ")
             }
             val name = TextUtils.numOrLetter(project.name)
-            val packageName = "${ManagerPlugin.getExtends().groupName.replace(".", "/")}/router/$name"
+            val packageName = "${ManagerPlugin.getExtends().groupName.replace(".", "/")}/auto/router/$name"
             val className = "${TextUtils.firstUp(name)}Paths"
             with(File(moduleDir, "java/$packageName/$className.java")) {
                 if (!exists()) FileUtils.writeText(this, "package ${packageName.replace("/", ".")};\nfinal class $className {}")

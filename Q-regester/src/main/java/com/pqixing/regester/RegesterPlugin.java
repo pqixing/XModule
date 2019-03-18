@@ -10,6 +10,8 @@ import org.gradle.api.Project;
  * 注册注解生成器
  */
 public class RegesterPlugin implements Plugin<Project> {
+//    public static AppExtension android;
+
     @Override
     public void apply(Project project) {
         boolean isApp = project.getPlugins().hasPlugin(AppPlugin.class);

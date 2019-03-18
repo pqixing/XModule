@@ -12,7 +12,6 @@ public class QLaunchManager {
     static {
         loadInvokeClass();
     }
-
     private static void loadInvokeClass() {
     }
 }

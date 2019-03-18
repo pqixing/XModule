@@ -1,6 +1,8 @@
 package com.pqixing.regester.utils;
 
 
+import com.pqixing.regester.RegesterPlugin;
+
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -51,7 +53,7 @@ public class ClassModify extends ClassVisitor {
         return v;
     }
 
-        @Override
+    @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
 //        System.out.println("visitField  -> name = "+name +" desc ="+desc + "value = "+value );
         switch (name) {
@@ -60,6 +62,9 @@ public class ClassModify extends ClassVisitor {
                 break;
             case "buildTime":
                 value = System.currentTimeMillis();
+                break;
+            case "BUILD_CONFIG_NAME":
+//                value = RegesterPlugin.android.getDefaultConfig().getApplicationId() + ".BuildConfig";
                 break;
         }
         return super.visitField(access, name, desc, signature, value);
@@ -127,8 +132,6 @@ class LoadTransformer extends GeneratorAdapter {
         this.activitys = activitys;
         this.likes = likes;
     }
-
-
 
 
     @Override

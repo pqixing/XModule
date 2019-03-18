@@ -23,7 +23,7 @@ uploadArchives {
             }
             pom.groupId = "com.pqixing.android" // 组名
             pom.artifactId = "regester"// 插件名
-            pom.version = "1.1.5" // 版本号
+            pom.version = "1.1.9" // 版本号
         }
     }
 }

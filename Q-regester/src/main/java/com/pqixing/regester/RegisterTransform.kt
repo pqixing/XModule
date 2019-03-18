@@ -54,7 +54,7 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
                                     /**本地工程**/
                                     ) && jar.file.absolutePath.endsWith(".jar")) {
                         handleJar(jar, activitys, applikes)
-                    } else System.out.println("UnHandle jar ->${jar.name}")
+                    }// else System.out.println("UnHandle jar ->${jar.name}")
                     val dest = getDestFile(outputProvider, jar)
                     FileUtils.copyFile(jar.file, dest)
                 }
@@ -81,7 +81,7 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
         val jarOutputStream = JarOutputStream(FileOutputStream(dest))
         val file = JarFile(jarInput.file)
         val enumeration = file.entries()
-        System.out.println("injectCode start ->$activitys \n -> $applikes")
+        System.out.println("injectCode start ->$activitys -> $applikes")
 
         while (enumeration.hasMoreElements()) {
             val jarEntry = enumeration.nextElement()

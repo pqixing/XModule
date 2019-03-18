@@ -45,7 +45,7 @@ object GradleUtils {
         val option = StringBuilder()
         env.forEach {
             if (it.key.isEmpty() || it.value.isEmpty()) return@forEach
-            option.append("-D${it.key}=${it.value} ")
+            option.append("-D${it.key}='${it.value}' ")
         }
         return option.toString()
     }

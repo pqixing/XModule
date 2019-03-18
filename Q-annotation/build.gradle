@@ -12,7 +12,7 @@ uploadArchives {
             }
             pom.groupId = "com.pqixing.android" // 组名
             pom.artifactId = "annotation"// 插件名
-            pom.version = "1.2" // 版本号
+            pom.version = "1.5" // 版本号
         }
     }
 }
