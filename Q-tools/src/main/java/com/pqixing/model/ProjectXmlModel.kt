@@ -29,17 +29,19 @@ data class ProjectModel(val name: String, val introduce: String, val url: String
         if (sm.type == SubModuleType.TYPE_LIBRARY_API) {
             sm.type = SubModuleType.TYPE_LIBRARY
             val api = SubModule(sm.project, "${sm.name}_api", sm.introduce, "${sm.path}/src/api", SubModuleType.TYPE_LIBRARY_API)
+            api.parent = sm
+            sm.child = api
             submodules.add(api)
         }
     }
 }
 
 data class SubModule(val project: ProjectModel, val name: String, val introduce: String, val path: String, var type: String = SubModuleType.TYPE_LIBRARY) {
+    var parent:SubModule?=null
+    var child:SubModule?=null
     fun getBranch() = project.branch
-    fun findApi(): SubModule? {
-        if (api == null) api = project.submodules.find { it.name == "${name}_api" }
-        return api
-    }
+    fun findApi()=child
+    fun findParent()=parent
 
     fun isApiModule() = type == SubModuleType.TYPE_LIBRARY_API
     private var api: SubModule? = null

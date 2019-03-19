@@ -29,8 +29,9 @@ class Script {
                 if (childens.size() > 0) childens.each { Node s ->
                     String s_name = s.@name
                     String s_type = s.@type
-                    if (includes.find { it == s_name } != null) addIncludeProject(setting, s_name, new File(rootDir, "$codeRoot/$name/$s_name"), s_type)
-                } else if (includes.find { it == name } != null) addIncludeProject(setting, name, new File(rootDir, "$codeRoot/$name"), type)
+                    
+                    if (includes.find { it == s_name||it=="${s_name}_api" } != null) addIncludeProject(setting, s_name, new File(rootDir, "$codeRoot/$name/$s_name"), s_type)
+                } else if (includes.find { it == name||it=="${name}_api" } != null) addIncludeProject(setting, name, new File(rootDir, "$codeRoot/$name"), type)
             }
         }
     }

@@ -18,20 +18,29 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
      * 上传到Maven的版本
      */
     var toMavenVersion = ""
-        get() {
+        get() = if (subModule.isApiModule()) {
+            val n = subModule.parent!!.name
+            val dpsExt = AndroidPlugin.getPluginByProject(plugin.project.rootProject.findProject(n)!!).dpsManager.dpsExt
+            dpsExt.toMavenVersion
+        } else {
             if (field.isEmpty()) {
                 field = ManagerPlugin.getExtends().baseVersion
             }
-            return field
+            field
         }
     /**
      * 上传到Maven的描述
      */
     var toMavenDesc = ""
-        get() {
+        get() = if (subModule.isApiModule()) {
+            val n = subModule.parent!!.name
+            val dpsExt = AndroidPlugin.getPluginByProject(plugin.project.rootProject.findProject(n)!!).dpsManager.dpsExt
+            dpsExt.toMavenDesc
+        } else {
             val desc = TextUtils.getSystemEnv("toMavenDesc")
-            return if (desc?.isNotEmpty() == true) desc else field
+            if (desc?.isNotEmpty() == true) desc else field
         }
+
 
     private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null) {
         val inner = DpComponents(project)
