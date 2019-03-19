@@ -19,6 +19,7 @@ import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.NewImportDialog
 import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.model.ProjectXmlModel
+import com.pqixing.model.SubModuleType
 import com.pqixing.tools.FileUtils
 import groovy.lang.GroovyClassLoader
 import java.io.File
@@ -44,7 +45,7 @@ class ImportAction : AnAction() {
         val dependentModel = clazz.getField("dependentModel").get(newInstance).toString()
 
         val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
-        val infoMaps = projectXml.allSubModules().map { Pair(it.name, JListInfo(it.name, it.introduce)) }.toMap(mutableMapOf())
+        val infoMaps = projectXml.allSubModules().filter { it.type!=SubModuleType.TYPE_LIBRARY_API }.map { Pair(it.name, JListInfo(it.name, it.introduce)) }.toMap(mutableMapOf())
         val repo = GitHelper.getRepo(File(basePath, "templet"), project)
         val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
         val localBranch = repo.currentBranchName ?: "master"
