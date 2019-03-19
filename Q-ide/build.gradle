@@ -8,6 +8,11 @@ intellij {
     plugins = ['android','git4idea']
     updateSinceUntilBuild false
 }
+publishPlugin {
+    username 'pqixing86'
+    password 'xing63755'
+    channels 'nightly'
+}
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

@@ -12,7 +12,12 @@ dependencies {
     implementation gradleApi()
     implementation localGroovy()
 }
-
+if (!localBuild) {
+    ext.mVersion = "1.0"
+    ext.mArtifactId = "regester"
+    apply from: '../script/bintray.gradle'
+    return
+}
 apply plugin: 'maven'
 // 上传到本地代码库
 uploadArchives {

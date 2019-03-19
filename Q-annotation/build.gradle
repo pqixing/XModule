@@ -2,6 +2,13 @@ apply plugin: 'java'
 apply plugin: "maven"
 dependencies {
 }
+if (!localBuild) {
+    ext.mVersion = "2.0"
+    ext.publishedGroupId = "com.pqixing.android"
+    ext.mArtifactId = "annotation"
+    apply from: '../script/bintray.gradle'
+    return
+}
 apply plugin: 'maven'
 // 上传到本地代码库
 uploadArchives {

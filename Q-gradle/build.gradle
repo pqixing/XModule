@@ -7,10 +7,11 @@ sourceSets {
     test.java.srcDirs += "src/groovy"
 }
 repositories {
-    mavenCentral()
-    jcenter()
-    google()
+//    mavenCentral()
+//    jcenter()
+//    google()
     if (localBuild) maven { url localMavenUri }
+    else maven { url  "https://dl.bintray.com/pqixing86/modularization"}
 }
 compileKotlin {
     kotlinOptions {
@@ -35,7 +36,7 @@ dependencies {
     if (localBuild) {
         compileOnly project(":Q-tools")
         implementation "com.pqixing.gradle:tools:0.9.1"
-    } else implementation "com.github.pqixing.modularization:Tools:$buildVersion"
+    } else implementation "com.pqixing.gradle:tools:0.5"
     implementation gradleApi()
     implementation localGroovy()
     implementation "com.alibaba:fastjson:1.2.44"
@@ -55,8 +56,9 @@ afterEvaluate {
 }
 
 if (!localBuild) {
-    apply from: '../install.gradle'
-    apply from: '../bintray.gradle'
+    ext.mVersion = "1.0"
+    ext.mArtifactId = "modularization"
+    apply from: '../script/bintray.gradle'
     return
 }
 apply plugin: 'maven'

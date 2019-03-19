@@ -6,9 +6,6 @@ dependencies {
     compileOnly localGroovy()
     testImplementation 'junit:junit:4.12'
 }
-repositories {
-    mavenCentral()
-}
 
 ext.mainDir = new File(projectDir, "src/main")
 ext.resourceDir = new File(mainDir, "resources/com/pqixing")
@@ -51,9 +48,11 @@ def writeFile(String txt, File out) {
 }
 
 if (!localBuild) {
-    apply from: '../install.gradle'
-    apply from: '../bintray.gradle'
-    return 
+    ext.mVersion = "0.5"
+//ext.publishedGroupId = "0.3"
+    ext.mArtifactId = "tools"
+    apply from: '../script/bintray.gradle'
+    return
 }
 apply plugin: 'maven'
 // 上传到本地代码库

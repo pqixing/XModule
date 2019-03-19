@@ -1,9 +1,9 @@
 // backup of [https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle]
-
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
-version = libraryVersion
-
+version = mVersion
 if (project.hasProperty("android")) { // Android libraries
     task sourcesJar(type: Jar) {
         classifier = 'sources'
@@ -34,28 +34,35 @@ artifacts {
 // Bintray
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
+publishing {
+    publications {
+        qixing(MavenPublication) {
+            from components.java
+            groupId publishedGroupId
+            artifactId mArtifactId
+            version mVersion
+        }
+    }
+}
 
 bintray {
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.apikey")
 
     configurations = ['archives']
+    publications = ['qixing']
     pkg {
         repo = bintrayRepo
-        name = bintrayName
-        desc = libraryDescription
+        name = developerId
+        desc = mArtifactId
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = allLicenses
         publish = true
         publicDownloadNumbers = true
         version {
-            desc = libraryDescription
-            gpg {
-                sign = true //Determines whether to GPG sign the files. The default is false
-                passphrase = properties.getProperty("bintray.gpg.password")
-                //Optional. The passphrase for GPG signing'
-            }
+            desc = "$mArtifactId for modularization"
+            name = mVersion
         }
     }
 }
