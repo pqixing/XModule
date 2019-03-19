@@ -47,24 +47,7 @@ def writeFile(String txt, File out) {
     writer.close()
 }
 
-if (!localBuild) {
-    ext.mVersion = "0.5"
-//ext.publishedGroupId = "0.3"
-    ext.mArtifactId = "tools"
-    apply from: '../script/bintray.gradle'
-    return
-}
-apply plugin: 'maven'
-// 上传到本地代码库
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: localMavenUri){
-                authentication(userName: "admin", password: "admin123")
-            }
-            pom.groupId = "com.pqixing.gradle" // 组名
-            pom.artifactId = "tools"// 插件名
-            pom.version = "0.9.1" // 版本号
-        }
-    }
-}
+ext.mVersion = "1.0"
+ext.mLocalVersion = "0.6"
+ext.mArtifactId = "tools"
+apply from: '../script/bintray.gradle'

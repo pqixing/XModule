@@ -1,3 +1,20 @@
+if (localBuild) {
+    apply plugin: 'maven'
+// 上传到本地代码库
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository(url: localMavenUri) {
+                    authentication(userName: "admin", password: "admin123")
+                }
+                pom.groupId = publishedGroupId // 组名
+                pom.artifactId = mArtifactId// 插件名
+                pom.version = mLocalVersion // 版本号
+            }
+        }
+    }
+    return
+}
 // backup of [https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle]
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven'

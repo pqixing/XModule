@@ -12,23 +12,7 @@ dependencies {
     implementation gradleApi()
     implementation localGroovy()
 }
-if (!localBuild) {
-    ext.mVersion = "1.0"
-    ext.mArtifactId = "regester"
-    apply from: '../script/bintray.gradle'
-    return
-}
-apply plugin: 'maven'
-// 上传到本地代码库
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "http://192.168.3.7:9527/nexus/content/repositories/releases/"){
-                authentication(userName: "admin", password: "admin123")
-            }
-            pom.groupId = "com.pqixing.android" // 组名
-            pom.artifactId = "regester"// 插件名
-            pom.version = "1.1.9" // 版本号
-        }
-    }
-}
+ext.mVersion = "1.0"
+ext.mLocalVersion = "1.6"
+ext.mArtifactId = "regester"
+apply from: '../script/bintray.gradle'

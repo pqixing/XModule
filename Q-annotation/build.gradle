@@ -1,25 +1,7 @@
 apply plugin: 'java'
-apply plugin: "maven"
-dependencies {
-}
-if (!localBuild) {
-    ext.mVersion = "2.0"
-    ext.publishedGroupId = "com.pqixing.android"
-    ext.mArtifactId = "annotation"
-    apply from: '../script/bintray.gradle'
-    return
-}
-apply plugin: 'maven'
-// 上传到本地代码库
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "http://192.168.3.7:9527/nexus/content/repositories/releases/"){
-                authentication(userName: "admin", password: "admin123")
-            }
-            pom.groupId = "com.pqixing.android" // 组名
-            pom.artifactId = "annotation"// 插件名
-            pom.version = "1.5" // 版本号
-        }
-    }
-}
+
+ext.mVersion = "2.0"
+ext.mLocalVersion = "1.5"
+ext.publishedGroupId = "com.pqixing.android"
+ext.mArtifactId = "annotation"
+apply from: '../script/bintray.gradle'
