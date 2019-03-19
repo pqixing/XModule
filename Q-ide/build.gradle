@@ -1,0 +1,25 @@
+
+apply plugin: "org.jetbrains.intellij"
+apply plugin: 'java'
+apply plugin: 'kotlin'
+intellij {
+    pluginName 'Modularization'
+    version 'IC-2018.3'
+    plugins = ['android','git4idea']
+    updateSinceUntilBuild false
+}
+publishPlugin {
+
+// Bintray
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+    username properties.getProperty("jetbrains.user")
+    password properties.getProperty("jetbrains.psw")
+    channels 'nightly'
+}
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    compile project(":Q-tools")
+}
