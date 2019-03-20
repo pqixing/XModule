@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 ext.mVersion = "2.0"
-ext.mLocalVersion = "1.5"
+ext.mLocalVersion = "1.8.2"
 ext.publishedGroupId = "com.pqixing.android"
 ext.mArtifactId = "annotation"
 apply from: '../script/bintray.gradle'

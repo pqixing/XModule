@@ -1,19 +1,17 @@
 package com.pqixing.regester.utils;
 
 
-import com.pqixing.regester.RegesterPlugin;
-
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 
@@ -23,9 +21,10 @@ import java.util.Set;
 public class ClassModify extends ClassVisitor {
     Set<String> activitys;
     Set<String> likes;
+    List<String> buildConfigClass;
     String pkg;
 
-    public static byte[] transform(byte[] b, String pkg, Set<String> activitys, Set<String> likes) {
+    public static byte[] transform(byte[] b, String pkg, Set<String> activitys, Set<String> likes, List<String> buildConfigClass) {
         final ClassReader classReader = new ClassReader(b);
         final ClassWriter cw = new ClassWriter(classReader,
                 ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
@@ -33,6 +32,7 @@ public class ClassModify extends ClassVisitor {
         modify.pkg = pkg;
         modify.activitys = activitys;
         modify.likes = likes;
+        modify.buildConfigClass = buildConfigClass;
         classReader.accept(modify, ClassReader.EXPAND_FRAMES);
 //        System.out.println("Start transform ->  ");
         return cw.toByteArray();
@@ -49,7 +49,7 @@ public class ClassModify extends ClassVisitor {
 
         MethodVisitor v = super.visitMethod(access, name, desc, signature, exceptions);
         if (name.equals("loadInvokeClass"))
-            v = new LoadTransformer(v, access, name, desc, pkg, activitys, likes);
+            v = new LoadTransformer(v, access, name, desc, pkg, activitys, likes, buildConfigClass);
         return v;
     }
 
@@ -124,13 +124,15 @@ public class ClassModify extends ClassVisitor {
 class LoadTransformer extends GeneratorAdapter {
     Set<String> activitys;
     Set<String> likes;
+    String buildConfigClass;
     String pkg;
 
-    LoadTransformer(MethodVisitor delegate, int access, String name, String desc, String pkg, Set<String> activitys, Set<String> likes) {
+    LoadTransformer(MethodVisitor delegate, int access, String name, String desc, String pkg, Set<String> activitys, Set<String> likes, List<String> buildConfigClass) {
         super(Opcodes.ASM5, delegate, access, name, desc);
         this.pkg = pkg;
         this.activitys = activitys;
         this.likes = likes;
+        this.buildConfigClass = buildConfigClass.size() > 0 ? buildConfigClass.get(0) : "";
     }
 
 
@@ -142,6 +144,16 @@ class LoadTransformer extends GeneratorAdapter {
 //            super.visitLdcInsn(DateFormat.getDateTimeInstance().format(new Date()));
 //            super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/pqixing/annotation/ObjectSet", "setO", "(Ljava/lang/Object;)"+ Type.VOID_TYPE, false);
 //            super.visitInsn(Opcodes.POP);
+            super.visitFieldInsn(Opcodes.GETSTATIC, pkg, "infos", "Ljava/util/ArrayList;");
+            super.visitLdcInsn(DateFormat.getDateTimeInstance().format(new Date()));
+            super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/util/ArrayList", "add", "(Ljava/lang/Object;)" + org.objectweb.asm.Type.BOOLEAN_TYPE, false);
+            super.visitInsn(Opcodes.POP);
+
+            super.visitFieldInsn(Opcodes.GETSTATIC, pkg, "infos", "Ljava/util/ArrayList;");
+            super.visitLdcInsn(buildConfigClass);
+            super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/util/ArrayList", "add", "(Ljava/lang/Object;)" + org.objectweb.asm.Type.BOOLEAN_TYPE, false);
+            super.visitInsn(Opcodes.POP);
+
 
             for (String key : activitys) {
                 super.visitFieldInsn(Opcodes.GETSTATIC, pkg, "activitys", "Ljava/util/HashSet;");

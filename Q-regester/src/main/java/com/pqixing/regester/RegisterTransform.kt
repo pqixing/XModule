@@ -4,7 +4,6 @@ import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
 import com.pqixing.regester.utils.ClassModify
-import groovyjarjarantlr.build.ANTLR.jarName
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.IOUtils
 import org.objectweb.asm.ClassReader
@@ -37,10 +36,11 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
         val outputProvider = transformInvocation.outputProvider;
         val activitys = mutableSetOf<String>()
         val applikes = mutableSetOf<String>()
+        val buildConfigClass = mutableListOf<String>();
         var targetInjectJar: JarInput? = null
         transformInvocation.inputs.forEach { input ->
             input.directoryInputs.forEach { dir ->
-                handleDir(dir.file, activitys, applikes)
+                handleDir(dir.file, activitys, applikes,buildConfigClass)
                 //生成输出路径
                 val dest = outputProvider.getContentLocation(dir.name, dir.contentTypes, dir.scopes, Format.DIRECTORY)
                 FileUtils.copyDirectory(dir.file, dest)
@@ -60,7 +60,7 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
                 }
             }
         }
-        injectCode(targetInjectJar, outputProvider, activitys, applikes)
+        injectCode(targetInjectJar, outputProvider, activitys, applikes,buildConfigClass)
         System.out.println("$name transform end , count -> ${System.currentTimeMillis() - start}")
     }
 
@@ -74,7 +74,7 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
         return outputProvider.getContentLocation(jarName + md5Name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
     }
 
-    private fun injectCode(jarInput: JarInput?, outputProvider: TransformOutputProvider, activitys: MutableSet<String>, applikes: MutableSet<String>) {
+    private fun injectCode(jarInput: JarInput?, outputProvider: TransformOutputProvider, activitys: MutableSet<String>, applikes: MutableSet<String>, buildConfigClass: MutableList<String>) {
         jarInput ?: return
         //生成输出路径
         val dest = getDestFile(outputProvider, jarInput)
@@ -90,7 +90,7 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
             val stream = file.getInputStream(ZipEntry(entryName))
             val sourceClassBytes = IOUtils.toByteArray(stream)
             if (entryName == "com/pqixing/annotation/QLaunchManager.class") {
-                val bytes = ClassModify.transform(sourceClassBytes, "com/pqixing/annotation/QLaunchManager", activitys, applikes)
+                val bytes = ClassModify.transform(sourceClassBytes, "com/pqixing/annotation/QLaunchManager", activitys, applikes,buildConfigClass)
                 jarOutputStream.write(bytes)
             } else jarOutputStream.write(sourceClassBytes)
             stream.close()
@@ -102,12 +102,13 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
 
     }
 
-    private fun handleDir(dir: File, activitys: MutableSet<String>, applikes: MutableSet<String>) {
+    private fun handleDir(dir: File, activitys: MutableSet<String>, applikes: MutableSet<String>, buildConfigClass: MutableList<String>) {
         dir.listFiles().forEach { f ->
-            if (f.isDirectory) handleDir(f, activitys, applikes)
+            if (f.isDirectory) handleDir(f, activitys, applikes, buildConfigClass)
             else if (f.isFile && f.name.endsWith(".class") && !f.absolutePath.contains("$")) {
                 val path = f.absolutePath
-                val className = path.substring(path.indexOf("/classes/") + 10, path.length - 6)
+                val className = path.substring(path.indexOf("/classes/") + 9, path.length - 6)
+                if(className.endsWith("/BuildConfig")) buildConfigClass.add(className.replace("/","."))
                 checkStream(f.inputStream(), className, activitys, applikes);
             }
         }

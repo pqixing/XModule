@@ -23,7 +23,7 @@ buildscript {
 
 ext.localMavenUri = "http://192.168.3.7:9527/nexus/content/repositories/AndroidDev/"
 //本地Maven调试
-ext.localBuild = false
+ext.localBuild = true
 group = "com.pqixing.gradle"
 
 allprojects {
