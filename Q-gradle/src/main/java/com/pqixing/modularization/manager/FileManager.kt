@@ -82,9 +82,12 @@ object FileManager : OnClear {
 //            GitUtils.addAndPush(docGit, ".", "add file $i", true)
 //        }
         GitUtils.close(docGit)
-
         //更新编译相关文件
-        if (extends.config.syncBuildFile) {
+        trySyncFile(extends)
+    }
+
+    fun trySyncFile(extends: ManagerExtends) {
+        if (extends.config.syncBuildFile&&GitUtils.isGitDir(templetRoot)) {
             FileUtils.writeText(File(rootDir, "build.gradle"), File(rootDir, "templet/build.gradle").readText(), true)
             FileUtils.writeText(File(rootDir, "gradle.properties"), File(rootDir, "templet/gradle.properties").readText(), true)
             FileUtils.writeText(File(rootDir, "gradle/wrapper/gradle-wrapper.properties"), File(rootDir, "templet/gradle-wrapper.properties").readText(), true)

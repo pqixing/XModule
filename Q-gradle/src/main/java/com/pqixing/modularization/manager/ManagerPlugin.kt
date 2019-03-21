@@ -53,6 +53,7 @@ open class ManagerPlugin : BasePlugin() {
 
         FileManager.checkFileExist(this)
 
+        FileManager.trySyncFile(getExtends())
         project.afterEvaluate {
             val extends = getExtends(ManagerExtends::class.java)
             extHelper.setExtValue(project, "groupName", extends.groupName)
