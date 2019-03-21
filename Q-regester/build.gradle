@@ -13,6 +13,6 @@ dependencies {
     implementation localGroovy()
 }
 ext.mVersion = "1.0"
-ext.mLocalVersion = "1.8.4"
+ext.mLocalVersion = "1.0.0"
 ext.mArtifactId = "regester"
 apply from: '../script/bintray.gradle'
