@@ -6,7 +6,10 @@ import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.interfaces.OnClear
-import com.pqixing.modularization.manager.*
+import com.pqixing.modularization.manager.ExceptionManager
+import com.pqixing.modularization.manager.FileManager
+import com.pqixing.modularization.manager.ManagerExtends
+import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.PropertiesUtils
@@ -16,7 +19,7 @@ import org.eclipse.jgit.api.Git
 import java.io.File
 import java.net.URL
 import java.util.*
-import java.util.Collections.emptyList
+import java.util.regex.Pattern
 import kotlin.Comparator
 
 object VersionManager : OnClear {
@@ -276,9 +279,7 @@ object VersionManager : OnClear {
         info.tagBranchs.split(",").forEach { if (it.isNotEmpty() && !fallbacks.contains(it)) fallbacks.add(it) }
 
         val matchKeys = fallbacks.map { "$groupName.$it." }
-
         val tagVersions = curVersions.filter { c -> matchKeys.any { f -> c.key.startsWith(f) } }
-
 
         val branchFile = File(repoGitDir, "versions/version_${info.taskBranch}.properties")
         PropertiesUtils.writeProperties(branchFile, tagVersions.toProperties())
@@ -309,38 +310,43 @@ object VersionManager : OnClear {
         GitUtils.pull(git)
 
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
-
         GitUtils.addAndPush(git, ".", "indexVersionFromNet ${Date().toLocaleString()}", true)
         GitUtils.close(git)
+    }
+
+    /**
+     *
+     */
+    fun readNetUrl(url: String) = try {
+        URL(url).readText()
+    } catch (e: Exception) {
+        ""
+    }
+
+    fun getFullUrl(url: String, baseUrl: String): String {
+        if (url.startsWith("http:")) return url
+        if (baseUrl.endsWith("/")) return "$baseUrl$url"
+        return "$baseUrl/$url"
     }
 
     /**
      * 解析maven仓库，爬取当前group的所有版本
      */
     fun parseNetVersions(baseUrl: String, versions: HashMap<String, String>, groupName: String) {
-        val prefix = "<a href=\""
-        val r = Regex(".*?$prefix$baseUrl.*?</a>")
-
-        val lines = try {
-            URL(baseUrl).readText().lines()
-        } catch (e: Exception) {
-            Tools.println("parseNetVersions Exception -> $e")
-            emptyList<String>()
+        var matcher = Pattern.compile("<a href=.*?>maven-metadata.xml</a>").matcher(readNetUrl(baseUrl))
+        if (matcher.find()) {
+            val group = matcher.group()
+            val meteUrl = group.substring(group.indexOf('"') + 1, group.lastIndexOf('"'))
+            val meta = XmlHelper.parseMetadata(readNetUrl(getFullUrl(meteUrl, baseUrl)))
+            addVersion(versions, meta.groupId.trim(), meta.artifactId.trim(), meta.versions)
+            return
         }
-        kotlin.run outer@{
-            lines.forEach { line ->
-                if (line.trim().matches(r)) {
-                    val start = line.indexOf(prefix) + prefix.length
-                    val url = line.substring(start, line.indexOf("\">", start))
-                    if (url.endsWith(FileNames.MAVEN_METADATA)) {
-                        val meta = XmlHelper.parseMetadata(URL(url).readText())
-                        addVersion(versions, meta.groupId.trim(), meta.artifactId.trim(), meta.versions)
-                        return@outer
-                    } else {
-                        parseNetVersions(url, versions, groupName)
-                    }
-                }
-            }
+        //查找相关路径的,爬
+        matcher = Pattern.compile("<a href=.*?</a>").matcher(readNetUrl(baseUrl))
+        while (matcher.find()) {
+            val group = matcher.group()
+            val url = getFullUrl(group.substring(group.indexOf('"') + 1, group.lastIndexOf('"')), baseUrl)
+            if (url.startsWith(baseUrl)) parseNetVersions(url, versions, groupName)
         }
     }
 }

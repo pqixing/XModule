@@ -48,6 +48,11 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
      * 上传组件的Maven地址，下载地址请到Doc目录的Manger目录进行配置
      */
     var groupMaven = ""
+    /**
+     * 用来解析groupMaven版本号的信息,默认与groupMaven相同
+     */
+    var groupMavenView=""
+        get() = if(field.isEmpty()) groupMaven else field
 
     /**
      * 添加依赖地址，如果为空，默认使用groupMaven
