@@ -40,7 +40,7 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
         var targetInjectJar: JarInput? = null
         transformInvocation.inputs.forEach { input ->
             input.directoryInputs.forEach { dir ->
-                handleDir(dir.file, activitys, applikes,buildConfigClass)
+                handleDir(dir.file.absolutePath.length+1,dir.file, activitys, applikes,buildConfigClass)
                 //生成输出路径
                 val dest = outputProvider.getContentLocation(dir.name, dir.contentTypes, dir.scopes, Format.DIRECTORY)
                 FileUtils.copyDirectory(dir.file, dest)
@@ -102,12 +102,13 @@ class RegisterTransform(val filters: Set<String>) : Transform() {
 
     }
 
-    private fun handleDir(dir: File, activitys: MutableSet<String>, applikes: MutableSet<String>, buildConfigClass: MutableList<String>) {
+    private fun handleDir(classStart: Int,dir: File, activitys: MutableSet<String>, applikes: MutableSet<String>, buildConfigClass: MutableList<String>) {
+
         dir.listFiles().forEach { f ->
-            if (f.isDirectory) handleDir(f, activitys, applikes, buildConfigClass)
+            if (f.isDirectory) handleDir(classStart,f, activitys, applikes, buildConfigClass)
             else if (f.isFile && f.name.endsWith(".class") && !f.absolutePath.contains("$")) {
                 val path = f.absolutePath
-                val className = path.substring(path.indexOf("/classes/") + 9, path.length - 6)
+                val className = path.substring(classStart, path.length - 6)
                 if(className.endsWith("/BuildConfig")) buildConfigClass.add(className.replace("/","."))
                 checkStream(f.inputStream(), className, activitys, applikes);
             }

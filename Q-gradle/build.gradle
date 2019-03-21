@@ -29,7 +29,7 @@ repositories {
         dirs "libs"
     }
 }
-ext.mLocalVersion = "1.0.1"
+ext.mLocalVersion = "1.0.5"
 ext.mVersion = "1.0"
 ext.mArtifactId = "modularization"
 apply from: '../script/bintray.gradle'
@@ -48,7 +48,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation 'org.eclipse.jgit:org.eclipse.jgit:+'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
-    implementation 'com.android.tools.build:gradle:3.3.2'
+    implementation 'com.android.tools.build:gradle:2.3.0'
 }
 
 

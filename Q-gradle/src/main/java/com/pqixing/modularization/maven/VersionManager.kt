@@ -195,7 +195,7 @@ object VersionManager : OnClear {
      */
     private fun prepareVersions() {
         val extends = ManagerPlugin.getExtends()
-        val vBranch = "_version"
+        val vBranch = "_v2"
         val git = GitUtils.open(repoGitDir)?.apply { GitUtils.pull(this) }
                 ?: GitUtils.clone(extends.docRepoUrl, repoGitDir, vBranch)
         if (git == null) {
@@ -204,7 +204,7 @@ object VersionManager : OnClear {
         }
         if (!GitUtils.checkoutBranch(git, vBranch, true)) {
             if (!GitUtils.createBranch(git, vBranch)) {
-                ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "can checkout to branch : _version")
+                ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "can checkout to branch : $vBranch")
             }
         }
         repoLastCommit = git.log().setMaxCount(1).call().firstOrNull()?.commitTime
@@ -297,12 +297,12 @@ object VersionManager : OnClear {
         if (!GitUtils.isGitDir(repoGitDir)) prepareVersions()
         val plugin = ManagerPlugin.getPlugin()
         val extends = plugin.getExtends(ManagerExtends::class.java)
-        val maven = extends.groupMaven
+        val maven = extends.groupMavenView
         val groupUrl = extends.groupName.replace(".", "/")
         Tools.println("parseNetVersions  start ->")
         val start = System.currentTimeMillis()
         versions.clear()
-        parseNetVersions("$maven/$groupUrl", versions, extends.groupName)
+        parseNetVersions(getFullUrl(groupUrl,maven), versions, extends.groupName)
         Tools.println("parseNetVersions  end -> ${System.currentTimeMillis() - start} ms")
         versions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
         //上传版本好到服务端

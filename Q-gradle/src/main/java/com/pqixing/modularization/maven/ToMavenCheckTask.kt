@@ -132,13 +132,13 @@ open class ToMavenCheckTask : BaseTask() {
         //如果匹配到的版本不是当前分支，则提示升级版本号
         if (matchBranch != branch) {
             Tools.println(unCheck - 1, "$artifactId Not allow user the same base version on new branch , please update before ToMaven!!!")
-
         }
         val params = UrlUtils.getParams(DpsManager.getPom(matchBranch, artifactId, "$baseVersion.$lastVersion").name)
         val hash = params["hash"] ?: ""
         val commitTime = params["commitTime"]?.toInt() ?: 0
         if (hash == revCommit.name || revCommit.commitTime < commitTime) {
-            Tools.println(unCheck - 2, "$matchBranch:$artifactId:$baseVersion.$lastVersion The code are not change")//距离上次提交没有变更时,视为成功
+            //距离上次提交没有变更时,视为成功
+            ResultUtils.writeResult("$matchBranch:$artifactId:$baseVersion.$lastVersion The code are not change", 0, unCheck < 2)
         }
     }
 
