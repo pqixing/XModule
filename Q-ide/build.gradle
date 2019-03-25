@@ -16,7 +16,8 @@ publishPlugin {
 
     username properties.getProperty("jetbrains.user")
     password properties.getProperty("jetbrains.psw")
-    channels 'nightly'
+//    channels 'nightly'
+    channels 'stable'
 }
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])

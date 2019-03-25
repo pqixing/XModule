@@ -1,4 +1,14 @@
-##  Gradle组件化gradle插件 -- modularization 2。0
+##  组件化管理系统
+gradle插件
+> com.module.android 　　
+
+![ide插件](https://plugins.jetbrains.com/plugin/12121-modularization)
+
+
+launch注解使用
+
+
+
 ### 零. 插件使用说明   
 随着项目的庞大，组件化开发变的非常有必要，在业务节藕拆分之外，为了实现代码的拆分隔离，多git的代码更加方便管理，modularization插件应声而生,其中包含gradle插件，注解插件，intelij 搭配使用   
 >  自动导入和管理开发代码   ![gif](imgs/importcode.gif)   
