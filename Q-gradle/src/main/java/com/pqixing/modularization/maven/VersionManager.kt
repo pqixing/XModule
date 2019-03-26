@@ -144,6 +144,10 @@ object VersionManager : OnClear {
         return branchVersion[branch] ?: readBranchVersion(branch)
     }
 
+    private fun getBranchVersionName(branch: String):String{
+        val of = branch.lastIndexOf("/");
+       return "versions/version_${branch.substring(of+1)}.properties"
+    }
     /**
      * 读取某个分支指定的配置文件
      */
@@ -152,7 +156,7 @@ object VersionManager : OnClear {
         branchVersion[branch] = branchMap
         //将基础版本放入
         branchMap.putAll(curVersions)
-        val branchFile = File(repoGitDir, "versions/version_$branch.properties")
+        val branchFile = File(repoGitDir, getBranchVersionName(branch))
         PropertiesUtils.readProperties(branchFile).forEach {
             branchMap[it.key.toString()] = it.value.toString()
         }
@@ -281,7 +285,7 @@ object VersionManager : OnClear {
         val matchKeys = fallbacks.map { "$groupName.$it." }
         val tagVersions = curVersions.filter { c -> matchKeys.any { f -> c.key.startsWith(f) } }
 
-        val branchFile = File(repoGitDir, "versions/version_${info.taskBranch}.properties")
+        val branchFile = File(repoGitDir, getBranchVersionName(taskBranch))
         PropertiesUtils.writeProperties(branchFile, tagVersions.toProperties())
         ResultUtils.writeResult(branchFile.absolutePath)
         val git = Git.open(repoGitDir)

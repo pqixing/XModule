@@ -34,7 +34,7 @@ open class AndroidPlugin : BasePlugin() {
 
         if (!isApp) project.apply(mapOf<String, String>("plugin" to "maven"))
         //如果是Library模块运行，设置ApplicationId
-        if (buildAsApp && !isApp) extHelper.setApplicationId(project, "${ManagerPlugin.getExtends().docRepoBranch}.${project.name}")
+        if (buildAsApp && !isApp) extHelper.setApplicationId(project, "com.${TextUtils.numOrLetter(ManagerPlugin.getExtends().docRepoBranch)}.${TextUtils.numOrLetter(project.name)}".toLowerCase())
     }
 
     /**
