@@ -2,7 +2,7 @@
 gradle插件
 > com.module.android 　　
 
-![ide插件](https://plugins.jetbrains.com/plugin/12121-modularization)
+[ide插件](https://plugins.jetbrains.com/plugin/12121-modularization)
 
 
 launch注解使用
