@@ -70,6 +70,8 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
         dialog.jlTips.text = "Click item to resolve conflict or list files;"
         dialog.pOpertator.isVisible = false
         dialog.buttonOK.text = "Commit"
+        dialog.buttonOK.isVisible = false
+        dialog.buttonCancel.isVisible = false
         dialog.adapter.boxVisible = false
         dialog.adapter.selectListener = this
         dialog.jlBranch.text = dialog.jlBranch.text
@@ -78,11 +80,16 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
 
     override fun updateItemLog(info: JListInfo, operatorCmd: String, cacheLog: String?) {
         val repo = getRepo(info.title) ?: return
-        val branchs = "${repo.currentBranchName}:${repo.state.toString().toLowerCase()}"
         val unMergeCount = GitHelper.getUnmergedFiles(repo).size
-        //如果有冲突，编辑黄色
-        info.staue = if (unMergeCount > 0) 3 else 0
-        info.log = "${(GitHelper.state(project, repo)?.size ?: -1)}; ${unMergeCount};$branchs"
+        val unClean = GitHelper.state(project, repo)?.size ?: 0
+        if (unClean + unMergeCount == 0) {
+            info.staue = 1
+            info.log = "${repo.currentBranchName}:clear"
+        } else {
+            //如果有冲突，编辑黄色
+            info.staue = if (unMergeCount > 0) 3 else 0
+            info.log = "Conflict:$unMergeCount,Change:$unClean"
+        }
     }
 
     override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> {
@@ -106,10 +113,10 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
         return true
     }
 
-    override fun onOkData(allDatas: MutableList<JListInfo>): List<JListInfo> =allDatas
+    override fun onOkData(allDatas: MutableList<JListInfo>): List<JListInfo> = allDatas
 
     override fun onOtherOk(cmd: String, dialog: GitOperatorDialog, targetBranch: String, r: JListInfo, project: Project) {
-        val repo = getRepo(r.title)?:return;
+        val repo = getRepo(r.title) ?: return;
         r.log = GitHelper.addAndCommit(project, repo, commitMsg, dialog.gitListener)
         r.staue = if (r.log == "Success") 1 else 3
     }

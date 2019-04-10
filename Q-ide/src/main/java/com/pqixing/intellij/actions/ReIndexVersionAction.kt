@@ -19,13 +19,13 @@ class ReIndexVersionAction : AnAction() {
 //        val file = File(rootRepoPath);
 //        val gitRoot = GitUtil.isGitRoot(file)
 //        Messages.showYesNoCancelDialog("End", "End", null)
-        val exitCode = Messages.showYesNoCancelDialog("CreateVersionTag", "ReIndexVersion", null)
-        if (exitCode == 0){
+        val exitCode = Messages.showYesNoCancelDialog("What you want to do ?", "SyncVersion", "JustIndex","CreateBranchTag","Cancel",null)
+        if(exitCode ==Messages.CANCEL) return
+        if (exitCode == Messages.NO){
             val dialog = VersionDialog(project, null)
             dialog.pack()
             dialog.isVisible = true
         }
-        else if (exitCode == 1) GradleUtils.runTask(project, Arrays.asList(":VersionIndex"))
-
+        else if (exitCode ==  Messages.YES) GradleUtils.runTask(project, Arrays.asList(":VersionIndex"))
     }
 }

@@ -8,6 +8,7 @@ import com.pqixing.intellij.adapter.JlistSelectListener;
 import com.pqixing.intellij.utils.GradleUtils;
 import com.pqixing.intellij.utils.UiUtils;
 import com.pqixing.tools.PropertiesUtils;
+import com.pqixing.tools.TextUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -38,6 +39,8 @@ import kotlin.Pair;
 
 public class NewImportDialog extends JDialog {
     public static final String BING_KEY = "syncRoot";
+    public static final String IMPORT_KEY = "IMPORT";
+    public static final String VCS_KEY = "vcs";
     private JPanel contentPane;
     private JButton buttonOK;
     private JComboBox cbBranchs;
@@ -51,6 +54,7 @@ public class NewImportDialog extends JDialog {
     private JList JlNotSelect;
     private JList jlSelect;
     private JButton btnConfig;
+    private JCheckBox cbVcs;
 
     //已选中导入的工程
     private List<String> imports;
@@ -82,12 +86,17 @@ public class NewImportDialog extends JDialog {
         this.imports = imports;
         properties = PropertiesUtils.INSTANCE.readProperties(new File(project.getBasePath(), UiUtils.IDE_PROPERTIES));
         syncBranch = properties.getProperty(BING_KEY, "N").equals("Y");
+        cbVcs.setSelected("Y".equals(properties.getProperty(VCS_KEY, "Y")));
         initDpModel(dpModel);
         initCodeRoot(branchs.get(0), codeRoot);
         initBranchs(branchs);
         initJList(imports, allInfos);
         initImportAction();
         initLoadBranch();
+    }
+
+    public boolean syncVcs() {
+        return cbVcs.isSelected();
     }
 
     private void initDpModel(String dpModel) {
@@ -199,7 +208,13 @@ public class NewImportDialog extends JDialog {
         }
         cbBranchs.addItemListener(e -> {
             if (syncBranch) {
-                tvCodeRoot.setText("../" + cbBranchs.getSelectedItem().toString());
+                tvCodeRoot.setText("../" + getSelectBranch());
+            }
+            List<String> list = str2List(properties.getProperty(IMPORT_KEY + TextUtils.INSTANCE.numOrLetter(getSelectBranch())));
+            if (!list.isEmpty()) {
+                imports.clear();
+                imports.addAll(list);
+                updateImports();
             }
         });
     }
@@ -249,11 +264,37 @@ public class NewImportDialog extends JDialog {
      */
     private void saveBindKey() {
         String newKey = syncBranch ? "Y" : "N";
-        String old = properties.getProperty(BING_KEY, "N");
-        if (!newKey.equals(old)) {
-            properties.setProperty(BING_KEY, newKey);
+        String oldBind = properties.getProperty(BING_KEY);
+        properties.setProperty(BING_KEY, newKey);
+
+        String newVcs = syncVcs() ? "Y" : "N";
+        String oldVcs = properties.getProperty(VCS_KEY);
+        properties.setProperty(VCS_KEY, newVcs);
+
+        String importKey = IMPORT_KEY + TextUtils.INSTANCE.numOrLetter(getSelectBranch());
+        String newImport = list2Str(getImports());
+        properties.setProperty(importKey, newImport);
+        String oldImports = properties.getProperty(importKey);
+
+        if (!newVcs.equals(oldVcs) || !newKey.equals(oldBind) || !newImport.equals(oldImports))
             PropertiesUtils.INSTANCE.writeProperties(new File(project.getBasePath(), UiUtils.IDE_PROPERTIES), properties);
+    }
+
+    private List<String> str2List(String str) {
+        List<String> ls = new ArrayList<>();
+        if (str == null) return ls;
+        for (String s : str.split(",")) {
+            if (s != null && !s.isEmpty()) ls.add(s);
         }
+        return ls;
+    }
+
+    private String list2Str(List<String> ls) {
+        StringBuilder sb = new StringBuilder();
+        for (String s : ls) {
+            sb.append(s).append(",");
+        }
+        return sb.toString();
     }
 
     public String getImportModel() {

@@ -12,6 +12,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.intellij.ui.InstallApkDialog
 import com.pqixing.intellij.utils.GradleUtils
+import jdk.internal.util.xml.impl.Pair
 
 
 open class BuildApkAction : AnAction() {
@@ -26,7 +27,15 @@ open class BuildApkAction : AnAction() {
 
         val projectMode = /*"ProjectViewPopup".equals(place)||*/"MainMenu" == e.place || module == null || project.name.replace(" ", "") == moduleName;
 
-        if (projectMode || Messages.showOkCancelDialog("Build $moduleName before install?", "Build Apk", null) != 0) {
+        if (projectMode) {
+            val apkDialog = InstallApkDialog(e.project, e.project!!.basePath + "/build/apks")
+            apkDialog.pack()
+            apkDialog.isVisible = true
+            return
+        }
+        val exitCode = Messages.showYesNoCancelDialog("What you want to do?", moduleName, "BuildModule", "JustInstall", "Cancel", null)
+        if (exitCode == Messages.CANCEL) return
+        if (exitCode == Messages.NO) {
             val apkDialog = InstallApkDialog(e.project, e.project!!.basePath + "/build/apks")
             apkDialog.pack()
             apkDialog.isVisible = true

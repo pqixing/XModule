@@ -13,7 +13,11 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.vcs.VcsDirectoryMapping
+import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.refactoring.safeDelete.ImportSearcher.getImport
+import com.intellij.vcsUtil.VcsUtil
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.NewImportDialog
@@ -21,6 +25,8 @@ import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.model.ProjectXmlModel
 import com.pqixing.model.SubModuleType
 import com.pqixing.tools.FileUtils
+import git4idea.GitUtil
+import git4idea.util.GitUIUtil
 import groovy.lang.GroovyClassLoader
 import java.io.File
 
@@ -45,7 +51,7 @@ class ImportAction : AnAction() {
         val dependentModel = clazz.getField("dependentModel").get(newInstance).toString()
 
         val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
-        val infoMaps = projectXml.allSubModules().filter { it.type!=SubModuleType.TYPE_LIBRARY_API }.map { Pair(it.name, JListInfo(it.name, it.introduce)) }.toMap(mutableMapOf())
+        val infoMaps = projectXml.allSubModules().filter { it.type != SubModuleType.TYPE_LIBRARY_API }.map { Pair(it.name, JListInfo(it.name, it.introduce)) }.toMap(mutableMapOf())
         val repo = GitHelper.getRepo(File(basePath, "templet"), project)
         val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
         val localBranch = repo.currentBranchName ?: "master"
@@ -62,10 +68,13 @@ class ImportAction : AnAction() {
                 val includeMaps = getImport(projectXml, dialog.imports.filter { !it.contains("#") }.toMutableSet(), codePath, dialog.imports.filter { it.contains("#") })
                 val import = dialog.importModel == "Import" && importByIde(includeMaps)
 
-                val maps = projectXml.allSubModules().filter { includeMaps.containsKey(it.name) }.map { Pair(codePath + "/" + it.project.name, it.project.url) }.toMap(mutableMapOf())
+                val maps = projectXml.allSubModules()
+                        .filter { includeMaps.containsKey(it.name) }
+                        .map { Pair(codePath + "/" + it.project.name, it.project.url) }
+                        .toMap(mutableMapOf())
                 maps.forEach { map ->
                     File(map.key).apply {
-                        if (File(this, ".git").exists()) return@apply
+                        if (GitUtil.isGitRoot(this)) return@apply
                         if (exists()) FileUtils.delete(this)
                         indicator.text = "Clone... ${map.value} "
                         //下载master分支
@@ -77,15 +86,28 @@ class ImportAction : AnAction() {
                 if (!import) ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
                 Thread.sleep(2000)//先睡眠2秒,然后检查git管理是否有缺少
                 ApplicationManager.getApplication().invokeLater {
-                    /**
-                     * 所有代码的跟目录
-                     * 对比一下,当前导入的所有工程,是否都在version管理中,如果没有,提示用户进行管理
-                     */
-                    val controlPaths = VcsRepositoryManager.getInstance(project).repositories.filter { it.presentableUrl.startsWith(codePath) }.map { it.presentableUrl }
-                    val gitPaths = maps.keys
-                    gitPaths.removeAll(controlPaths)
-                    if (gitPaths.isNotEmpty())
-                        Messages.showMessageDialog("Those project had import but not in Version Control\n ${gitPaths.joinToString { "\n" + it }} \n Please check Setting -> Version Control After Sync!!", "Miss Vcs Control", null)
+                    if (dialog.syncVcs()) {
+                        //根据导入的CodeRoot目录,自动更改AS的版本管理
+                        val pVcs: ProjectLevelVcsManagerImpl = ProjectLevelVcsManagerImpl.getInstance(project) as ProjectLevelVcsManagerImpl
+                        pVcs.directoryMappings = projectXml.projects
+                                .map { codePath + "/" + it.name }
+                                .filter { GitUtil.isGitRoot(File(it)) }
+                                .map { VcsDirectoryMapping(it, "Git") }
+                                .toMutableList().apply {
+                                    add(0, VcsDirectoryMapping(File(basePath, "templet").canonicalPath, "Git"))
+                                }
+                        pVcs.notifyDirectoryMappingChanged()
+                    } else {
+                        /**
+                         * 所有代码的跟目录
+                         * 对比一下,当前导入的所有工程,是否都在version管理中,如果没有,提示用户进行管理
+                         */
+                        val controlPaths = VcsRepositoryManager.getInstance(project).repositories.filter { it.presentableUrl.startsWith(codePath) }.map { it.presentableUrl }
+                        val gitPaths = maps.keys
+                        gitPaths.removeAll(controlPaths)
+                        if (gitPaths.isNotEmpty())
+                            Messages.showMessageDialog("Those project had import but not in Version Control\n ${gitPaths.joinToString { "\n" + it }} \n Please check Setting -> Version Control After Sync!!", "Miss Vcs Control", null)
+                    }
                 }
 
             }
