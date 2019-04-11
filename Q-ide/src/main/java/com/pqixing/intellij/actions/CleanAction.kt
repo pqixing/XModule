@@ -1,10 +1,9 @@
 package com.pqixing.intellij.actions
 
-import com.android.tools.idea.gradle.util.GradleUtil
+import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.DataKey
-import com.intellij.openapi.module.Module
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -16,7 +15,6 @@ import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.CleanDialog
 import com.pqixing.tools.FileUtils
 import groovy.lang.GroovyClassLoader
-import org.jetbrains.android.util.AndroidUtils
 import java.io.File
 
 
@@ -45,16 +43,22 @@ class CleanAction : AnAction() {
             override fun run(indicator: ProgressIndicator) {
                 val list = cleanDialog.adapter.datas.filter { it.select }.mapNotNull { projects[it.title] }.toMutableList()
                 list.add(0, File(basePath))
+                val cleanIdea = cleanDialog.cbIdea.isSelected
+                val cleanIml = cleanDialog.cbIdea.isSelected
                 list.forEach {
                     indicator.text = "Clean-> ${it.path}"
                     FileUtils.delete(File(it, "build"))
+                    if (cleanIdea) FileUtils.delete(File(it, ".idea"))
+                    if (cleanIml) FileUtils.delete(File(it, "${it.name}.iml"))
                 }
-                GradleUtil.getGradleUserSettingsFile()
-//                cleanDialog.
+                if (cleanIdea)ApplicationManager.getApplication().invokeLater { ActionManager.getInstance().getAction("InvalidateCaches").actionPerformed(e)}
+                else if(cleanIml)ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
             }
         }
         cleanDialog.setOnOk {
             ProgressManager.getInstance().runProcessWithProgressAsynchronously(cleanTask, BackgroundableProcessIndicator(cleanTask))
         }
+        cleanDialog.pack()
+        cleanDialog.isVisible = true
     }
 }

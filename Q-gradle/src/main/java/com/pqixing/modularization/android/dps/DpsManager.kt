@@ -68,7 +68,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
 
     val loseList = mutableListOf<String>()
     override fun start() {
-        compileModel = plugin.config?.dependentModel ?: "mavenOnly"
+        compileModel = plugin.config.dependentModel ?: "mavenOnly"
         managerExtends = ManagerPlugin.getExtends()
     }
 
@@ -192,7 +192,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
                 ?: return false
         if (!dpc.subModule.hasCheck) ProjectManager.checkProject(localProject)
         val branch = dpc.subModule.getBranch()
-        if (branch != managerExtends.docRepoBranch && !plugin.config.allowDpDiff) {
+        if (branch != plugin.subModule.getBranch() && !plugin.config.allowDpDiff) {
             Tools.println("onLocalCompile can not dependent other branch project!!!${dpc.moduleName} $branch")
             return false
         }

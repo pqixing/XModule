@@ -6,7 +6,7 @@ sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
-    implementation 'com.android.tools.build:gradle:2.3.0'
+    implementation 'com.android.tools.build:gradle:3.1.2'
 //    implementation 'com.alibaba:arouter-register:1.0.2'
     implementation 'org.javassist:javassist:3.24.0-GA'
     implementation gradleApi()
@@ -15,6 +15,21 @@ dependencies {
 
 }
 ext.mVersion = "1.0"
-ext.mLocalVersion = "1.0.3"
+ext.mLocalVersion = "1.0.7"
 ext.mArtifactId = "regester"
 apply from: '../script/bintray.gradle'
+
+//apply plugin: 'maven'
+//// 上传到本地代码库
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            repository(url: uri("/home/pqixing/.repo")) {
+//                authentication(userName: "admin", password: "admin123")
+//            }
+//            pom.groupId = "com.pqixing" // 组名
+//            pom.artifactId = "reflect"// 插件名
+//            pom.version = 0.1 // 版本号
+//        }
+//    }
+//}

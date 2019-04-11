@@ -7,6 +7,7 @@ import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import org.gradle.api.GradleException
 import java.io.File
+import java.util.*
 
 /**
  * 用于Ide的工具
@@ -15,27 +16,30 @@ object ResultUtils {
 
     //是否是通过ide调用
     val ide = "ide" == TextUtils.getSystemEnv("syncType")
+
     /**
      * 输出结果，用于Ide的交互获取
      * @param exitCode 退出标记 0 表示正常退出，1表示异常退出
      */
-    fun writeResult(msg: String, exitCode: Int = 0,exit:Boolean = exitCode!=0) {
+    fun writeResult(msg: String, exitCode: Int = 0, exit: Boolean = exitCode != 0) {
         Tools.println(msg)
-        if(ide) {
+        if (ide) {
             val plugin = ManagerPlugin.getPlugin()
             val ideFile = File(plugin.rootDir, ".idea/modularization.log")
             val log = "${Keys.PREFIX_IDE_LOG}?${Keys.RUN_TASK_ID}=${getProperty(Keys.RUN_TASK_ID)
                     ?: System.currentTimeMillis()}&endTime=${System.currentTimeMillis()}&exitCode=$exitCode&msg=$msg"
-            if (ideFile.exists() && ideFile.length() > 102400) {
-                Tools.println("writeResult del ${ideFile.path}-> ${ideFile.length()}")
-                FileUtils.delete(ideFile)
+            //只保留10条记录
+            val logs = LinkedList<String>()
+            FileUtils.readText(ideFile)?.lines()?.apply {
+                for (i in 0..(Math.min(19, size))) {
+                    logs.addFirst(get(size - i))
+                }
             }
-
-            if (!ideFile.exists()) {
-                FileUtils.writeText(ideFile, log)
-            } else ideFile.appendText("\n" + log)
+            logs.add(log)
+            FileUtils.writeText(ideFile, logs.joinToString { it + "\n" })
         }
         if (exit) {
+            Thread.sleep(500)
             throw  GradleException(msg)
         }
     }

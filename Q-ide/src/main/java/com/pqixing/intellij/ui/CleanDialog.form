@@ -49,12 +49,14 @@
               </component>
             </children>
           </grid>
-          <component id="30ee6" class="javax.swing.JCheckBox" binding="cbGradle">
+          <component id="30ee6" class="javax.swing.JCheckBox" binding="cbIdea">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value=".gradle"/>
+              <selected value="false"/>
+              <text value=".idea"/>
+              <visible value="false"/>
             </properties>
           </component>
           <component id="17448" class="javax.swing.JCheckBox" binding="cbIml">
@@ -62,6 +64,7 @@
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
+              <selected value="true"/>
               <text value=".iml"/>
             </properties>
           </component>

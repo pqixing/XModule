@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.pqixing.modularization.idea</id>
     <name>Modularization</name>
-    <version>1.2</version>
+    <version>1.3</version>
     <vendor email="pqixing86@gmail.com" url="https://github.com/pqixing/modularization">pqixing
     </vendor>
 
@@ -10,7 +10,7 @@
     </description>
 
     <change-notes>
-        Help to run modularization gradle plugin , provide ui operator for task!!
+        Auto Add Project to Version Manager System
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
@@ -37,16 +37,25 @@
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I" />
             </action>
             <separator />
+
+            <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
+                text="ToMaven" />
+            <separator />
+            <action id="Modularization.GitCheckout"
+                class="com.pqixing.intellij.actions.GitCheckoutAction" text="Checkout" />
+            <separator />
+
             <group id="Modularization.Code" popup="true" text="ForCode">
+                <action id="Modularization.Clean" class="com.pqixing.intellij.actions.CleanAction"
+                    text="Clean" />
+                <separator />
                 <action id="Modularization.GitSync"
                     class="com.pqixing.intellij.actions.GitSyncAction" text="GitSync" />
                 <separator />
                 <action id="Modularization.GitState"
                     class="com.pqixing.intellij.actions.GitStateAction" text="GitState" />
                 <separator />
-                <action id="Modularization.GitCheckout"
-                    class="com.pqixing.intellij.actions.GitCheckoutAction" text="Checkout" />
-                <separator />
+
                 <action id="Modularization.GitBranch"
                     class="com.pqixing.intellij.actions.GitBranchAction" text="GitBranch" />
                 <separator />
@@ -54,9 +63,7 @@
                     class="com.pqixing.intellij.actions.ReIndexVersionAction" text="SyncVersion" />
             </group>
             <separator />
-            <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
-                text="ToMaven" />
-            <separator />
+
             <action id="Modularization.BuildApk" class="com.pqixing.intellij.actions.BuildApkAction"
                 text="InstallApk" />
             <separator />

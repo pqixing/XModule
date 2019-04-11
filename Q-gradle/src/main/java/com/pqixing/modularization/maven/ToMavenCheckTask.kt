@@ -47,14 +47,18 @@ open class ToMavenCheckTask : BaseTask() {
     }
 
     override fun runTask() {
-        val extends = ManagerPlugin.getExtends()!!
+        val extends = ManagerPlugin.getExtends()
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
         val plugin = AndroidPlugin.getPluginByProject(project)
         val dpsExtends = plugin.getExtends(DpsExtends::class.java)
         val subModule = plugin.subModule
-        val lastLog = plugin.subModule
+//        val lastLog = plugin.subModule
         val artifactId = subModule.name
+        if(subModule.getBranch()!=extends.docRepoBranch){
+            Tools.println(unCheck - 1, "${subModule.name} branch is ${subModule.getBranch()} , do not match doc branch $extends.docRepoBranch")
+            return
+        }
 
         val open = GitUtils.open(File(ProjectManager.codeRootDir, subModule.project.name))
         if (open == null) {

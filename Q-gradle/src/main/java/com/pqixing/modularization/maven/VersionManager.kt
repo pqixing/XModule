@@ -12,12 +12,14 @@ import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
+import com.pqixing.tools.FileUtils
 import com.pqixing.tools.PropertiesUtils
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
 import org.eclipse.jgit.api.Git
 import java.io.File
 import java.net.URL
+import java.text.DateFormat
 import java.util.*
 import java.util.regex.Pattern
 import kotlin.Comparator
@@ -43,7 +45,11 @@ object VersionManager : OnClear {
 
     //版本号的管理工程,迁回root目录下,方便调试和查看
     var repoGitDir: File = File(".")
-        get() = File(FileManager.rootDir, "build/version")
+        get() {
+            //删除旧的目录
+            FileUtils.delete(File(FileManager.rootDir, "build/version"))
+            return FileManager.templetRoot
+        }
 
     private var repoLastCommit = 0
 
@@ -144,10 +150,11 @@ object VersionManager : OnClear {
         return branchVersion[branch] ?: readBranchVersion(branch)
     }
 
-    private fun getBranchVersionName(branch: String):String{
+    private fun getBranchVersionName(branch: String): String {
         val of = branch.lastIndexOf("/");
-       return "versions/version_${branch.substring(of+1)}.properties"
+        return "versions/version_${branch.substring(of + 1)}.properties"
     }
+
     /**
      * 读取某个分支指定的配置文件
      */
@@ -200,17 +207,20 @@ object VersionManager : OnClear {
     private fun prepareVersions() {
         val extends = ManagerPlugin.getExtends()
         val vBranch = "_v2"
-        val git = GitUtils.open(repoGitDir)?.apply { GitUtils.pull(this) }
+        val git = GitUtils.open(repoGitDir)
                 ?: GitUtils.clone(extends.docRepoUrl, repoGitDir, vBranch)
         if (git == null) {
             ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "can not find version repo!!")
             return
         }
-        if (!GitUtils.checkoutBranch(git, vBranch, true)) {
-            if (!GitUtils.createBranch(git, vBranch)) {
-                ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "can checkout to branch : $vBranch")
-            }
-        }
+        //如果是ToMaven,则更新,否则,不需要每次都更新
+        val startTask = ManagerPlugin.getPlugin().project.gradle.startParameter.toString()
+        if (startTask.contains("ToMaven")) git.pull()
+//        if (!GitUtils.checkoutBranch(git, vBranch, true)) {
+//            if (!GitUtils.createBranch(git, vBranch)) {
+//                ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "can checkout to branch : $vBranch")
+//            }
+//        }
         repoLastCommit = git.log().setMaxCount(1).call().firstOrNull()?.commitTime
                 ?: (System.currentTimeMillis() / 1000).toInt()
         GitUtils.close(git)
@@ -289,7 +299,7 @@ object VersionManager : OnClear {
         PropertiesUtils.writeProperties(branchFile, tagVersions.toProperties())
         ResultUtils.writeResult(branchFile.absolutePath)
         val git = Git.open(repoGitDir)
-        GitUtils.addAndPush(git, ".", "createVersionTag $taskBranch ${Date().toLocaleString()}", true)
+        GitUtils.addAndPush(git, "versions", "createVersionTag $taskBranch ${DateFormat.getDateTimeInstance().format(Date())}", true)
         GitUtils.close(git)
         return true
     }
@@ -306,7 +316,7 @@ object VersionManager : OnClear {
         Tools.println("parseNetVersions  start ->")
         val start = System.currentTimeMillis()
         versions.clear()
-        parseNetVersions(getFullUrl(groupUrl,maven), versions, extends.groupName)
+        parseNetVersions(getFullUrl(groupUrl, maven), versions, extends.groupName)
         Tools.println("parseNetVersions  end -> ${System.currentTimeMillis() - start} ms")
         versions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
         //上传版本好到服务端
@@ -314,7 +324,7 @@ object VersionManager : OnClear {
         GitUtils.pull(git)
 
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
-        GitUtils.addAndPush(git, ".", "indexVersionFromNet ${Date().toLocaleString()}", true)
+        GitUtils.addAndPush(git, "versions", "indexVersionFromNet ${DateFormat.getDateTimeInstance().format(Date())}", true)
         GitUtils.close(git)
     }
 
@@ -328,6 +338,7 @@ object VersionManager : OnClear {
     }
 
     fun getFullUrl(url: String, baseUrl: String): String {
+        if(url=="..")   return "";
         if (url.startsWith("http:")) return url
         if (baseUrl.endsWith("/")) return "$baseUrl$url"
         return "$baseUrl/$url"

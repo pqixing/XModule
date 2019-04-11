@@ -67,7 +67,7 @@ object ProjectManager : OnClear {
             GitUtils.close(this)
         }
         if (mBranch != docRepoBranch) {
-            Tools.println("${subModule.name} branch is $mBranch , do not match doc branch $docRepoBranch")
+            Tools.println("Warming!!!  ${subModule.name} branch is $mBranch , do not match doc branch $docRepoBranch")
         }
         //如果是Api工程,检查基础模块在不在
         if (apiModule) {

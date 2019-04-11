@@ -23,8 +23,8 @@ public class CleanDialog extends JDialog {
     private JButton buttonOK;
     private JButton buttonCancel;
     private JList jlProjects;
-    private JCheckBox cbGradle;
-    private JCheckBox cbIml;
+    public JCheckBox cbIdea;
+    public JCheckBox cbIml;
     private Runnable onOk;
     public JListSelectAdapter adapter;
 
