@@ -14,6 +14,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.JTextComponent;
 
+import git4idea.commands.GitLineHandlerAdapter;
 import git4idea.commands.GitLineHandlerListener;
 
 import org.jdesktop.swingx.JXRadioGroup;
@@ -172,7 +173,7 @@ public class GitOperatorDialog extends JDialog {
         dispose();
     }
 
-    public static class GitListener implements GitLineHandlerListener {
+    public static class GitListener extends GitLineHandlerAdapter {
         JTextComponent textField;
         ProgressIndicator indicator;
         private String lastPercentLine = null;

@@ -1,12 +1,14 @@
 package com.pqixing.intellij.utils;
 
 import com.intellij.openapi.util.Key;
+
+import git4idea.commands.GitLineHandlerAdapter;
 import git4idea.commands.GitLineHandlerListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GitEventDetector implements GitLineHandlerListener {
+public class GitEventDetector extends GitLineHandlerAdapter {
     private boolean myHappened;
     private List<String> events = new ArrayList<>();
 

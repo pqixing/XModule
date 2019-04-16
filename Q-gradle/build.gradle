@@ -29,8 +29,8 @@ repositories {
         dirs "libs"
     }
 }
-ext.mLocalVersion = "1.0.11"
-ext.mVersion = "1.0"
+ext.mLocalVersion = "1.0.13"
+ext.mVersion = "1.1"
 ext.mArtifactId = "modularization"
 apply from: '../script/bintray.gradle'
 
@@ -40,14 +40,14 @@ dependencies {
     if (localBuild) {
         compileOnly project(":Q-tools")
         implementation "com.pqixing.gradle:tools:1.0.0"
-    } else implementation "com.pqixing.gradle:tools:0.5"
+    } else implementation "com.pqixing.gradle:tools:1.1"
     implementation gradleApi()
     implementation localGroovy()
     implementation "com.alibaba:fastjson:1.2.44"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     testImplementation 'junit:junit:4.12'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit:+'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:+'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:5.3.0.201903130848-r'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:5.3.0.201903130848-r'
     implementation 'com.android.tools.build:gradle:2.3.0'
 }
 

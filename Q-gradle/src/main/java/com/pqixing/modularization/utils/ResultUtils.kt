@@ -31,12 +31,12 @@ object ResultUtils {
             //只保留10条记录
             val logs = LinkedList<String>()
             FileUtils.readText(ideFile)?.lines()?.apply {
-                for (i in 0..(Math.min(19, size))) {
-                    logs.addFirst(get(size - i))
+                for (i in 0 until (Math.min(19, size))) {
+                    logs.addFirst(get(size - 1 - i))
                 }
             }
             logs.add(log)
-            FileUtils.writeText(ideFile, logs.joinToString { it + "\n" })
+            FileUtils.writeText(ideFile, logs.joinToString ("\n"))
         }
         if (exit) {
             Thread.sleep(500)

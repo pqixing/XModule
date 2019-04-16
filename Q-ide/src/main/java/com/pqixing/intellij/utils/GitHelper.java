@@ -218,7 +218,7 @@ public class GitHelper {
         }
         handler.endOptions();
         addListener(handler, listeners);
-        getGit().runCommand(handler).throwOnError();
+        getGit().runCommand(handler);
     }
 
     /**

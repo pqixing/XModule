@@ -2,10 +2,6 @@ package com.pqixing.intellij.ui;
 
 import com.android.ddmlib.AndroidDebugBridge;
 import com.android.ddmlib.IDevice;
-import com.android.tools.idea.explorer.adbimpl.AdbPathUtil;
-import com.android.tools.idea.explorer.adbimpl.AdbShellCommandResult;
-import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil;
-import com.intellij.debugger.memory.utils.AndroidUtil;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -26,7 +22,6 @@ import com.pqixing.intellij.utils.UiUtils;
 import com.pqixing.shell.Shell;
 
 import org.jetbrains.android.sdk.AndroidSdkUtils;
-import org.jetbrains.android.util.AndroidUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.event.KeyEvent;
@@ -38,7 +33,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;

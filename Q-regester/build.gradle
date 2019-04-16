@@ -14,7 +14,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
 }
-ext.mVersion = "1.0"
+ext.mVersion = "1.1"
 ext.mLocalVersion = "1.0.7"
 ext.mArtifactId = "regester"
 apply from: '../script/bintray.gradle'
