@@ -24,19 +24,22 @@ object ResultUtils {
     fun writeResult(msg: String, exitCode: Int = 0, exit: Boolean = exitCode != 0) {
         Tools.println(msg)
         if (ide) {
-            val plugin = ManagerPlugin.getPlugin()
-            val ideFile = File(plugin.rootDir, ".idea/modularization.log")
             val log = "${Keys.PREFIX_IDE_LOG}?${Keys.RUN_TASK_ID}=${getProperty(Keys.RUN_TASK_ID)
                     ?: System.currentTimeMillis()}&endTime=${System.currentTimeMillis()}&exitCode=$exitCode&msg=$msg"
-            //只保留10条记录
-            val logs = LinkedList<String>()
-            FileUtils.readText(ideFile)?.lines()?.apply {
-                for (i in 0 until (Math.min(19, size))) {
-                    logs.addFirst(get(size - 1 - i))
+            val plugin = ManagerPlugin.getPlugin()
+            var logCount = 0
+            do {
+                val ideFile = File(plugin.rootDir, ".idea/modularization.log${logCount++}")
+                //只保留10条记录
+                val logs = LinkedList<String>()
+                FileUtils.readText(ideFile)?.lines()?.apply {
+                    for (i in 0 until (Math.min(19, size))) {
+                        logs.addFirst(get(size - 1 - i))
+                    }
                 }
-            }
-            logs.add(log)
-            FileUtils.writeText(ideFile, logs.joinToString ("\n"))
+                logs.add(log)
+                FileUtils.writeText(ideFile, logs.joinToString("\n"))
+            } while (ideFile.readText() != log && logCount <= 6)//如果写入失败并且次数小于6次,则尝试继续写入
         }
         if (exit) {
             Thread.sleep(500)

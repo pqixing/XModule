@@ -4,7 +4,6 @@ import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMo
 import com.intellij.openapi.project.Project;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
-import com.pqixing.intellij.adapter.JlistSelectListener;
 import com.pqixing.intellij.utils.GradleUtils;
 import com.pqixing.intellij.utils.UiUtils;
 import com.pqixing.tools.PropertiesUtils;
@@ -41,12 +40,12 @@ public class NewImportDialog extends JDialog {
     public static final String BING_KEY = "syncRoot";
     public static final String IMPORT_KEY = "IMPORT";
     public static final String VCS_KEY = "vcs";
+    private static final String CODEROOTS_KEY = "codeRoots";
     private JPanel contentPane;
     private JButton buttonOK;
     private JComboBox cbBranchs;
-    private JButton btnBranchs;
     private JCheckBox cbBind;
-    private JTextField tvCodeRoot;
+    private JComboBox tvCodeRoot;
     private JButton btnProjectXml;
     private JTextField tvImport;
     private JComboBox cbImportModel;
@@ -92,7 +91,6 @@ public class NewImportDialog extends JDialog {
         initBranchs(branchs);
         initJList(imports, allInfos);
         initImportAction();
-        initLoadBranch();
     }
 
     public boolean syncVcs() {
@@ -117,24 +115,21 @@ public class NewImportDialog extends JDialog {
         return btnConfig;
     }
 
-    private void initLoadBranch() {
-        btnBranchs.addActionListener(actionEvent -> {
-            String taskId = System.currentTimeMillis() + "";
-            String branch = cbBranchs.getSelectedItem().toString().trim();
-            Map<String, String> envs = new HashMap<>(GradleUtils.INSTANCE.getDefEnvs());
-            envs.put("taskBranch", branch);
-            GradleUtils.INSTANCE.runTask(project, Arrays.asList(":LoadAllBranchModule"), ProgressExecutionMode.IN_BACKGROUND_ASYNC, false, taskId, envs, () -> {
-                Pair<Boolean, String> result = GradleUtils.INSTANCE.getResult(GradleUtils.INSTANCE.getLogFile(project.getBasePath()), taskId);
-                if (!result.getFirst()) return;
-                String[] strings = result.getSecond().replace("#", ",").split(",");
-                if (strings.length > 0) {
-                    imports.clear();
-                    for (int i = 0; i < strings.length; i++) {
-                        if (!strings[i].isEmpty()) imports.add(strings[i]);
-                    }
-                    updateImports();
+    private void loadBranchModules(String branch) {
+        String taskId = System.currentTimeMillis() + "";
+        Map<String, String> envs = new HashMap<>(GradleUtils.INSTANCE.getDefEnvs());
+        envs.put("taskBranch", branch);
+        GradleUtils.INSTANCE.runTask(project, Arrays.asList(":LoadAllBranchModule"), ProgressExecutionMode.IN_BACKGROUND_ASYNC, false, taskId, envs, () -> {
+            Pair<Boolean, String> result = GradleUtils.INSTANCE.getResult(GradleUtils.INSTANCE.getLogFile(project.getBasePath()), taskId);
+            if (!result.getFirst()) return;
+            String[] strings = result.getSecond().replace("#", ",").split(",");
+            if (strings.length > 0) {
+                imports.clear();
+                for (int i = 0; i < strings.length; i++) {
+                    if (!strings[i].isEmpty()) imports.add(strings[i]);
                 }
-            });
+                updateImports();
+            }
         });
     }
 
@@ -193,12 +188,16 @@ public class NewImportDialog extends JDialog {
     private void initCodeRoot(String branch, String codeRoot) {
         String root = syncBranch ? "../" + branch : codeRoot;
         cbBind.setSelected(syncBranch);
-        tvCodeRoot.setText(root);
+//        tvCodeRoot.setText(root);
+        for (String s : str2List(properties.getProperty(CODEROOTS_KEY, ""))) {
+            tvCodeRoot.addItem(s);
+        }
+        tvCodeRoot.setSelectedItem(root);
         tvCodeRoot.setEnabled(!syncBranch);
         cbBind.addItemListener(changeEvent -> {
             syncBranch = cbBind.isSelected();
             tvCodeRoot.setEnabled(!syncBranch);
-            tvCodeRoot.setText(syncBranch ? "../" + cbBranchs.getSelectedItem().toString() : codeRoot);
+            tvCodeRoot.setSelectedItem(syncBranch ? "../" + cbBranchs.getSelectedItem().toString() : codeRoot);
         });
     }
 
@@ -208,7 +207,7 @@ public class NewImportDialog extends JDialog {
         }
         cbBranchs.addItemListener(e -> {
             if (syncBranch) {
-                tvCodeRoot.setText("../" + getSelectBranch());
+                tvCodeRoot.setSelectedItem("../" + getSelectBranch());
             }
             List<String> list = str2List(properties.getProperty(IMPORT_KEY + TextUtils.INSTANCE.numOrLetter(getSelectBranch())));
             if (!list.isEmpty()) {
@@ -276,7 +275,16 @@ public class NewImportDialog extends JDialog {
         properties.setProperty(importKey, newImport);
         String oldImports = properties.getProperty(importKey);
 
-        if (!newVcs.equals(oldVcs) || !newKey.equals(oldBind) || !newImport.equals(oldImports))
+        List<String> codeRoots = str2List(properties.getProperty(CODEROOTS_KEY, ""));
+        String rootStr = getCodeRootStr();
+        boolean exists = codeRoots.remove(rootStr);
+        codeRoots.add(0, rootStr);
+        while (codeRoots.size() > 6) {
+            codeRoots.remove(codeRoots.size() - 1);
+        }
+        properties.setProperty(CODEROOTS_KEY, list2Str(codeRoots));
+
+        if (!newVcs.equals(oldVcs) || !newKey.equals(oldBind) || !newImport.equals(oldImports) || !exists)
             PropertiesUtils.INSTANCE.writeProperties(new File(project.getBasePath(), UiUtils.IDE_PROPERTIES), properties);
     }
 
@@ -302,7 +310,7 @@ public class NewImportDialog extends JDialog {
     }
 
     public String getCodeRootStr() {
-        String item = tvCodeRoot.getText().trim();
+        String item = tvCodeRoot.getSelectedItem().toString().trim();
         return item.isEmpty() ? "../CodeSrc" : item;
     }
 

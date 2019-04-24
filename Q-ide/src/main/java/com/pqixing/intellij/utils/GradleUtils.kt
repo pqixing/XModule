@@ -55,21 +55,26 @@ object GradleUtils {
     /**
      * 读取Gradle任务完成的毁掉
      */
-    fun getResult(logFile: File, runTaskId: String): Pair<Boolean, String> {
-        if (!logFile.exists()) return Pair(false, "No Result")
-        val lines = logFile.readLines()
+    fun getResult(logFile: Array<File>?, runTaskId: String): Pair<Boolean, String> {
         val millis = System.currentTimeMillis()
-        for (i in lines.size - 1 downTo 0) {
-            val params = UrlUtils.getParams(lines[i])
-            val taskId = params["run_task_id"]
-            val endTime = params["endTime"]?.toLong() ?: 0
-            if (millis - endTime > 10000) return Pair(false, "No Result")//如果任务运行时间,大于结果读取时间10秒钟,则直接判定失败
-            if (runTaskId != taskId) continue
-            return Pair("0" == params["exitCode"], params["msg"] ?: "")
+        if (logFile != null) for (f in logFile) {
+            if (!f.exists()) continue
+            val lines = f.readLines()
+            for (i in lines.size - 1 downTo 0) {
+                val params = UrlUtils.getParams(lines[i])
+                val taskId = params["run_task_id"]
+                val endTime = params["endTime"]?.toLong() ?: 0
+                if (millis - endTime > 10000) break//如果任务运行时间,大于结果读取时间10秒钟,则直接判定失败
+                if (runTaskId == taskId) return Pair("0" == params["exitCode"], params["msg"] ?: "")
+            }
         }
         return Pair(false, "No Result")
     }
 
 
-    fun getLogFile(basePath: String) = File(basePath, ".idea/modularization.log")
+    fun getLogFile(basePath: String): Array<File>? {
+        val file = File(basePath, ".idea")
+        return if (file.exists()) file.listFiles { file, s -> s.contains("modularization.lo") }
+        else emptyArray()
+    }
 }

@@ -40,10 +40,12 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
                     datas.add(JListInfo(f.name, it.substring(0, 2)))
                 }
                 ApplicationManager.getApplication().invokeLater {
-                    FileListDialog(project, datas, files).apply {
-                        pack()
-                        isVisible = true
+                    val d = FileListDialog(project, datas, files) {
+//                        GitHelper.
+                        updateItemLog(info, "", "")
                     }
+                    d.pack()
+                    d.isVisible = true
                 }
             }
         }

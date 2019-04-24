@@ -6,13 +6,16 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataKey
+import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.intellij.psi.PsiFile
 import com.pqixing.intellij.ui.InstallApkDialog
 import com.pqixing.intellij.utils.GradleUtils
 import jdk.internal.util.xml.impl.Pair
+import java.io.File
 
 
 open class BuildApkAction : AnAction() {
@@ -24,11 +27,11 @@ open class BuildApkAction : AnAction() {
 
         val module = e.getData(DataKey.create<Module>("module"))
         val moduleName = module?.name ?: ""
-
-        val projectMode = /*"ProjectViewPopup".equals(place)||*/"MainMenu" == e.place || module == null || project.name.replace(" ", "") == moduleName;
+        val file = e.getData(PlatformDataKeys.VIRTUAL_FILE)?.canonicalPath?:e.project!!.basePath + "/build/apks"
+        val projectMode = /*"ProjectViewPopup".equals(place)||*/"MainMenu" == e.place || module == null || project.name.replace(" ", "") == moduleName||file.endsWith(".apk");
 
         if (projectMode) {
-            val apkDialog = InstallApkDialog(e.project, e.project!!.basePath + "/build/apks")
+            val apkDialog = InstallApkDialog(e.project, if(file.endsWith(".apk")) file else findTargetDir(e).absolutePath)
             apkDialog.pack()
             apkDialog.isVisible = true
             return
@@ -36,7 +39,8 @@ open class BuildApkAction : AnAction() {
         val exitCode = Messages.showYesNoCancelDialog("What you want to do?", moduleName, "BuildModule", "JustInstall", "Cancel", null)
         if (exitCode == Messages.CANCEL) return
         if (exitCode == Messages.NO) {
-            val apkDialog = InstallApkDialog(e.project, e.project!!.basePath + "/build/apks")
+            var dir = findTargetDir(e)
+            val apkDialog = InstallApkDialog(e.project, dir.absolutePath)
             apkDialog.pack()
             apkDialog.isVisible = true
             return
@@ -59,5 +63,14 @@ open class BuildApkAction : AnAction() {
         }
 //            AdbShellCommandsUtil.executeCommand()
         GradleUtils.runTask(project, listOf(":$moduleName:PrepareDev", ":$moduleName:BuildApk"), activateToolWindowBeforeRun = true, runTaskId = runTaskId, callback = callBack, envs = mapOf(Pair("include", ""), Pair("dependentModel", "")))
+    }
+
+    private fun findTargetDir(e: AnActionEvent): File {
+        var dir = File(e.project!!.basePath + "/build/apks")
+        if (dir.exists()) {
+            val apks = dir.listFiles { file, s -> s.endsWith(".apk") }.sortedBy { it.lastModified() }
+            if (apks.isNotEmpty()) dir = apks.last()
+        }
+        return dir
     }
 }

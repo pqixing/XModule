@@ -60,7 +60,7 @@ object ProjectManager : OnClear {
         if (mBranch.isEmpty()) if (GitUtils.isGitDir(projectDir)) Git.open(projectDir)
         else {
             FileUtils.delete(projectDir)
-            GitUtils.clone(subModule.project.url, projectDir)
+            GitUtils.clone(subModule.project.url, projectDir,docRepoBranch)
         }?.apply {
             mBranch = this.repository.branch
             subModule.project.branch = mBranch

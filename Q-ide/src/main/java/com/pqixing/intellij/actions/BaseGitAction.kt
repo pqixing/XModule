@@ -110,13 +110,13 @@ abstract class BaseGitAction : AnAction() {
             }
             "update" -> {
                 info.log = cacheLog
-                        ?: repo?.currentBranch?.let { it.name + " : " + it.findTrackedBranch(repo)?.name }
+                        ?: repo?.currentBranch?.let { GitHelper.state(project, repo)?.size?.toString() + " -> " + it.findTrackedBranch(repo)?.name }
                                 ?: "Project No Exists"
                 info.staue = if (repo == null) 3 else 0
             }
             "push" -> {
                 info.log = cacheLog ?: repo?.let {
-                    it.currentBranchName + " : " + GitLogUtil.collectFullDetails(project, repo.root, "origin/${it.currentBranchName}..${it.currentBranchName}").size
+                    GitLogUtil.collectFullDetails(project, repo.root, "origin/${it.currentBranchName}..${it.currentBranchName}").size.toString() + " -> " + it.currentBranch?.findTrackedBranch(repo)?.name
                 } ?: "Project No Exists"
                 info.staue = if (repo == null) 3 else 0
             }
@@ -149,7 +149,7 @@ abstract class BaseGitAction : AnAction() {
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
     }
 
-    protected  open fun onOkData(allDatas: MutableList<JListInfo>) = allDatas.filter { it.select }
+    protected open fun onOkData(allDatas: MutableList<JListInfo>) = allDatas.filter { it.select }
 
     protected open fun onOtherOk(cmd: String, dialog: GitOperatorDialog, targetBranch: String, r: JListInfo, project: Project) {}
 
@@ -193,7 +193,7 @@ abstract class BaseGitAction : AnAction() {
 
     abstract fun initDialog(dialog: GitOperatorDialog)
 
-    protected  open fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo>{
+    protected open fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> {
         val allDatas = urls.map {
             JListInfo(it.key, select = true)
         }.toMutableList()

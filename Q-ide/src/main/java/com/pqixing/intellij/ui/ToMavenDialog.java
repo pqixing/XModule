@@ -24,14 +24,13 @@ public class ToMavenDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JList jList;
-    private JButton all;
+    private javax.swing.JCheckBox all;
     private JLabel jlProgress;
     public JLabel jlTitle;
     private JComboBox cbUncheck;
     private JTextField tvDesc;
     JListSelectAdapter adapter;
     private Runnable onOk;
-    private boolean allSelect;
 
     public ToMavenDialog(List<JListInfo> datas) {
         setContentPane(contentPane);
@@ -56,7 +55,7 @@ public class ToMavenDialog extends JDialog {
         adapter.setDatas(datas);
         jList.setModel(adapter);
         all.addActionListener(e -> {
-            allSelect = !allSelect;
+            boolean allSelect = all.isSelected();
             all.setText(allSelect ? "None" : "All");
             for (JListInfo i : datas) {
                 i.setSelect(allSelect);

@@ -6,18 +6,28 @@ import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 import com.pqixing.intellij.utils.UiUtils;
 
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JToggleButton;
+import javax.swing.KeyStroke;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.JTextComponent;
 
 import git4idea.commands.GitLineHandlerAdapter;
-import git4idea.commands.GitLineHandlerListener;
-
-import org.jdesktop.swingx.JXRadioGroup;
 
 public class GitOperatorDialog extends JDialog {
     public JPanel contentPane;
@@ -30,7 +40,7 @@ public class GitOperatorDialog extends JDialog {
     public JList jLDatas;
     public JLabel jLTarget;
     public JLabel jlBranch;
-    public JButton allButton;
+    public JCheckBox allButton;
     public JLabel jlTips;
     public JTextArea tLog;
     public JScrollPane pLog;

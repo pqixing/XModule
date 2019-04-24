@@ -7,12 +7,15 @@ import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 import com.pqixing.intellij.utils.UiUtils;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JList;
@@ -22,10 +25,11 @@ import javax.swing.KeyStroke;
 public class FileListDialog extends JDialog {
     private JPanel contentPane;
     private JList jlDatas;
+    private JButton btnRevert;
     private Project project;
 
 
-    public FileListDialog(Project project, List<JListInfo> datas, List<File> filePath) {
+    public FileListDialog(Project project, List<JListInfo> datas, List<File> filePath, Runnable onRevert) {
         setContentPane(contentPane);
         setModal(false);
         UiUtils.centerDialog(this);
@@ -50,7 +54,10 @@ public class FileListDialog extends JDialog {
             FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(file, true), true);
             return true;
         });
-
+        btnRevert.setVisible(false);
+        btnRevert.addActionListener(actionEvent -> {
+            onRevert.run();
+        });
     }
 
     private void onOK() {

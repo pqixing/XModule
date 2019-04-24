@@ -44,8 +44,7 @@ public class VersionDialog extends JDialog {
     private JButton buttonCancel;
     private JComboBox cbTarget;
     private JList jlBrans;
-    private JButton allButton;
-    boolean all = false;
+    private javax.swing.JCheckBox allCheckBox;
 
     Project project;
     JListSelectAdapter adapter;
@@ -56,6 +55,7 @@ public class VersionDialog extends JDialog {
         getRootPane().setDefaultButton(buttonOK);
         this.project = project;
         UiUtils.centerDialog(this);
+        setTitle("Create Tag For Branch");
         buttonOK.addActionListener(e -> onOK());
 
         buttonCancel.addActionListener(e -> onCancel());
@@ -92,10 +92,10 @@ public class VersionDialog extends JDialog {
         }
         adapter = new JListSelectAdapter(jlBrans, true);
         adapter.setDatas(datas);
-        allButton.addActionListener(e -> {
-            all = !all;
+        allCheckBox.addActionListener(e -> {
+            boolean select = allCheckBox.isSelected();
             for (JListInfo j : datas) {
-                j.setSelect(all);
+                j.setSelect(select);
             }
             adapter.updateUI();
         });

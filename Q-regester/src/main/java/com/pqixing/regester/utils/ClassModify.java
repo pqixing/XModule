@@ -58,7 +58,7 @@ public class ClassModify extends ClassVisitor {
 //        System.out.println("visitField  -> name = "+name +" desc ="+desc + "value = "+value );
         switch (name) {
             case "buildTimeStr":
-                value = DateFormat.getDateTimeInstance().format(new Date());
+                value = System.currentTimeMillis()+"";
                 break;
             case "buildTime":
                 value = System.currentTimeMillis();
@@ -145,7 +145,7 @@ class LoadTransformer extends GeneratorAdapter {
 //            super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/pqixing/annotation/ObjectSet", "setO", "(Ljava/lang/Object;)"+ Type.VOID_TYPE, false);
 //            super.visitInsn(Opcodes.POP);
             super.visitFieldInsn(Opcodes.GETSTATIC, pkg, "infos", "Ljava/util/ArrayList;");
-            super.visitLdcInsn(DateFormat.getDateTimeInstance().format(new Date()));
+            super.visitLdcInsn(System.currentTimeMillis()+"");
             super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/util/ArrayList", "add", "(Ljava/lang/Object;)" + org.objectweb.asm.Type.BOOLEAN_TYPE, false);
             super.visitInsn(Opcodes.POP);
 
