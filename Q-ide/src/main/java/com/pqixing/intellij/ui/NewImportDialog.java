@@ -2,6 +2,8 @@ package com.pqixing.intellij.ui;
 
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.util.messages.impl.Message;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 import com.pqixing.intellij.utils.GradleUtils;
@@ -11,6 +13,10 @@ import com.pqixing.tools.TextUtils;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
@@ -43,7 +49,7 @@ public class NewImportDialog extends JDialog {
     private static final String CODEROOTS_KEY = "codeRoots";
     private JPanel contentPane;
     private JButton buttonOK;
-    private JComboBox cbBranchs;
+    private JComboBox<String> cbBranchs;
     private JCheckBox cbBind;
     private JComboBox tvCodeRoot;
     private JButton btnProjectXml;
@@ -54,6 +60,9 @@ public class NewImportDialog extends JDialog {
     private JList jlSelect;
     private JButton btnConfig;
     private JCheckBox cbVcs;
+    private JCheckBox cbMore;
+    private JPanel jpMore;
+    private JComboBox<String> cbLoadBranch;
 
     //已选中导入的工程
     private List<String> imports;
@@ -91,6 +100,14 @@ public class NewImportDialog extends JDialog {
         initBranchs(branchs);
         initJList(imports, allInfos);
         initImportAction();
+        initMore();
+    }
+
+    private void initMore() {
+        cbMore.addActionListener(actionEvent -> {
+            jpMore.setVisible(cbMore.isSelected());
+        });
+        jpMore.setVisible(cbMore.isSelected());
     }
 
     public boolean syncVcs() {
@@ -204,6 +221,7 @@ public class NewImportDialog extends JDialog {
     private void initBranchs(List<String> branchs) {
         for (String b : branchs) {
             cbBranchs.addItem(b);
+            cbLoadBranch.addItem(b);
         }
         cbBranchs.addItemListener(e -> {
             if (syncBranch) {
@@ -215,6 +233,9 @@ public class NewImportDialog extends JDialog {
                 imports.addAll(list);
                 updateImports();
             }
+        });
+        cbLoadBranch.addItemListener(itemEvent -> {
+            loadBranchModules(cbLoadBranch.getSelectedItem().toString().trim());
         });
     }
 

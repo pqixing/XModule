@@ -53,7 +53,7 @@ class CleanAction : AnAction() {
 
                 val cleanCache = cleanDialog.cbCache!!.isSelected
                 val cleanIde = cleanDialog.cbIml!!.isSelected
-                val restart = selectRoot == codeRoot && (cleanIde || cleanCache)
+                val restart = selectRoot == codeRoot && (cleanIde || !cleanCache)
                 var returnRun = false
                 ApplicationManager.getApplication().invokeAndWait {
                     returnRun = restart && Messages.showYesNoDialog(project, "this clean request restart!!!", "Warming", null) != Messages.YES
