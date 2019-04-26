@@ -41,6 +41,9 @@
             <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
                 text="ToMaven" />
             <separator />
+            <action id="Modularization.Jekins" class="com.dachen.creator.actions.JekinsAction"
+                text="Jekins" />
+            <separator />
             <action id="Modularization.GitCheckout"
                 class="com.pqixing.intellij.actions.GitCheckoutAction" text="Checkout" />
             <separator />

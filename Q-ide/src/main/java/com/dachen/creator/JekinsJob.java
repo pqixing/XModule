@@ -13,6 +13,7 @@ public class JekinsJob {
     public long timestamp;
     public String url;
     public int number;
+    public long duration;
     public String id;
     public String result;
     public String displayName;

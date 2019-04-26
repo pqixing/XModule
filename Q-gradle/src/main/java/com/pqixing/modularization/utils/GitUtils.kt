@@ -77,7 +77,7 @@ object GitUtils {
             git.pull().init().execute()
             git.add().addFilepattern(file).init().call()
             git.commit().setMessage(commitMsg).init().call()
-            push(git, true)
+            push(git, force)
         } catch (e: Exception) {
             Tools.println("addAndPush Exception -> $e")
             return false

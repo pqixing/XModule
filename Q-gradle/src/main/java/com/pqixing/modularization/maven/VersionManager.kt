@@ -268,7 +268,6 @@ object VersionManager : OnClear {
                 addV.append(v).append(",")
             }
         }
-//        Tools.println("addVersion -> $groupId -> $artifactId -> $addV")
     }
 
     fun indexVersionFromNet() {
@@ -324,7 +323,7 @@ object VersionManager : OnClear {
         GitUtils.pull(git)
 
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
-        GitUtils.addAndPush(git, "versions", "indexVersionFromNet ${DateFormat.getDateTimeInstance().format(Date())}", true)
+        GitUtils.addAndPush(git, "versions", "indexVersionFromNet ${DateFormat.getDateTimeInstance().format(Date())}", false)
         GitUtils.close(git)
     }
 

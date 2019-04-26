@@ -95,6 +95,7 @@ open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boole
         log.foreground = when (info.staue) {
             3 -> error
             1 -> success
+//            0 -> normal
             else -> wanming
         }
         log.isOpaque = info.staue == 3
@@ -112,6 +113,7 @@ interface JlistSelectListener {
 
 class JListInfo(var title: String = "", var log: String = "", var staue: Int = 0, var select: Boolean = false) {
     val infoId = i++
+    var data:Any?=null
     override fun equals(other: Any?): Boolean {
         return (other as? JListInfo)?.infoId == infoId
     }
