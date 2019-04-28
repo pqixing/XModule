@@ -25,7 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
-public class ImportDialog extends JDialog {
+public class ImportDialog extends BaseJDialog {
     private JPanel rootPanel;
     private JButton btnOK;
     private JButton btnCancel;
@@ -135,8 +135,6 @@ public class ImportDialog extends JDialog {
         }
         specificInclude.setText(more);
         codeRoot.setText(codeRootStr);
-
-        UiUtils.centerDialog(this);
     }
 
     private void setJListModel(JList jList, ImportSelectAdapter model, ImportSelectAdapter targetModel) {

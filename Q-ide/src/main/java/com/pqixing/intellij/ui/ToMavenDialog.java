@@ -20,7 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
-public class ToMavenDialog extends JDialog {
+public class ToMavenDialog extends BaseJDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JList jList;
@@ -62,8 +62,6 @@ public class ToMavenDialog extends JDialog {
             }
             updateUI(buttonOK.isVisible());
         });
-
-        UiUtils.centerDialog(this);
     }
 
     public void setOnOk(Runnable onOk) {

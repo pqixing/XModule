@@ -22,7 +22,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-public class FileListDialog extends JDialog {
+public class FileListDialog extends BaseJDialog {
     private JPanel contentPane;
     private JList jlDatas;
     private JButton btnRevert;
@@ -32,7 +32,6 @@ public class FileListDialog extends JDialog {
     public FileListDialog(Project project, List<JListInfo> datas, List<File> filePath, Runnable onRevert) {
         setContentPane(contentPane);
         setModal(false);
-        UiUtils.centerDialog(this);
         this.project = project;
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);

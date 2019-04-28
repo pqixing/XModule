@@ -42,7 +42,7 @@ import javax.swing.KeyStroke;
 
 import kotlin.Pair;
 
-public class NewImportDialog extends JDialog {
+public class NewImportDialog extends BaseJDialog {
     public static final String BING_KEY = "syncRoot";
     public static final String IMPORT_KEY = "IMPORT";
     public static final String VCS_KEY = "vcs";
@@ -89,7 +89,7 @@ public class NewImportDialog extends JDialog {
         });
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(e -> dispose(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        UiUtils.centerDialog(this);
+//        UiUtils.centerDialog(this);
         this.project = project;
         this.imports = imports;
         properties = PropertiesUtils.INSTANCE.readProperties(new File(project.getBasePath(), UiUtils.IDE_PROPERTIES));

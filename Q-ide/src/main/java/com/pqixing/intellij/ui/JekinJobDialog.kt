@@ -26,7 +26,7 @@ import java.net.URL
 import java.util.*
 import javax.swing.*
 
-class JekinJobDialog(val project: Project, val apps: List<String>, val branchs: List<String>) : JDialog() {
+class JekinJobDialog(val project: Project, val apps: List<String>, val branchs: List<String>) : BaseJDialog() {
     val apiJson = "api/json"
     val jobsUrl = "http://192.168.3.7:8080/jenkins/job/buildByIde/"
     val queueUrl = "http://192.168.3.7:8080/jenkins/queue/"
@@ -68,7 +68,6 @@ class JekinJobDialog(val project: Project, val apps: List<String>, val branchs: 
         })
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction({ onCancel() }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-        UiUtils.centerDialog(this)
         adapter = JListSelectAdapter(jlJobs, false)
         adapter.selectListener = object : JlistSelectListener {
             override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean {
@@ -216,8 +215,9 @@ class JekinJobDialog(val project: Project, val apps: List<String>, val branchs: 
                     } else if (hasNewBuild && data is JekinsJob && data.building) {//正在构建
                         exitCode = Messages.showYesNoCancelDialog(project, "Create new job ${data.displayName} success , Keep tracking building result in background??", "Build Result", null)
                         if (exitCode == Messages.YES) {
-                            val task = JekinsTrackTask(project, "New Job ${data.displayName} $app $branch $type", data.url + apiJson)
+                            val task = JekinsTrackTask(project, "Building Job ${data.displayName} $app $branch $type", data.url + apiJson)
                             ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, BackgroundableProcessIndicator(task))
+                            this@JekinJobDialog.onCancel()
                         }
                     } else {
                         Messages.showMessageDialog("Create build fail,Please check reason", "Build Result", null)

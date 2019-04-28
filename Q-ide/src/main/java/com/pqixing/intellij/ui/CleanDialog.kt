@@ -13,7 +13,7 @@ import java.awt.event.WindowEvent
 import java.io.File
 import javax.swing.*
 
-class CleanDialog(val project: Project, val codeRoots: List<String>, val projects: List<String>, val modules: List<String>) : JDialog() {
+class CleanDialog(val project: Project, val codeRoots: List<String>, val projects: List<String>, val modules: List<String>) : BaseJDialog() {
     var contentPane: JPanel? = null
     var buttonOK: JButton? = null
     var buttonCancel: JButton? = null
@@ -28,7 +28,6 @@ class CleanDialog(val project: Project, val codeRoots: List<String>, val project
         setContentPane(contentPane)
         isModal = true
         getRootPane().defaultButton = buttonOK
-        UiUtils.centerDialog(this)
         buttonOK!!.addActionListener { e -> onOK() }
 
         buttonCancel!!.addActionListener { e -> onCancel() }

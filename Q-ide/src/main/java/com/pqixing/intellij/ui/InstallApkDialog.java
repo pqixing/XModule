@@ -46,7 +46,7 @@ import javax.swing.KeyStroke;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
-public class InstallApkDialog extends JDialog {
+public class InstallApkDialog extends BaseJDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton refresh;
@@ -109,7 +109,6 @@ public class InstallApkDialog extends JDialog {
         if (apkPath != null) addApksUrls(apkPath);
         else loadApkUrls();
 
-        UiUtils.centerDialog(this);
     }
 
     private void mockData() {
@@ -126,11 +125,12 @@ public class InstallApkDialog extends JDialog {
     private void refreshDatas() {
         devices.clear();
         AndroidDebugBridge bridge = AndroidSdkUtils.getDebugBridge(project);
+        int i = 0;
         if (bridge != null) for (IDevice d : bridge.getDevices()) {
             String avdName = d.getAvdName();
             if (avdName == null)
                 avdName = UiUtils.adbShellCommon(d, "getprop ro.product.brand", true) + "-" + UiUtils.adbShellCommon(d, "getprop ro.product.model", true);
-            devices.put(new JListInfo(avdName + "  " + d.getSerialNumber() + "  " + d.getState(), "", 0, false), d);
+            devices.put(new JListInfo(avdName + "  " + d.getSerialNumber() + "  " + d.getState(), "", 0, i++ == 0), d);
         }
         adapter.setDatas(new LinkedList<>(devices.keySet()));
     }
@@ -169,7 +169,7 @@ public class InstallApkDialog extends JDialog {
             int of = key.lastIndexOf(" ");
             indicator.setText("Download..." + apkUrl);
             apkUrl = DachenHelper.INSTANCE.downloadApk(project, key.substring(Math.max(0, of)).trim(), apkUrl);
-            final  String u = apkUrl;
+            final String u = apkUrl;
             ApplicationManager.getApplication().invokeLater(() -> addApksUrls(u));
         }
         File apkFile = new File(apkUrl);

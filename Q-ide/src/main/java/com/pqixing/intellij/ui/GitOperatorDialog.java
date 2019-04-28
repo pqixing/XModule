@@ -29,7 +29,7 @@ import javax.swing.text.JTextComponent;
 
 import git4idea.commands.GitLineHandlerAdapter;
 
-public class GitOperatorDialog extends JDialog {
+public class GitOperatorDialog extends BaseJDialog {
     public JPanel contentPane;
     public JButton buttonOK;
     public JButton buttonCancel;
@@ -64,7 +64,6 @@ public class GitOperatorDialog extends JDialog {
         setModal(false);
         getRootPane().setDefaultButton(buttonOK);
         gitListener = new GitListener(tLog);
-        UiUtils.centerDialog(this);
         buttonOK.addActionListener(e -> onOK());
 
         buttonCancel.addActionListener(e -> onCancel());

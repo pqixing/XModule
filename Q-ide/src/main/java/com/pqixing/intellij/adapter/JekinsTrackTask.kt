@@ -24,13 +24,14 @@ class JekinsTrackTask(project: Project?, @Nls(capitalization = Nls.Capitalizatio
             Thread.sleep(10000)
             try {
                 job = JSON.parseObject(URL(jobUrl).readText(), JekinsJob::class.java)
+                indicator.text = "$title -> ${getDuration(job)}"
             } catch (e: Exception) {
             }
         } while (job?.building == true)
         ApplicationManager.getApplication().invokeLater {
             val n = Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, title, "Build Finish -> ${job?.result} -> ${getDuration(job)}  <a href=\"Install\">Install</a> ", if (job?.result == JekinsJob.SUCCESS) NotificationType.INFORMATION else NotificationType.WARNING)
             n.setListener { _, _ ->
-                val apkDialog = InstallApkDialog(project, "Select you apk file")
+                val apkDialog = InstallApkDialog(project, null)
                 apkDialog.pack()
                 apkDialog.isVisible = true
             }

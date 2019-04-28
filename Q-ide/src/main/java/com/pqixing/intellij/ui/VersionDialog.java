@@ -38,7 +38,7 @@ import git4idea.branch.GitBranchesCollection;
 import git4idea.repo.GitRepository;
 import kotlin.Pair;
 
-public class VersionDialog extends JDialog {
+public class VersionDialog extends BaseJDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -54,7 +54,6 @@ public class VersionDialog extends JDialog {
         setModal(false);
         getRootPane().setDefaultButton(buttonOK);
         this.project = project;
-        UiUtils.centerDialog(this);
         setTitle("Create Tag For Branch");
         buttonOK.addActionListener(e -> onOK());
 
