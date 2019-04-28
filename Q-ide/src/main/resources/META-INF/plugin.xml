@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.pqixing.modularization.idea</id>
     <name>Modularization</name>
-    <version>1.3</version>
+    <version>1.4</version>
     <vendor email="pqixing86@gmail.com" url="https://github.com/pqixing/modularization">pqixing
     </vendor>
 
@@ -10,7 +10,7 @@
     </description>
 
     <change-notes>
-        Auto Add Project to Version Manager System
+        Add Jekins Build,Fix Bug !!
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
@@ -41,11 +41,11 @@
             <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
                 text="ToMaven" />
             <separator />
-            <action id="Modularization.Jekins" class="com.dachen.creator.actions.JekinsAction"
-                text="Jekins" />
-            <separator />
             <action id="Modularization.GitCheckout"
                 class="com.pqixing.intellij.actions.GitCheckoutAction" text="Checkout" />
+            <separator />
+            <action id="Modularization.Jekins" class="com.dachen.creator.actions.JekinsAction"
+                text="Jekins" />
             <separator />
 
             <group id="Modularization.Code" popup="true" text="ForCode">
