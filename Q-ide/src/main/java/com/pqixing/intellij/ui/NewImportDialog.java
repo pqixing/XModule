@@ -219,6 +219,7 @@ public class NewImportDialog extends BaseJDialog {
     }
 
     private void initBranchs(List<String> branchs) {
+        cbLoadBranch.addItem("");
         for (String b : branchs) {
             cbBranchs.addItem(b);
             cbLoadBranch.addItem(b);

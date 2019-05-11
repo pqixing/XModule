@@ -125,8 +125,9 @@
             <properties>
               <editable value="true"/>
               <model>
-                <item value="release"/>
+                <item value="auto"/>
                 <item value="inTest"/>
+                <item value="release"/>
                 <item value="outTest"/>
                 <item value="debug"/>
               </model>

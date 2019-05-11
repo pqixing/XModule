@@ -17,6 +17,7 @@ import com.pqixing.intellij.adapter.JekinsTrackTask
 import com.pqixing.intellij.adapter.JlistSelectListener
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.tools.FileUtils
+import com.pqixing.tools.TextUtils
 import java.awt.event.ActionListener
 import java.awt.event.KeyEvent
 import java.awt.event.WindowAdapter
@@ -26,11 +27,11 @@ import java.net.URL
 import java.util.*
 import javax.swing.*
 
-class JekinJobDialog(val project: Project, val apps: List<String>, val branchs: List<String>) : BaseJDialog() {
+class JekinJobDialog(val project: Project, val curModule: String?, val apps: Map<String, String>, val branchs: List<String>) : BaseJDialog() {
     val apiJson = "api/json"
-    val jobsUrl = "http://192.168.3.7:8080/jenkins/job/buildByIde/"
+    val buildJobName = "remoteBuild"
+    val jobsUrl = "http://192.168.3.7:8080/jenkins/job/$buildJobName/"
     val queueUrl = "http://192.168.3.7:8080/jenkins/queue/"
-    val buildJobName = "buildByIde"
     val logStr = "click item to see log"
 
     var queryTime = 5000L//5毫秒刷新时间
@@ -80,7 +81,7 @@ class JekinJobDialog(val project: Project, val apps: List<String>, val branchs: 
 
         }
         adapter.setDatas(mutableListOf<JListInfo>().apply {
-            for (i in 0..8) this.add(JListInfo(i.toString()))
+            for (i in 0..8) this.add(JListInfo(" "))
         })
         val action = ActionListener { Thread(Runnable { onNewJobQuery() }).start() }
         listJobButton.addActionListener(action)
@@ -88,7 +89,10 @@ class JekinJobDialog(val project: Project, val apps: List<String>, val branchs: 
         cbModule.addActionListener(action)
         cbBranch.addActionListener(action)
         cbType.addActionListener(action)
-        apps.forEach { cbModule.addItem(it) }
+        apps.forEach {
+            cbModule.addItem(it.key)
+            if(it.key== curModule) cbModule.selectedItem = curModule
+        }
         branchs.forEach { cbBranch.addItem(it) }
         //开启线程加载
         Thread(Runnable {
@@ -114,7 +118,7 @@ class JekinJobDialog(val project: Project, val apps: List<String>, val branchs: 
             cacheDir.mkdirs()
         }
         val path = "$id/$apiJson"
-        val cacheFile = File(cacheDir, path)
+        val cacheFile = File(cacheDir, "$buildJobName/$path")
         if (cacheFile.exists()) {
             return JSON.parseObject(cacheFile.readText(), JekinsJob::class.java)
         }
@@ -165,7 +169,7 @@ class JekinJobDialog(val project: Project, val apps: List<String>, val branchs: 
 
         var requestCount = 0
         var id: Int = safeNet(jobsUrl + "lastBuild/buildNumber").toInt()
-        while (requestCount++ < 20 && datas.size < 5 && id > 0) {
+        while (requestCount++ < 200 && datas.size < 5 && id > 0) {
             val job = loadJobById(id--)
                     ?: continue
             if (!checkParam(job.params)) continue
@@ -175,6 +179,7 @@ class JekinJobDialog(val project: Project, val apps: List<String>, val branchs: 
                 JekinsJob.FAILURE, JekinsJob.ABORTED -> 3
                 else -> 0
             }).apply { data = job })
+            if (requestCount % 50 == 0) adapter.setDatas(datas) //请求50次刷新一下
         }
         if (managerOkButton) buttonOK.isVisible = !inVisible
         adapter.setDatas(datas)
@@ -195,7 +200,8 @@ class JekinJobDialog(val project: Project, val apps: List<String>, val branchs: 
                 //停止运行
                 filter.forEach { safeNet(jobsUrl + it.number + "/stop?token=remotebyide") }
                 //开始运行
-                safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type")
+                safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${TextUtils.removeLineAndMark(apps[app]?.replace(" ", "")
+                        ?: "")}")
                 var i = 0
                 jlLog.text = "Waiting Result"
                 while (i++ < 5) {

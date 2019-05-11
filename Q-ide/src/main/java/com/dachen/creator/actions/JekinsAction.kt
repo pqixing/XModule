@@ -29,16 +29,13 @@ open class JekinsAction : AnAction() {
         }
         val module = e.getData(DataKey.create<Module>("module"))?.name
         val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
-        val apps = projectXml.allSubModules().filter { it.type == SubModuleType.TYPE_APPLICATION }.map { it.name }.toMutableList()
-        if (module != null&&apps.remove(module)) {
-            apps.add(0, module)
-        }
+        val apps = projectXml.allSubModules().filter { it.type == SubModuleType.TYPE_APPLICATION }.map { Pair(it.name,it.introduce)}.toMap()
         val repo = GitHelper.getRepo(File(basePath, "templet"), project)
         val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
         val localBranch = repo.currentBranchName ?: "master"
         branchs.remove(localBranch)
         branchs.add(0, localBranch)
-        val dialog = JekinJobDialog(project, apps, branchs)
+        val dialog = JekinJobDialog(project,module, apps, branchs)
         dialog.pack()
         dialog.isVisible = true
     }

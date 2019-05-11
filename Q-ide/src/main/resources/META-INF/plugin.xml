@@ -37,16 +37,16 @@
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I" />
             </action>
             <separator />
-
+            <action id="Modularization.Jekins" class="com.dachen.creator.actions.JekinsAction"
+                    text="Jekins" />
+            <separator />
             <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
                 text="ToMaven" />
             <separator />
             <action id="Modularization.GitCheckout"
                 class="com.pqixing.intellij.actions.GitCheckoutAction" text="Checkout" />
             <separator />
-            <action id="Modularization.Jekins" class="com.dachen.creator.actions.JekinsAction"
-                text="Jekins" />
-            <separator />
+
 
             <group id="Modularization.Code" popup="true" text="ForCode">
                 <action id="Modularization.Clean" class="com.pqixing.intellij.actions.CleanAction"
