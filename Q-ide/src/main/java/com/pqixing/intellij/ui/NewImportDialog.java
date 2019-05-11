@@ -1,46 +1,24 @@
 package com.pqixing.intellij.ui;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
-import com.intellij.util.messages.impl.Message;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 import com.pqixing.intellij.utils.GradleUtils;
 import com.pqixing.intellij.utils.UiUtils;
 import com.pqixing.tools.PropertiesUtils;
 import com.pqixing.tools.TextUtils;
-
+import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-
-import kotlin.Pair;
+import java.util.*;
 
 public class NewImportDialog extends BaseJDialog {
     public static final String BING_KEY = "syncRoot";
@@ -307,7 +285,7 @@ public class NewImportDialog extends BaseJDialog {
         properties.setProperty(CODEROOTS_KEY, list2Str(codeRoots));
 
         if (!newVcs.equals(oldVcs) || !newKey.equals(oldBind) || !newImport.equals(oldImports) || !exists)
-            PropertiesUtils.INSTANCE.writeProperties(new File(project.getBasePath(), UiUtils.IDE_PROPERTIES), properties);
+            ApplicationManager.getApplication().runWriteAction(() -> PropertiesUtils.INSTANCE.writeProperties(new File(project.getBasePath(), UiUtils.IDE_PROPERTIES), properties));
     }
 
     private List<String> str2List(String str) {
