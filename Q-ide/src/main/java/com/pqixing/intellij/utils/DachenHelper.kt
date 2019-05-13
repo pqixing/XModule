@@ -1,9 +1,14 @@
 package com.pqixing.intellij.utils
 
+import android.net.NetworkUtils
+import com.intellij.ide.fileTemplates.impl.UrlUtil
 import com.intellij.openapi.project.Project
+import com.intellij.util.io.URLUtil
 import com.pqixing.tools.FileUtils
+import org.apache.http.client.utils.URLEncodedUtils
 import java.io.File
 import java.net.URL
+import java.net.URLEncoder
 import javax.net.ssl.HttpsURLConnection
 
 object DachenHelper {
@@ -15,7 +20,7 @@ object DachenHelper {
         val updateTag = "<div class=\"desc\">"
         val nameTag = "<span class=\"name\">"
         val downloadTag = "downloadUrl=\""
-        val conn = URL(baseUrl+"android").openConnection()
+        val conn = URL(baseUrl + "android").openConnection()
         (conn as HttpsURLConnection).setHostnameVerifier { s, sslSession -> true }
 
         var name = ""
@@ -42,13 +47,16 @@ object DachenHelper {
      * 下载apk文件
      */
     fun downloadApk(project: Project, name: String, url: String): String {
-        val file = File(project.basePath, "build/apks/${name.replace(Regex(" |-|_|:"),"")}.apk")
+        val file = File(project.basePath, "build/apks/${name.replace(Regex(" |-|_|:"), "")}.apk")
         try {
             file.parentFile.mkdirs()
             FileUtils.delete(file)
-            URL(url).openConnection().apply {
-                (this as HttpsURLConnection).setHostnameVerifier { s, sslSession -> true }
-            }.getInputStream().copyTo(file.outputStream())
+            val lastS = url.lastIndexOf("/")
+            val lastD = url.lastIndexOf(".")
+            val newUrl = url.substring(0, lastS + 1) + URLEncoder.encode(url.substring(lastS + 1, lastD), "utf-8") + url.substring(lastD)
+            val connection = URL(newUrl).openConnection()
+            (connection as HttpsURLConnection).setHostnameVerifier { s, sslSession -> true }
+            connection.getInputStream().copyTo(file.outputStream())
         } catch (e: Exception) {
             return e.toString()
         }

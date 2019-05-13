@@ -215,13 +215,14 @@ public class InstallApkDialog extends BaseJDialog {
                 for (JListInfo j : devices.keySet()) {
                     if (j.getSelect()) select++;
                 }
+
+                buttonOK.setVisible(false);
+                String path = getPath(indicator);
+                if (path == null) return;
                 if (select <= 0) {
                     jlResult.setText("No Devices");
                     return;
                 }
-                buttonOK.setVisible(false);
-                String path = getPath(indicator);
-                if (path == null) return;
                 install(path, indicator);
                 indicator.setText("Install Finish");
                 buttonOK.setVisible(true);
