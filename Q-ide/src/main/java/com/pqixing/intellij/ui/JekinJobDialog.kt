@@ -24,6 +24,7 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.io.File
 import java.net.URL
+import java.net.URLEncoder
 import java.util.*
 import javax.swing.*
 
@@ -200,8 +201,8 @@ class JekinJobDialog(val project: Project, val curModule: String?, val apps: Map
                 //停止运行
                 filter.forEach { safeNet(jobsUrl + it.number + "/stop?token=remotebyide") }
                 //开始运行
-                safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${TextUtils.removeLineAndMark(apps[app]?.replace(" ", "")
-                        ?: "")}")
+                safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${URLEncoder.encode(TextUtils.removeLineAndMark(apps[app]?.replace(" ", "")?:""),"utf-8")
+                }")
                 var i = 0
                 jlLog.text = "Waiting Result"
                 while (i++ < 5) {
