@@ -1,11 +1,7 @@
 package com.pqixing.intellij.utils
 
-import android.net.NetworkUtils
-import com.intellij.ide.fileTemplates.impl.UrlUtil
 import com.intellij.openapi.project.Project
-import com.intellij.util.io.URLUtil
 import com.pqixing.tools.FileUtils
-import org.apache.http.client.utils.URLEncodedUtils
 import java.io.File
 import java.net.URL
 import java.net.URLEncoder
