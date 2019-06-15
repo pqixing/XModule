@@ -5,6 +5,10 @@ package com.pqixing.annotation;
  */
 public @interface LaunchActivity {
     String name() default "";
+
     String group() default "";
-    String intent() default "";
+
+    int index() default 0;
+
+    String type() default "activity";
 }

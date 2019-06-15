@@ -34,13 +34,13 @@ public class AspectPlugin implements Plugin<Project> {
             android.registerTransform(new DachenRegisterTransform(anExtends.getFilters()));
 
             //如果是release模式. 开启Arouter的注解模式
-            new PluginLaunch().apply(project);
+            if(!isDebug) new PluginLaunch().apply(project);
 
             //register AspectTransform
             if (open || !isDebug) {
                 project.afterEvaluate(p -> {
                     ajxExtends.setEnabled(anExtends.getApectjxApps().contains(project.getName()));
-                    if (ajxExtends.getEnabled()) System.out.println("---------------> open Aspect");
+                    if (ajxExtends.getEnabled()) System.out.println("-------------------- Enable Aspect ---------------------");
                 });
                 android.registerTransform(new AJXTransform(project));
             }
