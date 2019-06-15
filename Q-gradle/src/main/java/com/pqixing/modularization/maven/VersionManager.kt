@@ -214,8 +214,7 @@ object VersionManager : OnClear {
             return
         }
         //如果是ToMaven,则更新,否则,不需要每次都更新
-        val startTask = ManagerPlugin.getPlugin().project.gradle.startParameter.toString()
-        if (startTask.contains("ToMaven")) git.pull()
+        if (ManagerPlugin.getPlugin().runTaskNames.toString().contains("ToMaven")) git.pull()
 //        if (!GitUtils.checkoutBranch(git, vBranch, true)) {
 //            if (!GitUtils.createBranch(git, vBranch)) {
 //                ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "can checkout to branch : $vBranch")

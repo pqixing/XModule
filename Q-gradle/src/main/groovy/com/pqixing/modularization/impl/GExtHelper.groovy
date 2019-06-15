@@ -1,17 +1,14 @@
 package com.pqixing.modularization.impl
 
 import com.android.build.gradle.AppExtension
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariant
-import com.pqixing.modularization.iterface.IExtHelper
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
 import org.jetbrains.annotations.NotNull
 
-public class GExtHelper implements IExtHelper {
+public class GExtHelper implements IGExtHelper {
 
     public Object getExtValue(Project project, String key) {
         try {

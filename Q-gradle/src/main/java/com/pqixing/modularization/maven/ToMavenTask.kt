@@ -5,7 +5,7 @@ import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.iterface.IExtHelper
+import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.modularization.utils.execute

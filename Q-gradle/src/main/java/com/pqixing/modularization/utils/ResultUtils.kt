@@ -39,7 +39,9 @@ object ResultUtils {
                 }
                 logs.add(log)
                 FileUtils.writeText(ideFile, logs.joinToString("\n"))
-            } while (ideFile.readText() != log && logCount <= 6)//如果写入失败并且次数小于6次,则尝试继续写入
+
+                Thread.sleep(500)
+            } while (!ideFile.readText().endsWith(log) && logCount <= 7)//如果写入失败并且次数小于6次,则尝试继续写入
         }
         if (exit) {
             Thread.sleep(500)

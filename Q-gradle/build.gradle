@@ -29,7 +29,7 @@ repositories {
         dirs "libs"
     }
 }
-ext.mLocalVersion = "1.1.0"
+ext.mLocalVersion = "1.1.1"
 ext.mVersion = "1.1"
 ext.mArtifactId = "modularization"
 apply from: '../script/bintray.gradle'
@@ -51,10 +51,11 @@ dependencies {
     implementation 'com.android.tools.build:gradle:2.3.0'
 }
 
-
 afterEvaluate {
-    project.compileGroovy.dependsOn.remove('compileJava')
-    project.compileKotlin.dependsOn project.compileGroovy
-    compileKotlin.classpath += files(compileGroovy.destinationDir)
-    classes.dependsOn compileKotlin
+    Task j = project.compileJava
+    Task g = project.compileGroovy
+    g.getDependsOn().clear()
+    j.dependsOn(g)
+
+    j.classpath += files(g.destinationDir)
 }

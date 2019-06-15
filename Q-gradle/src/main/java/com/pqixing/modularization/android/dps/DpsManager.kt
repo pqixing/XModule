@@ -3,12 +3,11 @@ package com.pqixing.modularization.android.dps
 import com.pqixing.Tools
 import com.pqixing.help.MavenPom
 import com.pqixing.help.XmlHelper
-import com.pqixing.model.SubModuleType
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.interfaces.OnClear
-import com.pqixing.modularization.iterface.IExtHelper
+import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.manager.ManagerExtends
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
@@ -106,7 +105,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
          * 缺失了部分依赖
          */
         if (loseList.isNotEmpty()) {
-            if (plugin.config.allowLose) Tools.println("ResolveDps -> lose dps -> $loseList")
+            if (checkLoseEnable()) Tools.println("ResolveDps -> lose dps -> $loseList")
             else Tools.printError(-1, "ResolveDps -> lose dps -> $loseList")
         }
         val sb = java.lang.StringBuilder("dependencies {  // isApp : ${plugin.isApp} -> buildAsApp : ${plugin.buildAsApp}\n")
@@ -117,6 +116,13 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
                 .append("}\n")
         return sb.toString()
     }
+
+    private fun checkLoseEnable(): Boolean {
+        if (plugin.config.allowLose) return true
+        val apiChild = plugin.subModule.child ?: return false
+        return loseList.size == 1 && loseList[0] == apiChild.name && plugin.runTaskNames.find { it.contains("ToMaven:${apiChild.name}") } != null
+    }
+
 
     /**
      * 处理自身的依赖，主要针对Library_api类型

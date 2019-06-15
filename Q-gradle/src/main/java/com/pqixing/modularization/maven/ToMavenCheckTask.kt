@@ -9,7 +9,7 @@ import com.pqixing.modularization.android.dps.DpComponents
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.iterface.IExtHelper
+import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.utils.GitUtils
@@ -30,11 +30,11 @@ open class ToMavenCheckTask : BaseTask() {
     }
 
     /**
-     * toMaven时,忽略检查项目
-     * 0:UnCheck null
-     * 1:UnCheck branch 不校验新分支第一次提交是否需要升级版本号
-     * 2:UnCheck version  不校验是否和上次代码是否相同,允许提交重复
-     * 3:UnCheck change  不检验本地是否存在未提交修改
+     * toMaven时,忽略检查项目, oldType 兼容旧版ide插件,newType 类型可以组合使用
+     * oldType 0, newType:0   :UnCheck null
+     * oldType 1, newType:1<<4:UnCheck branch 不校验新分支第一次提交是否需要升级版本号
+     * oldType 2, newType:1<<5:UnCheck version  不校验是否和上次代码是否相同,允许提交重复
+     * oldType 3, newType:1<<6:UnCheck change  不检验本地是否存在未提交修改
      */
     var unCheck = 0
 
@@ -55,8 +55,8 @@ open class ToMavenCheckTask : BaseTask() {
         val subModule = plugin.subModule
 //        val lastLog = plugin.subModule
         val artifactId = subModule.name
-        if(subModule.getBranch()!=extends.docRepoBranch){
-            Tools.println(unCheck - 1, "${subModule.name} branch is ${subModule.getBranch()} , do not match doc branch $extends.docRepoBranch")
+        if (subModule.getBranch() != extends.docRepoBranch) {
+            Tools.println(unCheck(1), "${subModule.name} branch is ${subModule.getBranch()} , do not match doc branch $extends.docRepoBranch")
             return
         }
 
@@ -104,7 +104,7 @@ open class ToMavenCheckTask : BaseTask() {
 
     private fun checkGitStatus(git: Git, subModule: SubModule) {
         if (!GitUtils.checkIfClean(git, getRelativePath(subModule.path))) {
-            Tools.println(unCheck - 3, "${subModule.name} Git status is not clean, please check your file!!")
+            Tools.println(unCheck(3), "${subModule.name} Git status is not clean, please check your file!!")
         }
     }
 
@@ -135,17 +135,28 @@ open class ToMavenCheckTask : BaseTask() {
 
         //如果匹配到的版本不是当前分支，则提示升级版本号
         if (matchBranch != branch) {
-            Tools.println(unCheck - 1, "$artifactId Not allow user the same base version on new branch , please update before ToMaven!!!")
+            Tools.println(unCheck(1), "$artifactId Not allow user the same base version on new branch , please update before ToMaven!!!")
         }
         val params = UrlUtils.getParams(DpsManager.getPom(matchBranch, artifactId, "$baseVersion.$lastVersion").name)
         val hash = params["hash"] ?: ""
         val commitTime = params["commitTime"]?.toInt() ?: 0
         if (hash == revCommit.name || revCommit.commitTime < commitTime) {
             //距离上次提交没有变更时,视为成功
-            ResultUtils.writeResult("$matchBranch:$artifactId:$baseVersion.$lastVersion The code are not change", 0, unCheck < 2)
+            ResultUtils.writeResult("$matchBranch:$artifactId:$baseVersion.$lastVersion The code are not change", 0, unCheck(2)!=0)
         }
     }
 
+    /**
+     * 检查是否需要忽略错误
+     * @return 返回结果 0,uncheckType, <0 , request check
+     */
+    private fun unCheck(oldType: Int): Int {
+        if (unCheck == 0) return -1
+        if (unCheck < 4) return unCheck - oldType
+
+        val newType = 1 shl (oldType + 3)
+        return (unCheck and newType) - 1
+    }
 
     private fun checkBaseVersion(baseVersion: String) {
         if (!TextUtils.isBaseVersion(baseVersion)) Tools.printError(-1, "ToMavenCheckTask $baseVersion is not base version, try x.x etc: 1.0")

@@ -9,7 +9,7 @@ import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.iterface.IExtHelper
+import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager

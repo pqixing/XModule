@@ -5,7 +5,7 @@ import com.pqixing.Config
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.interfaces.OnClear
-import com.pqixing.modularization.iterface.IExtHelper
+import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.tools.FileUtils
@@ -20,6 +20,7 @@ import java.io.File
  */
 
 abstract class BasePlugin : Plugin<Project>, IPlugin {
+    var runTaskNames = mutableListOf<String>()
     lateinit var p: Project
     val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
@@ -46,6 +47,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         }
 
     override fun apply(project: Project) {
+        runTaskNames = project.gradle.startParameter.taskNames.toMutableList()
         initProject(project)
     }
 

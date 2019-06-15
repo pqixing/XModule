@@ -1,0 +1,40 @@
+apply plugin: 'groovy'
+apply plugin: 'kotlin'
+apply plugin: 'java'
+jar {
+    from {
+        zipTree(new File(project.projectDir.absolutePath + "/libs/aspectjtools.jar"))
+    }
+}
+dependencies {
+    repositories {
+        mavenLocal()
+    }
+
+    compile gradleApi()
+    compile localGroovy()
+
+    compileOnly 'com.android.tools.build:gradle:3.1.2'
+//    compile "org.aspectj:aspectjtools:1.8.13"
+    implementation 'org.aspectj:aspectjrt:1.8.9'
+    implementation ('com.alibaba:arouter-register:1.0.2'){
+        exclude group :"com.android.tools.build"
+    }
+//    implementation 'com.android.tools.build:transform-api:1.5.0'
+    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+//    compile 'commons-io:commons-io:2.4'
+    compile files('libs/aspectjtools.jar')
+}
+ext.mVersion = "1.1"
+ext.mLocalVersion = "1.0.2.2"
+ext.mArtifactId = "aspectjx"
+apply from: '../script/bintray.gradle'
+
+afterEvaluate {
+    Task j = project.compileJava
+    Task g = project.compileGroovy
+    g.getDependsOn().clear()
+    j.dependsOn(g)
+    j.classpath += files(g.destinationDir)
+}

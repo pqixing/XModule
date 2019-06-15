@@ -1,1 +1,1 @@
-include ":Q-tools",":Q-gradle",":Q-ide","Q-annotation","Q-regester"
+include ":Q-tools",":Q-gradle",":Q-ide","Q-annotation","Q-aspect","Q-aspectjx"

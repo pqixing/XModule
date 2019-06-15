@@ -4,7 +4,8 @@ import com.pqixing.Tools
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.iterface.IExtHelper
+import com.pqixing.modularization.IExtHelper
+import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
@@ -17,7 +18,7 @@ open class BuildApkTask : BaseTask() {
     //解析出第一个Dev渠道的构建任务，防止有渠道包
     init {
         //如果当前有buildApk任务,则初始化
-        if (project.gradle.startParameter.taskNames.contains(":${project.name}:BuildApk"))
+        if (ManagerPlugin.getPlugin().runTaskNames.contains(":${project.name}:BuildApk"))
             project.afterEvaluate { p ->
                 val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
                 val plugin = AndroidPlugin.getPluginByProject(project)
