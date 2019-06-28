@@ -13,6 +13,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiFile
 import com.pqixing.intellij.ui.InstallApkDialog
+import com.pqixing.intellij.utils.GradleTaskCallBack
 import com.pqixing.intellij.utils.GradleUtils
 import jdk.internal.util.xml.impl.Pair
 import java.io.File
@@ -27,11 +28,11 @@ open class InstallApkAction : AnAction() {
 
         val module = e.getData(DataKey.create<Module>("module"))
         val moduleName = module?.name ?: ""
-        val file = e.getData(PlatformDataKeys.VIRTUAL_FILE)?.canonicalPath?:e.project!!.basePath + "/build/apks"
-        val projectMode = /*"ProjectViewPopup".equals(place)||*/"MainMenu" == e.place || module == null || project.name.replace(" ", "") == moduleName||file.endsWith(".apk");
+        val file = e.getData(PlatformDataKeys.VIRTUAL_FILE)?.canonicalPath ?: e.project!!.basePath + "/build/apks"
+        val projectMode = /*"ProjectViewPopup".equals(place)||*/"MainMenu" == e.place || module == null || project.name.replace(" ", "") == moduleName || file.endsWith(".apk");
 
         if (projectMode) {
-            val apkDialog = InstallApkDialog(e.project, if(file.endsWith(".apk")) file else findTargetDir(e).absolutePath)
+            val apkDialog = InstallApkDialog(e.project, if (file.endsWith(".apk")) file else findTargetDir(e).absolutePath)
             apkDialog.pack()
             apkDialog.isVisible = true
             return
@@ -47,16 +48,12 @@ open class InstallApkAction : AnAction() {
         }
         val runTaskId = System.currentTimeMillis().toString()
 
-        val callBack = Runnable {
-            val result = GradleUtils.getResult(GradleUtils.getLogFile(project.basePath!!), runTaskId)
-            if (!result.first) {
-                ApplicationManager.getApplication().invokeLater {
-                    Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "BuildApk", "Build $moduleName Apk Fail !!", NotificationType.WARNING).notify(project)
-                }
-                return@Runnable
+        val callBack = GradleTaskCallBack { result, log ->
+            if (!result) ApplicationManager.getApplication().invokeLater {
+                Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "BuildApk", "Build $moduleName Apk Fail !!", NotificationType.WARNING).notify(project)
             }
-            ApplicationManager.getApplication().invokeLater {
-                val apkDialog = InstallApkDialog(project, result.second)
+            else ApplicationManager.getApplication().invokeLater {
+                val apkDialog = InstallApkDialog(project, log)
                 apkDialog.pack()
                 apkDialog.isVisible = true
             }

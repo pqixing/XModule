@@ -115,13 +115,12 @@ public class VersionDialog extends BaseJDialog {
         GradleUtils.INSTANCE.runTask(project, Arrays.asList(":VersionIndex", ":VersionTag"),
                 ProgressExecutionMode.IN_BACKGROUND_ASYNC, false
                 , runTaskId, envs
-                , () -> {
-                    Pair<Boolean, String> result = GradleUtils.INSTANCE.getResult(project, runTaskId);
-                    if (!result.getFirst()) {
-                        new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "VersionTag", "Gradle Task Error " + result.getSecond(), NotificationType.WARNING).notify(project);
+                , (s, l) -> {
+                    if (!s) {
+                        new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "VersionTag", "Gradle Task Error " + l, NotificationType.WARNING).notify(project);
 
                     } else ApplicationManager.getApplication().invokeLater(() -> {
-                        FileEditorManager.getInstance(project).openFile(Objects.requireNonNull(VfsUtil.findFileByIoFile(new File(result.getSecond()), true)), true);
+                        FileEditorManager.getInstance(project).openFile(Objects.requireNonNull(VfsUtil.findFileByIoFile(new File(l), true)), true);
                     });
 
                 });

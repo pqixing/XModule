@@ -7,7 +7,9 @@ import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import org.gradle.api.GradleException
 import java.io.File
+import java.net.Socket
 import java.util.*
+
 
 /**
  * 用于Ide的工具
@@ -26,27 +28,44 @@ object ResultUtils {
         if (ide) {
             val log = "${Keys.PREFIX_IDE_LOG}?${Keys.RUN_TASK_ID}=${getProperty(Keys.RUN_TASK_ID)
                     ?: System.currentTimeMillis()}&endTime=${System.currentTimeMillis()}&exitCode=$exitCode&msg=$msg"
-            val plugin = ManagerPlugin.getPlugin()
-            var logCount = 0
-            do {
-                val ideFile = File(plugin.rootDir, ".idea/modularization.log${logCount++}")
-                //只保留10条记录
-                val logs = LinkedList<String>()
-                FileUtils.readText(ideFile)?.lines()?.apply {
-                    for (i in 0 until (Math.min(19, size))) {
-                        logs.addFirst(get(size - 1 - i))
+            if (!writeToSocket(log)) {
+                val plugin = ManagerPlugin.getPlugin()
+                var logCount = 0
+                do {
+                    val ideFile = File(plugin.rootDir, ".idea/modularization.log${logCount++}")
+                    //只保留10条记录
+                    val logs = LinkedList<String>()
+                    FileUtils.readText(ideFile)?.lines()?.apply {
+                        for (i in 0 until (Math.min(19, size))) {
+                            logs.addFirst(get(size - 1 - i))
+                        }
                     }
-                }
-                logs.add(log)
-                FileUtils.writeText(ideFile, logs.joinToString("\n"))
+                    logs.add(log)
+                    FileUtils.writeText(ideFile, logs.joinToString("\n"))
 
-                Thread.sleep(500)
-            } while (!ideFile.readText().endsWith(log) && logCount <= 7)//如果写入失败并且次数小于6次,则尝试继续写入
+                    Thread.sleep(500)
+                } while (!ideFile.readText().endsWith(log) && logCount <= 7)//如果写入失败并且次数小于6次,则尝试继续写入
+            }
         }
         if (exit) {
             Thread.sleep(500)
             throw  GradleException(msg)
         }
+    }
+
+    /**
+     * 尝试通过socket写入数据
+     */
+    fun writeToSocket(log: String) = try {
+        val socket = Socket("localhost", getProperty("ideSocketPort")?.toInt()?:8890)
+        val outputStream = socket.getOutputStream().bufferedWriter()//获取一个输出流，向服务端发送信息
+        outputStream.write(log + "\n")
+        outputStream.flush()
+        outputStream.close()
+        socket.close()
+        true
+    } catch (e: Exception) {
+        false
     }
 
     fun getProperty(key: String): String? = try {

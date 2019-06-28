@@ -114,10 +114,9 @@ public class NewImportDialog extends BaseJDialog {
         String taskId = System.currentTimeMillis() + "";
         Map<String, String> envs = new HashMap<>(GradleUtils.INSTANCE.getDefEnvs());
         envs.put("taskBranch", branch);
-        GradleUtils.INSTANCE.runTask(project, Arrays.asList(":LoadAllBranchModule"), ProgressExecutionMode.IN_BACKGROUND_ASYNC, false, taskId, envs, () -> {
-            Pair<Boolean, String> result = GradleUtils.INSTANCE.getResult(GradleUtils.INSTANCE.getLogFile(project.getBasePath()), taskId);
-            if (!result.getFirst()) return;
-            String[] strings = result.getSecond().replace("#", ",").split(",");
+        GradleUtils.INSTANCE.runTask(project, Arrays.asList(":LoadAllBranchModule"), ProgressExecutionMode.IN_BACKGROUND_ASYNC, false, taskId, envs, (s,l) -> {
+            if (!s) return;
+            String[] strings = l.replace("#", ",").split(",");
             if (strings.length > 0) {
                 imports.clear();
                 for (int i = 0; i < strings.length; i++) {

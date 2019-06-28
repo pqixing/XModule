@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.ToMavenDialog
+import com.pqixing.intellij.utils.GradleTaskCallBack
 import com.pqixing.intellij.utils.GradleUtils
 
 class ToMavenAction : AnAction() {
@@ -39,27 +40,24 @@ class ToMavenAction : AnAction() {
         dialog.isVisible = true
     }
 
-    private fun toMaven(dialog: ToMavenDialog, tModules: List<JListInfo>) = object : Runnable {
+    private fun toMaven(dialog: ToMavenDialog, tModules: List<JListInfo>) =object :GradleTaskCallBack {
         var i = -1
         var check = false//是否需要校验结果
         var runTaskId = ""
-        val logFile = GradleUtils.getLogFile(project.basePath!!)
         var excute = 0
         var envs = GradleUtils.defEnvs.toMutableMap().apply {
             put("toMavenUnCheck", dialog.unCheckCode)
             put("toMavenDesc", dialog.desc)
         }
 
-        override fun run() {
+        override fun onTaskEnd(success: Boolean, result: String?) {
             if (check) {//检查上传的任务是否正确
-                val result = GradleUtils.getResult(logFile, runTaskId)
-                var succes = result.first
                 val jListInfo = tModules[i]
-                jListInfo.staue = if (succes) 1 else 3
-                jListInfo.log = result.second
-                if (!succes) {//失败是展示结果
+                jListInfo.staue = if (success) 1 else 3
+                jListInfo.log = result?:""
+                if (!success) {//失败是展示结果
                     ApplicationManager.getApplication().invokeLater {
-                        dialog.updateUI(!succes)
+                        dialog.updateUI(!success)
                         dialog.isVisible = true
                     }
                     return
@@ -82,8 +80,8 @@ class ToMavenAction : AnAction() {
             } else {
                 check = false
                 runTaskId = ""
-                this.run()//循环运行
+                this.onTaskEnd(false,null)//循环运行
             }
         }
-    }.run()
+    }.onTaskEnd(false,null)
 }
