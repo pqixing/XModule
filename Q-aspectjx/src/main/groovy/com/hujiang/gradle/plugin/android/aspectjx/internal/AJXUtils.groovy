@@ -144,9 +144,12 @@ class AJXUtils {
         transformInvocation.outputProvider.deleteAll()
 
         transformInvocation.inputs.each { TransformInput input ->
-            input.directoryInputs.each { DirectoryInput dirInput->
-                File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", dirInput.contentTypes, dirInput.scopes, Format.JAR)
-                AJXUtils.mergeJar(dirInput.file, excludeJar)
+            input.directoryInputs.each { DirectoryInput dir->
+//                File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", dirInput.contentTypes, dirInput.scopes, Format.JAR)
+//                AJXUtils.mergeJar(dirInput.file, excludeJar)
+                //生成输出路径
+                def dest = transformInvocation.outputProvider.getContentLocation(dir.name, dir.contentTypes, dir.scopes, Format.DIRECTORY)
+                FileUtils.copyDirectory(dir.file, dest)
             }
 
             input.jarInputs.each { JarInput jarInput->
@@ -161,10 +164,13 @@ class AJXUtils {
 
     static void incrementalCopyFiles(TransformInvocation transformInvocation) {
         transformInvocation.inputs.each {TransformInput input ->
-            input.directoryInputs.each {DirectoryInput dirInput ->
-                if (dirInput.changedFiles.size() > 0) {
-                    File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", dirInput.contentTypes, dirInput.scopes, Format.JAR)
-                    AJXUtils.mergeJar(dirInput.file, excludeJar)
+            input.directoryInputs.each {DirectoryInput dir ->
+                if (dir.changedFiles.size() > 0) {
+//                    File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", dirInput.contentTypes, dirInput.scopes, Format.JAR)
+//                    AJXUtils.mergeJar(dirInput.file, excludeJar)
+                    //生成输出路径
+                    def dest = transformInvocation.outputProvider.getContentLocation(dir.name, dir.contentTypes, dir.scopes, Format.DIRECTORY)
+                    FileUtils.copyDirectory(dir.file, dest)
                 }
             }
 
