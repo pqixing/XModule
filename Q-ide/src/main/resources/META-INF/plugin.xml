@@ -14,7 +14,7 @@
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="181.0" />
+    <idea-version since-build="181.0"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -29,60 +29,53 @@
     <depends>org.jetbrains.android</depends>
     <actions>
         <group id="QTools" popup="true" text="QTools">
-            <add-to-group group-id="BuildMenu" anchor="first" />
-            <add-to-group group-id="EditorPopupMenu" anchor="first" />
-            <add-to-group group-id="ProjectViewPopupMenu" anchor="first" />
-            <action id="Modularization.Import" class="com.pqixing.intellij.actions.ImportAction"
-                text="Import">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I" />
-            </action>
-            <separator />
+            <add-to-group group-id="BuildMenu" anchor="first"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
             <action id="Modularization.Jekins" class="com.dachen.creator.actions.JekinsAction"
-                    text="Jekins" />
-            <separator />
+                    text="Jekins"/>
+            <action id="Modularization.Import" class="com.pqixing.intellij.actions.ImportAction"
+                    text="Import">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
+            </action>
             <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
-                text="ToMaven" />
-            <separator />
+                    text="ToMaven"/>
+            <separator/>
+            <action id="Modularization.Clean" class="com.pqixing.intellij.actions.CleanAction"
+                    text="Clean"/>
+            <action id="Modularization.GitState"
+                    class="com.pqixing.intellij.actions.GitStateAction" text="GitState"/>
+            <action id="Modularization.GitSync"
+                    class="com.pqixing.intellij.actions.GitSyncAction" text="GitClone"/>
+            <action id="Modularization.GitMerge"
+                    class="com.pqixing.intellij.actions.GitBranchAction" text="GitMerge"/>
+
+
             <action id="Modularization.GitCheckout"
-                class="com.pqixing.intellij.actions.GitCheckoutAction" text="Checkout" />
-            <separator />
+                    class="com.pqixing.intellij.actions.GitCheckoutAction" text="Checkout"/>
 
 
-            <group id="Modularization.Code" popup="true" text="ForCode">
-                <action id="Modularization.Clean" class="com.pqixing.intellij.actions.CleanAction"
-                    text="Clean" />
-                <separator />
-                <action id="Modularization.GitSync"
-                    class="com.pqixing.intellij.actions.GitSyncAction" text="GitSync" />
-                <separator />
-                <action id="Modularization.GitState"
-                    class="com.pqixing.intellij.actions.GitStateAction" text="GitState" />
-                <separator />
+            <separator/>
 
-                <action id="Modularization.GitBranch"
-                    class="com.pqixing.intellij.actions.GitBranchAction" text="GitBranch" />
-                <separator />
-                <action id="Modularization.ReIndexVersion"
-                    class="com.pqixing.intellij.actions.ReIndexVersionAction" text="SyncVersion" />
-            </group>
-            <separator />
-
-            <action id="Modularization.BuildApk" class="com.pqixing.intellij.actions.BuildApkAction" text="RunModule" />
-            <action id="Modularization.InstallApk" class="com.pqixing.intellij.actions.InstallApkAction" text="InstallApk" />
-            <separator />
+            <action id="Modularization.BuildApk" class="com.pqixing.intellij.actions.BuildApkAction" text="BuildApk">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift B"/>
+            </action>
+            <action id="Modularization.InstallApk" class="com.pqixing.intellij.actions.InstallApkAction"
+                    text="InstallApk"/>
             <action id="Modularization.DpsAnalyse"
-                class="com.pqixing.intellij.actions.DpsAnalyseAction" text="DpsAnalyse" />
-            <separator />
-            <group id="Modularization.Creator" popup="true" text="CodeCreator">
-                <action id="Modularization.mvpcreator" class="com.dachen.creator.actions.MvpCreator"
-                    text="MvpCreator" description="auto create MVP code" />
-                <action id="Modularization.routercreator"
+                    class="com.pqixing.intellij.actions.DpsAnalyseAction" text="DpsAnalyse"/>
+            <action id="Modularization.ReIndexVersion"
+                    class="com.pqixing.intellij.actions.ReIndexVersionAction" text="VersionSync"/>
+
+            <separator/>
+            <action id="Modularization.routercreator"
                     class="com.dachen.creator.actions.PathCreator" text="PathCreator"
-                    description="router auto create code" />
-                <action id="Modularization.modelcreator"
+                    description="router auto create code"/>
+            <action id="Modularization.mvpcreator" class="com.dachen.creator.actions.MvpCreator"
+                    text="MvpCreator" description="auto create MVP code"/>
+            <action id="Modularization.modelcreator"
                     class="com.dachen.creator.actions.ModelCreator" text="ModelCreator"
-                    description="auto create model code" />
-            </group>
+                    description="auto create model code"/>
             >
         </group>
     </actions>
