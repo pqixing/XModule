@@ -25,39 +25,35 @@ object ResultUtils {
      */
     fun writeResult(msg: String, exitCode: Int = 0, exit: Boolean = exitCode != 0) {
         Tools.println(msg)
-        if (ide) {
-            val log = "${Keys.PREFIX_IDE_LOG}?${Keys.RUN_TASK_ID}=${getProperty(Keys.RUN_TASK_ID)
-                    ?: System.currentTimeMillis()}&endTime=${System.currentTimeMillis()}&exitCode=$exitCode&msg=$msg"
-            if (!writeToSocket(log)) {
-                val plugin = ManagerPlugin.getPlugin()
-                var logCount = 0
-                do {
-                    val ideFile = File(plugin.rootDir, ".idea/modularization.log${logCount++}")
-                    //只保留10条记录
-                    val logs = LinkedList<String>()
-                    FileUtils.readText(ideFile)?.lines()?.apply {
-                        for (i in 0 until (Math.min(19, size))) {
-                            logs.addFirst(get(size - 1 - i))
-                        }
-                    }
-                    logs.add(log)
-                    FileUtils.writeText(ideFile, logs.joinToString("\n"))
+        val log = "${Keys.PREFIX_IDE_LOG}?${Keys.RUN_TASK_ID}=${getProperty(Keys.RUN_TASK_ID)
+                ?: System.currentTimeMillis()}&endTime=${System.currentTimeMillis()}&exitCode=$exitCode&msg=$msg"
 
-                    Thread.sleep(500)
-                } while (!ideFile.readText().endsWith(log) && logCount <= 7)//如果写入失败并且次数小于6次,则尝试继续写入
-            }
+        if (ide && !writeToSocket(log)) {
+            val rootDir = ManagerPlugin.getPlugin().rootDir
+            var logCount = 0
+            do {
+                val ideFile = File(rootDir, ".idea/modularization.log${logCount++}")
+                //只保留10条记录
+                val logs = LinkedList<String>()
+                FileUtils.readText(ideFile)?.lines()?.apply {
+                    for (i in 0 until (Math.min(19, size))) {
+                        logs.addFirst(get(size - 1 - i))
+                    }
+                }
+                logs.add(log)
+                FileUtils.writeText(ideFile, logs.joinToString("\n"))
+
+                Thread.sleep(500)
+            } while (!ideFile.readText().endsWith(log) && logCount <= 7)//如果写入失败并且次数小于6次,则尝试继续写入
         }
-        if (exit) {
-            Thread.sleep(500)
-            throw  GradleException(msg)
-        }
+        if (exit) throw  GradleException(msg)
     }
 
     /**
      * 尝试通过socket写入数据
      */
-    fun writeToSocket(log: String) = try {
-        val socket = Socket("localhost", getProperty("ideSocketPort")?.toInt()?:8890)
+    private fun writeToSocket(log: String) = try {
+        val socket = Socket("localhost", getProperty("ideSocketPort")?.toInt() ?: 8890)
         val outputStream = socket.getOutputStream().bufferedWriter()//获取一个输出流，向服务端发送信息
         outputStream.write(log + "\n")
         outputStream.flush()

@@ -18,17 +18,20 @@ import com.pqixing.intellij.adapter.JlistSelectListener
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
+import java.awt.Desktop
 import java.awt.event.ActionListener
 import java.awt.event.KeyEvent
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.io.File
+import java.net.URI
 import java.net.URL
 import java.net.URLEncoder
+import java.text.SimpleDateFormat
 import java.util.*
 import javax.swing.*
 
-class JekinJobDialog(val project: Project, val curModule: String?, val apps: Map<String, String>, val branchs: List<String>) : BaseJDialog() {
+class JekinJobDialog(val project: Project, val userName: String?, val curModule: String?, val apps: Map<String, String>, val branchs: List<String>) : BaseJDialog() {
     val apiJson = "api/json"
     val buildJobName = "remoteBuild"
     val jobsUrl = "http://192.168.3.7:8080/jenkins/job/$buildJobName/"
@@ -38,18 +41,18 @@ class JekinJobDialog(val project: Project, val curModule: String?, val apps: Map
     var queryTime = 5000L//5毫秒刷新时间
     private lateinit var contentPane: JPanel
     private lateinit var buttonOK: JButton
+    private lateinit var jspJobs: JScrollPane
     private lateinit var jlLog: JLabel
-    private lateinit var buttonCancel: JButton
     private lateinit var jlJobs: JList<JListInfo>
-    private lateinit var cbModule: JComboBox<String>
+    private lateinit var jlApps: JList<JListInfo>
     private lateinit var cbBranch: JComboBox<String>
     private lateinit var cbType: JComboBox<String>
-    private lateinit var listJobButton: JButton
+    private lateinit var cbAllLog: JCheckBox
     private var adapter: JListSelectAdapter
+    private var appAdapter: JListSelectAdapter
 
-    private var app: String = ""
-    private var branch: String = ""
-    private var type: String = ""
+    val format = SimpleDateFormat("MM-dd HH:mm")
+
     val cacheDir: File = File(project.basePath, ".idea/cache/net")
 
     init {
@@ -59,8 +62,6 @@ class JekinJobDialog(val project: Project, val curModule: String?, val apps: Map
         title = "Jekins Build"
         buttonOK!!.addActionListener { onOK() }
 
-        buttonCancel!!.addActionListener { onCancel() }
-
         // call onCancel() when cross is clicked
         defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
         addWindowListener(object : WindowAdapter() {
@@ -68,44 +69,62 @@ class JekinJobDialog(val project: Project, val curModule: String?, val apps: Map
                 onCancel()
             }
         })
+
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction({ onCancel() }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
         adapter = JListSelectAdapter(jlJobs, false)
         adapter.selectListener = object : JlistSelectListener {
             override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean {
                 val job = items.last().data as? JekinsJob ?: return true
-                val jobLog = JekinJobLog(project, job.url)
-                jobLog.pack()
-                jobLog.isVisible = true
+                if (job.displayName == null) {
+                    Desktop.getDesktop().browse(URI(jobsUrl))
+                } else {
+                    val jobLog = JekinJobLog(project, job.url)
+                    jobLog.pack()
+                    jobLog.isVisible = true
+                }
                 return true
             }
-
         }
+
         adapter.setDatas(mutableListOf<JListInfo>().apply {
-            for (i in 0..8) this.add(JListInfo(" "))
+            for (i in 0..200) this.add(JListInfo(" "))
         })
-        val action = ActionListener { Thread(Runnable { onNewJobQuery() }).start() }
-        listJobButton.addActionListener(action)
-        listJobButton.isVisible = false
-        cbModule.addActionListener(action)
+        val action = ActionListener {
+            jspJobs.verticalScrollBarPolicy = if (cbAllLog.isSelected) JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED else JScrollPane.VERTICAL_SCROLLBAR_NEVER
+            Thread { onNewJobQuery() }.start()
+        }
         cbBranch.addActionListener(action)
         cbType.addActionListener(action)
-        apps.forEach {
-            cbModule.addItem(it.key)
-            if(it.key== curModule) cbModule.selectedItem = curModule
+        cbAllLog.addActionListener(action)
+        appAdapter = JListSelectAdapter(jlApps, true)
+        appAdapter.setDatas(apps.map { JListInfo(it.key, select = it.key == curModule) })
+        appAdapter.selectListener = object : JlistSelectListener {
+            override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean {
+                action.actionPerformed(null)
+                return false
+            }
         }
-        branchs.forEach { cbBranch.addItem(it) }
+
+        cbBranch.addItem(branchs[0])
+        cbBranch.addItem("")
+        for (i in 1 until branchs.size) cbBranch.addItem(branchs[i])
+
         //开启线程加载
-        Thread(Runnable {
-            do {
-                try {
-                    onNewJobQuery()
-                    Thread.sleep(queryTime)
-                } catch (e: Exception) {
-                }
-            } while (this@JekinJobDialog.isShowing)
-        }).start()
-        jlLog.text = logStr
+        Thread {
+            while (true) try {
+                onNewJobQuery()
+                Thread.sleep(queryTime)
+                if (!this@JekinJobDialog.isShowing) break
+            } catch (e: Exception) {
+            }
+        }.start()
+        resetLog()
+    }
+
+    private fun resetLog() {
+        val selectApps = getSelectApps()
+        jlLog.text = if (selectApps.isEmpty()) logStr else selectApps.toString()
     }
 
     private fun safeNet(url: String): String = try {
@@ -131,15 +150,20 @@ class JekinJobDialog(val project: Project, val curModule: String?, val apps: Map
     }
 
     private fun loadQueueJob(datas: MutableList<JListInfo>) = try {
+        val branch = cbBranch.selectedItem.toString()
         JSON.parseObject(safeNet(queueUrl + apiJson)).getJSONArray("items")?.filter { f1 ->
             f1 is JSONObject && buildJobName == f1.getJSONObject("task")?.getString("name")
-                    && checkParam(f1.getString("params")?.split("\n")?.mapNotNull { f2 ->
-                val split = f2.trim().split("=")
-                if (split.size == 2) Pair(split[0], split[1]) else null
-            }?.toMap())
         }?.forEach {
             val o = it as JSONObject
-            datas.add(JListInfo("${o.getString("id")}  ${Date(o.getLong("inQueueSince")).toLocaleString()}", "Waiting for executor", 2))
+            val p = o.getString("params")?.split("\n")?.mapNotNull { f2 ->
+                val split = f2.trim().split("=")
+                if (split.size == 2) Pair(split[0], split[1]) else null
+            }?.toMap()
+            if (checkParam(p)) datas.add(JListInfo("${format.format(Date(o.getLong("inQueueSince")))}  ${p?.get("Apk")
+                    ?: o.getString("id")}  ${if (branch.isEmpty()) p?.get("BranchName")
+                    ?: "" else ""}", "Waiting for executor", 2).apply {
+                data = JekinsJob().apply { params = p!! }
+            })
         }
     } catch (e: Exception) {
     }
@@ -149,95 +173,92 @@ class JekinJobDialog(val project: Project, val curModule: String?, val apps: Map
         return "${timemills / 60}分 ${timemills % 60}秒"
     }
 
+    private fun getSelectApps() = appAdapter.datas.filter { it.select }.map { it.title }
+
     private fun checkParam(toMap: Map<String, String>?): Boolean {
         toMap ?: return false
-        return toMap["Apk"] == app && toMap["BranchName"] == branch && toMap["Type"] == type
+        val branch = cbBranch.selectedItem.toString()
+        val type = cbType.selectedItem.toString()
+        val apps = getSelectApps()
+        return (apps.isEmpty() || apps.contains(toMap["Apk"])) && (branch.isEmpty() || toMap["BranchName"] == branch) && (type.isEmpty() || toMap["Type"] == type)
     }
 
     /**
      * 查询新的job
      */
-    private fun onNewJobQuery(managerOkButton: Boolean = true) {
-        app = cbModule.selectedItem.toString()
-        branch = cbBranch.selectedItem.toString()
-        type = cbType.selectedItem.toString()
-
+    private fun onNewJobQuery() {
         val datas = mutableListOf<JListInfo>()
         //正在队列的id列表
         loadQueueJob(datas)
         var inVisible = datas.isNotEmpty()
-
-
         var requestCount = 0
         var id: Int = safeNet(jobsUrl + "lastBuild/buildNumber").toInt()
-        while (requestCount++ < 200 && datas.size < 5 && id > 0) {
+        val branch = cbBranch.selectedItem.toString()
+        val max = if (cbAllLog.isSelected) Int.MAX_VALUE else 20
+
+        while (requestCount++ < 200 && datas.size < max && id > 0) {
             val job = loadJobById(id--)
                     ?: continue
             if (!checkParam(job.params)) continue
             inVisible = inVisible or job.building
-            datas.add(JListInfo("${job.displayName}   ${Date(job.timestamp).toLocaleString()}", "${getDuration(job)} ${if (job.building) "BUILDING" else job.result}", when (job.result) {
+            datas.add(JListInfo("${format.format(Date(job.timestamp))}  ${job.appName
+                    ?: job.displayName}  ${if (branch.isEmpty()) job.branch
+                    ?: "" else ""}", "${getDuration(job)} ${if (job.building) "BUILDING" else job.result}", when (job.result) {
                 JekinsJob.SUCCESS -> 1
                 JekinsJob.FAILURE, JekinsJob.ABORTED -> 3
                 else -> 0
             }).apply { data = job })
-            if (requestCount % 50 == 0) adapter.setDatas(datas) //请求50次刷新一下
         }
-        if (managerOkButton) buttonOK.isVisible = !inVisible
         adapter.setDatas(datas)
     }
 
 
     private fun onOK() {
-        val filter = adapter.datas.mapNotNull { it.data }.map { it as JekinsJob }.filter { it.building }
-        var msg = "Create new build for $app $branch $type!!"
-        if (filter.isNotEmpty()) msg += "\nWarming: ${filter.map { it.displayName }} is building now and will close!!!"
-        var exitCode = Messages.showYesNoDialog(project, msg, "Jekins Build", null)
+        val branch = cbBranch.selectedItem.toString()
+        if (branch.isEmpty()) {
+            Messages.showMessageDialog("Branch is not allow empty!!", "Warning", null)
+            return
+        }
+        val type = cbType.selectedItem.toString()
+        val selectApps = getSelectApps()
+        if (selectApps.isEmpty()) {
+            Messages.showMessageDialog("BuildApp is not allow empty!!", "Warning", null)
+            return
+        }
+
+        //当前正在构建的App
+        val buildingApp = adapter.datas.mapNotNull { it.data }.map { it as JekinsJob }.filter { it.building && branch == it.branch && type == it.type }.map { it.appName }
+
+        val runApps = selectApps.toMutableList().apply { removeAll(buildingApp) }
+        val ignoreApps = selectApps.toMutableList().apply { removeAll(runApps) }
+
+        val exitCode = Messages.showYesNoCancelDialog("Prepare :\n $runApps \n\n Ignore (Building or Waiting for executor) :\n$ignoreApps", "Jekins Build", null)
         if (exitCode != Messages.YES) return
+
         buttonOK.isVisible = false//隐藏Build 按钮
-        val lastFirstTitle = adapter.datas.firstOrNull()?.title
-        jlLog.text = "Creating Build -> "
-        val importTask = object : Task.Backgroundable(project, "Start Build") {
+        val importTask = object : Task.Backgroundable(project, "Start Jekins Build") {
             override fun run(indicator: ProgressIndicator) {
-                //停止运行
-                filter.forEach { safeNet(jobsUrl + it.number + "/stop?token=remotebyide") }
+                queryTime = 1000L
                 //开始运行
-                safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${URLEncoder.encode(TextUtils.removeLineAndMark(apps[app]?.replace(" ", "")?:""),"utf-8")
-                }")
-                var i = 0
-                jlLog.text = "Waiting Result"
-                while (i++ < 5) {
-                    Thread.sleep(queryTime - (i * 1000))
-                    jlLog.text = "Querying Result Times -> $i"
-                    val first = adapter.datas.firstOrNull() ?: continue
-                    indicator.text = "Query Last Item is -> $first.title"
-                    if (first.title != lastFirstTitle && first.data != null) break
+                runApps.forEach { app ->
+                    indicator.text = "Start Build $app"
+                    jlLog.text = "Start Build $app"
+                    safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${URLEncoder.encode(TextUtils.removeLineAndMark(apps[app]?.replace(" ", "")
+                            ?: ""), "utf-8")}BuildUser=${userName}")
+                    Thread.sleep(500)//延迟500毫秒再进行请求,避免出现问题
                 }
-                onNewJobQuery()
-                val first = adapter.datas.firstOrNull()
-                ApplicationManager.getApplication().invokeLater {
-                    val hasNewBuild = first?.title != lastFirstTitle
-                    val data = adapter.datas.firstOrNull()?.data
-                    if (hasNewBuild && data == null) {
-                        Messages.showMessageDialog("Job is waiting for executor,Please check state later", "Build Result", null)
-                    } else if (hasNewBuild && data is JekinsJob && data.building) {//正在构建
-                        exitCode = Messages.showYesNoCancelDialog(project, "Create new job ${data.displayName} success , Keep tracking building result in background??", "Build Result", null)
-                        if (exitCode == Messages.YES) {
-                            val task = JekinsTrackTask(project, "Building Job ${data.displayName} $app $branch $type", data.url + apiJson)
-                            ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, BackgroundableProcessIndicator(task))
-                            this@JekinJobDialog.onCancel()
-                        }
-                    } else {
-                        Messages.showMessageDialog("Create build fail,Please check reason", "Build Result", null)
-                    }
-                }
-                jlLog.text = logStr
+                indicator.text = "Querying Result,Please Wait"
+                indicator.text = "Querying Result,Please Wait"
+                Thread.sleep(6000)
+                queryTime = 5000L
+                buttonOK.isVisible = true//隐藏Build 按钮
+                resetLog()
             }
         }
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
     }
 
     private fun onCancel() {
-        // add your code here if necessary
         dispose()
     }
 }

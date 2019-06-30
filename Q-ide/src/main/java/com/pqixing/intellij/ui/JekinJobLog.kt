@@ -22,7 +22,7 @@ class JekinJobLog(val project: Project, val jobUrl: String) : BaseJDialog() {
         isModal = false
         title = "Console"
         stopButton.addActionListener { Desktop.getDesktop().browse(URI(jobUrl)) }
-        autoRefresh.addActionListener { reloadJob() }
+        autoRefresh.addActionListener { if (autoRefresh.isSelected) reloadJob() }
         reloadJob()
     }
 
@@ -31,7 +31,7 @@ class JekinJobLog(val project: Project, val jobUrl: String) : BaseJDialog() {
         do {
             try {
                 job = JSON.parseObject(URL(jobUrl + "api/json").readText(), JekinsJob::class.java)
-                jlTitle.text = "${job.displayName} -> ${Date(job.timestamp).toLocaleString()} -> ${getDuration(job)} -> ${if (job.building) "BUILDING" else job.result}"
+                jlTitle.text = "${job.buildUser?:""}  ${job.appName}  ${job.branch}   ${job.type}   ${job.displayName} -> ${Date(job.timestamp).toLocaleString()} -> ${getDuration(job)} -> ${if (job.building) "BUILDING" else job.result}"
                 tpLog.text = URL(jobUrl + "consoleText").readText().lines().reversed().joinToString(separator = "\n")
             } catch (e: Exception) {
             }

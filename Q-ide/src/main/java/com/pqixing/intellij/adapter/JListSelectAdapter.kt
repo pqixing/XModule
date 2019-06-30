@@ -103,6 +103,9 @@ open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boole
         val revers = endIndex != -1 && p2 in Math.min(startIndex, endIndex)..Math.max(startIndex, endIndex)
         box.isSelected = if (revers) !info.select else info.select
         box.isVisible = boxVisible
+        if(!boxVisible) {
+            panel.background = if(box.isSelected) Color.GRAY else label.background
+        }
         return panel
     }
 }

@@ -110,11 +110,15 @@ public class NewImportDialog extends BaseJDialog {
         return btnConfig;
     }
 
+    private long lastLoadBranch = 0L;
+
     private void loadBranchModules(String branch) {
-        String taskId = System.currentTimeMillis() + "";
+        long taskId = System.currentTimeMillis();
+        if (taskId - lastLoadBranch < 500) return;
+        lastLoadBranch = taskId;
         Map<String, String> envs = new HashMap<>(GradleUtils.INSTANCE.getDefEnvs());
         envs.put("taskBranch", branch);
-        GradleUtils.INSTANCE.runTask(project, Arrays.asList(":LoadAllBranchModule"), ProgressExecutionMode.IN_BACKGROUND_ASYNC, false, taskId, envs, (s,l) -> {
+        GradleUtils.INSTANCE.runTask(project, Arrays.asList(":LoadAllBranchModule"), ProgressExecutionMode.IN_BACKGROUND_ASYNC, false, taskId + "", envs, (s, l) -> {
             if (!s) return;
             String[] strings = l.replace("#", ",").split(",");
             if (strings.length > 0) {
@@ -135,7 +139,7 @@ public class NewImportDialog extends BaseJDialog {
     private void initJList(List<String> imports, List<JListInfo> allInfos) {
         //模拟选中,不然列表数据会异常
         for (int i = 0; i < allInfos.size(); i++) imports.add(TAG);
-        selectAdapter = new JListSelectAdapter(jlSelect, true);
+        selectAdapter = new JListSelectAdapter(jlSelect, false);
         allAdapter = new ImportSelectAdapter(JlNotSelect, allInfos, imports);
         selectAdapter.setSelectListener((jList, adapter, items) -> {
             for (JListInfo info : items) {
@@ -271,8 +275,8 @@ public class NewImportDialog extends BaseJDialog {
 
         String importKey = IMPORT_KEY + TextUtils.INSTANCE.numOrLetter(getSelectBranch());
         String newImport = list2Str(getImports());
-        properties.setProperty(importKey, newImport);
         String oldImports = properties.getProperty(importKey);
+        properties.setProperty(importKey, newImport);
 
         List<String> codeRoots = str2List(properties.getProperty(CODEROOTS_KEY, ""));
         String rootStr = getCodeRootStr();
@@ -328,7 +332,7 @@ public class NewImportDialog extends BaseJDialog {
         private List<String> imports;
 
         public ImportSelectAdapter(JList jList, List<JListInfo> datas, List<String> imports) {
-            super(jList, true);
+            super(jList, false);
             setDatas(datas);
             this.imports = imports;
         }

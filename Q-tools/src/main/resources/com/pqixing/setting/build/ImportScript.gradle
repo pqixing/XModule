@@ -29,9 +29,13 @@ class Script {
                 if (childens.size() > 0) childens.each { Node s ->
                     String s_name = s.@name
                     String s_type = s.@type
-                    
-                    if (includes.find { it == s_name||it=="${s_name}_api" } != null) addIncludeProject(setting, s_name, new File(rootDir, "$codeRoot/$name/$s_name"), s_type)
-                } else if (includes.find { it == name||it=="${name}_api" } != null) addIncludeProject(setting, name, new File(rootDir, "$codeRoot/$name"), type)
+
+                    if (includes.find {
+                        it == s_name || it == "${s_name}_api"
+                    } != null) addIncludeProject(setting, s_name, new File(rootDir, "$codeRoot/$name/$s_name"), s_type)
+                } else if (includes.find {
+                    it == name || it == "${name}_api"
+                } != null) addIncludeProject(setting, name, new File(rootDir, "$codeRoot/$name"), type)
             }
         }
     }
@@ -109,6 +113,7 @@ class InCludes {
 
     private void handleDps(HashSet<String> source, File rootDir, String module, boolean add) {
         File d = new File(rootDir, "build/dps/${module}.dp")
+        if (add) source.add(module.trim()) else source.remove(module.trim())
         if (!d.exists()) module.println("File no exists -> $d.absolutePath , please excute task DpsAnalysis befor import!!!")
         else {
             d.text.split(",").each { if (add) source.add(it.trim()) else source.remove(it.trim()) }

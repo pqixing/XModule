@@ -59,7 +59,7 @@ object GradleUtils {
     }
 
     private fun initSocket(): Int {
-        val s = serverSocket ?: createServer(8890)
+        val s = serverSocket ?: createServer(8890)?:return 8890
         if (serverSocket == null) {
             serverSocket = s
             Thread {
@@ -86,7 +86,7 @@ object GradleUtils {
     /**
      * 绑定新的端口
      */
-    private fun createServer(port: Int): ServerSocket = try {
+    private fun createServer(port: Int): ServerSocket? = if(port>10000) null  else try {
         ServerSocket(port)
     } catch (e: Exception) {
         createServer(port + 1)
@@ -131,7 +131,7 @@ object GradleUtils {
 
     fun getLogFile(basePath: String): Array<File>? {
         val file = File(basePath, ".idea")
-        return if (file.exists()) file.listFiles { file, s -> s.contains("modularization.lo") }
+        return if (file.exists()) file.listFiles { file, s -> s.contains("modularization.log") }
         else emptyArray()
     }
 }

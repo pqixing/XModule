@@ -18,12 +18,32 @@ public class JekinsJob {
     public String result;
     public String displayName;
     public List<JAction> actions;
+    private   Map<String, String> params;
+
+    public String getAppName(){
+        return getParams().get("Apk");
+    }
+    public String getBranch(){
+        return getParams().get("BranchName");
+    }
+    public String getType(){
+        return getParams().get("Type");
+    }
+    public String getBuildUser(){
+        return getParams().get("BuildUser");
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
+    }
 
     public Map<String, String> getParams() {
-        HashMap<String, String> params = new HashMap<>();
-        if (actions != null) for (JAction a : actions) {
-            if (a.parameters != null) for (JParam p : a.parameters) {
-                params.put(p.name, p.value);
+        if(params==null) {
+            params = new HashMap<>();
+            if (actions != null) for (JAction a : actions) {
+                if (a.parameters != null) for (JParam p : a.parameters) {
+                    params.put(p.name, p.value);
+                }
             }
         }
         return params;

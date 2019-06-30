@@ -11,6 +11,7 @@ import com.pqixing.intellij.ui.JekinJobDialog
 import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.model.SubModuleType
 import com.pqixing.tools.PropertiesUtils
+import groovy.lang.GroovyClassLoader
 import java.io.File
 
 open class JekinsAction : AnAction() {
@@ -27,6 +28,10 @@ open class JekinsAction : AnAction() {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
             return
         }
+
+        val clazz = GroovyClassLoader().parseClass(configFile)
+        val userName = clazz.getField("userName").get(clazz.newInstance()).toString()
+
         val module = e.getData(DataKey.create<Module>("module"))?.name
         val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
         val apps = projectXml.allSubModules().filter { it.type == SubModuleType.TYPE_APPLICATION }.map { Pair(it.name,it.introduce)}.toMap()
@@ -35,7 +40,7 @@ open class JekinsAction : AnAction() {
         val localBranch = repo.currentBranchName ?: "master"
         branchs.remove(localBranch)
         branchs.add(0, localBranch)
-        val dialog = JekinJobDialog(project,module, apps, branchs)
+        val dialog = JekinJobDialog(project,userName,module, apps, branchs)
         dialog.pack()
         dialog.isVisible = true
     }
