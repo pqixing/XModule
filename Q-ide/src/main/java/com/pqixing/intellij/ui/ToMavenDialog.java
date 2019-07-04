@@ -8,31 +8,26 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 
 public class ToMavenDialog extends BaseJDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JList jList;
-    private javax.swing.JCheckBox all;
+    private JCheckBox all;
     private JLabel jlProgress;
-    public JLabel jlTitle;
-    private JComboBox cbUncheck;
     private JTextField tvDesc;
+    private JCheckBox branchCheckBox;
+    private JCheckBox versionCheckBox;
+    private JCheckBox changeCheckBox;
+    private JButton doneButton;
     JListSelectAdapter adapter;
     private Runnable onOk;
 
-    public ToMavenDialog(List<JListInfo> datas) {
+    public ToMavenDialog(List<JListInfo> datas, String moduleName) {
         setContentPane(contentPane);
         setModal(false);
         setLocation(400, 300);
@@ -47,16 +42,15 @@ public class ToMavenDialog extends BaseJDialog {
                 onCancel();
             }
         });
+        doneButton.addActionListener(e->{onCancel();});
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        setTitle("ToMaven");
+        setTitle("ToMaven : " + moduleName);
 
         adapter = new JListSelectAdapter(jList, true);
         adapter.setDatas(datas);
-        jList.setModel(adapter);
         all.addActionListener(e -> {
             boolean allSelect = all.isSelected();
-            all.setText(allSelect ? "None" : "All");
             for (JListInfo i : datas) {
                 i.setSelect(allSelect);
             }
@@ -76,8 +70,7 @@ public class ToMavenDialog extends BaseJDialog {
     public void updateUI(boolean okVisible) {
         buttonOK.setVisible(okVisible);
         jlProgress.setVisible(!okVisible);
-        if (!okVisible) {
-
+        if(!okVisible) {
             List<JListInfo> datas = adapter.getDatas();
             int all = 0;
             int done = 0;
@@ -91,12 +84,18 @@ public class ToMavenDialog extends BaseJDialog {
 
     }
 
-    public String getDesc(){
+    public String getDesc() {
         return tvDesc.getText().trim();
     }
-    public String getUnCheckCode(){
-        return cbUncheck.getSelectedItem().toString().split(":")[0].trim();
+
+    public String getUnCheckCode() {
+        int unCheck = 1;
+        if (branchCheckBox.isSelected()) unCheck |= 1 << 4;
+        if (versionCheckBox.isSelected()) unCheck |= 1 << 5;
+        if (changeCheckBox.isSelected()) unCheck |= 1 << 6;
+        return (unCheck == 1 ? 0 : unCheck) + "";
     }
+
     private void onOK() {
         buttonOK.setVisible(false);
         onOk.run();
@@ -105,12 +104,5 @@ public class ToMavenDialog extends BaseJDialog {
     private void onCancel() {
         // add your code here if necessary
         dispose();
-    }
-
-    public static void main(String[] args) {
-        ToMavenDialog dialog = new ToMavenDialog(Collections.emptyList());
-        dialog.pack();
-        dialog.setVisible(true);
-        System.exit(0);
     }
 }

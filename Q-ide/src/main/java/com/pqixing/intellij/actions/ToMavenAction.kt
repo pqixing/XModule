@@ -8,10 +8,13 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.openapi.ui.Messages
+import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.ToMavenDialog
 import com.pqixing.intellij.utils.GradleTaskCallBack
 import com.pqixing.intellij.utils.GradleUtils
+import java.io.File
 
 class ToMavenAction : AnAction() {
     lateinit var project: Project
@@ -20,7 +23,6 @@ class ToMavenAction : AnAction() {
 
         val module = e.getData(DataKey.create<Module>("module"))
         val moduleName = module?.name ?: ""
-
         val projectMode = /*"ProjectViewPopup".equals(place)||*/"MainMenu" == e.place || module == null || project.name == moduleName;
         var filters = if (projectMode) null else ModuleRootManager.getInstance(module!!).dependencies.map { it.name }
 
@@ -29,18 +31,13 @@ class ToMavenAction : AnAction() {
                 .filter { it.name != project.name && (filters == null || it.name == moduleName || filters.contains(it.name)) }
                 .map { JListInfo(it.name, "", 0, it.name == moduleName || it.name == "${moduleName}_api") }
 
-
-        val dialog = ToMavenDialog(tModules);
-        dialog.jlTitle.text = "Prepare ToMaven for :$moduleName"
-        dialog.setOnOk {
-            dialog.isVisible = false
-            toMaven(dialog, tModules)
-        }
+        val dialog = ToMavenDialog(tModules, moduleName);
+        dialog.setOnOk { toMaven(dialog, tModules) }
         dialog.pack()
         dialog.isVisible = true
     }
 
-    private fun toMaven(dialog: ToMavenDialog, tModules: List<JListInfo>) =object :GradleTaskCallBack {
+    private fun toMaven(dialog: ToMavenDialog, tModules: List<JListInfo>) = object : GradleTaskCallBack {
         var i = -1
         var check = false//是否需要校验结果
         var runTaskId = ""
@@ -54,20 +51,14 @@ class ToMavenAction : AnAction() {
             if (check) {//检查上传的任务是否正确
                 val jListInfo = tModules[i]
                 jListInfo.staue = if (success) 1 else 3
-                jListInfo.log = result?:""
-                if (!success) {//失败是展示结果
-                    ApplicationManager.getApplication().invokeLater {
-                        dialog.updateUI(!success)
-                        dialog.isVisible = true
-                    }
-                    return
-                }
+                jListInfo.log = result ?: ""
+                //失败是展示结果
+                dialog.updateUI(!success)
+
+                if (!success) return
             }
             if (i >= tModules.size - 1) {
-                ApplicationManager.getApplication().invokeLater {
-                    dialog.updateUI(false)
-                    dialog.isVisible = true
-                }
+                dialog.updateUI(false)
                 return
             }//执行完毕
             val info = tModules[++i]
@@ -80,8 +71,8 @@ class ToMavenAction : AnAction() {
             } else {
                 check = false
                 runTaskId = ""
-                this.onTaskEnd(false,null)//循环运行
+                this.onTaskEnd(false, null)//循环运行
             }
         }
-    }.onTaskEnd(false,null)
+    }.onTaskEnd(false, null)
 }
