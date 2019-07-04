@@ -34,7 +34,7 @@ public class UiUtils {
             return output.toString();
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return "";
         }
     }
 }

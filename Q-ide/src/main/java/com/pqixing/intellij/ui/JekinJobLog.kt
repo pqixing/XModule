@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON
 import com.dachen.creator.JekinsJob
 import com.intellij.openapi.project.Project
 import java.awt.Desktop
+import java.awt.Toolkit
 import java.net.URI
 import java.net.URL
 import java.util.*
@@ -21,6 +22,8 @@ class JekinJobLog(val project: Project, val jobUrl: String) : BaseJDialog() {
         setContentPane(contentPane)
         isModal = false
         title = "Console"
+//        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+
         stopButton.addActionListener { Desktop.getDesktop().browse(URI(jobUrl)) }
         autoRefresh.addActionListener { if (autoRefresh.isSelected) reloadJob() }
         reloadJob()

@@ -94,6 +94,9 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
         }
     }
 
+    override fun filterDatas(allDatas: MutableList<JListInfo>, operatorCmd: String): MutableList<JListInfo> {
+        return super.filterDatas(allDatas, operatorCmd).apply { forEach { it.select = false } }
+    }
     override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> {
         val keys = allRepos.map { VfsUtil.urlToPath(it.key) }
         val afterUrls = if (keys.isEmpty()) urls else urls.filter { keys.contains(it.key) }

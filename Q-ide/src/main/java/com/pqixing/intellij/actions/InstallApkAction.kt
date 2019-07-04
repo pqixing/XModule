@@ -11,11 +11,9 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.intellij.psi.PsiFile
 import com.pqixing.intellij.ui.InstallApkDialog
 import com.pqixing.intellij.utils.GradleTaskCallBack
 import com.pqixing.intellij.utils.GradleUtils
-import jdk.internal.util.xml.impl.Pair
 import java.io.File
 
 

@@ -32,19 +32,15 @@
             <add-to-group group-id="BuildMenu" anchor="first"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
-            <action id="Modularization.Jekins" class="com.dachen.creator.actions.JekinsAction"
-                    text="Jekins"/>
             <action id="Modularization.Import" class="com.pqixing.intellij.actions.ImportAction"
                     text="Import">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
             </action>
             <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
                     text="ToMaven"/>
+            <action id="Modularization.Jekins" class="com.dachen.creator.actions.JekinsAction"
+                    text="JekinsBuild"/>
             <separator/>
-            <action id="Modularization.Clean" class="com.pqixing.intellij.actions.CleanAction"
-                    text="Clean"/>
-            <action id="Modularization.GitState"
-                    class="com.pqixing.intellij.actions.GitStateAction" text="GitState"/>
             <action id="Modularization.GitSync"
                     class="com.pqixing.intellij.actions.GitSyncAction" text="GitClone"/>
             <action id="Modularization.GitMerge"
@@ -52,16 +48,18 @@
 
 
             <action id="Modularization.GitCheckout"
-                    class="com.pqixing.intellij.actions.GitCheckoutAction" text="Checkout"/>
+                    class="com.pqixing.intellij.actions.GitCheckoutAction" text="GitCheckout"/>
 
 
             <separator/>
-
-            <action id="Modularization.BuildApk" class="com.pqixing.intellij.actions.BuildApkAction" text="BuildApk">
+            <action id="Modularization.AdbText" class="com.pqixing.intellij.actions.AdbText"
+                    text="AdbText"/>
+            <action id="Modularization.InstallApk" class="com.pqixing.intellij.actions.InstallApkAction"
+                    text="AdbInstall">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift B"/>
             </action>
-            <action id="Modularization.InstallApk" class="com.pqixing.intellij.actions.InstallApkAction"
-                    text="InstallApk"/>
+
+            <separator/>
             <action id="Modularization.DpsAnalyse"
                     class="com.pqixing.intellij.actions.DpsAnalyseAction" text="DpsAnalyse"/>
             <action id="Modularization.ReIndexVersion"
