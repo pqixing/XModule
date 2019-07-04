@@ -80,7 +80,7 @@ public class VersionDialog extends BaseJDialog {
             branchs.add(b.getName());
         }
         LinkedList<JListInfo> datas = new LinkedList<>();
-        String targetBranch = "/"+repo.getCurrentBranchName();
+        String targetBranch = "/" + repo.getCurrentBranchName();
         for (String b : branchs) {
             cbTarget.addItem(b);
             datas.add(new JListInfo(b, "", 0, false));
@@ -105,7 +105,10 @@ public class VersionDialog extends BaseJDialog {
         envs.put("taskBranch", targetBranch);
         StringBuilder tagBrans = new StringBuilder();
         for (JListInfo j : adapter.getDatas()) {
-            if (j.getSelect()) tagBrans.append(j.getTitle()).append(",");
+            if (j.getSelect()) {
+                String[] split = j.getTitle().trim().split("/");
+                tagBrans.append(split[split.length - 1]).append(",");
+            }
         }
         envs.put("tagBranchs", tagBrans.toString());
 
