@@ -56,7 +56,7 @@ open class ToMavenCheckTask : BaseTask() {
 //        val lastLog = plugin.subModule
         val artifactId = subModule.name
         if (subModule.getBranch() != extends.docRepoBranch) {
-            Tools.println(unCheck(1), "${subModule.name} branch is ${subModule.getBranch()} , do not match doc branch $extends.docRepoBranch")
+            Tools.println(unCheck(1), "${subModule.name} branch is ${subModule.getBranch()} , Doc branch ${extends.docRepoBranch} does not match")
             return
         }
 
@@ -104,7 +104,7 @@ open class ToMavenCheckTask : BaseTask() {
 
     private fun checkGitStatus(git: Git, subModule: SubModule) {
         if (!GitUtils.checkIfClean(git, getRelativePath(subModule.path))) {
-            Tools.println(unCheck(3), "${subModule.name} Git status is not clean, please check your file!!")
+            Tools.println(unCheck(3), "${subModule.name} Code not clean")
         }
     }
 
@@ -135,7 +135,7 @@ open class ToMavenCheckTask : BaseTask() {
 
         //如果匹配到的版本不是当前分支，则提示升级版本号
         if (matchBranch != branch) {
-            Tools.println(unCheck(1), "$artifactId Not allow user the same base version on new branch , please update before ToMaven!!!")
+            Tools.println(unCheck(1), "$artifactId Not allow user the same base version on new branch")
         }
         val params = UrlUtils.getParams(DpsManager.getPom(matchBranch, artifactId, "$baseVersion.$lastVersion").name)
         val hash = params["hash"] ?: ""

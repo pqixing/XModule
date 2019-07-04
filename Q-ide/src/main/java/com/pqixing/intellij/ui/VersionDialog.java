@@ -49,7 +49,7 @@ public class VersionDialog extends BaseJDialog {
     Project project;
     JListSelectAdapter adapter;
 
-    public VersionDialog(Project project, String targetBranch) {
+    public VersionDialog(Project project) {
         setContentPane(contentPane);
         setModal(false);
         getRootPane().setDefaultButton(buttonOK);
@@ -76,18 +76,15 @@ public class VersionDialog extends BaseJDialog {
         }
         GitBranchesCollection branches = repo.getBranches();
         HashSet<String> branchs = new HashSet<>();
-        for (GitLocalBranch b : branches.getLocalBranches()) {
-            branchs.add(b.getName());
-        }
         for (GitRemoteBranch b : branches.getRemoteBranches()) {
             branchs.add(b.getName());
         }
         LinkedList<JListInfo> datas = new LinkedList<>();
-        if (targetBranch != null) branchs.add(targetBranch);
+        String targetBranch = "/"+repo.getCurrentBranchName();
         for (String b : branchs) {
             cbTarget.addItem(b);
             datas.add(new JListInfo(b, "", 0, false));
-            if (b.equals(targetBranch)) cbTarget.setSelectedIndex(cbTarget.getItemCount() - 1);
+            if (b.endsWith(targetBranch)) cbTarget.setSelectedIndex(cbTarget.getItemCount() - 1);
         }
         adapter = new JListSelectAdapter(jlBrans, true);
         adapter.setDatas(datas);

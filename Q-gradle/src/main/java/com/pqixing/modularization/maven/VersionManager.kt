@@ -288,7 +288,7 @@ object VersionManager : OnClear {
         }
         //拷贝一份
         val fallbacks = matchingFallbacks.toMutableList()
-        info.tagBranchs.split(",").forEach { if (it.isNotEmpty() && !fallbacks.contains(it)) fallbacks.add(it) }
+        info.tagBranchs.split(",").map { it.split("/").last().trim() }.forEach { if (it.isNotEmpty() && !fallbacks.contains(it)) fallbacks.add(it) }
 
         val matchKeys = fallbacks.map { "$groupName.$it." }
         val tagVersions = curVersions.filter { c -> matchKeys.any { f -> c.key.startsWith(f) } }
@@ -336,7 +336,7 @@ object VersionManager : OnClear {
     }
 
     fun getFullUrl(url: String, baseUrl: String): String {
-        if(url=="..")   return "";
+        if (url == "..") return "";
         if (url.startsWith("http:")) return url
         if (baseUrl.endsWith("/")) return "$baseUrl$url"
         return "$baseUrl/$url"
