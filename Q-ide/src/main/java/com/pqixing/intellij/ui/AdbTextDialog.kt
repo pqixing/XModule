@@ -1,10 +1,14 @@
 package com.pqixing.intellij.ui
 
 import android.util.Base64
+import com.android.ddmlib.IDevice
 import com.dachen.creator.utils.AndroidUtils
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.pqixing.intellij.utils.DachenHelper
 import com.pqixing.intellij.utils.UiUtils
+import com.pqixing.shell.Shell
+import org.jetbrains.android.sdk.AndroidSdkUtils
 
 import javax.swing.*
 import java.awt.event.KeyEvent
@@ -24,7 +28,6 @@ class AdbTextDialog(internal var project: Project) : BaseJDialog() {
     init {
         setContentPane(contentPane)
         isModal = false
-        getRootPane().defaultButton = toClipButton
         title = "Adb Text Editor"
         toClipButton!!.addActionListener { e -> toPhone(false) }
         toEditButton!!.addActionListener { e -> toPhone(true) }
@@ -52,7 +55,7 @@ class AdbTextDialog(internal var project: Project) : BaseJDialog() {
         }
         if (!result.contains("result=success")) {
             val exit = Messages.showOkCancelDialog("Clip helper receiver not found, Install clip helper?", "Miss Application", null)
-            if (exit == Messages.OK) installClipHelper()
+            if (exit == Messages.OK) installClipHelper(iDevice)
             return
         }
 
@@ -66,8 +69,9 @@ class AdbTextDialog(internal var project: Project) : BaseJDialog() {
         } else if (result.contains("result=fail")) Messages.showMessageDialog(if (edit) "set text fail, please check input" else "Unkonw error , please check?", "Error", null)
     }
 
-    private fun installClipHelper() {
-
+    private fun installClipHelper(iDevice: IDevice) {
+        val downloadApk = DachenHelper.downloadApk(project, "copy", "https://raw.githubusercontent.com/pqixing/modularization/master/Q-ide/adb_copy.apk")
+        Shell.runSync(AndroidSdkUtils.getAdb(project)?.absolutePath + " -s " + iDevice.getSerialNumber() + " install -r -t  " + downloadApk)
     }
 
     private fun fromPhone(edit: Boolean) {
@@ -78,7 +82,7 @@ class AdbTextDialog(internal var project: Project) : BaseJDialog() {
         }
         if (!result.contains("result=success")) {
             val exit = Messages.showOkCancelDialog("Clip helper receiver not found, Install clip helper?", "Miss Application", null)
-            if (exit == Messages.OK) installClipHelper()
+            if (exit == Messages.OK) installClipHelper(iDevice)
             return
         }
         //启动服务

@@ -6,7 +6,7 @@
       <xy x="48" y="54" width="618" height="453"/>
     </constraints>
     <properties>
-      <preferredSize width="650" height="435"/>
+      <preferredSize width="700" height="435"/>
     </properties>
     <border type="none"/>
     <children>
@@ -131,7 +131,7 @@
                 <children>
                   <scrollpane id="96119">
                     <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="1" anchor="0" fill="3" indent="0" use-parent-layout="false">
                         <minimum-size width="150" height="-1"/>
                       </grid>
                     </constraints>
