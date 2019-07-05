@@ -123,8 +123,8 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
     }
 
     private fun resetLog() {
-        val selectApps = getSelectApps()
-        jlLog.text = if (selectApps.isEmpty()) logStr else selectApps.toString()
+//        val selectApps = getSelectApps()
+        jlLog.text = logStr
     }
 
     private fun safeNet(url: String): String = try {
