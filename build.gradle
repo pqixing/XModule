@@ -16,6 +16,7 @@ buildscript {
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.android.tools.build:gradle:3.1.2'
 //        classpath 'com.novoda:bintray-release:0.9'
 //        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'//this
         classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.3.12"
