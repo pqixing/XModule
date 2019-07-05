@@ -145,7 +145,7 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
                 installApp(0, selectItem, indicator, targetDone, openAppCheckBox!!.isSelected, iDevice)
                 targetDone.waitFor()
                 val failItem = selectItem.filter { it.staue == 3 }
-                if (failItem.isNotEmpty()) {
+                if (model == 2 && failItem.isNotEmpty()) {
                     model = 0
                     updateUI()
                 }
@@ -196,14 +196,10 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
     }
 
     private fun adbInstall(iDevice: IDevice, l: String): String {
-        val result = try {
-            iDevice.installPackage(l, true, jParams!!.text)
-            "success"
-        } catch (e: Exception) {
-            e.toString()
-        }
+        val result = UiUtils.installApk(iDevice, l, jParams?.text ?: "")
+        val success = result.toLowerCase().contains("Success")
         addApkPaths(Collections.singletonList(File(l)), result != "success")[0].apply {
-            staue = if (result == "success") 1 else 3
+            staue = if (success) 1 else 3
             log = result
         }
         //添加本地数据
@@ -212,6 +208,7 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
         val list = if (logFiles.exists()) logFiles.readLines().toMutableList() else mutableListOf()
         list.remove(l)
         list.add(0, l)
+        while (list.size >30) list.removeAt(30)
         logFiles.writeText(list.joinToString("\n"))
         return result
     }

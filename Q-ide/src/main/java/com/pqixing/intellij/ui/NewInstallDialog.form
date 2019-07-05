@@ -96,7 +96,7 @@
               </grid>
             </constraints>
             <properties>
-              <text value="-t"/>
+              <text value="-r -t "/>
             </properties>
           </component>
         </children>

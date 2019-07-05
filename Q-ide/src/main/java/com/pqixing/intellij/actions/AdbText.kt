@@ -10,7 +10,8 @@ import javax.swing.TransferHandler
 
 class AdbText : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
-        val dialog = AdbTextDialog(e.project!!)
+        val project = e.project ?: return
+        val dialog = AdbTextDialog(project)
         dialog.pack()
         dialog.isVisible = true
     }

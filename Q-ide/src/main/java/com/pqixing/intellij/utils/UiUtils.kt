@@ -22,7 +22,7 @@ object UiUtils {
     val IDE_PROPERTIES = ".idea/modularization.properties"
     var lastDevices = ""
 
-    fun setTransfer(component: JComponent,block:(files:List<File>)->Unit){
+    fun setTransfer(component: JComponent, block: (files: List<File>) -> Unit) {
         component.transferHandler = object : TransferHandler() {
             override fun importData(p0: JComponent?, t: Transferable): Boolean {
                 try {
@@ -41,8 +41,9 @@ object UiUtils {
             }
         }
     }
+
     fun getSelectDevice(project: Project, comboBox: JComboBox<*>): IDevice? {
-        val id = comboBox.selectedItem?.toString()?:""
+        val id = comboBox.selectedItem?.toString() ?: ""
         return getDevices(project).find { it.first == id }?.second
     }
 
@@ -69,15 +70,24 @@ object UiUtils {
         return infos
     }
 
+    fun installApk(device: IDevice, path: String, params: String): String = try {
+        val newPath = "/data/local/tmp/${path.hashCode()}.apk"
+        device.pushFile(path, newPath)
+        val r = AdbShellCommandsUtil.executeCommand(device, "pm  install $params  $newPath").output.findLast { it.trim().isNotEmpty() }
+                ?: "Unknow Exception"
+        if (r.contains("Success")) adbShellCommon(device, "rm -f $newPath", false)
+        else adbShellCommon(device, "mv $newPath /sdcard/${path.substringAfterLast("/")}", false)
+        r
+    } catch (e: Exception) {
+        e.toString()
+    }
+
     fun adbShellCommon(device: IDevice, cmd: String, firstLine: Boolean): String = try {
         val output = AdbShellCommandsUtil.executeCommand(device, cmd).output
         if (firstLine || output.size == 1) output[0] else output.toString()
     } catch (e: Exception) {
         e.printStackTrace()
         ""
-    }
-    fun launchAppByPackageId(packageId:String){
-
     }
 
     fun getAppInfoFromApk(fileApk: File): AndroidApplicationInfo? = try {

@@ -3,8 +3,13 @@ package com.pqixing.intellij.ui
 import android.util.Base64
 import com.android.ddmlib.IDevice
 import com.dachen.creator.utils.AndroidUtils
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
+import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.intellij.util.concurrency.Semaphore
 import com.pqixing.intellij.utils.DachenHelper
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.shell.Shell
@@ -15,7 +20,7 @@ import java.awt.event.KeyEvent
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 
-class AdbTextDialog(internal var project: Project) : BaseJDialog() {
+class AdbTextDialog(var project: Project) : BaseJDialog() {
     private var contentPane: JPanel? = null
     private var toClipButton: JButton? = null
     private var toEditButton: JButton? = null
@@ -74,15 +79,25 @@ class AdbTextDialog(internal var project: Project) : BaseJDialog() {
         } else if (result.contains("result=fail")) Messages.showMessageDialog(if (edit) "set text fail, please check input" else "Unkonw error , please check?", "Error", null)
     }
 
-    private fun installClipHelper(iDevice: IDevice) = Thread {
-        val downloadApk = DachenHelper.downloadApk(project, "copy", "https://raw.githubusercontent.com/pqixing/modularization/master/Q-ide/adb_copy.apk")
-        try {
-            iDevice.installPackage(downloadApk, true, "-t")
-            UiUtils.adbShellCommon(iDevice, "am start -n com.pqixing.clieper/com.pqixing.clieper.MainActivity", false)
-        } catch (e: Exception) {
-            e.printStackTrace()
+    private fun installClipHelper(iDevice: IDevice) {
+        val install = object : Task.Backgroundable(project, "Start Install") {
+
+            override fun run(indicator: ProgressIndicator) {
+                val url ="https://raw.githubusercontent.com/pqixing/modularization/master/Q-ide/adb_copy.apk"
+                indicator.text = "Download : $url"
+                val downloadApk = DachenHelper.downloadApk(project, "copy", url)
+                try {
+                    indicator.text = "Install : $url"
+                    UiUtils.installApk(iDevice,downloadApk,"-r -t")
+                    UiUtils.adbShellCommon(iDevice, "am start -n com.pqixing.clieper/com.pqixing.clieper.MainActivity", false)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
         }
-    }.start()
+        ProgressManager.getInstance().runProcessWithProgressAsynchronously(install, BackgroundableProcessIndicator(install))
+
+    }
 
     private fun fromPhone(edit: Boolean) {
         val iDevice = UiUtils.getSelectDevice(project, cbDevices!!) ?: return
