@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.pqixing.modularization.idea</id>
     <name>Modularization</name>
-    <version>1.7</version>
+    <version>1.8</version>
     <vendor email="pqixing86@gmail.com" url="https://github.com/pqixing/modularization">pqixing
     </vendor>
 
@@ -10,7 +10,9 @@
     </description>
 
     <change-notes>
-        Jekins suppot chinese name !!
+        Jekins support!!
+        Adb Text support!!
+        Adb Install support!!
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->

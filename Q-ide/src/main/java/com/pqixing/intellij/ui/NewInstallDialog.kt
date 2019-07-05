@@ -199,7 +199,6 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
         val result = try {
             iDevice.installPackage(l, true, jParams!!.text)
             "success"
-            throw RuntimeException("Erroootsssss")
         } catch (e: Exception) {
             e.toString()
         }
