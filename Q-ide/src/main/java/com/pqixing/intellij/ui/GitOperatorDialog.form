@@ -7,7 +7,7 @@
     </constraints>
     <properties>
       <minimumSize width="-1" height="-1"/>
-      <preferredSize width="550" height="400"/>
+      <preferredSize width="650" height="400"/>
     </properties>
     <border type="none"/>
     <children>

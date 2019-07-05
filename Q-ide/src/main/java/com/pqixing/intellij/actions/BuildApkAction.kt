@@ -11,11 +11,9 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.intellij.psi.PsiFile
 import com.pqixing.intellij.ui.InstallApkDialog
-import com.pqixing.intellij.utils.GradleTaskCallBack
+import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.GradleUtils
-import jdk.internal.util.xml.impl.Pair
 import java.io.File
 
 
@@ -48,7 +46,7 @@ open class BuildApkAction : AnAction() {
         }
         val runTaskId = System.currentTimeMillis().toString()
 
-        val callBack = GradleTaskCallBack { result, log ->
+        val callBack = TaskCallBack { result, log ->
             if (!result) ApplicationManager.getApplication().invokeLater {
                 Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "BuildApk", "Build $moduleName Apk Fail !!", NotificationType.WARNING).notify(project)
             } else ApplicationManager.getApplication().invokeLater {

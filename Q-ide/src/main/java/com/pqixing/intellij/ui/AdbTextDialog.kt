@@ -76,8 +76,12 @@ class AdbTextDialog(internal var project: Project) : BaseJDialog() {
 
     private fun installClipHelper(iDevice: IDevice) = Thread {
         val downloadApk = DachenHelper.downloadApk(project, "copy", "https://raw.githubusercontent.com/pqixing/modularization/master/Q-ide/adb_copy.apk")
-        Shell.runSync(AndroidSdkUtils.getAdb(project)?.absolutePath + " -s " + iDevice.serialNumber + " install -r -t  " + downloadApk)
-        UiUtils.adbShellCommon(iDevice, "am start -n com.pqixing.clieper/com.pqixing.clieper.MainActivity", false)
+        try {
+            iDevice.installPackage(downloadApk, true, "-t")
+            UiUtils.adbShellCommon(iDevice, "am start -n com.pqixing.clieper/com.pqixing.clieper.MainActivity", false)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }.start()
 
     private fun fromPhone(edit: Boolean) {

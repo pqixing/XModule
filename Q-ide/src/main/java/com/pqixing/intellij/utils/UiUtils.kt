@@ -42,7 +42,7 @@ object UiUtils {
         }
     }
     fun getSelectDevice(project: Project, comboBox: JComboBox<*>): IDevice? {
-        val id = comboBox.selectedItem!!.toString()
+        val id = comboBox.selectedItem?.toString()?:""
         return getDevices(project).find { it.first == id }?.second
     }
 
@@ -75,6 +75,9 @@ object UiUtils {
     } catch (e: Exception) {
         e.printStackTrace()
         ""
+    }
+    fun launchAppByPackageId(packageId:String){
+
     }
 
     fun getAppInfoFromApk(fileApk: File): AndroidApplicationInfo? = try {

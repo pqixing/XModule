@@ -52,9 +52,13 @@ object DachenHelper {
             val newUrl = url.substring(0, lastS + 1) + URLEncoder.encode(url.substring(lastS + 1, lastD), "utf-8") + url.substring(lastD)
             val connection = URL(newUrl).openConnection()
             (connection as HttpsURLConnection).setHostnameVerifier { s, sslSession -> true }
-            connection.getInputStream().copyTo(file.outputStream())
+            val stream = file.outputStream()
+            connection.getInputStream().copyTo(stream)
+            connection.inputStream.close()
+            stream.flush()
+            stream.close()
         } catch (e: Exception) {
-            return e.toString()
+            return ""
         }
         return file.absolutePath
     }

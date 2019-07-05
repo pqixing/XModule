@@ -24,7 +24,7 @@ object GradleUtils {
                 , activateToolWindowBeforeRun: Boolean = true
                 , runTaskId: String = System.currentTimeMillis().toString()
                 , envs: Map<String, String> = defEnvs
-                , callback: GradleTaskCallBack? = null) {
+                , callback: TaskCallBack? = null) {
         val settings = ExternalSystemTaskExecutionSettings()
         settings.executionName = "Running Task:$tasks"
         settings.taskNames = tasks

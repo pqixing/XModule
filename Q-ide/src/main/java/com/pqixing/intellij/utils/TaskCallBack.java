@@ -1,6 +1,6 @@
 package com.pqixing.intellij.utils;
 
-public interface GradleTaskCallBack {
+public interface TaskCallBack {
 
     void  onTaskEnd(boolean success,String result);
 }

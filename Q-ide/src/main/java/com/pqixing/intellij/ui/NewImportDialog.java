@@ -120,7 +120,7 @@ public class NewImportDialog extends BaseJDialog {
         envs.put("taskBranch", branch);
         GradleUtils.INSTANCE.runTask(project, Arrays.asList(":LoadAllBranchModule"), ProgressExecutionMode.IN_BACKGROUND_ASYNC, false, taskId + "", envs, (s, l) -> {
             if (!s) return;
-            String[] strings = l.replace("#", ",").split(",");
+            String[] strings = l.split("#")[1].split(",");
             if (strings.length > 0) {
                 imports.clear();
                 for (int i = 0; i < strings.length; i++) {

@@ -115,7 +115,7 @@ interface JlistSelectListener {
 }
 
 class JListInfo(var title: String = "", var log: String = "", var staue: Int = 0, var select: Boolean = false) {
-    val infoId = i++
+    var infoId = (i++).toString()
     var data:Any?=null
     override fun equals(other: Any?): Boolean {
         return (other as? JListInfo)?.infoId == infoId

@@ -3,18 +3,14 @@ package com.pqixing.intellij.actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataKey
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
-import com.intellij.openapi.ui.Messages
-import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.ToMavenDialog
-import com.pqixing.intellij.utils.GradleTaskCallBack
+import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.GradleUtils
-import java.io.File
 
 class ToMavenAction : AnAction() {
     lateinit var project: Project
@@ -37,7 +33,7 @@ class ToMavenAction : AnAction() {
         dialog.isVisible = true
     }
 
-    private fun toMaven(dialog: ToMavenDialog, tModules: List<JListInfo>) = object : GradleTaskCallBack {
+    private fun toMaven(dialog: ToMavenDialog, tModules: List<JListInfo>) = object : TaskCallBack {
         var i = -1
         var check = false//是否需要校验结果
         var runTaskId = ""
