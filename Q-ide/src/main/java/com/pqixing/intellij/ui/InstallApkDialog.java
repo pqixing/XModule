@@ -129,7 +129,7 @@ public class InstallApkDialog extends BaseJDialog {
         if (bridge != null) for (IDevice d : bridge.getDevices()) {
             String avdName = d.getAvdName();
             if (avdName == null)
-                avdName = UiUtils.adbShellCommon(d, "getprop ro.product.brand", true) + "-" + UiUtils.adbShellCommon(d, "getprop ro.product.model", true);
+                avdName = UiUtils.INSTANCE.adbShellCommon(d, "getprop ro.product.brand", true) + "-" + UiUtils.INSTANCE.adbShellCommon(d, "getprop ro.product.model", true);
             devices.put(new JListInfo(avdName + "  " + d.getSerialNumber() + "  " + d.getState(), "", 0, i++ == 0), d);
         }
         adapter.setDatas(new LinkedList<>(devices.keySet()));

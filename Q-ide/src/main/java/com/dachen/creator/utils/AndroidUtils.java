@@ -33,56 +33,6 @@ import java.util.List;
 
 
 public class AndroidUtils {
-    public static String lastDevices = "";
-
-    public static IDevice getSelectDevice(final Project project, final JComboBox comboBox) {
-        String id = comboBox.getSelectedItem().toString();
-        for (Pair<String, IDevice> p : getDevices(project)) {
-            if (id.equals(p.getFirst())) {
-                lastDevices = p.getSecond().getSerialNumber();
-                return p.getSecond();
-            }
-        }
-        return null;
-    }
-
-    public static void initDevicesComboBox(final Project project, final JButton refreshButton, final JComboBox comboBox) {
-        ActionListener a = actionEvent -> {
-            List<Pair<String, IDevice>> pairs = getDevices(project);
-            comboBox.removeAllItems();
-            for (Pair p : pairs) {
-                comboBox.addItem(p.getFirst());
-            }
-        };
-        a.actionPerformed(null);
-        if (refreshButton != null) refreshButton.addActionListener(a);
-    }
-
-    public static List<Pair<String, IDevice>> getDevices(Project project) {
-        AndroidDebugBridge bridge = AndroidSdkUtils.getDebugBridge(project);
-        ArrayList<Pair<String, IDevice>> infos = new ArrayList<>();
-        if (bridge != null) for (IDevice d : bridge.getDevices()) {
-            String avdName = d.getAvdName();
-            if (avdName == null)
-                avdName = UiUtils.adbShellCommon(d, "getprop ro.product.brand", true) + "-" + UiUtils.adbShellCommon(d, "getprop ro.product.model", true);
-            Pair<String, IDevice> pair = new Pair<>(avdName, d);
-            if (lastDevices.equals(d.getSerialNumber())) infos.add(0, pair);
-            else infos.add(pair);
-        }
-        return infos;
-    }
-
-
-    public static AndroidApplicationInfo getAppInfoFromApk(File fileApk) {
-        try {
-            AaptInvoker invoker = new AaptInvoker(AndroidSdks.getInstance().tryToChooseSdkHandler(), new LogWrap());
-            List<String> xmlTree = invoker.getXmlTree(fileApk, "AndroidManifest.xml");
-            return AndroidApplicationInfo.parse(xmlTree);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     /**
      * 获取App对应的包名根目录

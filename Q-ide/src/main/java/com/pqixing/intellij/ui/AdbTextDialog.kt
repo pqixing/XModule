@@ -19,8 +19,8 @@ class AdbTextDialog(internal var project: Project) : BaseJDialog() {
     private var contentPane: JPanel? = null
     private var toClipButton: JButton? = null
     private var toEditButton: JButton? = null
-    private var jText: JTextArea? = null
-    private var cbDevices: JComboBox<*>? = null
+    public var jText: JTextArea? = null
+    private var cbDevices: JComboBox<String>? = null
     private var fromEditButton: JButton? = null
     private var fromClipButton: JButton? = null
     private var refreshButton: JButton? = null
@@ -44,24 +44,29 @@ class AdbTextDialog(internal var project: Project) : BaseJDialog() {
 
         // call onCancel() on ESCAPE
         contentPane!!.registerKeyboardAction({ e -> onCancel() }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-        AndroidUtils.initDevicesComboBox(project, refreshButton, cbDevices!!)
+        UiUtils.initDevicesComboBox(project, refreshButton, cbDevices!!)
+        UiUtils.setTransfer(jText!!) {
+            jText!!.text = it.joinToString("\n")
+        }
     }
 
-    private fun toPhone(edit: Boolean) {
-        val iDevice = AndroidUtils.getSelectDevice(project, cbDevices!!)
+    private fun checkHelper(iDevice: IDevice): Boolean {
         var result = UiUtils.adbShellCommon(iDevice, "am broadcast -n com.pqixing.clieper/com.pqixing.clieper.ClipHelperReceiver -e text \"check\"", false)
-        if (iDevice == null) {
-            return
-        }
         if (!result.contains("result=success")) {
             val exit = Messages.showOkCancelDialog("Clip helper receiver not found, Install clip helper?", "Miss Application", null)
             if (exit == Messages.OK) installClipHelper(iDevice)
-            return
+            return false
         }
+        return true
+    }
+
+    private fun toPhone(edit: Boolean) {
+        val iDevice = UiUtils.getSelectDevice(project, cbDevices!!) ?: return
+        if (!checkHelper(iDevice)) return
 
         val text = String(Base64.encode(jText!!.text.toByteArray(), 0))
         //启动服务
-        result = UiUtils.adbShellCommon(iDevice, "am broadcast -n com.pqixing.clieper/com.pqixing.clieper.ClipHelperReceiver -e ${if (edit) "set_text_edit" else "set_text"} \"$text\"", false)
+        var result = UiUtils.adbShellCommon(iDevice, "am broadcast -n com.pqixing.clieper/com.pqixing.clieper.ClipHelperReceiver -e ${if (edit) "set_text_edit" else "set_text"} \"$text\"", false)
         if (result.contains("result=notpermission")) {//没有权限,弹窗提示,是否打开设置页面
             val exit = Messages.showOkCancelDialog("Miss accessibility service permission , Go to setting ?", "Miss Permission", null)
             if (exit == Messages.OK) UiUtils.adbShellCommon(iDevice, "am start -a android.settings.ACCESSIBILITY_SETTINGS", true)
@@ -69,24 +74,17 @@ class AdbTextDialog(internal var project: Project) : BaseJDialog() {
         } else if (result.contains("result=fail")) Messages.showMessageDialog(if (edit) "set text fail, please check input" else "Unkonw error , please check?", "Error", null)
     }
 
-    private fun installClipHelper(iDevice: IDevice) {
+    private fun installClipHelper(iDevice: IDevice) = Thread {
         val downloadApk = DachenHelper.downloadApk(project, "copy", "https://raw.githubusercontent.com/pqixing/modularization/master/Q-ide/adb_copy.apk")
-        Shell.runSync(AndroidSdkUtils.getAdb(project)?.absolutePath + " -s " + iDevice.getSerialNumber() + " install -r -t  " + downloadApk)
-    }
+        Shell.runSync(AndroidSdkUtils.getAdb(project)?.absolutePath + " -s " + iDevice.serialNumber + " install -r -t  " + downloadApk)
+        UiUtils.adbShellCommon(iDevice, "am start -n com.pqixing.clieper/com.pqixing.clieper.MainActivity", false)
+    }.start()
 
     private fun fromPhone(edit: Boolean) {
-        val iDevice = AndroidUtils.getSelectDevice(project, cbDevices!!)
-        var result = UiUtils.adbShellCommon(iDevice, "am broadcast -n com.pqixing.clieper/com.pqixing.clieper.ClipHelperReceiver -e text \"check\"", false)
-        if (iDevice == null) {
-            return
-        }
-        if (!result.contains("result=success")) {
-            val exit = Messages.showOkCancelDialog("Clip helper receiver not found, Install clip helper?", "Miss Application", null)
-            if (exit == Messages.OK) installClipHelper(iDevice)
-            return
-        }
+        val iDevice = UiUtils.getSelectDevice(project, cbDevices!!) ?: return
+        if (!checkHelper(iDevice)) return
         //启动服务
-        result = UiUtils.adbShellCommon(iDevice, "am broadcast -n com.pqixing.clieper/com.pqixing.clieper.ClipHelperReceiver -e ${if (edit) "get_text_edit" else "get_text"} \"get\"", false)
+        var result = UiUtils.adbShellCommon(iDevice, "am broadcast -n com.pqixing.clieper/com.pqixing.clieper.ClipHelperReceiver -e ${if (edit) "get_text_edit" else "get_text"} \"get\"", false)
         if (result.contains("result=notpermission")) {//没有权限,弹窗提示,是否打开设置页面
             val exit = Messages.showOkCancelDialog("Miss accessibility service permission , Go to setting ?", "Miss Permission", null)
             if (exit == Messages.OK) UiUtils.adbShellCommon(iDevice, "am start -a android.settings.ACCESSIBILITY_SETTINGS", true)

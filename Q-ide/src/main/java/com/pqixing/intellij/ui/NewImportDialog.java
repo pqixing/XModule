@@ -70,7 +70,7 @@ public class NewImportDialog extends BaseJDialog {
 //        UiUtils.centerDialog(this);
         this.project = project;
         this.imports = imports;
-        properties = PropertiesUtils.INSTANCE.readProperties(new File(project.getBasePath(), UiUtils.IDE_PROPERTIES));
+        properties = PropertiesUtils.INSTANCE.readProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()));
         syncBranch = properties.getProperty(BING_KEY, "N").equals("Y");
         cbVcs.setSelected("Y".equals(properties.getProperty(VCS_KEY, "Y")));
         initDpModel(dpModel);
@@ -288,7 +288,7 @@ public class NewImportDialog extends BaseJDialog {
         properties.setProperty(CODEROOTS_KEY, list2Str(codeRoots));
 
         if (!newVcs.equals(oldVcs) || !newKey.equals(oldBind) || !newImport.equals(oldImports) || !exists)
-            ApplicationManager.getApplication().runWriteAction(() -> PropertiesUtils.INSTANCE.writeProperties(new File(project.getBasePath(), UiUtils.IDE_PROPERTIES), properties));
+            ApplicationManager.getApplication().runWriteAction(() -> PropertiesUtils.INSTANCE.writeProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()), properties));
     }
 
     private List<String> str2List(String str) {
