@@ -6,7 +6,7 @@
       <xy x="48" y="54" width="837" height="297"/>
     </constraints>
     <properties>
-      <preferredSize width="700" height="350"/>
+      <preferredSize width="720" height="350"/>
     </properties>
     <border type="none"/>
     <children>
@@ -85,7 +85,7 @@
             </constraints>
             <properties>
               <selected value="true"/>
-              <text value="openApp"/>
+              <text value="open"/>
             </properties>
           </component>
           <component id="a499b" class="javax.swing.JTextField" binding="jParams">

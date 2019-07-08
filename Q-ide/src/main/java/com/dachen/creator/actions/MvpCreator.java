@@ -10,8 +10,15 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
+import com.pqixing.intellij.actions.QToolGroup;
 
 public class MvpCreator extends AnAction   {
+
+    @Override
+    public void update(AnActionEvent e) {
+        super.update(e);
+        e.getPresentation().setVisible(QToolGroup.Companion.isDachenProject(e.getProject()));
+    }
 
     private String classPrefix;
     @Override

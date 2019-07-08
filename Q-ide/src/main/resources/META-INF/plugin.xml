@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.pqixing.modularization.idea</id>
     <name>Modularization</name>
-    <version>1.8</version>
+    <version>1.9</version>
     <vendor email="pqixing86@gmail.com" url="https://github.com/pqixing/modularization">pqixing
     </vendor>
 
@@ -10,9 +10,7 @@
     </description>
 
     <change-notes>
-        Jekins support!!
-        Adb Text support!!
-        Adb Install support!!
+        Jekins support!! Adb Text support!! Adb Install support!!
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
@@ -30,7 +28,7 @@
     <depends>Git4Idea</depends>
     <depends>org.jetbrains.android</depends>
     <actions>
-        <group id="QTools" popup="true" text="QTools">
+        <group id="QTools" popup="true" text="QTools" class="com.pqixing.intellij.actions.QToolGroup">
             <add-to-group group-id="BuildMenu" anchor="first"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>

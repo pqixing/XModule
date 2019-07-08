@@ -9,6 +9,7 @@ import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.util.concurrency.Semaphore
+import com.pqixing.intellij.actions.QToolGroup
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.utils.DachenHelper
@@ -66,23 +67,21 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
         contentPane!!.registerKeyboardAction({ onCancel() }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
         adapter = JListSelectAdapter(jlDatas!!, true)
         var ss = arrayListOf<JListInfo>()
-        for (i in 0..100) ss.add(JListInfo())
+        for (i in 0..100) ss.add(JListInfo(""))
         adapter.setDatas(ss)
-        UiUtils.initDevicesComboBox(project, null, devices!!)
+        UiUtils.initDevicesComboBox(project, devices!!)
         UiUtils.setTransfer(jlDatas!!) { f ->
             model = 0
             addApkPaths(f.filter { checkIsApk(it.name) }, true)
             updateUI()
         }
+        if (!QToolGroup.isModulariztionProject(project)) moduleRadioButton?.isVisible = false
+        if (!QToolGroup.isDachenProject(project)) netRadioButton?.isVisible = false
         model = if (checkIsApk(apkPath)) 0 else if (!projectMode) 1 else 2
         initData(apkPath)
     }
 
     fun checkIsApk(url: String?) = url?.endsWith(".apk") ?: false
-    override fun setVisible(p0: Boolean) {
-        if (p0) updateUI()
-        super.setVisible(p0)
-    }
 
     private fun addApkPaths(files: List<File>, select: Boolean = false): List<JListInfo> {
         val js = files.map { f ->
@@ -99,20 +98,26 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
     }
 
     private fun updateUI() {
+        //如果当前模式不可见,切换会默认模式
+        if (!radios[model].first.isVisible) {
+            model = 0
+            updateUI()
+            return
+        }
         for (i in 0 until radios.size) radios[i].first.isSelected = model == i
         adapter.setDatas(radios[model].second)
     }
 
     private fun initData(apkPath: String?) = Thread {
+        val start = System.currentTimeMillis();
         //添加本地数据
         val logFiles = File(project.basePath, ".idea/apks.log")
         if (logFiles.exists()) {
             addApkPaths(logFiles.readLines().map { File(it) })
         }
         if (checkIsApk(apkPath)) addApkPaths(Collections.singletonList(File(apkPath!!)), true)
-        if (model == 0) updateUI()//如果当前是本地模式,则,优先展示出来
         //添加网络数据
-        DachenHelper.loadApksForNet().forEach {
+        if (netRadioButton!!.isVisible) DachenHelper.loadApksForNet().forEach {
             val j = JListInfo(it.key).apply {
                 data = IInstall { _, _, i, c ->
                     i.text = "Download : ${it.value}"
@@ -122,7 +127,9 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
             }
             netApks.add(j)
         }
-        if (model == 2) updateUI()
+        val after = 100 - System.currentTimeMillis() + start
+        if (after > 0) Thread.sleep(after)
+        updateUI()
     }.start()
 
     private fun onOK() {
@@ -137,6 +144,7 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
             return
         }
         buttonOK!!.isVisible = false
+        if (model == 1 && selectItem.size == 1) isVisible = false//构建module,隐藏
         val install = object : Task.Backgroundable(project, "Start Install") {
 
             override fun run(indicator: ProgressIndicator) {
@@ -145,10 +153,11 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
                 installApp(0, selectItem, indicator, targetDone, openAppCheckBox!!.isSelected, iDevice)
                 targetDone.waitFor()
                 val failItem = selectItem.filter { it.staue == 3 }
-                if (model == 2 && failItem.isNotEmpty()) {
+                if (failItem.isNotEmpty()) {
                     model = 0
+                    isVisible = true
                     updateUI()
-                }
+                } else if (!isVisible) onCancel()//如果是一次后台模式安装成功, 直接关掉对话框
             }
         }
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(install, BackgroundableProcessIndicator(install))
@@ -208,7 +217,7 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
         val list = if (logFiles.exists()) logFiles.readLines().toMutableList() else mutableListOf()
         list.remove(l)
         list.add(0, l)
-        while (list.size >30) list.removeAt(30)
+        while (list.size > 30) list.removeAt(30)
         logFiles.writeText(list.joinToString("\n"))
         return result
     }

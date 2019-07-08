@@ -1,5 +1,6 @@
 package com.pqixing.intellij.actions
 
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
 import com.pqixing.intellij.utils.GitHelper
@@ -9,7 +10,9 @@ import java.io.File
 class GitCheckoutAction : BaseGitAction() {
 
     override fun checkUrls(urls: Map<String, String>): Boolean = true
-
+    override fun update(e: AnActionEvent?) {
+        e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
+    }
     override fun initDialog(dialog: GitOperatorDialog) {
         dialog.setTargetBranch(getRepo(rootRepoPath)?.branches?.remoteBranches?.map { it.name.substring(it.name.lastIndexOf("/") + 1) }, true)
         dialog.pOpertator.isVisible = false

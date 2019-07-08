@@ -49,7 +49,7 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
 
         // call onCancel() on ESCAPE
         contentPane!!.registerKeyboardAction({ e -> onCancel() }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-        UiUtils.initDevicesComboBox(project, refreshButton, cbDevices!!)
+        UiUtils.initDevicesComboBox(project, cbDevices!!)
         UiUtils.setTransfer(jText!!) {
             jText!!.text = it.joinToString("\n")
         }
@@ -83,12 +83,12 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
         val install = object : Task.Backgroundable(project, "Start Install") {
 
             override fun run(indicator: ProgressIndicator) {
-                val url ="https://raw.githubusercontent.com/pqixing/modularization/master/Q-ide/adb_copy.apk"
+                val url = "https://raw.githubusercontent.com/pqixing/modularization/master/Q-ide/adb_copy.apk"
                 indicator.text = "Download : $url"
                 val downloadApk = DachenHelper.downloadApk(project, "copy", url)
                 try {
                     indicator.text = "Install : $url"
-                    UiUtils.installApk(iDevice,downloadApk,"-r -t")
+                    UiUtils.installApk(iDevice, downloadApk, "-r -t")
                     UiUtils.adbShellCommon(iDevice, "am start -n com.pqixing.clieper/com.pqixing.clieper.MainActivity", false)
                 } catch (e: Exception) {
                     e.printStackTrace()

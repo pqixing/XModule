@@ -9,10 +9,17 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.pqixing.intellij.actions.QToolGroup;
 
 import java.util.Objects;
 
 public class ModelCreator extends AnAction {
+
+    @Override
+    public void update(AnActionEvent e) {
+        super.update(e);
+        e.getPresentation().setVisible(QToolGroup.Companion.isDachenProject(e.getProject()));
+    }
 
     @Override
     public void actionPerformed(AnActionEvent e) {

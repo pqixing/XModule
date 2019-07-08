@@ -48,6 +48,7 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
     private lateinit var cbBranch: JComboBox<String>
     private lateinit var cbType: JComboBox<String>
     private lateinit var cbAllLog: JCheckBox
+    private lateinit var cbBuilder: JCheckBox
     private var adapter: JListSelectAdapter
     private var appAdapter: JListSelectAdapter
 
@@ -97,6 +98,7 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
         cbBranch.addActionListener(action)
         cbType.addActionListener(action)
         cbAllLog.addActionListener(action)
+        cbBuilder.addActionListener(action)
         appAdapter = JListSelectAdapter(jlApps, true)
         appAdapter.setDatas(apps.map { JListInfo(it.key, select = it.key == curModule) })
         appAdapter.selectListener = object : JlistSelectListener {
@@ -106,9 +108,7 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
             }
         }
 
-        cbBranch.addItem(branchs[0])
-        cbBranch.addItem("")
-        for (i in 1 until branchs.size) cbBranch.addItem(branchs[i])
+        for (i in 0 until branchs.size) cbBranch.addItem(branchs[i])
 
         //开启线程加载
         Thread {
@@ -150,7 +150,7 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
     }
 
     private fun loadQueueJob(datas: MutableList<JListInfo>) = try {
-        val branch = cbBranch.selectedItem.toString()
+        val allLog = cbAllLog.isSelected
         JSON.parseObject(safeNet(queueUrl + apiJson)).getJSONArray("items")?.filter { f1 ->
             f1 is JSONObject && buildJobName == f1.getJSONObject("task")?.getString("name")
         }?.forEach {
@@ -160,7 +160,8 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
                 if (split.size == 2) Pair(split[0], split[1]) else null
             }?.toMap()
             if (checkParam(p)) datas.add(JListInfo("${format.format(Date(o.getLong("inQueueSince")))}  ${p?.get("Apk")
-                    ?: o.getString("id")}  ${if (branch.isEmpty()) p?.get("BranchName")
+                    ?: o.getString("id")}  ${if (allLog) p?.get("BranchName")
+                    ?: "" else ""}  ${if (cbBuilder.isSelected) p?.get("BuildUser")
                     ?: "" else ""}", "Waiting for executor", 2).apply {
                 data = JekinsJob().apply { params = p!! }
             })
@@ -177,10 +178,11 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
 
     private fun checkParam(toMap: Map<String, String>?): Boolean {
         toMap ?: return false
+        if (cbAllLog.isSelected) return true
         val branch = cbBranch.selectedItem.toString()
         val type = cbType.selectedItem.toString()
         val apps = getSelectApps()
-        return (apps.isEmpty() || apps.contains(toMap["Apk"])) && (branch.isEmpty() || toMap["BranchName"] == branch) && (type.isEmpty() || toMap["Type"] == type)
+        return (apps.isEmpty() || apps.contains(toMap["Apk"])) && toMap["BranchName"] == branch && toMap["Type"] == type
     }
 
     /**
@@ -193,7 +195,7 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
         var inVisible = datas.isNotEmpty()
         var requestCount = 0
         var id: Int = safeNet(jobsUrl + "lastBuild/buildNumber").toInt()
-        val branch = cbBranch.selectedItem.toString()
+        val allLog = cbAllLog.isSelected
         val max = if (cbAllLog.isSelected) Int.MAX_VALUE else 20
 
         while (requestCount++ < 200 && datas.size < max && id > 0) {
@@ -202,8 +204,8 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
             if (!checkParam(job.params)) continue
             inVisible = inVisible or job.building
             datas.add(JListInfo("${format.format(Date(job.timestamp))}  ${job.appName
-                    ?: job.displayName}  ${if (branch.isEmpty()) job.branch
-                    ?: "" else ""}", "${getDuration(job)} ${if (job.building) "BUILDING" else job.result}", when (job.result) {
+                    ?: job.displayName}  ${if (allLog) job.branch
+                    ?: "" else ""}  ${if (cbBuilder.isSelected) job.buildUser ?: "" else ""}", "${getDuration(job)} ${if (job.building) "BUILDING" else job.result}", when (job.result) {
                 JekinsJob.SUCCESS -> 1
                 JekinsJob.FAILURE, JekinsJob.ABORTED -> 3
                 else -> 0
@@ -215,10 +217,6 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
 
     private fun onOK() {
         val branch = cbBranch.selectedItem.toString()
-        if (branch.isEmpty()) {
-            Messages.showMessageDialog("Branch is not allow empty!!", "Warning", null)
-            return
-        }
         val type = cbType.selectedItem.toString()
         val selectApps = getSelectApps()
         if (selectApps.isEmpty()) {
@@ -244,7 +242,7 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
                     indicator.text = "Start Build $app"
                     jlLog.text = "Start Build $app"
                     safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${URLEncoder.encode(TextUtils.removeLineAndMark(apps[app]?.replace(" ", "")
-                            ?: ""), "utf-8")}BuildUser=${userName}")
+                            ?: ""), "utf-8")}&BuildUser=${userName}")
                     Thread.sleep(500)//延迟500毫秒再进行请求,避免出现问题
                 }
                 indicator.text = "Querying Result,Please Wait"

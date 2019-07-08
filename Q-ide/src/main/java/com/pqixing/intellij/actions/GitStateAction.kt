@@ -1,6 +1,7 @@
 package com.pqixing.intellij.actions
 
 import com.intellij.dvcs.DvcsUtil
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
@@ -21,7 +22,9 @@ import javax.swing.JList
 class GitStateAction : BaseGitAction, JlistSelectListener {
     //    val TIP = "A:All;  C:Conflict;  P:Push";
     var commitMsg = ""//提交的文本
-
+    override fun update(e: AnActionEvent?) {
+        e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
+    }
     override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean {
         val info = items.last()
         val repo = getRepo(info.title) ?: return true

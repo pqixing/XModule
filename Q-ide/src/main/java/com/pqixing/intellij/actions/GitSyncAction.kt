@@ -1,12 +1,15 @@
 package com.pqixing.intellij.actions
 
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
 import git4idea.GitUtil
 import java.io.File
 
 class GitSyncAction : BaseGitAction() {
-
+    override fun update(e: AnActionEvent?) {
+        e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
+    }
     override fun checkUrls(urls: Map<String, String>): Boolean=true
 
     override fun getAdapterList(urls: Map<String, String>): MutableList<JListInfo> {

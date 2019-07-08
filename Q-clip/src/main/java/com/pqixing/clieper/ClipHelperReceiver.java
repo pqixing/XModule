@@ -41,7 +41,7 @@ public class ClipHelperReceiver extends BroadcastReceiver {
                 setResult(Activity.RESULT_OK, "result=notpermission", null);
             } else {
                 extra = AccessService.getFocusText() + "";
-                setResult(Activity.RESULT_OK, "result=success" + new String(Base64.encode(extra.getBytes(), 0)), null);
+                setResult(Activity.RESULT_OK, "result=success" + (extra.isEmpty()?"":new String(Base64.encode(extra.getBytes(), 0))), null);
             }
         } else if (!TextUtils.isEmpty(extra = intent.getStringExtra(EXTRA_SET_TEXT_EDIT))) {
             if (!checkIfAccessServiceRunning(context)) {

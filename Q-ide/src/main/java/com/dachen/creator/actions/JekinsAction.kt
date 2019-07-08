@@ -7,6 +7,7 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.help.XmlHelper
+import com.pqixing.intellij.actions.QToolGroup
 import com.pqixing.intellij.ui.JekinJobDialog
 import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.model.SubModuleType
@@ -17,6 +18,10 @@ import java.io.File
 open class JekinsAction : AnAction() {
     lateinit var project: Project
     lateinit var basePath: String
+    override fun update(e: AnActionEvent?) {
+        super.update(e)
+        e?.presentation?.isVisible = QToolGroup.isDachenProject(e?.getProject())
+    }
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return

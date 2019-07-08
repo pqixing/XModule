@@ -34,6 +34,10 @@ import java.io.File
 class ImportAction : AnAction() {
     lateinit var project: Project
     lateinit var basePath: String
+
+    override fun update(e: AnActionEvent?) {
+        e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
+    }
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return

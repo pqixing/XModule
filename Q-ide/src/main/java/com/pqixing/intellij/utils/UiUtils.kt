@@ -8,15 +8,17 @@ import com.android.tools.idea.sdk.AndroidSdks
 import com.dachen.creator.utils.LogWrap
 import com.intellij.openapi.project.Project
 import org.jetbrains.android.sdk.AndroidSdkUtils
-
-import java.awt.Dimension
-import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 import java.awt.event.ActionEvent
 import java.io.File
-import java.util.ArrayList
-import javax.swing.*
+import java.util.*
+import javax.swing.JButton
+import javax.swing.JComboBox
+import javax.swing.JComponent
+import javax.swing.TransferHandler
+import javax.swing.event.PopupMenuEvent
+import javax.swing.event.PopupMenuListener
 
 object UiUtils {
     val IDE_PROPERTIES = ".idea/modularization.properties"
@@ -44,16 +46,30 @@ object UiUtils {
 
     fun getSelectDevice(project: Project, comboBox: JComboBox<*>): IDevice? {
         val id = comboBox.selectedItem?.toString() ?: ""
-        return getDevices(project).find { it.first == id }?.second
+        return getDevices(project).find { it.first == id }?.second?.apply {
+            lastDevices = serialNumber//保存最后一次选择项
+        }
     }
 
-    fun initDevicesComboBox(project: Project, refreshButton: JButton?, comboBox: JComboBox<String>) {
-        val a = { e: ActionEvent? ->
+    fun initDevicesComboBox(project: Project, comboBox: JComboBox<String>) {
+        val a = {
             comboBox.removeAllItems()
             getDevices(project).forEach { i -> comboBox.addItem(i.first) }
         }
-        a(null)
-        refreshButton?.addActionListener(a)
+        a()
+        if (comboBox.itemCount == 0) comboBox.addPopupMenuListener(object : PopupMenuListener {
+            override fun popupMenuWillBecomeInvisible(p0: PopupMenuEvent?) {
+                a()
+                if (comboBox.itemCount != 0) comboBox.removePopupMenuListener(this)
+            }
+
+            override fun popupMenuCanceled(p0: PopupMenuEvent?) {
+            }
+
+            override fun popupMenuWillBecomeVisible(p0: PopupMenuEvent?) {
+            }
+
+        })
     }
 
     fun getDevices(project: Project): List<Pair<String, IDevice>> {
