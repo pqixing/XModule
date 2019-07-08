@@ -154,9 +154,11 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
                 targetDone.waitFor()
                 val failItem = selectItem.filter { it.staue == 3 }
                 if (failItem.isNotEmpty()) {
-                    model = 0
-                    isVisible = true
-                    updateUI()
+                    if (model == 1) isVisible = true
+                    else {
+                        model = 0
+                        updateUI()
+                    }
                 } else if (!isVisible) onCancel()//如果是一次后台模式安装成功, 直接关掉对话框
             }
         }
