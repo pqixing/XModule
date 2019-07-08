@@ -242,7 +242,7 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
                     indicator.text = "Start Build $app"
                     jlLog.text = "Start Build $app"
                     safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${URLEncoder.encode(TextUtils.removeLineAndMark(apps[app]?.replace(" ", "")
-                            ?: ""), "utf-8")}&BuildUser=${userName}")
+                            ?: ""), "utf-8")}&BuildUser=${TextUtils.removeLineAndMark(userName?:"")}")
                     Thread.sleep(500)//延迟500毫秒再进行请求,避免出现问题
                 }
                 indicator.text = "Querying Result,Please Wait"
