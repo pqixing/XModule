@@ -1,0 +1,9 @@
+/build
+*.iml
+.idea
+.gradle/
+#gradle/
+gradlew
+gradlew.bat
+local.properties
+CodeCreator/out/
