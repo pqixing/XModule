@@ -155,7 +155,7 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
                 val failItem = selectItem.filter { it.staue == 3 }
                 if (failItem.isNotEmpty()) {
                     if (model == 1) isVisible = true
-                    else {
+                    else if(model==2){
                         model = 0
                         updateUI()
                     }
