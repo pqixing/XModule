@@ -155,18 +155,19 @@ class ImportAction : AnAction() {
 
     private fun getImlPath(codePath: String, projectXml: ProjectXmlModel, title: String) = "$codePath/${projectXml.findSubModuleByName(title)?.path}/$title.iml"
 
-    private fun saveConfig(configgFile: File, dialog: NewImportDialog) =ApplicationManager.getApplication().runWriteAction{
-        val dpModel = dialog.dpModel?.trim() ?: ""
-        val codeRoot = dialog.codeRootStr.trim()
-        val includes = dialog.imports
+    private fun saveConfig(configgFile: File, dialog: NewImportDialog) =ApplicationManager.getApplication().invokeLater {
+        ApplicationManager.getApplication().runWriteAction {
+            val dpModel = dialog.dpModel?.trim() ?: ""
+            val codeRoot = dialog.codeRootStr.trim()
+            val includes = dialog.imports
 
-        var result = configgFile.readText()
-        result = result.replace(Regex("String *dependentModel *=.*;"), "String dependentModel = \"$dpModel\";")
-        result = result.replace(Regex("String *codeRoot *=.*;"), "String codeRoot = \"$codeRoot\";")
-        result = result.replace(Regex("String *include *=.*;"), "String include = \"${includes.joinToString { "$it," }}\";")
-        FileUtils.writeText(configgFile, result, true)
+            var result = configgFile.readText()
+            result = result.replace(Regex("String *dependentModel *=.*;"), "String dependentModel = \"$dpModel\";")
+            result = result.replace(Regex("String *codeRoot *=.*;"), "String codeRoot = \"$codeRoot\";")
+            result = result.replace(Regex("String *include *=.*;"), "String include = \"${includes.joinToString { "$it," }}\";")
+            FileUtils.writeText(configgFile, result, true)
+        }
     }
-
     /**
      * 直接通过ide进行导入
      */
