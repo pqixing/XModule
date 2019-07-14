@@ -21,8 +21,11 @@ class QToolGroup : DefaultActionGroup() {
             return configs[project]?.second == true
         }
 
+        var lastInitTime = 0L
         private fun initSettingEnable(project: Project?) {
+            if (System.currentTimeMillis() - lastInitTime < 100) return
             val basePath = project?.basePath ?: return
+            lastInitTime = System.currentTimeMillis()
             val projectXmlFile = File(basePath, "templet/project.xml")
             if (!projectXmlFile.exists()) {
                 configs[project] = null
