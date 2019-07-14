@@ -155,7 +155,7 @@ class ImportAction : AnAction() {
 
     private fun getImlPath(codePath: String, projectXml: ProjectXmlModel, title: String) = "$codePath/${projectXml.findSubModuleByName(title)?.path}/$title.iml"
 
-    private fun saveConfig(configgFile: File, dialog: NewImportDialog) {
+    private fun saveConfig(configgFile: File, dialog: NewImportDialog) =ApplicationManager.getApplication().runWriteAction{
         val dpModel = dialog.dpModel?.trim() ?: ""
         val codeRoot = dialog.codeRootStr.trim()
         val includes = dialog.imports

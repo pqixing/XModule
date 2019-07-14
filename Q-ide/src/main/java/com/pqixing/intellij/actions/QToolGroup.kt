@@ -26,7 +26,7 @@ class QToolGroup : DefaultActionGroup() {
             val projectXmlFile = File(basePath, "templet/project.xml")
             if (!projectXmlFile.exists()) {
                 configs[project] = null
-            } else if (projectXmlFile.lastModified() > configs[project]?.first ?: 0L) {//距离上次修改有更新时
+            } else if (projectXmlFile.lastModified() != configs[project]?.first ?: 0L) {//距离上次修改有更新时
                 configs[project] = Pair(projectXmlFile.lastModified(), projectXmlFile.readText().contains("DachenBase"))
             }
         }

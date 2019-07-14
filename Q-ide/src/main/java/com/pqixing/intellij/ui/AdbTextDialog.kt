@@ -3,6 +3,7 @@ package com.pqixing.intellij.ui
 import android.util.Base64
 import com.android.ddmlib.IDevice
 import com.dachen.creator.utils.AndroidUtils
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -14,11 +15,14 @@ import com.pqixing.intellij.utils.DachenHelper
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.shell.Shell
 import org.jetbrains.android.sdk.AndroidSdkUtils
+import java.awt.Desktop
 
 import javax.swing.*
 import java.awt.event.KeyEvent
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
+import java.io.File
+import java.net.URI
 
 class AdbTextDialog(var project: Project) : BaseJDialog() {
     private var contentPane: JPanel? = null
@@ -85,11 +89,17 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
             override fun run(indicator: ProgressIndicator) {
                 val url = "https://raw.githubusercontent.com/pqixing/modularization/master/Q-ide/adb_copy.apk"
                 indicator.text = "Download : $url"
-                val downloadApk = DachenHelper.downloadApk(project, "copy", url)
                 try {
-                    indicator.text = "Install : $url"
-                    UiUtils.installApk(iDevice, downloadApk, "-r -t")
-                    UiUtils.adbShellCommon(iDevice, "am start -n com.pqixing.clieper/com.pqixing.clieper.MainActivity", false)
+                    val downloadApk = DachenHelper.downloadApk(project, "copy", url)
+                    if (downloadApk.isEmpty()||!File(downloadApk).exists()) ApplicationManager.getApplication().invokeLater {
+                        if (Messages.OK == Messages.showOkCancelDialog("请尝试使用浏览器进行下载并手动安装?", "下载失败", null)) {
+                            Desktop.getDesktop().browse(URI(url))
+                        }
+                    } else {
+                        indicator.text = "Install : $url"
+                        UiUtils.installApk(iDevice, downloadApk, "-r -t")
+                        UiUtils.adbShellCommon(iDevice, "am start -n com.pqixing.clieper/com.pqixing.clieper.MainActivity", false)
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -105,7 +115,7 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
         //启动服务
         var result = UiUtils.adbShellCommon(iDevice, "am broadcast -n com.pqixing.clieper/com.pqixing.clieper.ClipHelperReceiver -e ${if (edit) "get_text_edit" else "get_text"} \"get\"", false)
         if (result.contains("result=notpermission")) {//没有权限,弹窗提示,是否打开设置页面
-            val exit = Messages.showOkCancelDialog("Miss accessibility service permission , Go to setting ?", "Miss Permission", null)
+            val exit = Messages.showOkCancelDialog("Miss accessibility service permission , Go to setting for cliphelper ?", "Miss Permission", null)
             if (exit == Messages.OK) UiUtils.adbShellCommon(iDevice, "am start -a android.settings.ACCESSIBILITY_SETTINGS", true)
         } else if (result.contains("result=success")) {
             jText?.text = String(Base64.decode(result.split("result=success")[1].split("\"")[0].trim(), 0))

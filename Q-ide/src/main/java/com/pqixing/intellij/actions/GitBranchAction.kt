@@ -23,10 +23,8 @@ class GitBranchAction : BaseGitAction() {
     }
 
     override fun initDialog(dialog: GitOperatorDialog) {
-        dialog.adapter.boxVisible = false
         dialog.setOperator("create", "merge", "delete")
         dialog.setTargetBranch(getRepo(rootRepoPath)?.branches?.remoteBranches?.map { it.name }, true)
-        dialog.allButton.isVisible = false//不允许反选
         dialog.setOnOperatorChange { }//重新设置，不需要更新状态
     }
 
