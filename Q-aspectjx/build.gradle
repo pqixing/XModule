@@ -1,11 +1,6 @@
 apply plugin: 'groovy'
 apply plugin: 'kotlin'
 apply plugin: 'java'
-jar {
-    from {
-        zipTree(new File(project.projectDir.absolutePath + "/libs/aspectjtools.jar"))
-    }
-}
 dependencies {
     repositories {
         mavenLocal()
@@ -14,9 +9,10 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
 
-    compileOnly 'com.android.tools.build:gradle:3.1.2'
+    compileOnly 'com.android.tools.build:gradle:3.4.2'
 //    compile "org.aspectj:aspectjtools:1.8.13"
-    implementation 'org.aspectj:aspectjrt:1.8.9'
+    implementation 'org.aspectj:aspectjrt:1.8.11'
+    implementation 'org.aspectj:aspectjtools:1.8.4'
     implementation ('com.alibaba:arouter-register:1.0.2'){
         exclude group :"com.android.tools.build"
     }
@@ -27,7 +23,7 @@ dependencies {
     compile files('libs/aspectjtools.jar')
 }
 ext.mVersion = "1.1"
-ext.mLocalVersion = "1.0.4"
+ext.mLocalVersion = "1.0.5"
 ext.mArtifactId = "aspectjx"
 apply from: '../script/bintray.gradle'
 
