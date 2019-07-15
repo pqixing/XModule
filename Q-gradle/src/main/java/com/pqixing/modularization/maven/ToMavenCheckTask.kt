@@ -155,7 +155,7 @@ open class ToMavenCheckTask : BaseTask() {
         if (unCheck < 4) return unCheck - oldType
 
         val newType = 1 shl (oldType + 3)
-        return (unCheck and newType) - 1
+        return Math.min(0,(unCheck and newType) - 1)
     }
 
     private fun checkBaseVersion(baseVersion: String) {
