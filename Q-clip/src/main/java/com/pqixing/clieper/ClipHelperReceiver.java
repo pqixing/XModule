@@ -6,6 +6,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -14,45 +15,61 @@ import android.widget.Toast;
 public class ClipHelperReceiver extends BroadcastReceiver {
     private static String TAG = "ClipboardReceiver";
 
-    public static String EXTRA_TEXT = "text";
+    public static String EXTRA_GET_VERSION = "get_version";
     public static String EXTRA_GET_TEXT = "get_text";
     public static String EXTRA_SET_TEXT = "set_text";
     public static String EXTRA_GET_TEXT_EDIT = "get_text_edit";
     public static String EXTRA_SET_TEXT_EDIT = "set_text_edit";
 
+    public void writeResult(String result) {
+        setResult(Activity.RESULT_OK, "onIdeResult=" + (TextUtils.isEmpty(result) ? "" : new String(Base64.encode(result.getBytes(), 0))), null);
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        String extra = intent.getStringExtra(EXTRA_TEXT);
         ClipboardManager clipboar = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-        if (!TextUtils.isEmpty(extra)) {
-            setResult(Activity.RESULT_OK, "result=success", null);
-        } else if (!TextUtils.isEmpty(intent.getStringExtra(EXTRA_GET_TEXT))) {
-            extra = clipboar.getText() + "";
-            setResult(Activity.RESULT_OK, "result=success" + new String(Base64.encode(extra.getBytes(), 0)), null);
-        } else if (!TextUtils.isEmpty(extra = intent.getStringExtra(EXTRA_SET_TEXT))) {
-            extra = new String(Base64.decode(extra, 0));
-            clipboar.setPrimaryClip(ClipData.newPlainText(null, extra));
-            Toast.makeText(context, "copy to clip boar:\n" + extra, Toast.LENGTH_SHORT).show();
-            setResult(Activity.RESULT_OK, "result=success", null);
-            Toast.makeText(context, "Copy " + extra, Toast.LENGTH_SHORT).show();
 
-        } else if (!TextUtils.isEmpty(intent.getStringExtra(EXTRA_GET_TEXT_EDIT))) {
-            if (!checkIfAccessServiceRunning(context)) {
-                setResult(Activity.RESULT_OK, "result=notpermission", null);
-            } else {
-                extra = AccessService.getFocusText() + "";
-                setResult(Activity.RESULT_OK, "result=success" + (extra.isEmpty()?"":new String(Base64.encode(extra.getBytes(), 0))), null);
-            }
-        } else if (!TextUtils.isEmpty(extra = intent.getStringExtra(EXTRA_SET_TEXT_EDIT))) {
-            if (!checkIfAccessServiceRunning(context)) {
-                setResult(Activity.RESULT_OK, "result=notpermission", null);
-            } else {
-                boolean setFocusText = AccessService.setFocusText(new String(Base64.decode(extra, 0)));
-                setResult(Activity.RESULT_OK, "result="+(setFocusText?"success":"fail"), null);
-            }
-        }else  setResult(Activity.RESULT_OK, "result=fail", null);
+        String input = null;
 
-//        Toast.makeText(context, "onRecevice " + extra, Toast.LENGTH_SHORT).show();
+        if (EXTRA_GET_VERSION.equals(input = getString(intent, EXTRA_GET_VERSION))) {
+            writeResult(getVersionName(context));
+        } else if (!TextUtils.isEmpty(input = getString(intent, EXTRA_GET_TEXT))) {
+            String fromClip = "";
+            ClipData clip = clipboar.getPrimaryClip();
+            if (clip != null && clip.getItemCount() > 0) {
+                fromClip = clip.getItemAt(0).coerceToText(context).toString();
+            }
+            writeResult(fromClip);
+        } else if (EXTRA_GET_TEXT_EDIT.equals(input = getString(intent, EXTRA_GET_TEXT_EDIT))) {
+            if (!checkIfAccessServiceRunning(context)) writeResult("##permission##");
+            else {
+                String output = AccessService.getFocusText();
+                writeResult(output == null ? "##fail##" : output);
+            }
+        } else if (!TextUtils.isEmpty(input = getString(intent, EXTRA_SET_TEXT))) {
+            clipboar.setPrimaryClip(ClipData.newPlainText(null, input));
+            writeResult("##success##");
+            Toast.makeText(context, "Copy " + input, Toast.LENGTH_SHORT).show();
+        } else if (!TextUtils.isEmpty(input = getString(intent, EXTRA_SET_TEXT_EDIT))) {
+            if (!checkIfAccessServiceRunning(context)) writeResult("##permission##");
+            else writeResult(AccessService.setFocusText(input) ? "##success##" : "##fail##");
+        } else writeResult("##unkonw##");
+        Toast.makeText(context, "onReceive" + input, Toast.LENGTH_SHORT).show();
+    }
+
+    private String getString(Intent intent, String key) {
+        String value = intent.getStringExtra(key);
+        if (TextUtils.isEmpty(value)) return null;
+        return new String(Base64.decode(value, 0));
+    }
+
+    private String getVersionName(Context context) {
+        try {
+            return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return "0.0";
     }
 
     private boolean checkIfAccessServiceRunning(Context context) {

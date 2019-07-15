@@ -2,7 +2,7 @@ package com.pqixing.intellij.ui
 
 import android.util.Base64
 import com.android.ddmlib.IDevice
-import com.dachen.creator.utils.AndroidUtils
+import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -10,19 +10,15 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.intellij.util.concurrency.Semaphore
 import com.pqixing.intellij.utils.DachenHelper
 import com.pqixing.intellij.utils.UiUtils
-import com.pqixing.shell.Shell
-import org.jetbrains.android.sdk.AndroidSdkUtils
 import java.awt.Desktop
-
-import javax.swing.*
 import java.awt.event.KeyEvent
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.io.File
 import java.net.URI
+import javax.swing.*
 
 class AdbTextDialog(var project: Project) : BaseJDialog() {
     private var contentPane: JPanel? = null
@@ -33,6 +29,8 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
     private var fromEditButton: JButton? = null
     private var fromClipButton: JButton? = null
     private var refreshButton: JButton? = null
+    private var clipVersion = "1.1"
+    val resultKey = "onIdeResult="
 
     init {
         setContentPane(contentPane)
@@ -47,51 +45,84 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
         defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
         addWindowListener(object : WindowAdapter() {
             override fun windowClosing(e: WindowEvent?) {
-                onCancel()
+                dispose()
             }
         })
 
         // call onCancel() on ESCAPE
-        contentPane!!.registerKeyboardAction({ e -> onCancel() }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+        contentPane!!.registerKeyboardAction({ e -> dispose() }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
         UiUtils.initDevicesComboBox(project, cbDevices!!)
         UiUtils.setTransfer(jText!!) {
             jText!!.text = it.joinToString("\n")
         }
     }
 
+    /**
+     * 执行命令并且返回结果
+     */
+    private fun runAdCommand(device: IDevice, cmd: String): String? {
+        val result = AdbShellCommandsUtil.executeCommand(device, cmd).output.find { it.contains(resultKey) }
+                ?: return null
+
+        val start = result.indexOf(resultKey) + resultKey.length
+        val end = result.indexOf("\"", start)
+        return String(Base64.decode(result.substring(start, if (end == -1) result.length else end), 0))
+    }
+
+
+    private fun getBroadCastCmd(key: String, value: String? = null): String {
+        return "am broadcast -n com.pqixing.clieper/com.pqixing.clieper.ClipHelperReceiver -e $key \"${String(Base64.encode((value
+                ?: key).toByteArray(), 0))}\""
+    }
+
     private fun checkHelper(iDevice: IDevice): Boolean {
-        var result = UiUtils.adbShellCommon(iDevice, "am broadcast -n com.pqixing.clieper/com.pqixing.clieper.ClipHelperReceiver -e text \"check\"", false)
-        if (!result.contains("result=success")) {
-            val exit = Messages.showOkCancelDialog("Clip helper receiver not found, Install clip helper?", "Miss Application", null)
-            if (exit == Messages.OK) installClipHelper(iDevice)
-            return false
+        var result = runAdCommand(iDevice, getBroadCastCmd("get_version"))
+        //获取失败
+        if (result == null && runAdCommand(iDevice, "am start -n com.pqixing.clieper/com.pqixing.clieper.MainActivity") != null) {
+            result = runAdCommand(iDevice, getBroadCastCmd("get_version"))
         }
-        return true
+        val isVail = result == null || result < clipVersion
+        if (isVail) ApplicationManager.getApplication().invokeLater {
+            val exit = Messages.showOkCancelDialog("是否下载安装PC输入助手?", "助手应用未安装", null)
+            if (exit == Messages.OK) installClipHelper(iDevice)
+        }
+        return isVail
     }
 
-    private fun toPhone(edit: Boolean) {
-        val iDevice = UiUtils.getSelectDevice(project, cbDevices!!) ?: return
-        if (!checkHelper(iDevice)) return
+    private fun toPhone(edit: Boolean) = ProgressManager.getInstance().runProcess({
+        val iDevice = UiUtils.getSelectDevice(project, cbDevices!!) ?: return@runProcess
+        if (!checkHelper(iDevice)) return@runProcess
 
-        val text = String(Base64.encode(jText!!.text.toByteArray(), 0))
+        val adCommand = runAdCommand(iDevice, getBroadCastCmd(if (edit) "set_text_edit" else "set_text", jText!!.text))
+        if ("##permission##" == adCommand) ApplicationManager.getApplication().invokeLater {
+            Messages.showOkCancelDialog("PC输入助手 没有获取辅助权限,请去设置中打开打开辅助权限?", "权限", null)
+        } else if ("##fail##" == adCommand) ApplicationManager.getApplication().invokeLater {
+            Messages.showMessageDialog(if (edit) "设置文本失败,请检查当前页面焦点" else "无法设置文本,请检查", "未知错误", null)
+        }
+    }, null)
+
+    private fun fromPhone(edit: Boolean) = ProgressManager.getInstance().runProcess({
+        val iDevice = UiUtils.getSelectDevice(project, cbDevices!!) ?: return@runProcess
+        if (!checkHelper(iDevice)) return@runProcess
         //启动服务
-        var result = UiUtils.adbShellCommon(iDevice, "am broadcast -n com.pqixing.clieper/com.pqixing.clieper.ClipHelperReceiver -e ${if (edit) "set_text_edit" else "set_text"} \"$text\"", false)
-        if (result.contains("result=notpermission")) {//没有权限,弹窗提示,是否打开设置页面
-            val exit = Messages.showOkCancelDialog("Miss accessibility service permission , Go to setting ?", "Miss Permission", null)
-            if (exit == Messages.OK) UiUtils.adbShellCommon(iDevice, "am start -a android.settings.ACCESSIBILITY_SETTINGS", true)
-            return
-        } else if (result.contains("result=fail")) Messages.showMessageDialog(if (edit) "set text fail, please check input" else "Unkonw error , please check?", "Error", null)
-    }
+
+        var adCommand = runAdCommand(iDevice, getBroadCastCmd(if (edit) "get_text_edit" else "get_text"))
+        if ("##permission##" == adCommand) ApplicationManager.getApplication().invokeLater {
+            Messages.showOkCancelDialog("PC输入助手 没有获取辅助权限,请去设置中打开打开辅助权限?", "权限", null)
+        } else if ("##fail##" == adCommand || adCommand == null) ApplicationManager.getApplication().invokeLater {
+            Messages.showMessageDialog(if (edit) "设置文本失败,请检查当前页面焦点" else "无法设置文本,请检查", "未知错误", null)
+        } else jText?.text = adCommand
+    }, null)
 
     private fun installClipHelper(iDevice: IDevice) {
         val install = object : Task.Backgroundable(project, "Start Install") {
 
             override fun run(indicator: ProgressIndicator) {
-                val url = "https://raw.githubusercontent.com/pqixing/modularization/master/Q-ide/adb_copy.apk"
+                val url = "https://raw.githubusercontent.com/pqixing/modularization/master/jars/clip-helper.apk"
                 indicator.text = "Download : $url"
                 try {
                     val downloadApk = DachenHelper.downloadApk(project, "copy", url)
-                    if (downloadApk.isEmpty()||!File(downloadApk).exists()) ApplicationManager.getApplication().invokeLater {
+                    if (downloadApk.isEmpty() || !File(downloadApk).exists()) ApplicationManager.getApplication().invokeLater {
                         if (Messages.OK == Messages.showOkCancelDialog("请尝试使用浏览器进行下载并手动安装?", "下载失败", null)) {
                             Desktop.getDesktop().browse(URI(url))
                         }
@@ -109,21 +140,4 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
 
     }
 
-    private fun fromPhone(edit: Boolean) {
-        val iDevice = UiUtils.getSelectDevice(project, cbDevices!!) ?: return
-        if (!checkHelper(iDevice)) return
-        //启动服务
-        var result = UiUtils.adbShellCommon(iDevice, "am broadcast -n com.pqixing.clieper/com.pqixing.clieper.ClipHelperReceiver -e ${if (edit) "get_text_edit" else "get_text"} \"get\"", false)
-        if (result.contains("result=notpermission")) {//没有权限,弹窗提示,是否打开设置页面
-            val exit = Messages.showOkCancelDialog("Miss accessibility service permission , Go to setting for cliphelper ?", "Miss Permission", null)
-            if (exit == Messages.OK) UiUtils.adbShellCommon(iDevice, "am start -a android.settings.ACCESSIBILITY_SETTINGS", true)
-        } else if (result.contains("result=success")) {
-            jText?.text = String(Base64.decode(result.split("result=success")[1].split("\"")[0].trim(), 0))
-        } else Messages.showMessageDialog(if (edit) "set text fail, please check input" else "Unkonw error , please check?", "Error", null)
-    }
-
-    private fun onCancel() {
-        // add your code here if necessary
-        dispose()
-    }
 }

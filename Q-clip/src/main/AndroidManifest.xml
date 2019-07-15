@@ -4,7 +4,7 @@
 
     <application
         android:allowBackup="true"
-        android:label="cliphelper"
+        android:label="PC输入助手"
         android:supportsRtl="true">
         <activity android:name=".MainActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter >
