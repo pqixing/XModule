@@ -1,13 +1,8 @@
 package com.pqixing.clieper;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
+import android.content.*;
 import android.content.pm.PackageManager;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.widget.Toast;
@@ -54,7 +49,7 @@ public class ClipHelperReceiver extends BroadcastReceiver {
             if (!checkIfAccessServiceRunning(context)) writeResult("##permission##");
             else writeResult(AccessService.setFocusText(input) ? "##success##" : "##fail##");
         } else writeResult("##unkonw##");
-        Toast.makeText(context, "onReceive" + input, Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "onReceive:" + input, Toast.LENGTH_SHORT).show();
     }
 
     private String getString(Intent intent, String key) {
@@ -73,14 +68,6 @@ public class ClipHelperReceiver extends BroadcastReceiver {
     }
 
     private boolean checkIfAccessServiceRunning(Context context) {
-        boolean isRuning = AccessService.service != null;
-        if (!isRuning) try {
-            Toast.makeText(context, "Clip Helper accessibility service is not running , please enable first", Toast.LENGTH_SHORT).show();
-            context.startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        } catch (Exception e) {
-            context.startActivity(new Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-            e.printStackTrace();
-        }
-        return isRuning;
+        return AccessService.service != null;
     }
 }

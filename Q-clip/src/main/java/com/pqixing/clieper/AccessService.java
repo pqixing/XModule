@@ -17,32 +17,32 @@ public class AccessService extends AccessibilityService {
     protected void onServiceConnected() {
         super.onServiceConnected();
         service = this;
-        Log.i("AccessService", "onServiceConnected: ");
         Toast.makeText(this,"onServiceConnected:",Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        Log.i("AccessService", "onAccessibilityEvent: ------------------");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        service = null;
+       onInterrupt();
     }
 
     public static String getFocusText() {
         if (service == null) return null;
         AccessibilityNodeInfo window = service.getRootInActiveWindow();
+        if(window==null) return null;
         AccessibilityNodeInfo focus = window.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
         if (focus == null) return null;
-        return focus.getText().toString();
+        return focus.getText()+"";
     }
 
     public static boolean setFocusText(String text) {
         if (service == null) return false;
         AccessibilityNodeInfo window = service.getRootInActiveWindow();
+        if(window==null) return false;
         AccessibilityNodeInfo focus = window.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
         if (focus == null) return false;
         Bundle bundle = new Bundle();
@@ -54,6 +54,7 @@ public class AccessService extends AccessibilityService {
     @Override
     public void onInterrupt() {
         service = null;
+        Toast.makeText(this,"onServiceDisConnected:",Toast.LENGTH_SHORT).show();
     }
 
 }
