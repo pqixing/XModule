@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,10 +20,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setResult(Activity.RESULT_OK);
+        String startP = getIntent().getStringExtra("startP");
         if (ReceiverView.onAttachedView == null) showFloatView();
-        else {
-            getWindowManager().removeView(ReceiverView.onAttachedView);
-        }
+        else if (TextUtils.equals("start", startP))
+            Toast.makeText(getApplicationContext(), "PC助手已经启动", Toast.LENGTH_SHORT).show();
+        else getWindowManager().removeView(ReceiverView.onAttachedView);
         finish();
     }
 

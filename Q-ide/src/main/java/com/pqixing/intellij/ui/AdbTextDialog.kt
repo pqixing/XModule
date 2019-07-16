@@ -78,7 +78,8 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
         var result = runAdCommand(iDevice, getBroadCastCmd("get_version"))?:kotlin.run {
             //获取失败
             //尝试启动应用,然后重新获取
-            runAdCommand(iDevice, "am start -n com.pqixing.clieper/com.pqixing.clieper.MainActivity")
+            runAdCommand(iDevice, "am start -n com.pqixing.clieper/com.pqixing.clieper.MainActivity -e startP \"start\"")
+            Thread.sleep(500)//延迟500毫秒,等待系统确实启动并注册了app
             runAdCommand(iDevice, getBroadCastCmd("get_version"))
         }
         val unVail = result == null || result < clipVersion
