@@ -60,12 +60,12 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
      * 执行命令并且返回结果
      */
     private fun runAdCommand(device: IDevice, cmd: String): String? {
-        val result = AdbShellCommandsUtil.executeCommand(device, cmd).output.find { it.contains(resultKey) }
-                ?: return null
+        val result = AdbShellCommandsUtil.executeCommand(device, cmd).output.toString()
+        if(!result.contains(resultKey)) return null
 
         val start = result.indexOf(resultKey) + resultKey.length
         val end = result.indexOf("\"", start)
-        return String(Base64.decode(result.substring(start, if (end == -1) result.length else end), 0))
+        return String(Base64.decode(result.substring(start, if (end == -1) result.length else end).trim(), 0))
     }
 
 
