@@ -1,6 +1,6 @@
 apply plugin: 'java'
 
-ext.mVersion = "1.1"
+ext.mVersion = "1.2.0"
 ext.mLocalVersion = "1.0.2"
 ext.publishedGroupId = "com.pqixing.android"
 ext.mArtifactId = "annotation"
