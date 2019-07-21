@@ -23,6 +23,8 @@ import java.text.DateFormat
 import java.util.*
 import java.util.regex.Pattern
 import kotlin.Comparator
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 object VersionManager : OnClear {
     val matchingFallbacks get() = ManagerPlugin.getExtends().matchingFallbacks.toMutableList()
@@ -345,8 +347,11 @@ object VersionManager : OnClear {
     /**
      * 解析maven仓库，爬取当前group的所有版本
      */
-    fun parseNetVersions(baseUrl: String, versions: HashMap<String, String>, groupName: String) {
-        var matcher = Pattern.compile("<a href=.*?>maven-metadata.xml</a>").matcher(readNetUrl(baseUrl))
+    fun parseNetVersions(baseUrl: String, versions: HashMap<String, String>, groupName: String, readUrls: HashSet<String> = HashSet()) {
+        if (readUrls.contains(baseUrl)) return//防止重复请求处理
+        readUrls.add(baseUrl)
+        val htmlText = readNetUrl(baseUrl)
+        var matcher = Pattern.compile("<a href=.*?>maven-metadata.xml</a>").matcher(htmlText)
         if (matcher.find()) {
             val group = matcher.group()
             val meteUrl = group.substring(group.indexOf('"') + 1, group.lastIndexOf('"'))
@@ -355,11 +360,11 @@ object VersionManager : OnClear {
             return
         }
         //查找相关路径的,爬
-        matcher = Pattern.compile("<a href=.*?</a>").matcher(readNetUrl(baseUrl))
+        matcher = Pattern.compile("<a href=.*?</a>").matcher(htmlText)
         while (matcher.find()) {
             val group = matcher.group()
             val url = getFullUrl(group.substring(group.indexOf('"') + 1, group.lastIndexOf('"')), baseUrl)
-            if (url.startsWith(baseUrl)) parseNetVersions(url, versions, groupName)
+            if (url.startsWith(baseUrl) && !url.endsWith(".xml")) parseNetVersions(url, versions, groupName, readUrls)
         }
     }
 }
