@@ -2,14 +2,26 @@ package com.pqixing.adbkeyboard;
 
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.inputmethodservice.InputMethodService;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputConnection;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import com.android.adbkeyboard.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AdbIME extends InputMethodService {
 
     private BroadcastReceiver mReceiver = null;
+    private SharedPreferences sp;
+    private int historyCount = 20;
+    private ListView historyView;
 
     @Override
     public View onCreateInputView() {
@@ -32,13 +44,62 @@ public class AdbIME extends InputMethodService {
                 setInputText("");
             }
         });
+        historyView = mInputView.findViewById(R.id.lv_history);
+        initHistory(historyView, getHistoryView());
 
         return mInputView;
+    }
+
+    private List<String> getHistoryView() {
+        String key = "historyView";
+        ArrayList<String> historys = new ArrayList<>(historyCount);
+        for (int i = 0; i < historyCount; i++) {
+            String h = sp.getString(key + i, null);
+            if (h == null) break;
+            historys.add(h);
+        }
+        return historys;
+    }
+
+    private void addHistory(String h) {
+        List<String> historys = getHistoryView();
+        historys.remove(h);
+        historys.add(0, h);
+        while (historys.size() > historyCount) historys.remove(historys.size() - 1);
+
+        SharedPreferences.Editor edit = sp.edit();
+        String key = "historyView";
+        for (int i = 0; i < historys.size(); i++) {
+            edit.putString(key + i, historys.get(i));
+        }
+        edit.apply();
+        initHistory(historyView,historys);
+    }
+
+    private void initHistory(ListView listView, List<String> historys) {
+        if(listView==null) return;
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+        });
+        listView.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, historys) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                if (view instanceof TextView) {
+                    ((TextView) view).setSingleLine();
+                }
+                return view;
+            }
+        });
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        sp = getApplicationContext().getSharedPreferences("AdbIme", 0);
         IntentFilter filter = new IntentFilter(AdbReceiver.ACTION_GET_VERSION);
         filter.addAction(AdbReceiver.ACTION_GET_TEXT);
         filter.addAction(AdbReceiver.ACTION_GET_TEXT_EDIT);
@@ -72,6 +133,7 @@ public class AdbIME extends InputMethodService {
         inputConnection.performContextMenuAction(android.R.id.selectAll);
         inputConnection.commitText(input, 0);
         inputConnection.endBatchEdit();
-        return false;
+        addHistory(input);
+        return true;
     }
 }

@@ -5,4 +5,5 @@
 	<string name="copy">COPY</string>
 	<string name="paste">PASTE</string>
 	<string name="ime">CLEAR</string>
+    <string name="history">HISTORY</string>
 </resources>

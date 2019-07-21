@@ -12,6 +12,10 @@
             android:textColor="#fff"
             android:text="@string/keyboard_on"
     />
+    <ListView android:layout_width="match_parent"
+              android:id="@+id/lv_history"
+
+              android:layout_height="200dp"/>
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:background="#ccc"
