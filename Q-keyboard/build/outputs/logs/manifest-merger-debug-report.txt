@@ -1,0 +1,65 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:1:1-21:12
+INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:1:1-21:12
+INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:1:1-21:12
+INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:1:1-21:12
+INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:1:1-21:12
+INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:1:1-21:12
+INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:1:1-21:12
+	package
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:3:11-44
+		INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+		INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:1:1-21:12
+		INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+	xmlns:tools
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:2:11-57
+	android:versionCode
+		INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:1:1-21:12
+		INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:1:11-69
+application
+ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:6:5-19:19
+	android:label
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:7:13-45
+	tools:ignore
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:8:13-52
+service#com.pqixing.adbkeyboard.AdbIME
+ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:11:9-18:19
+	android:label
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:12:13-50
+	android:permission
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:13:13-70
+	android:name
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:11:18-63
+intent-filter#action:name:android.view.InputMethod
+ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:14:13-16:29
+action#android.view.InputMethod
+ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:15:17-67
+	android:name
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:15:25-64
+meta-data#android.view.im
+ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:17:13-89
+	android:resource
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:17:55-86
+	android:name
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml:17:24-54
+uses-sdk
+INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+		INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+		ADDED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml
+		INJECTED from /home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/src/main/AndroidManifest.xml

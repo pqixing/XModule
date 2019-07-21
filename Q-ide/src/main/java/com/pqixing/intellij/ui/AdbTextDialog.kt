@@ -21,6 +21,7 @@ import java.net.URI
 import javax.swing.*
 
 class AdbTextDialog(var project: Project) : BaseJDialog() {
+    private val adbInputPkg = "com.pqixing.adbkeyboard"
     private var contentPane: JPanel? = null
     private var toClipButton: JButton? = null
     private var toEditButton: JButton? = null
@@ -35,10 +36,10 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
         setContentPane(contentPane)
         isModal = false
         title = "Adb Text Editor"
-        toClipButton!!.addActionListener { e -> toPhone(false,toClipButton) }
-        toEditButton!!.addActionListener { e -> toPhone(true,toEditButton) }
-        fromEditButton!!.addActionListener { e -> fromPhone(true,fromEditButton) }
-        fromClipButton!!.addActionListener { e -> fromPhone(false,fromClipButton) }
+        toClipButton!!.addActionListener { e -> toPhone(false, toClipButton) }
+        toEditButton!!.addActionListener { e -> toPhone(true, toEditButton) }
+        fromEditButton!!.addActionListener { e -> fromPhone(true, fromEditButton) }
+        fromClipButton!!.addActionListener { e -> fromPhone(false, fromClipButton) }
 
         // call onCancel() when cross is clicked
         defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
@@ -61,7 +62,7 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
      */
     private fun runAdCommand(device: IDevice, cmd: String): String? {
         val result = AdbShellCommandsUtil.executeCommand(device, cmd).output.toString()
-        if(!result.contains(resultKey)) return null
+        if (!result.contains(resultKey)) return null
 
         val start = result.indexOf(resultKey) + resultKey.length
         val end = result.indexOf("\"", start)
@@ -69,41 +70,45 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
     }
 
 
-    private fun getBroadCastCmd(key: String, value: String? = null): String {
-        return "am broadcast -a com.peqixing.clip.helper -e $key \"${String(Base64.encode((value
-                ?: key).toByteArray(), 0))}\""
+    private fun getBroadCastCmd(action: String, value: String? = null): String {
+        var cmd = "am broadcast -a $adbInputPkg.$action "
+        if (value?.isNotEmpty() == true) cmd += "-e AdbReceiver \"${String(Base64.encode(value.toByteArray(), 0))}\""
+        return cmd
     }
 
     private fun checkHelper(iDevice: IDevice): Boolean {
-        var result = runAdCommand(iDevice, getBroadCastCmd("get_version"))?:kotlin.run {
-            //获取失败
-            //尝试启动应用,然后重新获取
-            runAdCommand(iDevice, "am start -n com.pqixing.clieper/com.pqixing.clieper.MainActivity -e startP \"start\"")
-            Thread.sleep(500)//延迟500毫秒,等待系统确实启动并注册了app
-            runAdCommand(iDevice, getBroadCastCmd("get_version"))
+        var result = runAdCommand(iDevice, getBroadCastCmd("get_version"))
+        if (result == null) {
+            val hadInstall = AdbShellCommandsUtil.executeCommand(iDevice, "pm ").output?.find { it == adbInputPkg } != null
+            if (hadInstall) ApplicationManager.getApplication().invokeLater {
+                Messages.showMessageDialog("ADB Keyboard 不是当前指定的输入发, 请切换后重新输入?", "ADB Keyboard", null)
+            } else ApplicationManager.getApplication().invokeLater {
+                val exit = Messages.showOkCancelDialog("下载安装ADB Keyboard?", "ADB Keyboard未安装", null)
+                if (exit == Messages.OK) installClipHelper(iDevice)
+            }
+            return false
         }
-        val unVail = result == null || result < clipVersion
-        if (unVail) ApplicationManager.getApplication().invokeLater {
-            val exit = Messages.showOkCancelDialog("请手动启动PC输入助手并,如未安装,是否下载安装?", "启动助手应用失败", null)
-            if (exit == Messages.OK) installClipHelper(iDevice)
+        if (result < clipVersion) {
+            ApplicationManager.getApplication().invokeLater {
+                val exit = Messages.showOkCancelDialog("下载升级ADB Keyboard?", "ADB Keyboard版本过低", null)
+                if (exit == Messages.OK) installClipHelper(iDevice)
+            }
+            return false
         }
-        return !unVail
+        return true
     }
 
     private fun toPhone(edit: Boolean, btn: JButton?) = ProgressManager.getInstance().runProcess({
         val iDevice = UiUtils.getSelectDevice(project, cbDevices!!) ?: return@runProcess
         btn?.isEnabled = false
-        if (!checkHelper(iDevice)){
+        if (!checkHelper(iDevice)) {
             btn?.isEnabled = true
             return@runProcess
         }
 
         val adCommand = runAdCommand(iDevice, getBroadCastCmd(if (edit) "set_text_edit" else "set_text", jText!!.text))
-        if ("##permission##" == adCommand) ApplicationManager.getApplication().invokeLater {
-            val exit = Messages.showOkCancelDialog("PC输入助手 没有获取辅助权限,请去设置中打开打开或者关闭再打开辅助权限?", "权限", null)
-            if (exit == Messages.OK) runAdCommand(iDevice, "am start -a android.settings.ACCESSIBILITY_SETTINGS")
-        } else if ("##fail##" == adCommand) ApplicationManager.getApplication().invokeLater {
-            Messages.showMessageDialog(if (edit) "设置文本失败,请检查当前页面焦点" else "无法设置文本,请检查", "未知错误", null)
+        if ("##fail##" == adCommand) ApplicationManager.getApplication().invokeLater {
+            Messages.showMessageDialog("无法设置文本,请检查Adb Keyboard输入法是否正常", "设置文本失败", null)
         }
         btn?.isEnabled = true
     }, null)
@@ -111,17 +116,14 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
     private fun fromPhone(edit: Boolean, btn: JButton?) = ProgressManager.getInstance().runProcess({
         val iDevice = UiUtils.getSelectDevice(project, cbDevices!!) ?: return@runProcess
         btn?.isEnabled = false
-        if (!checkHelper(iDevice)){
+        if (!checkHelper(iDevice)) {
             btn?.isEnabled = true
             return@runProcess
         }
 
         var adCommand = runAdCommand(iDevice, getBroadCastCmd(if (edit) "get_text_edit" else "get_text"))
-        if ("##permission##" == adCommand) ApplicationManager.getApplication().invokeLater {
-           val exit =  Messages.showOkCancelDialog("PC输入助手 没有获取辅助权限,请去设置中打开打开辅助权限?", "权限", null)
-            if (exit == Messages.OK) runAdCommand(iDevice, "am start -a android.settings.ACCESSIBILITY_SETTINGS")
-        } else if ("##fail##" == adCommand || adCommand == null) ApplicationManager.getApplication().invokeLater {
-            Messages.showMessageDialog(if (edit) "设置文本失败,请检查当前页面焦点" else "无法设置文本,请检查", "未知错误", null)
+        if ("##fail##" == adCommand || adCommand == null) ApplicationManager.getApplication().invokeLater {
+            Messages.showMessageDialog("无法设置文本,请检查Adb Keyboard输入法是否正常", "设置文本失败", null)
         } else jText?.text = adCommand
         btn?.isEnabled = true
     }, null)
@@ -130,7 +132,7 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
         val install = object : Task.Backgroundable(project, "Start Install") {
 
             override fun run(indicator: ProgressIndicator) {
-                val url = "https://raw.githubusercontent.com/pqixing/modularization/master/jars/clip-helper.apk"
+                val url = "https://raw.githubusercontent.com/pqixing/modularization/master/jars/Q-keyboard-debug.apk"
                 indicator.text = "Download : $url"
                 try {
                     val downloadApk = DachenHelper.downloadApk(project, "copy", url)

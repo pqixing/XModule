@@ -1,0 +1,7 @@
+#Internal package file, do not edit.
+#Sun Jul 21 16:57:23 CST 2019
+0.baseType=DIRECTORY
+0.base=/home/pqixing/Documents/Code/pqixing/modularization/Q-keyboard/build/intermediates/transforms/dexMerger/debug/0
+0.path=classes.dex
+0.set=DEX
+count=1
