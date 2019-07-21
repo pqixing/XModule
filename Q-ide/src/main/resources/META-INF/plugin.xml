@@ -39,7 +39,7 @@
             <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
                     text="ToMaven"/>
             <action id="Modularization.Jekins" class="com.dachen.creator.actions.JekinsAction"
-                    text="JKBuild"/>
+                    text="JKenBuild"/>
             <separator/>
             <action id="Modularization.GitSync"
                     class="com.pqixing.intellij.actions.GitSyncAction" text="GitClone"/>

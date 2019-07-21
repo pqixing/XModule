@@ -79,9 +79,9 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
     private fun checkHelper(iDevice: IDevice): Boolean {
         var result = runAdCommand(iDevice, getBroadCastCmd("get_version"))
         if (result == null) {
-            val hadInstall = AdbShellCommandsUtil.executeCommand(iDevice, "pm ").output?.find { it == adbInputPkg } != null
+            val hadInstall = AdbShellCommandsUtil.executeCommand(iDevice, "pm -l").output?.find { it.split(":").last().trim() == adbInputPkg } != null
             if (hadInstall) ApplicationManager.getApplication().invokeLater {
-                Messages.showMessageDialog("ADB Keyboard 不是当前指定的输入发, 请切换后重新输入?", "ADB Keyboard", null)
+                Messages.showMessageDialog("ADB Keyboard 不是当前Android设备指定的输入法, 请切换后输入法重试?", "非指定输入法", null)
             } else ApplicationManager.getApplication().invokeLater {
                 val exit = Messages.showOkCancelDialog("下载安装ADB Keyboard?", "ADB Keyboard未安装", null)
                 if (exit == Messages.OK) installClipHelper(iDevice)
