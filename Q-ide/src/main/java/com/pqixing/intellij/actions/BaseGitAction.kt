@@ -73,7 +73,7 @@ abstract class BaseGitAction : AnAction() {
     }
 
     protected open fun filterDatas(allDatas: MutableList<JListInfo>, operatorCmd: String): MutableList<JListInfo> = when (operatorCmd) {
-        "clone" -> allDatas.filter { !GitUtil.isGitRoot(File(it.title)) }.toMutableList()
+        "clone" -> allDatas.sortedBy { GitUtil.isGitRoot(File(it.title)) }.toMutableList()
         else -> allDatas.filter { GitUtil.isGitRoot(File(it.title)) }.toMutableList()
     }
 
@@ -105,7 +105,7 @@ abstract class BaseGitAction : AnAction() {
                 info.staue = if (getRepo(rootRepoPath)?.currentBranchName == info.log) 0 else 3
             }
             "clone" -> {
-                info.log = cacheLog ?: repo?.currentBranchName ?: "Project No Exists"
+                info.log = cacheLog ?: repo?.currentBranchName ?: "No Clone"
                 info.staue = if (repo == null) 3 else 0
             }
             "update" -> {

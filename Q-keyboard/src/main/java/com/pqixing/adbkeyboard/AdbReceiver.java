@@ -5,6 +5,7 @@ import android.content.*;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.widget.Toast;
 
 public class AdbReceiver extends BroadcastReceiver {
@@ -14,8 +15,8 @@ public class AdbReceiver extends BroadcastReceiver {
     public final static String ACTION_GET_VERSION = PKG + ".get_version";
     public final static String ACTION_GET_TEXT = PKG + ".get_text";
     public final static String ACTION_SET_TEXT = PKG + ".set_text";
-    public final static String ACTION_GET_TEXT_EDIT = PKG + "get_text_edit";
-    public final static String ACTION_SET_TEXT_EDIT = PKG + "set_text_edit";
+    public final static String ACTION_GET_TEXT_EDIT = PKG + ".get_text_edit";
+    public final static String ACTION_SET_TEXT_EDIT = PKG + ".set_text_edit";
 
     public AdbReceiver(AdbIME adbIME) {
         this.adbIME = adbIME;
@@ -31,6 +32,9 @@ public class AdbReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         if (action == null) action = "";
         String input = getString(intent, TAG);
+        Log.i(TAG, "onReceive: action ="+action +" input ="+input);
+        if (!ACTION_GET_VERSION.equals(action))
+            Toast.makeText(context, "onReceive:" + action + (input == null ? "" : (" -> " + input)), Toast.LENGTH_SHORT).show();
         switch (action) {
             case ACTION_GET_VERSION:
                 writeResult(getVersionName(context));
@@ -53,11 +57,11 @@ public class AdbReceiver extends BroadcastReceiver {
                 writeResult("##unkonw##");
                 break;
         }
-        Toast.makeText(context, "onReceive:" + action + (input == null ? "" : (" -> " + input)), Toast.LENGTH_SHORT).show();
+
     }
 
     static void setClipText(Context context, String text) {
-        if(text==null) text = "";
+        if (text == null) text = "";
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         clipboard.setPrimaryClip(ClipData.newPlainText(null, text));
     }

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.inputmethodservice.InputMethodService;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputConnection;
@@ -62,6 +63,7 @@ public class AdbIME extends InputMethodService {
     }
 
     private void addHistory(String h) {
+        if (h == null || h.trim().isEmpty()) return;
         List<String> historys = getHistoryView();
         historys.remove(h);
         historys.add(0, h);
@@ -73,15 +75,15 @@ public class AdbIME extends InputMethodService {
             edit.putString(key + i, historys.get(i));
         }
         edit.apply();
-        initHistory(historyView,historys);
+        initHistory(historyView, historys);
     }
 
-    private void initHistory(ListView listView, List<String> historys) {
-        if(listView==null) return;
+    private void initHistory(ListView listView, final List<String> historys) {
+        if (listView == null) return;
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                setInputText(historys.get(position));
             }
         });
         listView.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, historys) {
@@ -90,6 +92,7 @@ public class AdbIME extends InputMethodService {
                 View view = super.getView(position, convertView, parent);
                 if (view instanceof TextView) {
                     ((TextView) view).setSingleLine();
+                    ((TextView) view).setEllipsize(TextUtils.TruncateAt.END);
                 }
                 return view;
             }

@@ -72,7 +72,7 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
 
     private fun getBroadCastCmd(action: String, value: String? = null): String {
         var cmd = "am broadcast -a $adbInputPkg.$action "
-        if (value?.isNotEmpty() == true) cmd += "-e AdbReceiver \"${String(Base64.encode(value.toByteArray(), 0))}\""
+        if (value?.isNotEmpty() == true) cmd = "$cmd -e AdbReceiver \"${String(Base64.encode(value.toByteArray(), 0))}\""
         return cmd
     }
 

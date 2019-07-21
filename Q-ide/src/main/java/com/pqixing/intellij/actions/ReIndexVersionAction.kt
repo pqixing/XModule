@@ -14,6 +14,7 @@ class ReIndexVersionAction : AnAction() {
     override fun update(e: AnActionEvent?) {
         e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
     }
+
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         val exitCode = Messages.showCheckboxMessageDialog("Sync Version From Net For All Module               "
@@ -23,7 +24,7 @@ class ReIndexVersionAction : AnAction() {
                 , false
                 , 0
                 , -1
-                , null) { i, c -> if (c.isSelected) 4 else i }
+                , null) { i, c -> if (i == Messages.YES && c.isSelected) 4 else i }
         if (exitCode == 4) VersionDialog(project).apply {
             pack()
             isVisible = true

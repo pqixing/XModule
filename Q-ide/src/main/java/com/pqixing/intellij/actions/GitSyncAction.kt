@@ -23,7 +23,7 @@ class GitSyncAction : BaseGitAction() {
     override fun checkOnOk(allDatas: MutableList<JListInfo>, dialog: GitOperatorDialog): Boolean = true
 
     override fun initDialog(dialog: GitOperatorDialog) {
-        dialog.setOperator("clone", "update", "push")
+        dialog.setOperator( "update","clone", "push")
         dialog.setTargetBranch(null, false)
     }
 }
