@@ -15,8 +15,7 @@ public class RouterCreatorGenerator {
     }
 
     private static void genRouterPathsFile(Project project, PsiClass clazz) {
-        String fullClassName = clazz.getQualifiedName();
-        String className = fullClassName.substring(fullClassName.lastIndexOf(".") + 1, fullClassName.length()) + ".java";
+        String className = clazz.getName() + ".java";
         VirtualFile pkgDir = AndroidUtils.getPackageByName(clazz, className, "proxy");
         VirtualFile virtualFile = pkgDir.findChild(className);
         if(virtualFile != null){
@@ -29,7 +28,6 @@ public class RouterCreatorGenerator {
         }
         PsiFile initFile = PsiFileFactory.getInstance(project).createFileFromText(
                 className, JavaFileType.INSTANCE, RouterCodeFactory.generatRouterProxy(clazz));
-
         // 加到包目录下
         PsiManager.getInstance(project).findDirectory(pkgDir).add(initFile);
         //virtualFile = pkgDir.findChild(className);

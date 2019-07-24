@@ -27,12 +27,7 @@ public class PathCreator extends AnAction {
                 if (classFilter(clazz)) {
                     return;
                 }
-                WriteCommandAction.runWriteCommandAction(project, new Runnable() {
-                    @Override
-                    public void run() {
-                        RouterCreatorGenerator.genCode(project, clazz);
-                    }
-                });
+                WriteCommandAction.runWriteCommandAction(project, () -> RouterCreatorGenerator.genCode(project, clazz));
             }
         }
     }
