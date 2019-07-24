@@ -76,20 +76,20 @@ public class RouterCodeFactory {
 
         PsiAnnotation dcPath = null;
         PsiAnnotation dcServices = null;
+        StringBuilder sb = new StringBuilder();
         for (PsiAnnotation a : field.getAnnotations()) {
             String name = a.getQualifiedName();
-            if ("DcPath".equals(name)) {
+            if(name==null) continue;
+            if (name.endsWith("DcPath")) {
                 dcPath = a;
-                break;
-            }
-            if ("DcServices".equals(name)) {
+            }else  if (name.endsWith("DcServices")) {
                 dcServices = a;
-                break;
             }
+            sb.append(name);
         }
         String fieldName = field.getName();
         if (fieldName == null || fieldName.trim().isEmpty() || (dcPath == null && dcServices == null) || !field.hasInitializer())
-            return "";
+            return "//"+field.getName()+" is no vail ->"+sb.toString();
 
         PsiDocComment doc = null;
         for (PsiElement fe : field.getChildren()) {
@@ -113,10 +113,6 @@ public class RouterCodeFactory {
         codeSb.append(StringUtils.formatSingleLine(4, "private android.os.Bundle bundle = null;")
                 + "\n");
 
-        String fieldText = field.getText()
-                .replace("\n", "")
-                .replace("\"", "")
-                .replace(" ", "");
         if (dcPath != null) {
             handleDcPath(fieldName, codeSb, parseDcPath(dcPath.getText()));
         } else if (dcServices != null) {
@@ -239,6 +235,7 @@ public class RouterCodeFactory {
         String content = pathText.substring(paramStart + 1, paramEnd)
                 .replace("\n", "")
                 .replace(" ", "")
+                .replace("\"", "")
                 .replace("@Key", "")
                 .replace("(", "")
                 .replace(")", "")

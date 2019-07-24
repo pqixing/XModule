@@ -71,9 +71,6 @@
                     description="router auto create code"/>
             <action id="Modularization.mvpcreator" class="com.dachen.creator.actions.MvpCreator"
                     text="MvpCreator" description="auto create MVP code"/>
-            <action id="Modularization.modelcreator"
-                    class="com.dachen.creator.actions.ModelCreator" text="ModelCreator"
-                    description="auto create model code"/>
             >
         </group>
     </actions>
