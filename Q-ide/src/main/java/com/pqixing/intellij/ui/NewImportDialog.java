@@ -282,11 +282,11 @@ public class NewImportDialog extends BaseJDialog {
 
                         String readText = FileUtils.readText(file);
                         if (readText != null) Messages.showMessageDialog(
-                                dpsItem + " dps\n" + readText
+                                "Import dps for " + dpsItem + "\n" + readText
                                         .replace(" ", "")
                                         .replace(",,", "")
                                         .replace(",", "\n")
-                                , dpsItem + "dps", null);
+                                , "All dps for " + dpsItem, null);
                     }
                     setVisible(true);
                     updateImports();
