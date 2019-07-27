@@ -5,6 +5,7 @@ buildscript {
 //        maven {
 //            url "http://192.168.0.70:8081/repository/androidgroup/"
 //        }
+        mavenLocal()
         google()
         maven {
             url "https://plugins.gradle.org/m2/"
@@ -31,14 +32,14 @@ group = "com.pqixing.gradle"
 
 allprojects {
     repositories {
-//        google()
 //          maven{
 //                url "https://dl.bintray.com/pqixing86/modularization"
 //          }
+        mavenLocal()
         maven {
             url "http://maven.aliyun.com/nexus/content/groups/public"
         }
-        mavenLocal()
+        google()
 //        maven {
 //            url "http://192.168.0.70:8081/repository/androidgroup/"
 //        }
