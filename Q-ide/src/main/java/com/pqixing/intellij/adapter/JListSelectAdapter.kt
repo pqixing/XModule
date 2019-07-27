@@ -14,6 +14,7 @@ open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boole
     private var startIndex = -1
     private var endIndex = -1
     public var selectListener: JlistSelectListener? = null
+    val selectColor = Color(128,128,128)
     private var label = JLabel().apply {
         font = Font("宋体", Font.PLAIN, 14)
 //        setSize(100, 30)
@@ -81,7 +82,7 @@ open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boole
     val wanming = Color(236, 117, 0)
     val error = Color(236, 0, 0)
     val success = Color(0, 187, 18)
-    val normal = Color(20, 160, 120)
+    val normal = label.foreground
 
     override fun getListCellRendererComponent(p0: JList<out JListInfo>?, info: JListInfo, p2: Int, p3: Boolean, p4: Boolean): Component? {
         label.text = "   " + info.title
@@ -95,7 +96,7 @@ open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boole
         log.foreground = when (info.staue) {
             3 -> error
             1 -> success
-//            0 -> normal
+            0 -> normal
             else -> wanming
         }
         log.isOpaque = info.staue == 3
@@ -103,8 +104,8 @@ open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boole
         val revers = endIndex != -1 && p2 in Math.min(startIndex, endIndex)..Math.max(startIndex, endIndex)
         box.isSelected = if (revers) !info.select else info.select
         box.isVisible = boxVisible
-        if(!boxVisible) {
-            panel.background = if(box.isSelected) Color.GRAY else label.background
+        if(!boxVisible) {//#808080
+            panel.background = if(box.isSelected) selectColor else label.background
         }
         return panel
     }

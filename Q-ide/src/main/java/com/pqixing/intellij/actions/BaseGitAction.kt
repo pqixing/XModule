@@ -67,7 +67,7 @@ abstract class BaseGitAction : AnAction() {
         dialog.adapter.setDatas(filterDatas(allDatas, dialog.operatorCmd))
         updateLog(dialog)
         dialog.setOnOk {
-            if (checkOnOk(allDatas, dialog)) doOk(dialog, dialog.adapter.datas, urls, rootBranch) else dialog.dispose()
+            if (checkOnOk(allDatas, dialog)) doOk(dialog, dialog.adapter.datas, urls, rootBranch)
         }
         dialog.isVisible = true
     }

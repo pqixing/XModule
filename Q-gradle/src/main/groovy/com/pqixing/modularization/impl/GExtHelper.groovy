@@ -94,7 +94,6 @@ public class GExtHelper implements IGExtHelper {
                 ? ((AppExtension) android).applicationVariants
                 : ((LibraryExtension) android).libraryVariants)
                 .all { BaseVariant app ->
-            app.buildType.name
             variants[app.buildType.name] = app.outputs.last().outputFile
         }
         return variants

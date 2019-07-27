@@ -61,7 +61,7 @@ public class GitOperatorDialog extends BaseJDialog {
 
     public GitOperatorDialog(String title, String curBranch, List<JListInfo> datas) {
         setContentPane(contentPane);
-        setModal(false);
+        setModal(true);
         getRootPane().setDefaultButton(buttonOK);
         gitListener = new GitListener(tLog);
         buttonOK.addActionListener(e -> onOK());

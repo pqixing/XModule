@@ -3,16 +3,20 @@ package com.pqixing.intellij.ui;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 import com.pqixing.intellij.utils.GradleUtils;
 import com.pqixing.intellij.utils.UiUtils;
+import com.pqixing.tools.FileUtils;
 import com.pqixing.tools.PropertiesUtils;
 import com.pqixing.tools.TextUtils;
-import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
@@ -40,7 +44,11 @@ public class NewImportDialog extends BaseJDialog {
     private JCheckBox cbVcs;
     private JCheckBox cbMore;
     private JPanel jpMore;
-    private JComboBox<String> cbLoadBranch;
+    private JButton loadAppButton;
+    private JButton loadBranchButton;
+    private JButton loadDpsButton;
+    private JPanel jpSelect;
+    private JScrollPane jpOthers;
 
     //已选中导入的工程
     private List<String> imports;
@@ -75,7 +83,7 @@ public class NewImportDialog extends BaseJDialog {
         cbVcs.setSelected("Y".equals(properties.getProperty(VCS_KEY, "Y")));
         initDpModel(dpModel);
         initCodeRoot(branchs.get(0), codeRoot);
-        initBranchs(branchs);
+        initLoadButtons(branchs);
         initJList(imports, allInfos);
         initImportAction();
         initMore();
@@ -110,25 +118,33 @@ public class NewImportDialog extends BaseJDialog {
         return btnConfig;
     }
 
-    private long lastLoadBranch = 0L;
 
-    private void loadBranchModules(String branch) {
-        long taskId = System.currentTimeMillis();
-        if (taskId - lastLoadBranch < 500) return;
-        lastLoadBranch = taskId;
+    /**
+     * 加载指定分支的模块
+     *
+     * @param branch
+     * @param app    加载app
+     */
+    private void loadBranchModules(String branch, boolean app) {
+        if (branch == null) return;
+
+        setVisible(false);
         Map<String, String> envs = new HashMap<>(GradleUtils.INSTANCE.getDefEnvs());
         envs.put("taskBranch", branch);
-        GradleUtils.INSTANCE.runTask(project, Arrays.asList(":LoadAllBranchModule"), ProgressExecutionMode.IN_BACKGROUND_ASYNC, false, taskId + "", envs, (s, l) -> {
-            if (!s) return;
-            String[] strings = l.split("#")[1].split(",");
-            if (strings.length > 0) {
-                imports.clear();
-                for (int i = 0; i < strings.length; i++) {
-                    if (!strings[i].isEmpty()) imports.add(strings[i]);
-                }
-                updateImports();
-            }
-        });
+        GradleUtils.INSTANCE.runTask(project, Collections.singletonList(":LoadAllBranchModule")
+                , ProgressExecutionMode.IN_BACKGROUND_ASYNC
+                , false, System.currentTimeMillis() + "", envs, (s, l) -> {
+                    if (!s) {
+                        setVisible(true);
+                        return;
+                    }
+                    imports.clear();
+                    for (String string : l.split("#")[app ? 0 : 1].split(",")) {
+                        if (!string.isEmpty()) imports.add(string);
+                    }
+                    setVisible(true);
+                    updateImports();
+                });
     }
 
     public String getSelectBranch() {
@@ -140,7 +156,7 @@ public class NewImportDialog extends BaseJDialog {
         //模拟选中,不然列表数据会异常
         for (int i = 0; i < allInfos.size(); i++) imports.add(TAG);
         selectAdapter = new JListSelectAdapter(jlSelect, false);
-        allAdapter = new ImportSelectAdapter(JlNotSelect, allInfos, imports);
+        allAdapter = new ImportSelectAdapter(JlNotSelect, allInfos);
         selectAdapter.setSelectListener((jList, adapter, items) -> {
             for (JListInfo info : items) {
                 imports.remove(info.getTitle());
@@ -158,14 +174,14 @@ public class NewImportDialog extends BaseJDialog {
             updateImports();
             return true;
         });
+        repaintBorder(jpOthers, "Others", allInfos.size());
         updateImports();
     }
 
     @Override
     public void setVisible(boolean b) {
         if (b) {
-            while (imports.remove(TAG)) {
-            }
+            while (true) if (!imports.remove(TAG)) break;
             updateImports();
         }
         super.setVisible(b);
@@ -181,6 +197,13 @@ public class NewImportDialog extends BaseJDialog {
             infos.add(new JListInfo(i, "", 0, false));
         }
         selectAdapter.setDatas(infos);
+        repaintBorder(jpSelect, "Select", infos.size());
+    }
+
+    void repaintBorder(JComponent jpSelect, String key, int size) {
+        ((TitledBorder) jpSelect.getBorder()).setTitle(key + " (" + size + ")");
+        jpSelect.revalidate();
+        jpSelect.repaint();
     }
 
     private void initCodeRoot(String branch, String codeRoot) {
@@ -199,12 +222,29 @@ public class NewImportDialog extends BaseJDialog {
         });
     }
 
-    private void initBranchs(List<String> branchs) {
-        cbLoadBranch.addItem("");
-        for (String b : branchs) {
-            cbBranchs.addItem(b);
-            cbLoadBranch.addItem(b);
-        }
+    /**
+     * 选择分支
+     */
+    private String selectItems(List<String> items, String initValue) {
+        if (items == null || items.isEmpty()) return null;
+        return Messages.showEditableChooseDialog("", "Select Item", null, items.toArray(new String[]{}), initValue == null ? items.get(0) : initValue, null);
+    }
+
+    private void initLoadButtons(List<String> branchs) {
+        loadAppButton.addActionListener(actionEvent -> loadBranchModules(getSelectBranch(), true));
+        loadBranchButton.addActionListener(actionEvent -> loadBranchModules(selectItems(branchs, getSelectBranch()), false));
+        loadDpsButton.addActionListener(actionEvent -> {
+            ArrayList<String> items = new ArrayList<>();
+            for (String m : getImports()) {
+                if (!m.contains("#")) items.add(m);
+            }
+            String dpsItem = selectItems(items, null);
+            //需要加载Dps依赖的项目
+            loadDpsItem(dpsItem);
+
+        });
+        for (String b : branchs) cbBranchs.addItem(b);
+
         cbBranchs.addItemListener(e -> {
             if (syncBranch) {
                 tvCodeRoot.setSelectedItem("../" + getSelectBranch());
@@ -216,9 +256,42 @@ public class NewImportDialog extends BaseJDialog {
                 updateImports();
             }
         });
-        cbLoadBranch.addItemListener(itemEvent -> {
-            loadBranchModules(cbLoadBranch.getSelectedItem().toString().trim());
-        });
+    }
+
+    /**
+     * 加载给定的模块的依赖
+     *
+     * @param dpsItem
+     */
+    private void loadDpsItem(String dpsItem) {
+        if (dpsItem == null) return;
+        long runTime = System.currentTimeMillis();
+        Map<String, String> envs = new HashMap<>();
+        envs.put("include", "");
+        envs.put("dependentModel", "");
+        setVisible(false);
+
+        GradleUtils.INSTANCE.runTask(project, Collections.singletonList(":" + dpsItem + ":DpsAnalysis")
+                , ProgressExecutionMode.IN_BACKGROUND_ASYNC, true, runTime + ""
+                , envs, (s, l) -> ApplicationManager.getApplication().invokeLater(() -> {
+                    File file = new File(project.getBasePath(), "build/dps/" + dpsItem + ".dp");
+                    if (!file.exists()) Messages.showMessageDialog(dpsItem + " dps import failure", "ERROR", null);
+                    else if (file.lastModified() > runTime || Messages.OK == Messages.showOkCancelDialog("The local configuration is available and still imported?", "ERROR", null)) {
+                        imports.remove(dpsItem);
+                        imports.add(0, "D#" + dpsItem);
+
+
+                        String readText = FileUtils.readText(file);
+                        if (readText != null) Messages.showMessageDialog(
+                                dpsItem + " dps\n" + readText
+                                        .replace(" ", "")
+                                        .replace(",,", "")
+                                        .replace(",", "\n")
+                                , dpsItem + "dps", null);
+                    }
+                    setVisible(true);
+                    updateImports();
+                }));
     }
 
     private void initImportAction() {
@@ -247,8 +320,8 @@ public class NewImportDialog extends BaseJDialog {
                     }
                     allAdapter.filterDatas("");
                     tvImport.setText("");
-                    return;
                 } else allAdapter.filterDatas(filterKey);
+                repaintBorder(jpOthers, "Others", allAdapter.getDatas().size());
             }
         });
     }
@@ -329,16 +402,10 @@ public class NewImportDialog extends BaseJDialog {
     public static class ImportSelectAdapter extends JListSelectAdapter {
         List<JListInfo> sources = new ArrayList<>();
         private String filterKey;
-        private List<String> imports;
 
-        public ImportSelectAdapter(JList jList, List<JListInfo> datas, List<String> imports) {
+        public ImportSelectAdapter(JList jList, List<JListInfo> datas) {
             super(jList, false);
             setDatas(datas);
-            this.imports = imports;
-        }
-
-        public List<JListInfo> getSelectItems() {
-            return super.getDatas();
         }
 
         @Override
@@ -349,30 +416,40 @@ public class NewImportDialog extends BaseJDialog {
         @Override
         public void setDatas(List<JListInfo> datas) {
             this.sources.clear();
-            addDatas(datas);
+            if (datas != null) {
+                this.sources.addAll(0, datas);
+                filterDatas(filterKey);
+            }
         }
 
         public JListInfo filterDatas(String key) {
             this.filterKey = key == null ? "" : key.trim();
             List<JListInfo> datas = new LinkedList<>();
-            datas.clear();
             JListInfo select = null;
-            int lastScore = 0;
-            if (!filterKey.isEmpty()) for (JListInfo p : sources) {
-                p.setSelect(false);
-                if (!p.toString().toLowerCase().contains(filterKey.toLowerCase()))
-                    continue;
-                int s = findLikeScore(p, filterKey);
-                if (s > lastScore) {
-                    lastScore = s;
-                    select = p;
-                    datas.add(0, p);
-                } else datas.add(p);
-            }
-            else datas.addAll(sources);
+            if (!filterKey.isEmpty()) {
+                loadDataByScope(datas);
+            } else datas.addAll(sources);
             super.setDatas(datas);
-            if (select != null) select.setSelect(true);
+            if (!datas.isEmpty()) {
+                select = datas.get(0);
+                select.setSelect(true);
+            }
             return select;
+        }
+
+        private void loadDataByScope(List<JListInfo> datas) {
+            for (JListInfo p : sources) {
+                p.setSelect(false);
+                int s = findLikeScore(p, filterKey);
+                if (s == -1) continue;
+                p.setData(s);
+                datas.add(p);
+            }
+            if (!datas.isEmpty()) Collections.sort(datas, (t0, t1) -> {
+                String t0s = t0.getData() == null ? "0" : t0.getData().toString();
+                String t1s = t1.getData() == null ? "0" : t1.getData().toString();
+                return t1s.compareTo(t0s);
+            });
         }
 
         private int findLikeScore(JListInfo p, String key) {
@@ -381,33 +458,36 @@ public class NewImportDialog extends BaseJDialog {
             if (title.contains(key)) {
                 return 10000 * match;
             }
-            if (p.getTitle().toLowerCase().contains(key.toLowerCase())) {
+            if (title.toLowerCase().contains(key.toLowerCase())) {
                 return 100 * match;
             }
-            return match;
-        }
 
-        public void addDatas(List<JListInfo> datas) {
-            addDatas(datas, filterKey);
-        }
-
-        public void addDatas(List<JListInfo> datas, String filterKey) {
-            if (datas != null) {
-                this.sources.addAll(0, datas);
-                filterDatas(filterKey);
+            if (checkMath(title.toLowerCase(), key.toLowerCase())) {
+                return 10 * match;
             }
-        }
+            StringBuilder mb = new StringBuilder();
+            for (char k : key.toCharArray()) mb.append(".*").append(k);
 
-        public void removeDatas(List<JListInfo> datas) {
-            removeDatas(datas, filterKey);
-        }
-
-        public void removeDatas(List<JListInfo> datas, String filterKey) {
-            if (datas != null) {
-                sources.removeAll(datas);
-                filterDatas(filterKey);
+            if (title.matches(mb.toString())) {
             }
+            if (p.getLog().toLowerCase().contains(key.toLowerCase()))
+                return match;
+            return -1;
         }
+
+        private boolean checkMath(String title, String key) {
+            char[] chars = title.toCharArray();
+            int length = chars.length;
+            int queryIndex = -1;
+
+            outer:
+            for (char k : key.toCharArray()) {
+                while (++queryIndex < length) if (k == chars[queryIndex]) continue outer;
+                return false;
+            }
+            return true;
+        }
+
     }
 
 }

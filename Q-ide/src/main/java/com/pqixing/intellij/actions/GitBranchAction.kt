@@ -1,25 +1,30 @@
 package com.pqixing.intellij.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.Messages
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
 import com.pqixing.intellij.utils.GitHelper
 import git4idea.GitUtil
+import git4idea.actions.GitCloneAction
 import java.io.File
 
 class GitBranchAction : BaseGitAction() {
     override fun update(e: AnActionEvent?) {
         e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
     }
+
     override fun beforeActionRun() = key == Messages.showPasswordDialog("Please input key!!", "Password")
     override fun checkUrls(urls: Map<String, String>): Boolean {
         val filter = urls.keys.filter { !GitUtil.isGitRoot(File(it)) }
-        if (filter.isNotEmpty()) {
-            Messages.showMessageDialog(project, "Those project are not clone!!\n${filter.joinToString { it + "\n" }}", "Miss Project", null)
-            return false
+        if (filter.isEmpty()) return true
+        val exitCode = Messages.showYesNoCancelDialog("The following projects are not clone,It may lead to unpredictable exception !!!\n${filter.joinToString { it + "\n" }}", "Miss Project", "ToMerge", "ToClone", "Cancel", null)
+        if (exitCode == Messages.YES) return true
+        if (exitCode == Messages.NO) ApplicationManager.getApplication().invokeLater {
+            GitSyncAction().actionPerformed(e)
         }
-        return true
+        return false
     }
 
     override fun initDialog(dialog: GitOperatorDialog) {
@@ -31,22 +36,26 @@ class GitBranchAction : BaseGitAction() {
     override fun checkOnOk(allDatas: MutableList<JListInfo>, dialog: GitOperatorDialog): Boolean {
         val localBranch = getRepo(rootRepoPath)?.currentBranchName
         if (localBranch == null) {
-            Messages.showMessageDialog(project, "Can not find local branch for root project!!", "Miss Branch", null)
+            Messages.showMessageDialog(project, "Unable to find local branch root project!!", "Miss Branch", null)
             return false
         }
         val operatorCmd = dialog.operatorCmd
         //不允许操作master
         if ("delete" == operatorCmd && "master" == GitHelper.findLocalBranchName(dialog.targetBranch)) {
-            Messages.showErrorDialog(project, "Can not delete branch : master", "Error")
+            Messages.showErrorDialog(project, "Unable to delete branch : master", "Error")
             return false
         }
         if (localBranch == GitHelper.findLocalBranchName(dialog.targetBranch)) {
-            Messages.showMessageDialog(project, "Target branch are not  allow equals local branch!!", localBranch, null)
+            Messages.showMessageDialog(project, "Target branch is not allowed to be the same as local branch", localBranch, null)
             return false
         }
         val branchs = allDatas.mapNotNull { getRepo(it.title) }.mapNotNull { if (localBranch == it.currentBranchName) null else "${it.root.name}  ->  ${it.currentBranchName}" }
         if (branchs.isNotEmpty()) {
-            Messages.showMessageDialog(project, "Those project branch are not equals local branch!! \n ${branchs.joinToString { it + "\n" }}", localBranch, null)
+            val exitCode = Messages.showOkCancelDialog(project, "Those project branch are not equals local branch!! \n ${branchs.joinToString { it + "\n" }}", localBranch, "ToCheckOut", "Cancel", null)
+            if (exitCode == Messages.OK) {
+                dialog.dispose()
+                ApplicationManager.getApplication().invokeLater { GitCheckoutAction().actionPerformed(e) }
+            }
             return false
         }
         return true

@@ -16,8 +16,6 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.VcsDirectoryMapping
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
 import com.intellij.openapi.vfs.VfsUtil
-import com.intellij.refactoring.safeDelete.ImportSearcher.getImport
-import com.intellij.vcsUtil.VcsUtil
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.NewImportDialog
@@ -26,7 +24,6 @@ import com.pqixing.model.ProjectXmlModel
 import com.pqixing.model.SubModuleType
 import com.pqixing.tools.FileUtils
 import git4idea.GitUtil
-import git4idea.util.GitUIUtil
 import groovy.lang.GroovyClassLoader
 import java.io.File
 
@@ -38,6 +35,7 @@ class ImportAction : AnAction() {
     override fun update(e: AnActionEvent?) {
         e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
     }
+
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
@@ -55,7 +53,7 @@ class ImportAction : AnAction() {
         val dependentModel = clazz.getField("dependentModel").get(newInstance).toString()
 
         val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
-        val infoMaps = projectXml.allSubModules().filter { it.type != SubModuleType.TYPE_LIBRARY_API }.map { Pair(it.name, JListInfo(it.name, it.introduce)) }.toMap(mutableMapOf())
+        val infoMaps = projectXml.allSubModules().filter { it.type != SubModuleType.TYPE_LIBRARY_API }.map { Pair(it.name, JListInfo(it.name, it.introduce.trim())) }.toMap(mutableMapOf())
         val repo = GitHelper.getRepo(File(basePath, "templet"), project)
         val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
         val localBranch = repo.currentBranchName ?: "master"
@@ -155,7 +153,7 @@ class ImportAction : AnAction() {
 
     private fun getImlPath(codePath: String, projectXml: ProjectXmlModel, title: String) = "$codePath/${projectXml.findSubModuleByName(title)?.path}/$title.iml"
 
-    private fun saveConfig(configgFile: File, dialog: NewImportDialog) =ApplicationManager.getApplication().invokeLater {
+    private fun saveConfig(configgFile: File, dialog: NewImportDialog) = ApplicationManager.getApplication().invokeLater {
         ApplicationManager.getApplication().runWriteAction {
             val dpModel = dialog.dpModel?.trim() ?: ""
             val codeRoot = dialog.codeRootStr.trim()
@@ -168,6 +166,7 @@ class ImportAction : AnAction() {
             FileUtils.writeText(configgFile, result, true)
         }
     }
+
     /**
      * 直接通过ide进行导入
      */
