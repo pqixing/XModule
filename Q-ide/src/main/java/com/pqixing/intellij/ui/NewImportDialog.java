@@ -267,7 +267,6 @@ public class NewImportDialog extends BaseJDialog {
         if (dpsItem == null) return;
         long runTime = System.currentTimeMillis();
         Map<String, String> envs = new HashMap<>();
-        envs.put("include", "");
         envs.put("dependentModel", "");
         setVisible(false);
 
