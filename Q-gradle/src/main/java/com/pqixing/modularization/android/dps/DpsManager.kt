@@ -42,6 +42,10 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
             val groupMaven = extends.groupMaven
             val group = "${extends.groupName}.$branch"
             val pomUrl = "$groupMaven/${group.replace(".", "/")}/$module/$version/$module-$version.pom"
+            if (!pomUrl.startsWith("http")) {//增加对本地Maven地址的支持
+                return XmlHelper.parsePomEclude(FileUtils.readText(File(pomUrl)) ?: "", "${extends.groupName}.")
+            }
+
             val pomKey = TextUtils.numOrLetter(pomUrl)
             var pom = pomCache.find { it.first == pomKey }?.apply { pomCache.remove(this);pomCache.addFirst(this) }?.second
             if (pom != null) return pom
@@ -96,6 +100,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
                 val newVersion = VersionManager.getVersion(dpc.branch, dpc.moduleName, "+")
                 if (!newVersion.second.startsWith(dpc.version) && newVersion.second.trim() != "+" && dpc.version.trim() != "+")
                     dpsV.add("\n       Config Version : ${dpc.version} -> Last Version : ${newVersion.second} -> Match Branch : ${newVersion.first} -> ${dpc.moduleName} ")
+                if (dpc.emptyVersion) dpc.version = newVersion.second
             }
             if (dpsV.isNotEmpty())
                 Tools.println("${plugin.project.name} -> Dependency Diff BaseVersion $dpsV")
@@ -108,6 +113,18 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
             if (checkLoseEnable()) Tools.println("ResolveDps -> lose dps -> $loseList")
             else Tools.printError(-1, "ResolveDps -> lose dps -> $loseList")
         }
+
+        val extends = ManagerPlugin.getExtends()
+        val allows = extends.emptyVersions
+        val emptyVersions = dps.filter { it.emptyVersion && !allows.contains(it.moduleName) }
+        if (emptyVersions.isNotEmpty()) {
+            Tools.println("------------------------------WARNING------------------------------")
+            emptyVersions.forEach {
+                Tools.println("compile \"${it.moduleName}:${it.version.substringBeforeLast(".")}\"")
+            }
+            if (!extends.allowEmptyVerion) Tools.println("------------------------------ERROR:Not Allow Empty Version For The Above Modules------------------------------")
+        }
+
         val sb = java.lang.StringBuilder("dependencies {  // isApp : ${plugin.isApp} -> buildAsApp : ${plugin.buildAsApp}\n")
         includes.forEach { sb.append(it).append("\n") }
         sb.append("}\n")

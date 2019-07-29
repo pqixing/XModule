@@ -313,10 +313,12 @@ object VersionManager : OnClear {
         val extends = plugin.getExtends(ManagerExtends::class.java)
         val maven = extends.groupMavenView
         val groupUrl = extends.groupName.replace(".", "/")
-        Tools.println("parseNetVersions  start ->")
+        Tools.println("parseNetVersions  start -> $groupUrl")
         val start = System.currentTimeMillis()
         versions.clear()
-        parseNetVersions(getFullUrl(groupUrl, maven), versions, extends.groupName)
+        if (!maven.startsWith("http")) {
+            parseLocalVersion(File(maven, groupUrl), versions)
+        } else parseNetVersions(getFullUrl(groupUrl, maven), versions, extends.groupName)
         Tools.println("parseNetVersions  end -> ${System.currentTimeMillis() - start} ms")
         versions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
         //上传版本好到服务端
@@ -326,6 +328,23 @@ object VersionManager : OnClear {
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
         GitUtils.addAndPush(git, "versions", "indexVersionFromNet ${DateFormat.getDateTimeInstance().format(Date())}", false)
         GitUtils.close(git)
+    }
+
+    /**
+     * 解析本地仓库的版本信息
+     */
+    private fun parseLocalVersion(dir: File, versions: HashMap<String, String>) {
+        if (!dir.exists() || dir.isFile) return
+
+        for (f in dir.listFiles { f -> f.isFile }) {
+            if (f.name == "maven-metadata.xml") {//解析版本,如果已经找到了版本, 则不再需要
+                val meta = XmlHelper.parseMetadata(FileUtils.readText(f) ?: "")
+                addVersion(versions, meta.groupId.trim(), meta.artifactId.trim(), meta.versions)
+                return
+            }
+        }
+        //递归解析本地目录
+        dir.listFiles { f -> f.isDirectory }.forEach { parseLocalVersion(it, versions) }
     }
 
     /**

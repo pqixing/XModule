@@ -51,8 +51,8 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
     /**
      * 用来解析groupMaven版本号的信息,默认与groupMaven相同
      */
-    var groupMavenView=""
-        get() = if(field.isEmpty()) groupMaven else field
+    var groupMavenView = ""
+        get() = if (field.isEmpty()) groupMaven else field
 
     /**
      * 添加依赖地址，如果为空，默认使用groupMaven
@@ -66,6 +66,15 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
      * 默认基础版本，如果ToMaven或者是依赖时没有配置，默认使用1.0
      */
     var baseVersion = "1.0"
+
+    /**
+     * 支持忽略版本的模块
+     */
+    var emptyVersions = mutableListOf<String>()
+    /**
+     * 是否支持忽略版本号
+     */
+    var allowEmptyVerion = true
 
     fun checkVail() {
         if (dependMaven.isEmpty()) dependMaven.add(groupMaven)

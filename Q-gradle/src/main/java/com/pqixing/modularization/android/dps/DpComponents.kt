@@ -33,6 +33,8 @@ class DpComponents(project: Project) : BaseExtension(project) {
 
     var version: String = ""
 
+    var emptyVersion = false
+
     var branch: String = ""
 
     var excludes: HashSet<Pair<String?, String?>> = HashSet()

@@ -77,7 +77,9 @@ public class GExtHelper implements IGExtHelper {
         def pom = deployer.pom
         def repository = deployer.repository
 
-        repository.url = maven_url
+        if (maven_url.startsWith("http")) repository.url = maven_url
+        else repository.url = project.uri(maven_url)
+
         repository.authentication.userName = userName
         repository.authentication.password = password
         pom.groupId = groupId
@@ -94,8 +96,8 @@ public class GExtHelper implements IGExtHelper {
                 ? ((AppExtension) android).applicationVariants
                 : ((LibraryExtension) android).libraryVariants)
                 .all { BaseVariant app ->
-            variants[app.buildType.name] = app.outputs.last().outputFile
-        }
+                    variants[app.buildType.name] = app.outputs.last().outputFile
+                }
         return variants
     }
 
