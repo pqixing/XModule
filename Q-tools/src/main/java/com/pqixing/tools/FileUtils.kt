@@ -1,7 +1,9 @@
 package com.pqixing.tools
 
 import com.pqixing.Tools
+import java.io.Closeable
 import java.io.File
+import java.io.FileInputStream
 
 object FileUtils {
     var clazz: Class<*> = Tools::class.java
@@ -76,5 +78,11 @@ object FileUtils {
         return if (source.contains(regex)) {
             source.replace(regex, targetTx)
         } else "$source$targetTx"
+    }
+
+    fun closeSafe(stream: Closeable) =try{
+        stream.close()
+    }catch (e:Exception){
+        e.printStackTrace()
     }
 }

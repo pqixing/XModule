@@ -26,13 +26,18 @@ object PropertiesUtils {
 
     fun readProperties(file: File): Properties {
         val properties = Properties()
-        if (file.exists())
-            properties.load(file.inputStream())
+        if (file.exists()){
+            val stream = file.inputStream()
+            properties.load(stream)
+            FileUtils.closeSafe(stream)
+        }
         return properties
     }
 
     fun writeProperties(file: File, properties: Properties) {
         if (!file.exists()) file.parentFile.mkdirs()
-        properties.store(file.outputStream(), "UTF-8")
+        val out = file.outputStream()
+        properties.store(out, "UTF-8")
+        FileUtils.closeSafe(out)
     }
 }

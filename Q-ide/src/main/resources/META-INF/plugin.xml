@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.pqixing.modularization.idea</id>
     <name>Modularization</name>
-    <version>1.9.4</version>
+    <version>1.9.5</version>
     <vendor email="pqixing86@gmail.com" url="https://github.com/pqixing/modularization">pqixing
     </vendor>
 
