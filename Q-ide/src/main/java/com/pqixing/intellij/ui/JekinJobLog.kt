@@ -20,7 +20,7 @@ class JekinJobLog(val project: Project, val jobUrl: String) : BaseJDialog() {
 
     init {
         setContentPane(contentPane)
-        isModal = false
+        isModal = true
         title = "Console"
 //        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
 

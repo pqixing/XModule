@@ -60,7 +60,7 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
         isModal = true
         getRootPane().defaultButton = buttonOK
         title = "Jekins Build"
-        buttonOK!!.addActionListener { onOK() }
+        buttonOK.addActionListener { onOK() }
 
         // call onCancel() when cross is clicked
         defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
@@ -88,7 +88,7 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
         }
 
         adapter.setDatas(mutableListOf<JListInfo>().apply {
-            for (i in 0..200) this.add(JListInfo(" "))
+            for (i in 0..250) this.add(JListInfo(" "))
         })
         val action = ActionListener {
             jspJobs.verticalScrollBarPolicy = if (cbAllLog.isSelected) JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED else JScrollPane.VERTICAL_SCROLLBAR_NEVER

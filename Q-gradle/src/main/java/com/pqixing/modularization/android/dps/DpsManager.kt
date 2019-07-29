@@ -99,11 +99,11 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
                 if (!compile) loseList.add(dpc.moduleName)
                 val newVersion = VersionManager.getVersion(dpc.branch, dpc.moduleName, "+")
                 if (!newVersion.second.startsWith(dpc.version) && newVersion.second.trim() != "+" && dpc.version.trim() != "+")
-                    dpsV.add("\n       Config Version : ${dpc.version} -> Last Version : ${newVersion.second} -> Match Branch : ${newVersion.first} -> ${dpc.moduleName} ")
+                    dpsV.add("${dpc.version} -> ${newVersion.second} -> compile \"${dpc.moduleName}:${newVersion.second.substringBeforeLast(".")}\"")
                 if (dpc.emptyVersion) dpc.version = newVersion.second
             }
             if (dpsV.isNotEmpty())
-                Tools.println("${plugin.project.name} -> Dependency Diff BaseVersion $dpsV")
+                Tools.println("----------------------Has New Version----------------------\n ${dpsV.joinToString("\n")}")
         }
 
         /**
@@ -118,11 +118,8 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
         val allows = extends.emptyVersions
         val emptyVersions = dps.filter { it.emptyVersion && !allows.contains(it.moduleName) }
         if (emptyVersions.isNotEmpty()) {
-            Tools.println("------------------------------WARNING------------------------------")
-            emptyVersions.forEach {
-                Tools.println("compile \"${it.moduleName}:${it.version.substringBeforeLast(".")}\"")
-            }
-            if (!extends.allowEmptyVerion) Tools.println("------------------------------ERROR:Not Allow Empty Version For The Above Modules------------------------------")
+            val emptyModule = emptyVersions.joinToString("\n") { "compile \"${it.moduleName}:${it.version.substringBeforeLast(".")}\"" }
+            Tools.println(if (extends.allowEmptyVerion) 0 else -1, "----------------------${if (extends.allowEmptyVerion) "WARNING" else "ERROR"}:Empty version Add to emptyVersions or configuration version----------------------\n$emptyModule")
         }
 
         val sb = java.lang.StringBuilder("dependencies {  // isApp : ${plugin.isApp} -> buildAsApp : ${plugin.buildAsApp}\n")

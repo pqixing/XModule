@@ -73,7 +73,7 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
         if (inner.version.isEmpty()) {
 //            inner.version = manager.baseVersion
             //默认不配置的情况下,使用最新的版本号
-            inner.emptyVersion = true;
+            inner.emptyVersion = true
             inner.version = "+"
         }
         inner.subModule = ProjectManager.findSubModuleByName(inner.moduleName)!!

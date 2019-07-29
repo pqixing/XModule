@@ -98,13 +98,11 @@ open class AndroidPlugin : BasePlugin() {
         project.extensions.add(Keys.CONFIG_MODULE, moduleConfig)
         //在工程处理后，处理组件依赖
         processInnerDps = Runnable {
-            Tools.println("----------------------processing innerDps----------------------")
             dpsManager = DpsManager(this@AndroidPlugin, dpsExt)
             val dependencies = dpsManager.resolveDps()
             val dpPath = FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dependencies, true)
             project.apply(mapOf("from" to dpPath))
-            Tools.println("processing result:$dpPath")
-            Tools.println("-----------------------------------------------------------------")
+            Tools.println("result:$dpPath")
         }
     }
 //
