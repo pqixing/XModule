@@ -10,12 +10,9 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.intellij.util.messages.impl.Message
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
-import com.pqixing.intellij.adapter.JekinsTrackTask
 import com.pqixing.intellij.adapter.JlistSelectListener
-import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import java.awt.Desktop
@@ -41,6 +38,7 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
     var queryTime = 5000L//5毫秒刷新时间
     private lateinit var contentPane: JPanel
     private lateinit var buttonOK: JButton
+    private lateinit var btnConfig: JButton
     private lateinit var jspJobs: JScrollPane
     private lateinit var jlLog: JLabel
     private lateinit var jlJobs: JList<JListInfo>
@@ -52,13 +50,14 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
     private var adapter: JListSelectAdapter
     private var appAdapter: JListSelectAdapter
 
-    val format = SimpleDateFormat("MM-dd HH:mm")
+    val format = SimpleDateFormat("MM-dd HH:mm", Locale.CHINA)
 
     val cacheDir: File = File(project.basePath, ".idea/cache/net")
+    val configFile: File = File(project.basePath, ".idea/cache/config/jkconfig")
 
     init {
         setContentPane(contentPane)
-        isModal = false
+        isModal = true
         getRootPane().defaultButton = buttonOK
         title = "Jekins Build"
         buttonOK!!.addActionListener { onOK() }
@@ -120,6 +119,63 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
             }
         }.start()
         resetLog()
+
+        btnConfig.addActionListener { loadConfig() }
+    }
+
+    private fun loadConfig() {
+        val readText = FileUtils.readText(configFile) ?: ""
+        val configs = readText.lines().filter { it.trim().isNotEmpty() }.map { it.split("##")[0] to it }.toMutableList()
+        val c = Messages.showEditableChooseDialog("", "Select Item", null
+                , configs.map { it.first }.toTypedArray()
+                , configs.firstOrNull()?.first ?: "", null) ?: return
+
+        val targetConfig = configs.find { it.first == c }
+        if (targetConfig == null) createConfig(c, configs)
+        else initByConfig(targetConfig.second, configs)
+    }
+
+    private fun initByConfig(configStr: String?, configs: MutableList<Pair<String, String>>) {
+        configStr ?: return
+        val split = configStr.split("##")
+        val name = split[0].trim()
+        val modules = split[1].trim().split(",")
+        val branch = split[2].trim()
+        val type = split[3].trim()
+
+        val exitCode = Messages.showYesNoCancelDialog(configStr.replace("##", "\n"), "Load Config", "Load", "Create", "Cancel", null)
+        when (exitCode) {
+            Messages.YES -> {
+                appAdapter.setDatas(appAdapter.datas.onEach { it.select = modules.contains(it.title) }.toList())
+                cbBranch.selectedItem = branch
+
+                cbType.selectedItem = type
+
+            }
+            Messages.NO -> createConfig(name, configs, false)
+        }
+    }
+
+    private fun createConfig(name: String, configs: MutableList<Pair<String, String>>, conform: Boolean = true) {
+        if (name.trim().isEmpty()) return
+
+
+        val branch = cbBranch.selectedItem.toString()
+        val type = cbType.selectedItem.toString()
+        val selectApps = getSelectApps()
+        val configStr = "$name##${selectApps.joinToString(",")}##$branch##$type"
+
+        if (conform && Messages.OK != Messages.showOkCancelDialog(configStr.replace("##", "\n"), "Create New Config", null)) return
+
+        for (i in 0 until configs.size) if (name == configs[i].first) {
+            configs.removeAt(i)
+            break
+        }
+
+        ApplicationManager.getApplication().runWriteAction {
+            configs.add(0, Pair(name, configStr))
+            FileUtils.writeText(configFile, configs.map { it.second }.joinToString("\n"))
+        }
     }
 
     private fun resetLog() {
@@ -205,7 +261,8 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
             inVisible = inVisible or job.building
             datas.add(JListInfo("${format.format(Date(job.timestamp))}  ${job.appName
                     ?: job.displayName}  ${if (allLog) job.branch
-                    ?: "" else ""}  ${if (cbBuilder.isSelected) job.buildUser ?: "" else ""}", "${getDuration(job)} ${if (job.building) "BUILDING" else job.result}", when (job.result) {
+                    ?: "" else ""}  ${if (cbBuilder.isSelected) job.buildUser
+                    ?: "" else ""}", "${getDuration(job)} ${if (job.building) "BUILDING" else job.result}", when (job.result) {
                 JekinsJob.SUCCESS -> 1
                 JekinsJob.FAILURE, JekinsJob.ABORTED -> 3
                 else -> 0
@@ -230,7 +287,9 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
         val runApps = selectApps.toMutableList().apply { removeAll(buildingApp) }
         val ignoreApps = selectApps.toMutableList().apply { removeAll(runApps) }
 
-        val exitCode = Messages.showYesNoCancelDialog("Prepare :\n $runApps \n\n Ignore (Building or Waiting for executor) :\n$ignoreApps", "Jekins Build", null)
+        var msg = "Prepare To Build :\n $runApps \n"
+        if (ignoreApps.isNotEmpty()) msg += "\n Ignore (Building or Waiting for executor) :\n $ignoreApps"
+        val exitCode = Messages.showYesNoCancelDialog(msg, "Jekins Build", null)
         if (exitCode != Messages.YES) return
 
         buttonOK.isVisible = false//隐藏Build 按钮
@@ -242,7 +301,7 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
                     indicator.text = "Start Build $app"
                     jlLog.text = "Start Build $app"
                     safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${URLEncoder.encode(TextUtils.removeLineAndMark(apps[app]?.replace(" ", "")
-                            ?: ""), "utf-8")}&BuildUser=${TextUtils.removeLineAndMark(userName?:"")}")
+                            ?: ""), "utf-8")}&BuildUser=${TextUtils.removeLineAndMark(userName ?: "")}")
                     Thread.sleep(500)//延迟500毫秒再进行请求,避免出现问题
                 }
                 indicator.text = "Querying Result,Please Wait"

@@ -20,7 +20,7 @@ open class JekinsAction : AnAction() {
     lateinit var basePath: String
     override fun update(e: AnActionEvent?) {
         super.update(e)
-        e?.presentation?.isVisible = QToolGroup.isDachenProject(e?.getProject())
+        e?.presentation?.isVisible = QToolGroup.isDachenProject(e?.project)
     }
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return

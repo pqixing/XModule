@@ -167,6 +167,8 @@ public class GitOperatorDialog extends BaseJDialog {
     private void setLogModel(boolean log) {
         // add your code here
         pLog.setVisible(log);
+        //重置历史记录
+        tLog.setText("");
         pOk.setVisible(!log);
         pOpertator.setVisible(!log);
     }
