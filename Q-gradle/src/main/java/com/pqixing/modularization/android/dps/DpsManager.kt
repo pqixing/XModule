@@ -134,7 +134,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
     private fun checkLoseEnable(): Boolean {
         if (plugin.config.allowLose) return true
         val apiChild = plugin.subModule.child ?: return false
-        return loseList.size == 1 && loseList[0] == apiChild.name && plugin.runTaskNames.find { it.contains("${apiChild.name}:ToMaven") } != null
+        return plugin.runTaskNames.find { it.contains("${apiChild.name}:ToMaven") } != null
     }
 
 

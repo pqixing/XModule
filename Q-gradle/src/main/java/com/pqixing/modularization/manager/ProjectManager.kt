@@ -6,8 +6,6 @@ import com.pqixing.model.ProjectXmlModel
 import com.pqixing.model.SubModule
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.interfaces.OnClear
-import com.pqixing.modularization.manager.ProjectManager.codeRootDir
-import com.pqixing.modularization.manager.ProjectManager.projectXml
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
