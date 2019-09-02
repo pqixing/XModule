@@ -262,14 +262,16 @@ open class DpsAnalysisTask : BaseTask() {
         val branch = plugin.subModule.getBranch()
         val tags = VersionManager.curVersions.toProperties()
         tags.putAll(VersionManager.findBranchVersion(branch))
-        tags["TargetModule"] = plugin.subModule.name
+        tags["TargetName"] = plugin.subModule.name
         GitUtils.open(File(ProjectManager.codeRootDir, plugin.subModule.project.name))?.runCatching {
+            tags["TargetBranch"] = branch
             tags["TargetRevision"] = getLastRevision(this, plugin.subModule.path.substringAfterLast("/", "")) ?: ""
             tags["TargetProjectRevision"] = getLastRevision(this, "") ?: ""
             close()
         }
         GitUtils.open(FileManager.templetRoot)?.runCatching {
             tags["templetRevision"] = getLastRevision(this, "") ?: ""
+            tags["templetBranch"] = this.repository.branch
             close()
         }
         val  extends: com.android.build.gradle.BaseExtension = plugin.project.extensions.getByName("android") as com.android.build.gradle.BaseExtension

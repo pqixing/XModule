@@ -14,7 +14,6 @@ import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.utils.DachenHelper
 import com.pqixing.intellij.utils.IInstall
-import com.pqixing.intellij.utils.IInstallListener
 import com.pqixing.intellij.utils.UiUtils
 import java.awt.event.KeyEvent
 import java.awt.event.WindowAdapter
@@ -33,13 +32,12 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
     private var devices: JComboBox<String>? = null
     private var jlDatas: JList<JListInfo>? = null
     private var openAppCheckBox: JCheckBox? = null
-    private var cbLibraryParams: JCheckBox? = null
+    var cbBuildParams: JCheckBox? = null
     private var adapter: JListSelectAdapter
     private val apkPaths = arrayListOf<JListInfo>()
     private val netApks = arrayListOf<JListInfo>()
     private var model = 0;
     private var radios = arrayListOf<Pair<JRadioButton, List<JListInfo>>>()
-    var listener:IInstallListener?=null
 
     init {
         setContentPane(contentPane)
@@ -87,7 +85,7 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
                     ?: JListInfo(f.name + " : .." + f.absolutePath.substring(Math.max(0, f.absolutePath.length - 30)), "", 0, select)
                             .apply {
                                 infoId = f.absolutePath
-                                data = IInstall { _, _, _, c -> c.onTaskEnd(f.exists(), f.absolutePath) }
+                                data = IInstall { _, _,_, _, c -> c.onTaskEnd(f.exists(), f.absolutePath) }
                             }
         }
         apkPaths.removeAll(js)
@@ -104,7 +102,7 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
         }
         for (i in 0 until radios.size) radios[i].first.isSelected = model == i
         adapter.setDatas(radios[model].second)
-        cbLibraryParams?.isVisible = model==1
+        cbBuildParams?.isVisible = model==1
     }
 
     private fun initData(apkPath: String?) = Thread {
@@ -118,7 +116,7 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
         //添加网络数据
         if (netRadioButton!!.isVisible) DachenHelper.loadApksForNet().forEach {
             val j = JListInfo(it.key).apply {
-                data = IInstall { _, _, i, c ->
+                data = IInstall { _, _,_, i, c ->
                     i.text = "Download : ${it.value}"
                     val downloadApk = DachenHelper.downloadApk(project, it.key.split(" ").last().trim(), it.value);
                     c.onTaskEnd(downloadApk.isNotEmpty(), downloadApk)
@@ -149,9 +147,7 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
             override fun run(indicator: ProgressIndicator) {
                 val targetDone = Semaphore()
                 targetDone.down()
-                listener?.beforeStartInstall(model)
                 installApp(0, selectItem, indicator, targetDone, openAppCheckBox!!.isSelected, iDevice)
-                listener?.afterStartInstall(model)
                 targetDone.waitFor()
                 val failItem = selectItem.filter { it.staue == 3 }
                 if (failItem.isNotEmpty()) {
@@ -175,8 +171,7 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
         info.staue = 2
         info.log = "-----"
         updateUI()
-        listener?.onInstall(i,info)
-        (info.data as IInstall).onInstall(info, this, indicator) { s, l ->
+        (info.data as IInstall).onInstall(info, i,this, indicator) { s, l ->
             if (!s) {
                 info.staue = 3
                 info.log = l

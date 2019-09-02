@@ -5,5 +5,5 @@ import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.ui.NewInstallDialog;
 
 public interface IInstall {
-    void onInstall(JListInfo info, NewInstallDialog dialog, ProgressIndicator indicator, TaskCallBack afterInstall);
+    void onInstall(JListInfo info,int index, NewInstallDialog dialog, ProgressIndicator indicator, TaskCallBack afterInstall);
 }

@@ -4,10 +4,12 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataKey
 import com.intellij.openapi.actionSystem.PlatformDataKeys
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.pqixing.intellij.adapter.JListInfo
+import com.pqixing.intellij.ui.BuildParamDialog
 import com.pqixing.intellij.ui.NewInstallDialog
 import com.pqixing.intellij.utils.GradleUtils
 import com.pqixing.intellij.utils.IInstall
@@ -21,17 +23,15 @@ open class InstallApkAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         val moduleName = e.getData(DataKey.create<Module>("module"))?.name
-        val listener = object :IInstallListener{
-            override fun beforeStartInstall(model: Int) {
+        var param:BuildParamDialog?=null
+        val install = IInstall { info,index, dialog, indicator, c ->
+            if(index==0){
+                if( dialog.cbBuildParams?.isSelected==true) ApplicationManager.getApplication().invokeAndWait {
+                    param = BuildParamDialog()
+                    param?.pack()
+                    param?.isVisible = true
+                }else param = null
             }
-
-            override fun afterStartInstall(model: Int) {
-            }
-
-            override fun onInstall(i: Int, info: JListInfo) {
-            }
-        }
-        val install = IInstall { info, dialog, indicator, c ->
             indicator.text = "Building ${info.title}"
             GradleUtils.runTask(project, listOf(":${info.title}:PrepareDev", ":${info.title}:BuildApk"), activateToolWindowBeforeRun = true
                     , envs = mapOf(Pair("include", ""), Pair("dependentModel", "dpMode")), callback = c)
@@ -41,7 +41,6 @@ open class InstallApkAction : AnAction() {
         val apkDialog = NewInstallDialog(project
                 , e.getData(PlatformDataKeys.VIRTUAL_FILE)?.canonicalPath, moduleName == null || !modulesName.contains(moduleName)
                 , modules)
-        apkDialog.listener = listener
         apkDialog.pack()
         apkDialog.isVisible = true
     }

@@ -6,9 +6,5 @@ import com.pqixing.intellij.ui.NewInstallDialog;
 import org.jetbrains.annotations.NotNull;
 
 public interface IInstallListener {
-    void beforeStartInstall(int model);
-
-    void afterStartInstall(int model);
-
-    void onInstall(int i, @NotNull JListInfo info);
+    void onInstall(NewInstallDialog dialog,int model,int type,JListInfo info);
 }
