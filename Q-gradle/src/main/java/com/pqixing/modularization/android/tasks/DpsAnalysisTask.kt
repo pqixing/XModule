@@ -3,21 +3,24 @@ package com.pqixing.modularization.android.tasks
 import com.pqixing.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.SubModuleType
+import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.maven.VersionManager
+import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
+import com.pqixing.tools.PropertiesUtils
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
+import org.eclipse.jgit.api.Git
 import java.io.File
 import java.util.*
 import kotlin.collections.HashMap
@@ -32,7 +35,7 @@ open class DpsAnalysisTask : BaseTask() {
     val plugin = AndroidPlugin.getPluginByProject(project)
     val groupName = ManagerPlugin.getExtends().groupName
     val dir = File(plugin.cacheDir, "report")
-    val temp = File(dir, "DependencyReport.txt")
+    val temp = File(dir, "AndroidReport.txt")
     //    val temp = File(dir, "DpsReport.bak")
     val versions = TreeMap<String, String>()
 
@@ -120,7 +123,7 @@ open class DpsAnalysisTask : BaseTask() {
 
     //DpsCompare.txt
     override fun end() {
-        val oldReport = File(project.projectDir, "DpsReport.txt")
+        val oldReport = File(project.projectDir, Keys.TXT_DPS_REPORT)
         if (!oldReport.exists()) {
             Tools.println("Compare dps fail,please put the old report file on project dir and try again!!${oldReport.absolutePath}")
             ResultUtils.writeResult(File(dir, Keys.TXT_DPS_REPORT).absolutePath)
@@ -142,7 +145,7 @@ open class DpsAnalysisTask : BaseTask() {
         val thirdList = LinkedList<String>()
 
         val result = StringBuilder("Compare Dependencies Version : ${oldVersions.remove("CreateTime")} -> ${versions.remove("CreateTime")}\n")
-        versions.forEach { k, n ->
+        versions.forEach { (k, n) ->
 
             val o = oldVersions.remove(k)
 //            Tools.println("versions.forEach -> $k ->$o -> $n")
@@ -154,7 +157,7 @@ open class DpsAnalysisTask : BaseTask() {
             (if (inner) innerList else thirdList).add(l)
         }
 
-        oldVersions.forEach { k, o ->
+        oldVersions.forEach { (k, o) ->
             val t = "del  "
             val inner = k.startsWith(groupName) || innerModules.contains(k)
 
@@ -168,7 +171,7 @@ open class DpsAnalysisTask : BaseTask() {
         result.append("\nThird -> \n")
         thirdList.sortedBy { it }.forEach { result.append(it) }
         val rl = result.toString()
-        if(!ResultUtils.ide) Tools.println(rl)
+        if (!ResultUtils.ide) Tools.println(rl)
         FileUtils.writeText(compareFile, rl)
 
         clear()
@@ -214,6 +217,7 @@ open class DpsAnalysisTask : BaseTask() {
 
     //生成 DpsAnalysis.txt
     override fun runTask() {
+        saveVersionTag()
         val dpsExt = plugin.dpsManager.dpsExt
         //依赖排序起点
         val topVertex = Vertex(project.name)
@@ -252,6 +256,30 @@ open class DpsAnalysisTask : BaseTask() {
         resultStr.append("cd \$curPath \n")
         FileUtils.writeText(File(dir, Keys.TXT_DPS_ANALYSIS), resultStr.toString())
         FileUtils.writeText(File(plugin.rootDir, "build/dps/${project.name}.dp"), getCollectionStr(include))
+    }
+
+    private fun saveVersionTag() {
+        val branch = plugin.subModule.getBranch()
+        val tags = VersionManager.curVersions.toProperties()
+        tags.putAll(VersionManager.findBranchVersion(branch))
+        tags["TargetModule"] = plugin.subModule.name
+        GitUtils.open(File(ProjectManager.codeRootDir, plugin.subModule.project.name))?.runCatching {
+            tags["TargetRevision"] = getLastRevision(this, plugin.subModule.path.substringAfterLast("/", "")) ?: ""
+            tags["TargetProjectRevision"] = getLastRevision(this, "") ?: ""
+            close()
+        }
+        GitUtils.open(FileManager.templetRoot)?.runCatching {
+            tags["templetRevision"] = getLastRevision(this, "") ?: ""
+            close()
+        }
+        val  extends: com.android.build.gradle.BaseExtension = plugin.project.extensions.getByName("android") as com.android.build.gradle.BaseExtension
+        PropertiesUtils.writeProperties(File(dir,"${TextUtils.numOrLetter(plugin.subModule.name)}_${extends.defaultConfig.versionName}_${extends.defaultConfig.versionCode}.version"),tags)
+    }
+
+    fun getLastRevision(git: Git, path: String?): String? {
+        val command = git.log().setMaxCount(1)
+        if (path?.isNotEmpty() == true) command.addPath(path)
+        return command.call().find { true }?.name
     }
 
     private fun getCollectionStr(include: Any): String {

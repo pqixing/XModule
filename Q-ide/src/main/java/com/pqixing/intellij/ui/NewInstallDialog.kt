@@ -14,13 +14,12 @@ import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.utils.DachenHelper
 import com.pqixing.intellij.utils.IInstall
+import com.pqixing.intellij.utils.IInstallListener
 import com.pqixing.intellij.utils.UiUtils
-import com.pqixing.shell.Shell
 import java.awt.event.KeyEvent
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.io.File
-import java.lang.RuntimeException
 import java.util.*
 import javax.swing.*
 
@@ -28,18 +27,19 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
     private var contentPane: JPanel? = null
     private var buttonOK: JButton? = null
     private var jParams: JTextField? = null
-    private var buttonCancel: JButton? = null
     private var localRadioButton: JRadioButton? = null
     private var moduleRadioButton: JRadioButton? = null
     private var netRadioButton: JRadioButton? = null
     private var devices: JComboBox<String>? = null
     private var jlDatas: JList<JListInfo>? = null
     private var openAppCheckBox: JCheckBox? = null
+    private var cbLibraryParams: JCheckBox? = null
     private var adapter: JListSelectAdapter
     private val apkPaths = arrayListOf<JListInfo>()
     private val netApks = arrayListOf<JListInfo>()
     private var model = 0;
     private var radios = arrayListOf<Pair<JRadioButton, List<JListInfo>>>()
+    var listener:IInstallListener?=null
 
     init {
         setContentPane(contentPane)
@@ -48,8 +48,6 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
         getRootPane().defaultButton = buttonOK
 
         buttonOK!!.addActionListener { onOK() }
-
-        buttonCancel!!.addActionListener { onCancel() }
 
         // call onCancel() when cross is clicked
         defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
@@ -106,6 +104,7 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
         }
         for (i in 0 until radios.size) radios[i].first.isSelected = model == i
         adapter.setDatas(radios[model].second)
+        cbLibraryParams?.isVisible = model==1
     }
 
     private fun initData(apkPath: String?) = Thread {
@@ -150,7 +149,9 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
             override fun run(indicator: ProgressIndicator) {
                 val targetDone = Semaphore()
                 targetDone.down()
+                listener?.beforeStartInstall(model)
                 installApp(0, selectItem, indicator, targetDone, openAppCheckBox!!.isSelected, iDevice)
+                listener?.afterStartInstall(model)
                 targetDone.waitFor()
                 val failItem = selectItem.filter { it.staue == 3 }
                 if (failItem.isNotEmpty()) {
@@ -174,6 +175,7 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
         info.staue = 2
         info.log = "-----"
         updateUI()
+        listener?.onInstall(i,info)
         (info.data as IInstall).onInstall(info, this, indicator) { s, l ->
             if (!s) {
                 info.staue = 3

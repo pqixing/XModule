@@ -27,7 +27,7 @@ buildscript {
 
 ext.localMavenUri = "http://192.168.0.70:8081/repository/pqixing/"
 //本地Maven调试
-ext.localBuild = false
+ext.localBuild = true
 group = "com.pqixing.gradle"
 
 allprojects {

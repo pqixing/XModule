@@ -59,7 +59,7 @@ object VersionManager : OnClear {
     /**
      * 当前最新的版本信息
      */
-    private val curVersions = HashMap<String, String>()
+    val curVersions = HashMap<String, String>()
 
     /**
      * 分支相关版本号信息
@@ -146,7 +146,7 @@ object VersionManager : OnClear {
         return "+"
     }
 
-    private fun findBranchVersion(branch: String): HashMap<String, String> {
+    fun findBranchVersion(branch: String): HashMap<String, String> {
         if (curVersions.isEmpty()) readCurVersions()
         if (targetVersion.isEmpty()) readTargetVersions()
         return branchVersion[branch] ?: readBranchVersion(branch)

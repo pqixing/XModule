@@ -33,7 +33,7 @@ class JekinJobDialog(val project: Project, val userName: String?, val curModule:
     val buildJobName = "remoteBuild"
     val jobsUrl = "http://192.168.3.7:8080/jenkins/job/$buildJobName/"
     val queueUrl = "http://192.168.3.7:8080/jenkins/queue/"
-    val logStr = "click item to see log"
+    val logStr = ""
 
     var queryTime = 5000L//5毫秒刷新时间
     private lateinit var contentPane: JPanel
