@@ -12,7 +12,7 @@ object DachenHelper {
      * 2019-03-06 17:00
      */
     fun loadApksForNet(): LinkedHashMap<String, String> {
-        val baseUrl = "https://192.168.3.211:9000/"
+        val baseUrl = "https://dev.downloads.mediportal.com.cn:900/"
         val updateTag = "<div class=\"desc\">"
         val nameTag = "<span class=\"name\">"
         val downloadTag = "downloadUrl=\""

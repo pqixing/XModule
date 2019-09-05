@@ -3,7 +3,6 @@ package com.pqixing.adbkeyboard;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.inputmethodservice.InputMethodService;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,46 +11,19 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.android.adbkeyboard.R;
+import com.android.inputmethod.pinyin.PinyinIME;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdbIME extends InputMethodService {
+public class AdbIME extends PinyinIME {
 
     private BroadcastReceiver mReceiver = null;
     private SharedPreferences sp;
     private int historyCount = 20;
     private ListView historyView;
 
-    @Override
-    public View onCreateInputView() {
-        View mInputView = getLayoutInflater().inflate(R.layout.ime_view, null);
-        mInputView.findViewById(R.id.btn_copy).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AdbReceiver.setClipText(getApplicationContext(), getInputText());
-            }
-        });
-        mInputView.findViewById(R.id.btn_paste).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setInputText(AdbReceiver.getClipText(getApplicationContext()));
-            }
-        });
-        mInputView.findViewById(R.id.btn_ime).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setInputText("");
-            }
-        });
-        historyView = mInputView.findViewById(R.id.lv_history);
-        initHistory(historyView, getHistoryView());
-
-        return mInputView;
-    }
-
-    private List<String> getHistoryView() {
+    private List<String> getHistorys() {
         String key = "historyView";
         ArrayList<String> historys = new ArrayList<>(historyCount);
         for (int i = 0; i < historyCount; i++) {
@@ -64,7 +36,7 @@ public class AdbIME extends InputMethodService {
 
     private void addHistory(String h) {
         if (h == null || h.trim().isEmpty()) return;
-        List<String> historys = getHistoryView();
+        List<String> historys = getHistorys();
         historys.remove(h);
         historys.add(0, h);
         while (historys.size() > historyCount) historys.remove(historys.size() - 1);

@@ -1,25 +1,12 @@
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
->
-    <TextView
-            android:background="#444"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textColor="#fff"
-            android:text="@string/keyboard_on"
-    />
-    <ListView android:layout_width="match_parent"
-              android:id="@+id/lv_history"
-              android:background="#fff"
-
-              android:layout_height="200dp"/>
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:background="#ccc"
+                  android:visibility="gone"
                   android:orientation="horizontal">
         <Button android:layout_width="0dp"
                 android:id="@+id/btn_copy"
@@ -40,4 +27,14 @@
                 android:text="@string/ime"
         />
     </LinearLayout>
+    <FrameLayout
+            android:id="@+id/flContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <ListView android:id="@+id/history"
+                  android:layout_width="match_parent"
+                  android:visibility="gone"
+                  android:layout_height="200dp"/>
+    </FrameLayout>
+
 </LinearLayout>

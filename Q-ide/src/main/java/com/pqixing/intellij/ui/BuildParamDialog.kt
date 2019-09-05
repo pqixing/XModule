@@ -6,19 +6,19 @@ import java.awt.event.*
 import kotlin.math.max
 
 class BuildParamDialog : BaseJDialog() {
-    private var contentPane: JPanel? = null
-    private var buttonOK: JButton? = null
-    private var jLVersion: JLabel? = null
-    private var cbBuildType: JComboBox<*>? = null
-    private var cbDpModel: JComboBox<*>? = null
-    private var btnCheckoutTemplet: JButton? = null
-    private var tfTemplet: JTextField? = null
-    private var btnCheckoutModule: JButton? = null
-    private var btnClear: JButton? = null
-    private var tfModule: JTextField? = null
-    private var jpModule: JPanel? = null
-    private var jpTemplet: JPanel? = null
-    private var jpContent: JPanel? = null
+     var contentPane: JPanel? = null
+     var buttonOK: JButton? = null
+     var jLVersion: JLabel? = null
+     var cbBuildType: JComboBox<*>? = null
+     var cbDpModel: JComboBox<*>? = null
+     var btnCheckoutTemplet: JButton? = null
+     var tfTemplet: JTextField? = null
+     var btnCheckoutModule: JButton? = null
+     var btnClear: JButton? = null
+     var tfModule: JTextField? = null
+     var jpModule: JPanel? = null
+     var jpTemplet: JPanel? = null
+     var jpContent: JPanel? = null
 
     var versionPath: String? = null
     var buildType: String? = null
@@ -59,6 +59,9 @@ class BuildParamDialog : BaseJDialog() {
         } ?: "Drag version file into panel"
         jpContent?.isVisible = versionPath != null
         setSize(width,if(versionPath==null) defHeight else 210)
+        if(versionPath!=null){
+
+        }
     }
 
     private fun onOK() {
