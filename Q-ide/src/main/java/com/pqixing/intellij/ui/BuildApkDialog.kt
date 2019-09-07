@@ -421,11 +421,10 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
     }
 
     private fun startLocalBuild(index: Int, params: List<Map<String, String>>, iDevice: IDevice) {
-        if (index >= params.size) {
+        if (index >= params.size) return ApplicationManager.getApplication().invokeAndWait {
             buttonOK.isVisible = true
             isVisible = false
             isVisible = true
-            return
         }
         val param = params[index].toMutableMap()
         val title = param["title"] ?: ""
@@ -436,7 +435,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
         param["log"] = "Build"
         writeLocalBuild(Collections.singletonList(param))
 
-        GradleUtils.runTask(project, listOf(":$title:PrepareDev",":$title:clean", ":$title:BuildApk")
+        GradleUtils.runTask(project, listOf(":$title:PrepareDev", ":$title:clean", ":$title:BuildApk")
                 , activateToolWindowBeforeRun = true
                 , envs = mapOf("include" to if (dpModel == "mavenOnly") title else "${includes.joinToString(",")},$title", "dependentModel" to dpModel, "versionFile" to versionPath)
                 , callback = TaskCallBack { success, result ->
@@ -464,7 +463,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
             param["endTime"] = System.currentTimeMillis().toString()
             param["status"] = if (success) "1" else "3"
             writeLocalBuild(Collections.singletonList(param))
-            startLocalBuild(index+1,params,iDevice)
+            startLocalBuild(index + 1, params, iDevice)
         })
 
     }
