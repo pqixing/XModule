@@ -48,6 +48,14 @@ public class UrlUtils {
         }
         return mapRequest;
     }
+
+    public static String toUrl(String scheme,String host,Map<String,String> params){
+        StringBuilder url  = new StringBuilder(scheme).append("://").append(host).append("?");
+        for (Map.Entry<String,String> m: params.entrySet()) {
+            url.append(m.getKey()).append("=").append(m.getValue()).append("&");
+        }
+        return url.substring(0,url.length()-1);
+    }
     /**
      * 解析出url参数中的键值对
      * @param URL  url地址

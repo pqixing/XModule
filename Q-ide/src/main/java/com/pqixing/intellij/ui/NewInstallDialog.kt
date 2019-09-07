@@ -22,21 +22,19 @@ import java.io.File
 import java.util.*
 import javax.swing.*
 
-class NewInstallDialog(val project: Project, val apkPath: String?, val projectMode: Boolean, val modules: List<JListInfo>) : BaseJDialog() {
-    private var contentPane: JPanel? = null
-    private var buttonOK: JButton? = null
-    private var jParams: JTextField? = null
-    private var localRadioButton: JRadioButton? = null
-    private var moduleRadioButton: JRadioButton? = null
-    private var netRadioButton: JRadioButton? = null
-    private var devices: JComboBox<String>? = null
-    private var jlDatas: JList<JListInfo>? = null
-    private var openAppCheckBox: JCheckBox? = null
-    var cbBuildParams: JCheckBox? = null
-    private var adapter: JListSelectAdapter
-    private val apkPaths = arrayListOf<JListInfo>()
-    private val netApks = arrayListOf<JListInfo>()
-    private var model = 0;
+class NewInstallDialog(val project: Project, apkPath: String?) : BaseJDialog() {
+    private lateinit var contentPane: JPanel
+    private lateinit var buttonOK: JButton
+    private lateinit var jParams: JTextField
+    private lateinit var localRadioButton: JRadioButton
+    private lateinit var netRadioButton: JRadioButton
+    private lateinit var devices: JComboBox<String>
+    private lateinit var jlDatas: JList<JListInfo>
+    private lateinit var openAppCheckBox: JCheckBox
+    private  var adapter: JListSelectAdapter
+    private  val apkPaths = arrayListOf<JListInfo>()
+    private  val netApks = arrayListOf<JListInfo>()
+    private  var model = 0;
     private var radios = arrayListOf<Pair<JRadioButton, List<JListInfo>>>()
 
     init {
@@ -55,7 +53,6 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
             }
         })
         radios.add(Pair(localRadioButton!!, apkPaths))
-        radios.add(Pair(moduleRadioButton!!, modules))
         radios.add(Pair(netRadioButton!!, netApks))
         for (i in 0 until radios.size) radios[i].first.addActionListener { model = i;updateUI() }
 
@@ -66,14 +63,13 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
         for (i in 0..100) ss.add(JListInfo(""))
         adapter.setDatas(ss)
         UiUtils.initDevicesComboBox(project, devices!!)
-        UiUtils.setTransfer(jlDatas!!) { f ->
+        UiUtils.setTransfer(jlDatas) { f ->
             model = 0
             addApkPaths(f.filter { checkIsApk(it.name) }, true)
             updateUI()
         }
-        if (!QToolGroup.isModulariztionProject(project)) moduleRadioButton?.isVisible = false
-        if (!QToolGroup.isDachenProject(project)) netRadioButton?.isVisible = false
-        model = if (checkIsApk(apkPath)) 0 else if (!projectMode) 1 else 2
+        if (!QToolGroup.isDachenProject(project)) netRadioButton.isVisible = false
+        model = if (checkIsApk(apkPath)) 0 else 1
         initData(apkPath)
     }
 
@@ -102,7 +98,6 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
         }
         for (i in 0 until radios.size) radios[i].first.isSelected = model == i
         adapter.setDatas(radios[model].second)
-        cbBuildParams?.isVisible = model==1
     }
 
     private fun initData(apkPath: String?) = Thread {
@@ -140,21 +135,19 @@ class NewInstallDialog(val project: Project, val apkPath: String?, val projectMo
             Messages.showMessageDialog("Can not find device to run", "Miss Device", null)
             return
         }
-        buttonOK!!.isVisible = false
-        if (model == 1 && selectItem.size == 1) isVisible = false//构建module,隐藏
+        buttonOK.isVisible = false
         val install = object : Task.Backgroundable(project, "Start Install") {
-
             override fun run(indicator: ProgressIndicator) {
                 val targetDone = Semaphore()
                 targetDone.down()
-                installApp(0, selectItem, indicator, targetDone, openAppCheckBox!!.isSelected, iDevice)
+                installApp(0, selectItem, indicator, targetDone, openAppCheckBox.isSelected, iDevice)
                 targetDone.waitFor()
                 val failItem = selectItem.filter { it.staue == 3 }
                 if (failItem.isNotEmpty()) {
-                    if (model == 1) isVisible = true
-                    else if (model == 2) model = 0
+                    model = 0
                     updateUI()
-                } else if (!isVisible) onCancel()//如果是一次后台模式安装成功, 直接关掉对话框
+                }
+                buttonOK.isVisible = true
             }
         }
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(install, BackgroundableProcessIndicator(install))

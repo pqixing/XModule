@@ -72,6 +72,7 @@ open class JListSelectAdapter(val jList: JList<JListInfo>, var boxVisible: Boole
 
     fun updateUI() {
         jList.model = this
+        jList.invalidate()
         jList.setSize(jList.width, datas.size * 30 + 15)
     }
 

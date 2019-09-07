@@ -4,18 +4,20 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataKey
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.actions.QToolGroup
-import com.pqixing.intellij.ui.JekinJobDialog
+import com.pqixing.intellij.adapter.JListInfo
+import com.pqixing.intellij.ui.BuildApkDialog
 import com.pqixing.intellij.utils.GitHelper
+import com.pqixing.model.SubModule
 import com.pqixing.model.SubModuleType
-import com.pqixing.tools.PropertiesUtils
 import groovy.lang.GroovyClassLoader
 import java.io.File
 
-open class JekinsAction : AnAction() {
+open class BuildApkAction : AnAction() {
     lateinit var project: Project
     lateinit var basePath: String
     override fun update(e: AnActionEvent?) {
@@ -33,20 +35,29 @@ open class JekinsAction : AnAction() {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
             return
         }
+        val allSubModule = XmlHelper.parseProjectXml(projectXmlFile).allSubModules()
+        BuildApkDialog(project, getConfigInfo(configFile), getActivityModules(e, allSubModule), allSubModule, getBranches()).showAndPack()
+    }
 
-        val clazz = GroovyClassLoader().parseClass(configFile)
-        val userName = clazz.getField("userName").get(clazz.newInstance()).toString()
+    private fun getConfigInfo(configFile: File) = GroovyClassLoader().parseClass(configFile).newInstance()
 
-        val module = e.getData(DataKey.create<Module>("module"))?.name
-        val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
-        val apps = projectXml.allSubModules().filter { it.type == SubModuleType.TYPE_APPLICATION }.map { Pair(it.name,it.introduce)}.toMap()
+    private fun getActivityModules(e: AnActionEvent, allSubModule: MutableSet<SubModule>): MutableList<String> {
+        val curModule = e.getData(DataKey.create<Module>("module"))?.name
+        val moduleNames = allSubModule.map { it.name }
+        val activityModules = ModuleManager.getInstance(project).sortedModules.filter { moduleNames.contains(it.name) }.mapNotNull { it.name }.toMutableList()
+        if (curModule != null) {
+            activityModules.remove(curModule)
+            activityModules.add(0, curModule)
+        }
+        return activityModules
+    }
+
+    private fun getBranches(): MutableList<String> {
         val repo = GitHelper.getRepo(File(basePath, "templet"), project)
         val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
         val localBranch = repo.currentBranchName ?: "master"
         branchs.remove(localBranch)
         branchs.add(0, localBranch)
-        val dialog = JekinJobDialog(project,userName,module, apps, branchs)
-        dialog.pack()
-        dialog.isVisible = true
+        return branchs
     }
 }

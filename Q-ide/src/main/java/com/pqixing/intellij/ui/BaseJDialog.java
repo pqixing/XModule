@@ -15,6 +15,12 @@ public class BaseJDialog extends JDialog {
         setLocationRelativeTo(null);
     }
 
+    public BaseJDialog showAndPack() {
+        pack();
+        setVisible(true);
+        return this;
+    }
+
     @Override
     public void dispose() {
         super.dispose();
