@@ -43,7 +43,7 @@ class AdbToolDialog(val project: Project, apkPath: String?) : BaseJDialog() {
     init {
         setContentPane(contentPane)
         isModal = false
-        title = "Install Apk"
+        title = "Adb Tools"
         getRootPane().defaultButton = buttonOK
 
         buttonOK!!.addActionListener { onOK() }

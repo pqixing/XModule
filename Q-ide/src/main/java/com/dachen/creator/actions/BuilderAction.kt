@@ -17,7 +17,7 @@ import com.pqixing.model.SubModuleType
 import groovy.lang.GroovyClassLoader
 import java.io.File
 
-open class BuildApkAction : AnAction() {
+open class BuilderAction : AnAction() {
     lateinit var project: Project
     lateinit var basePath: String
     override fun update(e: AnActionEvent?) {

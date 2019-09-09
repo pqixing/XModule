@@ -36,8 +36,10 @@
                     text="Import">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
             </action>
-            <action id="Modularization.Jekins" class="com.dachen.creator.actions.BuildApkAction"
-                    text="Builder"/>
+            <action id="Modularization.Jekins" class="com.dachen.creator.actions.BuilderAction"
+                    text="Builder">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift B"/>
+            </action>
             <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
                     text="ToMaven"/>
 
@@ -48,15 +50,12 @@
                     class="com.pqixing.intellij.actions.GitBranchAction" text="GitMerge"/>
 
 
-            <action id="Modularization.GitCheckout"
-                    class="com.pqixing.intellij.actions.GitCheckoutAction" text="GitCheckout"/>
+            <action id="Modularization.GitCheckout" class="com.pqixing.intellij.actions.GitCheckoutAction" text="GitCheckout"/>
 
 
             <separator/>
             <action id="Modularization.InstallApk" class="com.pqixing.intellij.actions.AdbToolsAction"
-                    text="AdbTool">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift B"/>
-            </action>
+                    text="AdbTool"/>
 
             <separator/>
             <action id="Modularization.DpsAnalyse"
