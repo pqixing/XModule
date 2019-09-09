@@ -53,8 +53,10 @@ object UiUtils {
 
     fun initDevicesComboBox(project: Project, comboBox: JComboBox<String>) {
         val a = {
-            comboBox.removeAllItems()
-            getDevices(project).forEach { i -> comboBox.addItem(i.first) }
+            val ds = getDevices(project).map { it.first }.toMutableList()
+            val c = comboBox.itemCount
+            for (i in 0 until c) ds.remove(comboBox.getItemAt(i))
+            ds.forEach { comboBox.addItem(it) }
         }
         a()
         if (comboBox.itemCount == 0) comboBox.addPopupMenuListener(object : PopupMenuListener {
