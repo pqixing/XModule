@@ -53,10 +53,8 @@
 
 
             <separator/>
-            <action id="Modularization.AdbText" class="com.pqixing.intellij.actions.AdbText"
-                    text="AdbText"/>
-            <action id="Modularization.InstallApk" class="com.pqixing.intellij.actions.InstallApkAction"
-                    text="AdbInstall">
+            <action id="Modularization.InstallApk" class="com.pqixing.intellij.actions.AdbToolsAction"
+                    text="AdbTool">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift B"/>
             </action>
 

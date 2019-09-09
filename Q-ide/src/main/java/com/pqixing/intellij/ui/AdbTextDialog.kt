@@ -13,48 +13,21 @@ import com.intellij.openapi.ui.Messages
 import com.pqixing.intellij.utils.DachenHelper
 import com.pqixing.intellij.utils.UiUtils
 import java.awt.Desktop
-import java.awt.event.KeyEvent
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
 import java.io.File
 import java.net.URI
-import javax.swing.*
+import javax.swing.JButton
+import javax.swing.JComboBox
+import javax.swing.JTextArea
 
-class AdbTextDialog(var project: Project) : BaseJDialog() {
+class AdbTextDialog(var project: Project, var cbDevices: JComboBox<String>, var taText: JTextArea, val btnFrom: JButton, val btnTo: JButton) {
     private val adbInputPkg = "com.pqixing.adbkeyboard"
-    private var contentPane: JPanel? = null
-    private var toClipButton: JButton? = null
-    private var toEditButton: JButton? = null
-    public var jText: JTextArea? = null
-    private var cbDevices: JComboBox<String>? = null
-    private var fromEditButton: JButton? = null
-    private var fromClipButton: JButton? = null
     private var clipVersion = "1.1"
     val resultKey = "onIdeResult="
 
-    init {
-        setContentPane(contentPane)
-        isModal = false
-        title = "Adb Text Editor"
-        toClipButton!!.addActionListener { e -> toPhone(false, toClipButton) }
-        toEditButton!!.addActionListener { e -> toPhone(true, toEditButton) }
-        fromEditButton!!.addActionListener { e -> fromPhone(true, fromEditButton) }
-        fromClipButton!!.addActionListener { e -> fromPhone(false, fromClipButton) }
-
-        // call onCancel() when cross is clicked
-        defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
-        addWindowListener(object : WindowAdapter() {
-            override fun windowClosing(e: WindowEvent?) {
-                dispose()
-            }
-        })
-
-        // call onCancel() on ESCAPE
-        contentPane!!.registerKeyboardAction({ e -> dispose() }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-        UiUtils.initDevicesComboBox(project, cbDevices!!)
-        UiUtils.setTransfer(jText!!) {
-            jText!!.text = it.joinToString("\n")
-        }
+    fun init() {
+        UiUtils.setTransfer(taText) { taText.text = it.joinToString("\n") }
+        btnFrom.addActionListener { fromPhone(true,btnFrom) }
+        btnTo.addActionListener { toPhone(true,btnTo) }
     }
 
     /**
@@ -106,7 +79,7 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
             return@runProcess
         }
 
-        val adCommand = runAdCommand(iDevice, getBroadCastCmd(if (edit) "set_text_edit" else "set_text", jText!!.text))
+        val adCommand = runAdCommand(iDevice, getBroadCastCmd(if (edit) "set_text_edit" else "set_text", taText!!.text))
         if ("##fail##" == adCommand) ApplicationManager.getApplication().invokeLater {
             Messages.showMessageDialog("无法设置文本,请检查Adb Keyboard输入法是否正常", "设置文本失败", null)
         }
@@ -124,7 +97,7 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
         var adCommand = runAdCommand(iDevice, getBroadCastCmd(if (edit) "get_text_edit" else "get_text"))
         if ("##fail##" == adCommand || adCommand == null) ApplicationManager.getApplication().invokeLater {
             Messages.showMessageDialog("无法设置文本,请检查Adb Keyboard输入法是否正常", "设置文本失败", null)
-        } else jText?.text = adCommand
+        } else taText?.text = adCommand
         btn?.isEnabled = true
     }, null)
 
@@ -151,7 +124,6 @@ class AdbTextDialog(var project: Project) : BaseJDialog() {
             }
         }
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(install, BackgroundableProcessIndicator(install))
-
     }
 
 }
