@@ -42,8 +42,9 @@ object DachenHelper {
      *https://192.168.3.211:9000/apk/Medical-yhq_1901.apk
      * 下载apk文件
      */
-    fun downloadApk(project: Project, name: String, url: String): String {
-        val file = File(project.basePath, "build/apks/${name.replace(Regex(" |-|_|:"), "")}.apk")
+    fun downloadApk(project: Project, name: String?, url: String): String {
+        val apkName = (name?:url.substringAfterLast("/").substringBeforeLast(".")).replace(Regex(" |-|_|:"), "")
+        val file = File(project.basePath, "build/apks/$apkName.apk")
         try {
             file.parentFile.mkdirs()
             FileUtils.delete(file)

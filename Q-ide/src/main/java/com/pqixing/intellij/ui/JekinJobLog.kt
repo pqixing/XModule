@@ -24,7 +24,7 @@ class JekinJobLog(val project: Project, val jobUrl: String) : BaseJDialog() {
         title = "Console"
 //        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
 
-        stopButton.addActionListener { Desktop.getDesktop().browse(URI(jobUrl)) }
+        stopButton.addActionListener { Desktop.getDesktop().browse(URI("${jobUrl}console")) }
         autoRefresh.addActionListener { if (autoRefresh.isSelected) reloadJob() }
         reloadJob()
     }

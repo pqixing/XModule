@@ -32,6 +32,9 @@ public class JekinsJob {
     public String getBuildUser(){
         return getParams().get("BuildUser");
     }
+    public String getShowName(){
+        return getParams().get("ShowName");
+    }
 
     public void setParams(Map<String, String> params) {
         this.params = params;

@@ -15,6 +15,7 @@ import com.intellij.openapi.ui.Messages
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.adapter.JlistSelectListener
+import com.pqixing.intellij.utils.DachenHelper
 import com.pqixing.intellij.utils.GradleUtils
 import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils
@@ -36,6 +37,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import javax.swing.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class BuildApkDialog(val project: Project, val configInfo: Any, val activityModel: List<String>, val allModule: Set<SubModule>, val branchs: List<String>) : BaseJDialog() {
     val apiJson = "api/json"
@@ -44,11 +46,11 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
     val jobsUrl = "http://192.168.3.7:8080/jenkins/job/$buildJobName/"
     val queueUrl = "http://192.168.3.7:8080/jenkins/queue/"
 
-    var maxTime = 20//5毫秒刷新时间
+    var maxTime = 18//5毫秒刷新时间
     val logAction = ActionListener { sleepTimes = maxTime }
     private lateinit var contentPane: JPanel
     private lateinit var buttonOK: JButton
-    private lateinit var btnConfig: JButton
+    private lateinit var btnSetting: JButton
     private lateinit var jspJobs: JScrollPane
     private lateinit var jlJobs: JList<JListInfo>
     private lateinit var jlApps: JList<JListInfo>
@@ -67,7 +69,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
     val configFile: File = File(project.basePath, ".idea/cache/config/jkconfig")
     var includes: MutableSet<String> = mutableSetOf()
     var installParam = "-r -t"
-    lateinit var dpModel:String
+    var dpModel: String
     private val updateCmd = Runnable {
         do {
             if (sleepTimes++ >= maxTime) try {
@@ -90,7 +92,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
         if (!buildDir.exists()) buildDir.mkdirs()
         val selects = appAdapter.datas.filter { it.select }.map { it.title }
         val showLogs = (buildDir.listFiles() ?: emptyArray()).filter { it.isFile && it.name.endsWith(".log") }
-                .sortedBy { it.name }.mapNotNull { FileUtils.readText(it) }
+                .sortedByDescending { it.name }.mapNotNull { FileUtils.readText(it) }
                 .mapNotNull {
                     val params = UrlUtils.getParams(it)
                     val branch = params["branch"] ?: ""
@@ -103,11 +105,11 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
                     val createTime = params["createTime"]?.toLongOrNull() ?: System.currentTimeMillis()
                     val status = params["status"]?.toIntOrNull() ?: 0
                     val buildLog = params["log"] ?: ""
-                    val endTime = params["endTime"]?.toLongOrNull() ?: System.currentTimeMillis()
+                    val endTime = params["endTime"]?.toLongOrNull() ?: 0L
                     val log = when (status) {
                         0 -> "Wait for builder"
-                        2 -> "$buildLog : " + (System.currentTimeMillis() - startTime).let { l -> "${l / 1000}秒" }
-                        else -> "Spend : " + (endTime - startTime).let { l -> "${l / 1000}秒" }
+                        2 -> "$buildLog : " + getTimeText(System.currentTimeMillis() - startTime)
+                        else -> "Spend : " + getTimeText(endTime - startTime)
                     }
                     var title = "${format.format(Date(createTime))}  $module"
                     if (allLog) title += "  $branch  $buildType"
@@ -116,13 +118,19 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
         adapter.setDatas(showLogs)
     }
 
+    private fun getTimeText(timeMills: Long): String = (timeMills / 1000).let { "${it / 60}分 ${it % 60}秒" }
 
     init {
         setContentPane(contentPane)
         isModal = false
         getRootPane().defaultButton = buttonOK
         title = "Builder"
-        buttonOK.addActionListener { onOK() }
+        buttonOK.addActionListener {
+            when (cbShowType.selectedItem) {
+                "Jekins" -> onJekinBuild()
+                "Local" -> onLocalBuild()
+            }
+        }
 
         // call onCancel() when cross is clicked
         defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
@@ -140,7 +148,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
 
         branchs.forEach { cbBranch.addItem(it) }
         cbShowType.addActionListener { updateShowType() }
-        btnConfig.addActionListener { buildConfigClick() }
+        btnSetting.addActionListener { settingClick() }
         dpModel = configInfo.javaClass.getField("dependentModel").get(configInfo)?.toString() ?: "localFirst"
         configInfo.javaClass.getField("include").get(configInfo)?.toString()?.split(",")?.forEach {
             if (it.trim().isNotEmpty()) includes.add(it)
@@ -181,53 +189,83 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
         }
     }
 
-    val selectListener = object : JlistSelectListener {
+    val jekinLogClick = object : JlistSelectListener {
         override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean {
             val job = items.last().data as? JekinsJob ?: return true
+
             if (job.displayName == null) {
                 Desktop.getDesktop().browse(URI(jobsUrl))
-            } else {
-                val jobLog = JekinJobLog(project, job.url)
-                jobLog.pack()
-                jobLog.isVisible = true
+                return true
             }
-            return true
+            if (job.result == JekinsJob.SUCCESS && Messages.OK == Messages.showOkCancelDialog(project, "For ${job.showName}-${job.branch}", job.displayName, "Install", "ShowLog", null)) {
+                val iDevice = UiUtils.getSelectDevice(project, cbDevices)
+                if (iDevice != null) {
+                    val apkName = "${job.showName}-${job.branch}"
+                    val url = "https://dev.downloads.mediportal.com.cn:9000/apk/$apkName.apk"
+                    adbInstall(iDevice, Collections.singletonList(url)) { s, k, l ->
+                        ApplicationManager.getApplication().invokeAndWait { Messages.showMessageDialog("$l    ->    $apkName", "Install Result", null) }
+                    }
+                } else Messages.showMessageDialog("", "No devices found", null)
+
+                return true
+            }
+            return JekinJobLog(project, job.url).showAndPack() != null
         }
     }
+    val localLogClick = object : JlistSelectListener {
+        override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean = true.apply {
+            val urls = items.filter { it.data?.toString()?.isNotEmpty() == true }
+                    .map { "${it.title}->../${it.data.toString().substringAfterLast("/")}" to it.data.toString() }
+            if (urls.isNotEmpty() && Messages.OK == Messages.showOkCancelDialog(urls.joinToString("\n") { it.first }, "Install Apk ?", null)) {
+                val iDevice = UiUtils.getSelectDevice(project, cbDevices)
+                if (iDevice != null) {
+                    val results = HashMap<String, String>()
+                    adbInstall(iDevice, urls.map { it.second }) { s, k, r ->
+                        results[k] = r
+                        if (results.size == urls.size) ApplicationManager.getApplication().invokeAndWait {
+                            Messages.showMessageDialog(urls.joinToString("\n") { "${results[it.second]}    ->    ${it.first}" }, "Install Result", null)
+                        }
+                    }
+                } else Messages.showMessageDialog("", "No devices found", null)
+            }
+        }
+    }
+
     var sleepTimes = 0
+    var showAllLocalModule = false
     private fun updateShowType() {
         val oldDatas = appAdapter.datas.filter { it.select }.map { it.title }
         val newData = when (cbShowType.selectedItem) {
             "Jekins" -> {
                 adapter.boxVisible = false
-                adapter.selectListener = selectListener
+                adapter.selectListener = jekinLogClick
                 cbType.isVisible = true
                 cbBranch.isVisible = true
                 cbBuilder.isVisible = true
-                btnConfig.isVisible = true
-                cbDevices.isVisible = false
+                btnSetting.isVisible = true
                 allModule.filter { it.type == SubModuleType.TYPE_APPLICATION }.map { JListInfo(it.name, select = activityModel.contains(it.name)) }.sortedBy { !it.select }
             }
             "Local" -> {
                 adapter.boxVisible = false
-                adapter.selectListener = selectListener
+                adapter.selectListener = localLogClick
                 cbType.isVisible = true
-                cbDevices.isVisible = true
                 cbBranch.isVisible = false
                 cbBuilder.isVisible = false
-                btnConfig.isVisible = true
-                UiUtils.initDevicesComboBox(project,cbDevices)
-                allModule.filter { it.type == SubModuleType.TYPE_APPLICATION || it.child != null }.sortedBy { it.type != SubModuleType.TYPE_APPLICATION }.map { JListInfo(it.name, select = activityModel.indexOf(it.name) == 0) }.sortedBy { !activityModel.contains(it.title) }
+                btnSetting.isVisible = true
+                allModule.filter { showAllLocalModule || it.type == SubModuleType.TYPE_APPLICATION || it.child != null || activityModel.contains(it.name) }
+                        .sortedBy { it.type != SubModuleType.TYPE_APPLICATION }
+                        .map { JListInfo(it.name, select = activityModel.indexOf(it.name) == 0) }
+                        .sortedBy { !activityModel.contains(it.title) }
             }
             else -> appAdapter.datas
         }
+        UiUtils.initDevicesComboBox(project, cbDevices)
         newData.forEach { if (oldDatas.contains(it.title)) it.select = true }
         appAdapter.setDatas(newData)
-
         sleepTimes = maxTime
     }
 
-    private fun buildConfigClick() {
+    private fun settingClick() {
         val branch = cbBranch.selectedItem.toString()
         val type = cbType.selectedItem.toString()
         val selectApps = getSelectApps()
@@ -295,7 +333,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
     }
 
     private fun queryQueueJob(datas: MutableList<JListInfo>) = try {
-        val allLog: Boolean = cbAllLog.isSelected
+        val showAll: Boolean = cbAllLog.isSelected
         JSON.parseObject(safeNet(queueUrl + apiJson)).getJSONArray("items")?.filter { f1 ->
             f1 is JSONObject && buildJobName == f1.getJSONObject("task")?.getString("name")
         }?.forEach {
@@ -305,7 +343,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
                 if (split.size == 2) Pair(split[0], split[1]) else null
             }?.toMap()
             if (checkParam(p)) datas.add(JListInfo("${format.format(Date(o.getLong("inQueueSince")))}  ${p?.get("Apk")
-                    ?: o.getString("id")}  ${if (allLog) p?.get("BranchName")
+                    ?: o.getString("id")}  ${if (showAll) p?.get("BranchName")
                     ?: "" else ""}  ${if (cbBuilder.isSelected) p?.get("BuildUser")
                     ?: "" else ""}", "Waiting for executor", 2).apply {
                 data = JekinsJob().apply { params = p!! }
@@ -314,10 +352,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
     } catch (e: Exception) {
     }
 
-    private fun getDuration(job: JekinsJob): String {
-        var timemills = (if (job.building) (System.currentTimeMillis() - job.timestamp) else job.duration) / 1000
-        return "${timemills / 60}分 ${timemills % 60}秒"
-    }
+    private fun getDuration(job: JekinsJob): String = getTimeText(if (job.building) (System.currentTimeMillis() - job.timestamp) else job.duration)
 
     private fun getSelectApps() = appAdapter.datas.filter { it.select }.map { it.title }
 
@@ -360,20 +395,14 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
     }
 
 
-    private fun onOK() {
-        when (cbShowType.selectedItem) {
-            "Jekins" -> onJekinBuild()
-            "Local" -> onLocalBuild()
-        }
-    }
-
     private fun onLocalBuild() {
         val selectItem = appAdapter.datas.filter { it.select }
         if (selectItem.isEmpty()) {
-            Messages.showMessageDialog("Please select target apk to install", "Miss Item", null)
+            Messages.showMessageDialog("Please select target module to build", "Miss Item", null)
             return
         }
-        val iDevice = UiUtils.getSelectDevice(project,cbDevices)?:return  Messages.showMessageDialog("", "No Deive", null)
+        val iDevice = UiUtils.getSelectDevice(project, cbDevices)
+                ?: return Messages.showMessageDialog("", "No devices found", null)
 
         UiUtils.lastDevices = iDevice.serialNumber
         buttonOK.isVisible = false
@@ -417,52 +446,60 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
         param["startTime"] = System.currentTimeMillis().toString()
         param["log"] = "Build"
         writeLocalBuild(Collections.singletonList(param))
-
-        GradleUtils.runTask(project, listOf(":$title:PrepareDev", ":$title:clean", ":$title:BuildApk")
-                , activateToolWindowBeforeRun = true
-                , envs = mapOf("include" to if (dpModel == "mavenOnly") title else "${includes.joinToString(",")},$title", "dependentModel" to dpModel, "versionFile" to versionPath)
-                , callback = TaskCallBack { success, result ->
-
+        val buildCallBack = TaskCallBack { success, result ->
             if (success) {
-                val newPath = File(cacheDir.parentFile, "$buildHistory/${param["createTime"]}.apk")
+                val targetApkName = param["title"] + "-" + format.format(Date(param["createTime"]!!.toLong())).replace(Regex(" |-|_|:"), "")
+                val newPath = File(project.basePath, "build/apks/$targetApkName.apk")
+                if (!newPath.parentFile.exists()) newPath.parentFile.mkdirs()
                 File(result).renameTo(newPath)
                 param["apkUrl"] = newPath.absolutePath
                 param["log"] = "Install"
                 writeLocalBuild(Collections.singletonList(param))
-                val installLog = adbInstall(iDevice, newPath.absolutePath)
-                if (installLog.toLowerCase().contains("success")) {
-                    val packageId = UiUtils.getAppInfoFromApk(newPath)?.packageId
-                    if (packageId != null) {
-                        param["log"] = "Open"
-                        writeLocalBuild(Collections.singletonList(param))
-                        val lauchActivity = AdbShellCommandsUtil.executeCommand(iDevice, "dumpsys package $packageId").output.find { it.contains(packageId) }
-                        //打开应用
-                        if (lauchActivity?.isNotEmpty() == true) {
-                            AdbShellCommandsUtil.executeCommand(iDevice, "am start -n ${lauchActivity.substring(lauchActivity.indexOf(packageId)).split(" ").first().trim()}")
-                        }
-                    }
-                }
+                var installing = true
+                adbInstall(iDevice, Collections.singletonList(newPath.absolutePath)) { s, k, r -> installing = false }
+
+                while (installing) Thread.sleep(500)
             }
             param["endTime"] = System.currentTimeMillis().toString()
             param["status"] = if (success) "1" else "3"
             writeLocalBuild(Collections.singletonList(param))
             startLocalBuild(index + 1, params, iDevice)
-        })
+        }
 
+        val cleanCallBack = TaskCallBack { _, _ ->
+            GradleUtils.runTask(project, listOf(":$title:PrepareDev", ":$title:BuildApk")
+                    , activateToolWindowBeforeRun = true
+                    , envs = mapOf("include" to if (dpModel == "mavenOnly") title else "${includes.joinToString(",")},$title", "dependentModel" to dpModel, "versionFile" to versionPath)
+                    , callback = buildCallBack)
+        }
+        GradleUtils.runTask(project, listOf(":$title:clean")
+                , activateToolWindowBeforeRun = true
+                , envs = mapOf("include" to title, "dependentModel" to dpModel)
+                , callback = cleanCallBack)
     }
 
-    private fun adbInstall(iDevice: IDevice, l: String): String {
-        val result = UiUtils.installApk(iDevice, l, installParam)
-        //添加本地数据
-        val logFiles = File(project.basePath, ".idea/apks.log")
-        logFiles.parentFile.mkdirs()
-        val list = if (logFiles.exists()) logFiles.readLines().toMutableList() else mutableListOf()
-        list.remove(l)
-        list.add(0, l)
-        while (list.size > 30) list.removeAt(30)
-        logFiles.writeText(list.joinToString("\n"))
-        return result
-    }
+    private fun adbInstall(iDevice: IDevice, urls: List<String>, block: (s: Boolean, k: String, r: String) -> Unit) = object : Task.Backgroundable(project, "Start Install") {
+        override fun run(indicator: ProgressIndicator) = urls.forEach { l ->
+            val localPath = if (!l.startsWith("http")) l else {
+                indicator.text = "Download : $l"
+                DachenHelper.downloadApk(project, null, l)
+            }
+            indicator.text = "Install : $localPath"
+            val installLog = UiUtils.installApk(iDevice, localPath, installParam)
+            if (installLog.toLowerCase().contains("success")) {
+                val packageId = UiUtils.getAppInfoFromApk(File(l))?.packageId
+                if (packageId != null) {
+                    indicator.text = "Open : $packageId"
+                    val lauchActivity = AdbShellCommandsUtil.executeCommand(iDevice, "dumpsys package $packageId").output.find { it.contains(packageId) }
+                    //打开应用
+                    if (lauchActivity?.isNotEmpty() == true) {
+                        AdbShellCommandsUtil.executeCommand(iDevice, "am start -n ${lauchActivity.substring(lauchActivity.indexOf(packageId)).split(" ").first().trim()}")
+                    }
+                }
+                block(true, l, installLog)
+            } else block(false, l, installLog)
+        }
+    }.let { ProgressManager.getInstance().runProcessWithProgressAsynchronously(it, BackgroundableProcessIndicator(it)) }
 
     private fun onJekinBuild() {
         val branch = cbBranch.selectedItem.toString()
@@ -479,28 +516,26 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
         val runApps = selectApps.toMutableList().apply { removeAll(buildingApp) }
         val ignoreApps = selectApps.toMutableList().apply { removeAll(runApps) }
 
-        var msg = "Prepare To Build :\n $runApps \n"
-        if (ignoreApps.isNotEmpty()) msg += "\n Ignore (Building or Waiting for executor) :\n $ignoreApps"
-        val exitCode = Messages.showYesNoCancelDialog(msg, "Jekins Build", null)
-        if (exitCode != Messages.YES) return
-
         buttonOK.isVisible = false//隐藏Build 按钮
         val importTask = object : Task.Backgroundable(project, "Start Jekins Build") {
             override fun run(indicator: ProgressIndicator) {
+                val oldMax = maxTime
+                maxTime = 8
                 //开始运行
-                runApps.forEach { app ->
+                runApps.forEachIndexed { index, app ->
                     indicator.text = "Start Build $app"
                     safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${URLEncoder.encode(TextUtils.removeLineAndMark(allModule.find { it.name == app }?.introduce?.replace(" ", "")
                             ?: ""), "utf-8")}&BuildUser=${TextUtils.removeLineAndMark(configInfo.javaClass.getField("userName").get(configInfo).toString())}")
-                    Thread.sleep(500)//延迟500毫秒再进行请求,避免出现问题
+                    Thread.sleep(if (index == 0) 2000 else 500)//延迟500毫秒再进行请求,避免出现问题
                 }
                 indicator.text = "Querying Result,Please Wait"
-                indicator.text = "Querying Result,Please Wait"
-                Thread.sleep(6000)
+                Thread.sleep(3000)
+                maxTime = oldMax
                 buttonOK.isVisible = true//隐藏Build 按钮
             }
         }
-        ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
+        if (runApps.isNotEmpty()) ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
+        if (ignoreApps.isNotEmpty()) Messages.showMessageDialog("Building or Waiting for executor\n" + ignoreApps.joinToString("\n"), "Ignore App", null)
     }
 
     private fun onCancel() {
