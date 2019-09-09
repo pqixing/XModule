@@ -6,7 +6,7 @@
       <xy x="48" y="54" width="1235" height="492"/>
     </constraints>
     <properties>
-      <preferredSize width="750" height="500"/>
+      <preferredSize width="780" height="500"/>
     </properties>
     <border type="none"/>
     <children>
@@ -20,12 +20,12 @@
         <children>
           <hspacer id="98af6">
             <constraints>
-              <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
           <component id="7b970" class="javax.swing.JComboBox" binding="cbType">
             <constraints>
-              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
                 <minimum-size width="100" height="-1"/>
                 <preferred-size width="100" height="-1"/>
               </grid>
@@ -60,41 +60,9 @@
               <text value="Build"/>
             </properties>
           </component>
-          <component id="6d8b2" class="javax.swing.JComboBox" binding="cbBranch">
-            <constraints>
-              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                <preferred-size width="120" height="-1"/>
-              </grid>
-            </constraints>
-            <properties>
-              <model/>
-            </properties>
-          </component>
-          <component id="81689" class="javax.swing.JComboBox" binding="cbDpModel">
-            <constraints>
-              <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <model>
-                <item value="mavenOnly"/>
-                <item value="mavenFirst"/>
-                <item value="localFirst"/>
-                <item value="localOnly"/>
-              </model>
-              <visible value="false"/>
-            </properties>
-          </component>
-          <component id="8573a" class="javax.swing.JButton" binding="btnConfig">
-            <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Load"/>
-            </properties>
-          </component>
           <component id="6808" class="javax.swing.JCheckBox" binding="cbAllLog">
             <constraints>
-              <grid row="0" column="8" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="7" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="showAll"/>
@@ -102,21 +70,34 @@
           </component>
           <component id="36f6c" class="javax.swing.JCheckBox" binding="cbBuilder">
             <constraints>
-              <grid row="0" column="7" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="user"/>
             </properties>
           </component>
-          <component id="e9243" class="javax.swing.JTextField" binding="jParams">
+          <component id="8573a" class="javax.swing.JButton" binding="btnConfig">
             <constraints>
-              <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                <preferred-size width="60" height="-1"/>
-                <maximum-size width="60" height="-1"/>
+              <grid row="0" column="8" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Setting"/>
+            </properties>
+          </component>
+          <component id="79bee" class="javax.swing.JComboBox" binding="cbDevices">
+            <constraints>
+              <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+          </component>
+          <component id="6d8b2" class="javax.swing.JComboBox" binding="cbBranch">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="120" height="-1"/>
               </grid>
             </constraints>
             <properties>
-              <text value="-t -r"/>
+              <model/>
             </properties>
           </component>
         </children>

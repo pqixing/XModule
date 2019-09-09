@@ -187,12 +187,10 @@ class ImportAction : AnAction() {
     /**
      * 加载模块
      */
-    private fun loadModule(manager: ModuleManager, filePath: String): Int {
-        if (!File(filePath).exists()) return 0
-        return try {
-            manager.loadModule(filePath);0
-        } catch (e: Exception) {
-            1
+    private fun loadModule(manager: ModuleManager, filePath: String) = ApplicationManager.getApplication().runWriteAction {
+        if (File(filePath).exists()) try {
+            manager.loadModule(filePath)
+        } finally {
         }
     }
 }

@@ -12,11 +12,9 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.intellij.util.concurrency.Semaphore
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.adapter.JlistSelectListener
-import com.pqixing.intellij.utils.DachenHelper
 import com.pqixing.intellij.utils.GradleUtils
 import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils
@@ -25,7 +23,6 @@ import com.pqixing.model.SubModuleType
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
-import org.bouncycastle.asn1.x500.style.RFC4519Style.c
 import java.awt.Desktop
 import java.awt.event.ActionListener
 import java.awt.event.KeyEvent
@@ -56,12 +53,11 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
     private lateinit var jlJobs: JList<JListInfo>
     private lateinit var jlApps: JList<JListInfo>
     private lateinit var cbBranch: JComboBox<String>
-    private lateinit var cbDpModel: JComboBox<String>
     private lateinit var cbType: JComboBox<String>
     private lateinit var cbShowType: JComboBox<String>
+    private lateinit var cbDevices: JComboBox<String>
     private lateinit var cbAllLog: JCheckBox
     private lateinit var cbBuilder: JCheckBox
-    private lateinit var jParams: JTextField
     private var adapter: JListSelectAdapter
     private var appAdapter: JListSelectAdapter
 
@@ -70,6 +66,8 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
     val cacheDir: File = File(project.basePath, ".idea/cache/net")
     val configFile: File = File(project.basePath, ".idea/cache/config/jkconfig")
     var includes: MutableSet<String> = mutableSetOf()
+    var installParam = "-r -t"
+    lateinit var dpModel:String
     private val updateCmd = Runnable {
         do {
             if (sleepTimes++ >= maxTime) try {
@@ -143,7 +141,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
         branchs.forEach { cbBranch.addItem(it) }
         cbShowType.addActionListener { updateShowType() }
         btnConfig.addActionListener { buildConfigClick() }
-        cbDpModel.selectedItem = configInfo.javaClass.getField("dependentModel").get(configInfo) ?: "localFirst"
+        dpModel = configInfo.javaClass.getField("dependentModel").get(configInfo)?.toString() ?: "localFirst"
         configInfo.javaClass.getField("include").get(configInfo)?.toString()?.split(",")?.forEach {
             if (it.trim().isNotEmpty()) includes.add(it)
         }
@@ -204,26 +202,21 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
                 adapter.boxVisible = false
                 adapter.selectListener = selectListener
                 cbType.isVisible = true
-                cbDpModel.isVisible = false
                 cbBranch.isVisible = true
                 cbBuilder.isVisible = true
-                btnConfig.text = "History"
-                buttonOK.text = "Build"
                 btnConfig.isVisible = true
-                jParams.isVisible = false
+                cbDevices.isVisible = false
                 allModule.filter { it.type == SubModuleType.TYPE_APPLICATION }.map { JListInfo(it.name, select = activityModel.contains(it.name)) }.sortedBy { !it.select }
             }
             "Local" -> {
                 adapter.boxVisible = false
                 adapter.selectListener = selectListener
                 cbType.isVisible = true
-                cbDpModel.isVisible = true
+                cbDevices.isVisible = true
                 cbBranch.isVisible = false
                 cbBuilder.isVisible = false
-                btnConfig.text = "Param"
-                buttonOK.text = "Build"
                 btnConfig.isVisible = true
-                jParams.isVisible = true
+                UiUtils.initDevicesComboBox(project,cbDevices)
                 allModule.filter { it.type == SubModuleType.TYPE_APPLICATION || it.child != null }.sortedBy { it.type != SubModuleType.TYPE_APPLICATION }.map { JListInfo(it.name, select = activityModel.indexOf(it.name) == 0) }.sortedBy { !activityModel.contains(it.title) }
             }
             else -> appAdapter.datas
@@ -380,23 +373,13 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
             Messages.showMessageDialog("Please select target apk to install", "Miss Item", null)
             return
         }
-        val devices = UiUtils.getDevices(project)
-        if (devices.isEmpty()) {
-            Messages.showMessageDialog("", "No Deive", null)
-            return
-        }
-        val devicesName = Messages.showEditableChooseDialog("Prepare to install :\n${selectItem.joinToString("\n") { it.title }}", "Install Apk", null, devices.map { it.first }.toTypedArray(), devices.first().first, null)
-        val iDevice = devices.findLast { it.first == devicesName }?.second
-        if (iDevice == null) {
-            Messages.showMessageDialog("Can not find device to run", "Miss Device", null)
-            return
-        }
+        val iDevice = UiUtils.getSelectDevice(project,cbDevices)?:return  Messages.showMessageDialog("", "No Deive", null)
+
         UiUtils.lastDevices = iDevice.serialNumber
         buttonOK.isVisible = false
 
         val branch = cbBranch.selectedItem.toString()
         val type = cbType.selectedItem.toString()
-        val dpModel = cbDpModel.selectedItem.toString()
 
         val createTime = System.currentTimeMillis()
 
@@ -469,7 +452,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
     }
 
     private fun adbInstall(iDevice: IDevice, l: String): String {
-        val result = UiUtils.installApk(iDevice, l, jParams.text ?: "")
+        val result = UiUtils.installApk(iDevice, l, installParam)
         //添加本地数据
         val logFiles = File(project.basePath, ".idea/apks.log")
         logFiles.parentFile.mkdirs()
