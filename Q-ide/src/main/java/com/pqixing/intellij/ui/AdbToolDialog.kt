@@ -31,6 +31,7 @@ class AdbToolDialog(val project: Project, apkPath: String?) : BaseJDialog() {
     private lateinit var devices: JComboBox<String>
     private lateinit var jlDatas: JList<JListInfo>
     private lateinit var openAppCheckBox: JCheckBox
+    private lateinit var cbEdit: JCheckBox
     private lateinit var taText: JTextArea
     private lateinit var btnFrom: JButton
     private lateinit var btnTo: JButton
@@ -74,7 +75,7 @@ class AdbToolDialog(val project: Project, apkPath: String?) : BaseJDialog() {
         if (!QToolGroup.isDachenProject(project)) netRadioButton.isVisible = false
         model = if (checkIsApk(apkPath)) 0 else 1
         initData(apkPath)
-        AdbTextDialog(project,devices,taText,btnFrom,btnTo).init()
+        AdbTextDialog(project,devices,taText,btnFrom,btnTo,cbEdit).init()
     }
 
     fun checkIsApk(url: String?) = url?.endsWith(".apk") ?: false

@@ -16,18 +16,19 @@ import java.awt.Desktop
 import java.io.File
 import java.net.URI
 import javax.swing.JButton
+import javax.swing.JCheckBox
 import javax.swing.JComboBox
 import javax.swing.JTextArea
 
-class AdbTextDialog(var project: Project, var cbDevices: JComboBox<String>, var taText: JTextArea, val btnFrom: JButton, val btnTo: JButton) {
+class AdbTextDialog(var project: Project, var cbDevices: JComboBox<String>, var taText: JTextArea, val btnFrom: JButton, val btnTo: JButton,val cbEdit:JCheckBox) {
     private val adbInputPkg = "com.pqixing.adbkeyboard"
     private var clipVersion = "1.1"
     val resultKey = "onIdeResult="
 
     fun init() {
         UiUtils.setTransfer(taText) { taText.text = it.joinToString("\n") }
-        btnFrom.addActionListener { fromPhone(true,btnFrom) }
-        btnTo.addActionListener { toPhone(true,btnTo) }
+        btnFrom.addActionListener { fromPhone(cbEdit.isSelected,btnFrom) }
+        btnTo.addActionListener { toPhone(cbEdit.isSelected,btnTo) }
     }
 
     /**

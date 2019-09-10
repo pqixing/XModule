@@ -12,6 +12,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.pqixing.intellij.actions.QToolGroup
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.adapter.JlistSelectListener
@@ -39,11 +40,13 @@ import javax.swing.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class BuildApkDialog(val project: Project, val configInfo: Any, val activityModel: List<String>, val allModule: Set<SubModule>, val branchs: List<String>) : BaseJDialog() {
+class BuilderDialog(val project: Project, val configInfo: Any, val activityModel: List<String>, val allModule: Set<SubModule>, val branchs: List<String>) : BaseJDialog() {
     companion object {
         var lastShowType = ""
         var showAllLocalModule = false
         var versionPath = ""
+        val JEKINS = "Jekins"
+        val LOCAL = "Local"
     }
 
     val apiJson = "api/json"
@@ -80,8 +83,8 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
             if (sleepTimes++ >= maxTime) try {
                 sleepTimes = 0
                 when (cbShowType.selectedItem) {
-                    "Jekins" -> queryJekinsJob()
-                    "Local" -> queryLocalBuild()
+                    JEKINS -> queryJekinsJob()
+                    LOCAL -> queryLocalBuild()
                 }
             } catch (e: Exception) {
             }
@@ -132,8 +135,8 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
         title = "Builder"
         buttonOK.addActionListener {
             when (cbShowType.selectedItem) {
-                "Jekins" -> onJekinBuild()
-                "Local" -> onLocalBuild()
+                JEKINS -> onJekinBuild()
+                LOCAL -> onLocalBuild()
             }
         }
 
@@ -152,6 +155,10 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
 
 
         branchs.forEach { cbBranch.addItem(it) }
+        if(QToolGroup.isDachenProject(project)){
+            cbShowType.addItem(JEKINS)
+        }else cbShowType.isVisible = false
+        cbShowType.addItem(LOCAL)
         if (lastShowType.isNotEmpty()) cbShowType.selectedItem = lastShowType
         cbShowType.addActionListener { updateShowType() }
         btnSetting.addActionListener { settingClick() }
@@ -261,13 +268,13 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
         lastShowType = cbShowType.selectedItem.toString()
         val oldDatas = appAdapter.datas.filter { it.select }.map { it.title }
         val newData = when (lastShowType) {
-            "Jekins" -> {
+            JEKINS -> {
                 adapter.selectListener = jekinLogClick
                 cbBranch.isVisible = true
                 cbDpModel.isVisible = false
                 allModule.filter { it.type == SubModuleType.TYPE_APPLICATION }.map { JListInfo(it.name, select = activityModel.contains(it.name)) }.sortedBy { !it.select }
             }
-            "Local" -> {
+            LOCAL -> {
                 adapter.selectListener = localLogClick
                 cbDpModel.isVisible = true
                 cbBranch.isVisible = false

@@ -9,11 +9,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.actions.QToolGroup
-import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.ui.BuildApkDialog
+import com.pqixing.intellij.ui.BuilderDialog
 import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.model.SubModule
-import com.pqixing.model.SubModuleType
 import groovy.lang.GroovyClassLoader
 import java.io.File
 
@@ -22,7 +20,7 @@ open class BuilderAction : AnAction() {
     lateinit var basePath: String
     override fun update(e: AnActionEvent?) {
         super.update(e)
-        e?.presentation?.isVisible = QToolGroup.isDachenProject(e?.project)
+        e?.presentation?.isVisible = QToolGroup.isModulariztionProject(e?.project)
     }
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
@@ -37,7 +35,7 @@ open class BuilderAction : AnAction() {
             return
         }
         val allSubModule = XmlHelper.parseProjectXml(projectXmlFile).allSubModules()
-        BuildApkDialog(project, getConfigInfo(configFile), getActivityModules(e, allSubModule), allSubModule, getBranches()).showAndPack()
+        BuilderDialog(project, getConfigInfo(configFile), getActivityModules(e, allSubModule), allSubModule, getBranches()).showAndPack()
     }
 
     private fun getConfigInfo(configFile: File) = GroovyClassLoader().parseClass(configFile).newInstance()
