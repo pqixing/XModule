@@ -40,9 +40,12 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 class BuildApkDialog(val project: Project, val configInfo: Any, val activityModel: List<String>, val allModule: Set<SubModule>, val branchs: List<String>) : BaseJDialog() {
-    companion object{
+    companion object {
         var lastShowType = ""
+        var showAllLocalModule = false
+        var versionPath = ""
     }
+
     val apiJson = "api/json"
     val buildJobName = "remoteBuild"
     val buildHistory = "buildHistory"
@@ -149,7 +152,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
 
 
         branchs.forEach { cbBranch.addItem(it) }
-        if(lastShowType.isNotEmpty()) cbShowType.selectedItem = lastShowType
+        if (lastShowType.isNotEmpty()) cbShowType.selectedItem = lastShowType
         cbShowType.addActionListener { updateShowType() }
         btnSetting.addActionListener { settingClick() }
         cbDpModel.selectedItem = configInfo.javaClass.getField("dependentModel").get(configInfo)?.toString()
@@ -160,7 +163,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
         initUpdateAction()
     }
 
-    var versionPath = ""
+
     private fun showBuildParams() {
         val d: com.intellij.openapi.util.Pair<String?, Boolean> = Messages.showInputDialogWithCheckBox("Input version path", "Build Setting", "showAllLocalModule", showAllLocalModule, true, null, versionPath, null)
         if (d.first != null) {
@@ -210,9 +213,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
             if (job.result == JekinsJob.SUCCESS && Messages.OK == Messages.showOkCancelDialog(project, "${job.displayName} ${job.appName} -> $url", apkName, "Install", "ShowLog", null)) {
                 val iDevice = UiUtils.getSelectDevice(project, cbDevices)
                 if (iDevice != null) {
-                    adbInstall(iDevice, Collections.singletonList(url)) { s, k, l ->
-                        ApplicationManager.getApplication().invokeAndWait { Messages.showMessageDialog("$l    ->    $apkName", "Install Result", null) }
-                    }
+                    prepareToInstall(iDevice, Collections.singletonList(Pair(url, apkName)))
                 } else Messages.showMessageDialog("", "No devices found", null)
 
                 return true
@@ -220,27 +221,42 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
             return JekinJobLog(project, job.url).showAndPack() != null
         }
     }
+
     val localLogClick = object : JlistSelectListener {
         override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean = true.apply {
-            val urls = items.filter { it.data?.toString()?.isNotEmpty() == true }
-                    .map { "${it.title}->../${it.data.toString().substringAfterLast("/")}" to it.data.toString() }
-            if (urls.isNotEmpty() && Messages.OK == Messages.showOkCancelDialog(urls.joinToString("\n") { it.first }, "Install Apk ?", null)) {
+            val urls = items.mapNotNull { m -> m.data?.toString()?.let { l -> l to "${m.title}->../${l.substringAfterLast("/")}" } }
+            if (urls.isNotEmpty() && Messages.OK == Messages.showOkCancelDialog(urls.joinToString("\n") { it.second }, "Install Apk ?", null)) {
                 val iDevice = UiUtils.getSelectDevice(project, cbDevices)
                 if (iDevice != null) {
-                    val results = HashMap<String, String>()
-                    adbInstall(iDevice, urls.map { it.second }) { s, k, r ->
-                        results[k] = r
-                        if (results.size == urls.size) ApplicationManager.getApplication().invokeAndWait {
-                            Messages.showMessageDialog(urls.joinToString("\n") { "${results[it.second]}    ->    ${it.first}" }, "Install Result", null)
-                        }
-                    }
+                    prepareToInstall(iDevice, urls)
                 } else Messages.showMessageDialog("", "No devices found", null)
             }
         }
     }
 
+    /**
+     * @param urls url , showName
+     */
+    private fun prepareToInstall(iDevice: IDevice, urls: List<Pair<String, String>>) {
+        val results = HashMap<String, String>()
+        val failResult = mutableListOf<Pair<String, String>>()
+        adbInstall(iDevice, urls.map { it.first }) { s, u, p, r ->
+            results[u] = r
+            if (!s) failResult.add(Pair(if (p.isEmpty()) u else p, urls.find { it.first == u }?.second ?: ""))
+            if (results.size == urls.size) ApplicationManager.getApplication().invokeAndWait {
+
+                val msg = urls.joinToString("\n") { "${results[it.first]}    ->    ${it.second}" }
+                if (failResult.isEmpty()) Messages.showMessageDialog(msg, "Install Result", null)
+                else if (Messages.OK == Messages.showOkCancelDialog("$msg\n Fail Item:\n ${failResult.joinToString("\n") { "${it.second} -> ${it.first}" }}"
+                                , "Install Result", "Install Fail Item", "CANCEL", null)) {
+                    prepareToInstall(iDevice, failResult)
+                }
+            }
+        }
+    }
+
     var sleepTimes = 0
-    var showAllLocalModule = false
+
     private fun updateShowType() {
         lastShowType = cbShowType.selectedItem.toString()
         val oldDatas = appAdapter.datas.filter { it.select }.map { it.title }
@@ -457,7 +473,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
                 param["log"] = "Install"
                 writeLocalBuild(Collections.singletonList(param))
                 var installing = true
-                adbInstall(iDevice, Collections.singletonList(newPath.absolutePath)) { s, k, r -> installing = false }
+                adbInstall(iDevice, Collections.singletonList(newPath.absolutePath)) { s, k, p, r -> installing = false }
 
                 while (installing) Thread.sleep(500)
             }
@@ -483,7 +499,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
         val buildDir = File(cacheDir.parentFile, buildHistory)
         if (!buildDir.exists()) return@runWriteAction
         buildDir.listFiles()?.filter { it.isFile && it.name.endsWith(".log") }?.sortedByDescending { it.name }?.forEachIndexed { index, file ->
-            if (index >= 0) {
+            if (index >= 50) {
                 val apkUrl = UrlUtils.getParams(FileUtils.readText(file))["apkUrl"]
                 FileUtils.delete(file)
                 if (apkUrl?.isNotEmpty() == true) FileUtils.delete(File(apkUrl))
@@ -491,7 +507,7 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
         }
     }
 
-    private fun adbInstall(iDevice: IDevice, urls: List<String>, block: (s: Boolean, k: String, r: String) -> Unit) = ApplicationManager.getApplication().invokeLater {
+    private fun adbInstall(iDevice: IDevice, urls: List<String>, block: (s: Boolean, url: String, path: String, result: String) -> Unit) = ApplicationManager.getApplication().invokeLater {
         val task = object : Task.Backgroundable(project, "Start Install") {
             override fun run(indicator: ProgressIndicator) = urls.forEach { l ->
                 val localPath = if (!l.startsWith("http")) l else {
@@ -499,8 +515,8 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
                     DachenHelper.downloadApk(project, null, l)
                 }
                 indicator.text = "Install : $localPath"
-                val installLog = UiUtils.installApk(iDevice, localPath, installParam)
-                if (installLog.toLowerCase().contains("success")) {
+                var installLog = ""
+                if (localPath.isNotEmpty() && UiUtils.installApk(iDevice, localPath, installParam).apply { installLog = this }.toLowerCase().contains("success")) {
                     val packageId = UiUtils.getAppInfoFromApk(File(l))?.packageId
                     if (packageId != null) {
                         indicator.text = "Open : $packageId"
@@ -510,8 +526,8 @@ class BuildApkDialog(val project: Project, val configInfo: Any, val activityMode
                             AdbShellCommandsUtil.executeCommand(iDevice, "am start -n ${lauchActivity.substring(lauchActivity.indexOf(packageId)).split(" ").first().trim()}")
                         }
                     }
-                    block(true, l, installLog)
-                } else block(false, l, installLog)
+                    block(true, l, localPath, installLog)
+                } else block(false, l, localPath, installLog)
             }
         }
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, BackgroundableProcessIndicator(task))

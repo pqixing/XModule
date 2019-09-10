@@ -27,6 +27,7 @@ open class BuilderAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
+        val p = e.place
         val projectXmlFile = File(basePath, "templet/project.xml")
         val configFile = File(basePath, "Config.java")
 
