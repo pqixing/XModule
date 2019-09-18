@@ -20,15 +20,15 @@ import javax.swing.JCheckBox
 import javax.swing.JComboBox
 import javax.swing.JTextArea
 
-class AdbTextDialog(var project: Project, var cbDevices: JComboBox<String>, var taText: JTextArea, val btnFrom: JButton, val btnTo: JButton,val cbEdit:JCheckBox) {
+class AdbTextDialog(var project: Project, var cbDevices: JComboBox<String>, var taText: JTextArea, val btnFrom: JButton, val btnTo: JButton, val cbEdit: JCheckBox) {
     private val adbInputPkg = "com.pqixing.adbkeyboard"
     private var clipVersion = "1.1"
     val resultKey = "onIdeResult="
 
     fun init() {
         UiUtils.setTransfer(taText) { taText.text = it.joinToString("\n") }
-        btnFrom.addActionListener { fromPhone(cbEdit.isSelected,btnFrom) }
-        btnTo.addActionListener { toPhone(cbEdit.isSelected,btnTo) }
+        btnFrom.addActionListener { fromPhone(cbEdit.isSelected, btnFrom) }
+        btnTo.addActionListener { toPhone(cbEdit.isSelected, btnTo) }
     }
 
     /**
@@ -57,15 +57,15 @@ class AdbTextDialog(var project: Project, var cbDevices: JComboBox<String>, var 
             if (hadInstall) ApplicationManager.getApplication().invokeLater {
                 Messages.showMessageDialog("ADB Keyboard 不是当前Android设备指定的输入法, 请切换后输入法重试?", "非指定输入法", null)
             } else ApplicationManager.getApplication().invokeLater {
-                val exit = Messages.showOkCancelDialog("下载安装ADB Keyboard?", "ADB Keyboard未安装", null)
-                if (exit == Messages.OK) installClipHelper(iDevice)
+                val url = Messages.showInputDialog("下载安装ADB Keyboard?", "ADB Keyboard未安装", null, "https://raw.githubusercontent.com/pqixing/modularization/master/jars/Q-keyboard-debug.apk", null)
+                if (url != null) installClipHelper(iDevice, url)
             }
             return false
         }
         if (result < clipVersion) {
             ApplicationManager.getApplication().invokeLater {
-                val exit = Messages.showOkCancelDialog("下载升级ADB Keyboard?", "ADB Keyboard版本过低", null)
-                if (exit == Messages.OK) installClipHelper(iDevice)
+                val url = Messages.showInputDialog("下载升级ADB Keyboard?", "ADB Keyboard版本过低", null, "https://raw.githubusercontent.com/pqixing/modularization/master/jars/Q-keyboard-debug.apk", null)
+                if (url != null) installClipHelper(iDevice, url)
             }
             return false
         }
@@ -73,7 +73,7 @@ class AdbTextDialog(var project: Project, var cbDevices: JComboBox<String>, var 
     }
 
     private fun toPhone(edit: Boolean, btn: JButton?) = ProgressManager.getInstance().runProcess({
-        val iDevice = UiUtils.getSelectDevice( cbDevices!!) ?: return@runProcess
+        val iDevice = UiUtils.getSelectDevice(cbDevices!!) ?: return@runProcess
         btn?.isEnabled = false
         if (!checkHelper(iDevice)) {
             btn?.isEnabled = true
@@ -88,7 +88,7 @@ class AdbTextDialog(var project: Project, var cbDevices: JComboBox<String>, var 
     }, null)
 
     private fun fromPhone(edit: Boolean, btn: JButton?) = ProgressManager.getInstance().runProcess({
-        val iDevice = UiUtils.getSelectDevice( cbDevices!!) ?: return@runProcess
+        val iDevice = UiUtils.getSelectDevice(cbDevices!!) ?: return@runProcess
         btn?.isEnabled = false
         if (!checkHelper(iDevice)) {
             btn?.isEnabled = true
@@ -102,11 +102,10 @@ class AdbTextDialog(var project: Project, var cbDevices: JComboBox<String>, var 
         btn?.isEnabled = true
     }, null)
 
-    private fun installClipHelper(iDevice: IDevice) {
+    private fun installClipHelper(iDevice: IDevice, url: String) {
         val install = object : Task.Backgroundable(project, "Start Install") {
 
             override fun run(indicator: ProgressIndicator) {
-                val url = "https://raw.githubusercontent.com/pqixing/modularization/master/jars/Q-keyboard-debug.apk"
                 indicator.text = "Download : $url"
                 try {
                     val downloadApk = DachenHelper.downloadApk(project, "copy", url)

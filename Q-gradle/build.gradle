@@ -29,8 +29,8 @@ repositories {
         dirs "libs"
     }
 }
-ext.mLocalVersion = "1.1.6.2"
-ext.mVersion = "1.2.2"
+ext.mLocalVersion = "1.1.6.3"
+ext.mVersion = "1.2.3"
 ext.mArtifactId = "modularization"
 apply from: '../script/bintray.gradle'
 
@@ -39,8 +39,8 @@ dependencies {
 //    implementation files("../libs/Tools.jar")
     if (localBuild) {
         compileOnly project(":Q-tools")
-        implementation "com.pqixing.gradle:tools:1.0.1"
-    } else implementation "com.pqixing.gradle:tools:1.2.2"
+        implementation "com.pqixing.gradle:tools:1.0.3"
+    } else implementation "com.pqixing.gradle:tools:1.2.3"
     implementation gradleApi()
     implementation localGroovy()
     implementation "com.alibaba:fastjson:1.2.44"
