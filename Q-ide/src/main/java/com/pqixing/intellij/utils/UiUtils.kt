@@ -1,5 +1,6 @@
 package com.pqixing.intellij.utils
 
+import com.android.ddmlib.AndroidDebugBridge
 import com.android.ddmlib.IDevice
 import com.android.tools.apk.analyzer.AaptInvoker
 import com.android.tools.apk.analyzer.AndroidApplicationInfo
@@ -20,9 +21,33 @@ import javax.swing.TransferHandler
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
 
-object UiUtils {
+object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
+    override fun deviceConnected(p0: IDevice) {
+        if (devices.find { p0.serialNumber == it.second.serialNumber } == null) {
+            val newItem = Pair(p0.getDevicesName(), p0)
+            devices.add(newItem)
+            comboxs.forEach { it.addItem(newItem.first) }
+        }
+    }
+
+    override fun deviceDisconnected(p0: IDevice) {
+        val item = devices.find { p0.serialNumber == it.second.serialNumber } ?: return
+        devices.remove(item)
+        comboxs.forEach { it.removeItem(item.first) }
+    }
+
+    override fun deviceChanged(p0: IDevice?, p1: Int) {
+
+    }
+
     val IDE_PROPERTIES = ".idea/modularization.properties"
     var lastDevices = ""
+    val devices = ArrayList<Pair<String, IDevice>>()
+    val comboxs = ArrayList<JComboBox<String>>()
+
+    init {
+        AndroidDebugBridge.addDeviceChangeListener(this)
+    }
 
     fun setTransfer(component: JComponent, block: (files: List<File>) -> Unit) {
         component.transferHandler = object : TransferHandler() {
@@ -44,49 +69,25 @@ object UiUtils {
         }
     }
 
-    fun getSelectDevice(project: Project, comboBox: JComboBox<*>): IDevice? {
+    fun getSelectDevice(comboBox: JComboBox<*>): IDevice? {
         val id = comboBox.selectedItem?.toString() ?: ""
-        return getDevices(project).find { it.first == id }?.second?.apply {
-            lastDevices = serialNumber//保存最后一次选择项
-        }
+        //保存最后一次选择项
+        return devices.find { it.first == id }?.second?.apply { lastDevices = serialNumber }
     }
 
-    fun initDevicesComboBox(project: Project, comboBox: JComboBox<String>) {
-        val a = {
-            val ds = getDevices(project).map { it.first }.toMutableList()
-            val c = comboBox.itemCount
-            for (i in 0 until c) ds.remove(comboBox.getItemAt(i))
-            ds.forEach { comboBox.addItem(it) }
+    fun addDevicesComboBox(project: Project, comboBox: JComboBox<String>) {
+        val ds = AndroidSdkUtils.getDebugBridge(project)?.devices?.map { Pair(it.getDevicesName(), it) }?.sortedBy { it.second.serialNumber == lastDevices }
+        if (ds != null) {
+            devices.clear()
+            devices.addAll(ds)
         }
-        a()
-        if (comboBox.itemCount == 0) comboBox.addPopupMenuListener(object : PopupMenuListener {
-            override fun popupMenuWillBecomeInvisible(p0: PopupMenuEvent?) {
-                a()
-                if (comboBox.itemCount != 0) comboBox.removePopupMenuListener(this)
-            }
-
-            override fun popupMenuCanceled(p0: PopupMenuEvent?) {
-            }
-
-            override fun popupMenuWillBecomeVisible(p0: PopupMenuEvent?) {
-            }
-
-        })
+        devices.forEach { comboBox.addItem(it.first) }
+        comboxs.add(comboBox)
     }
 
-    fun getDevices(project: Project): List<Pair<String, IDevice>> {
-        val infos = ArrayList<Pair<String, IDevice>>()
-        AndroidSdkUtils.getDebugBridge(project)?.devices?.forEach { d ->
-            var avdName: String = d.avdName
-                    ?: (UiUtils.adbShellCommon(d, "getprop ro.product.brand", true) + "-" + UiUtils.adbShellCommon(d, "getprop ro.product.model", true))
-            val p = Pair(avdName, d)
-            if (lastDevices == d.serialNumber)
-                infos.add(0, p)
-            else
-                infos.add(p)
-        }
-        return infos
-    }
+    fun IDevice.getDevicesName() = avdName ?: "${getProperty("ro.product.manufacturer")} ${getProperty("ro.product.model")}"
+
+    fun removeDevicesComboBox(comboBox: JComboBox<String>) = comboxs.remove(comboBox)
 
     fun installApk(device: IDevice, path: String, params: String): String = try {
         val newPath = "/data/local/tmp/${path.hashCode()}.apk"

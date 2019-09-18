@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.*;
 
 public class NewImportDialog extends BaseJDialog {
+    private static boolean moreVisible = false;
     public static final String BING_KEY = "syncRoot";
     public static final String IMPORT_KEY = "IMPORT";
     public static final String VCS_KEY = "vcs";
@@ -90,7 +91,9 @@ public class NewImportDialog extends BaseJDialog {
     }
 
     private void initMore() {
-        cbMore.addActionListener(actionEvent -> {
+        cbMore.setSelected(moreVisible);
+        cbMore.addActionListener(a -> {
+            moreVisible = cbMore.isSelected();
             jpMore.setVisible(cbMore.isSelected());
         });
         jpMore.setVisible(cbMore.isSelected());
@@ -295,6 +298,8 @@ public class NewImportDialog extends BaseJDialog {
 
     private void initImportAction() {
         tvImport.addKeyListener(new KeyListener() {
+            int lastKeyCode = 0;
+
             @Override
             public void keyTyped(KeyEvent keyEvent) {
             }
@@ -307,20 +312,65 @@ public class NewImportDialog extends BaseJDialog {
             public void keyReleased(KeyEvent keyEvent) {
                 String key = tvImport.getText().trim();
                 String filterKey = key.replaceAll(".*#", "");
-                if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER) {//如果敲下的是回车键,清空当前输入内容,并且自动选择待选框的文本
-                    JListInfo find = allAdapter.filterDatas(filterKey);
-                    if (find != null) {
-                        String importKey = key.replace(filterKey, "") + find.getTitle();
-                        if (!imports.contains(importKey)) {
-                            imports.add(0, importKey);
-                            updateImports();
+                int keyCode = keyEvent.getKeyCode();
+                if (keyCode == KeyEvent.VK_ENTER) {//如果敲下的是回车键,清空当前输入内容,并且自动选择待选框的文本
+                    if (lastKeyCode == KeyEvent.VK_CONTROL) {
+                        onOK();
+                    } else {
+                        JListInfo find = null;
+                        for (JListInfo i : allAdapter.getDatas()) {
+                            if (i.getSelect()) {
+                                find = i;
+                                break;
+                            }
                         }
-                        find.setSelect(false);
+                        if (find != null) {
+                            String importKey = key.replace(filterKey, "") + find.getTitle();
+                            if (!imports.contains(importKey)) {
+                                imports.add(0, importKey);
+                                updateImports();
+                            }
+                            find.setSelect(false);
+                        }
+                        allAdapter.filterDatas("");
+                        tvImport.setText("");
                     }
-                    allAdapter.filterDatas("");
-                    tvImport.setText("");
+                } else if (keyCode == KeyEvent.VK_DOWN) {
+                    Iterator<JListInfo> iterator = allAdapter.getDatas().iterator();
+                    JListInfo last = null;
+                    while (iterator.hasNext()) {
+                        JListInfo next = iterator.next();
+                        if (last == null || !last.getSelect()) {
+                            last = next;
+                            continue;
+                        }
+                        last.setSelect(false);
+                        next.setSelect(true);
+                        allAdapter.updateUI();
+                        break;
+                    }
+                } else if (keyCode == KeyEvent.VK_UP) {
+                    Iterator<JListInfo> iterator = allAdapter.getDatas().iterator();
+                    JListInfo last = null;
+                    while (iterator.hasNext()) {
+                        JListInfo next = iterator.next();
+                        if (!next.getSelect()) {
+                            last = next;
+                            continue;
+                        }
+                        if (last != null) {
+                            last.setSelect(true);
+                            next.setSelect(false);
+                            allAdapter.updateUI();
+                        }
+                        break;
+                    }
                 } else allAdapter.filterDatas(filterKey);
-                repaintBorder(jpOthers, "Others", allAdapter.getDatas().size());
+
+                repaintBorder(jpOthers, "Others", allAdapter.getDatas().
+
+                        size());
+                lastKeyCode = keyCode;
             }
         });
     }

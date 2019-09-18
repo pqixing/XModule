@@ -5,6 +5,9 @@ import com.alibaba.fastjson.JSONObject
 import com.android.ddmlib.IDevice
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
 import com.dachen.creator.JekinsJob
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -42,11 +45,10 @@ import kotlin.collections.HashMap
 
 class BuilderDialog(val project: Project, val configInfo: Any, val activityModel: List<String>, val allModule: Set<SubModule>, val branchs: List<String>) : BaseJDialog() {
     companion object {
-        var lastShowType = ""
+        var buildJekins = true
         var showAllLocalModule = false
         var versionPath = ""
-        val JEKINS = "Jekins"
-        val LOCAL = "Local"
+        var maxRecord = 50
     }
 
     val apiJson = "api/json"
@@ -65,10 +67,10 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
     private lateinit var jlApps: JList<JListInfo>
     private lateinit var cbBranch: JComboBox<String>
     private lateinit var cbType: JComboBox<String>
-    private lateinit var cbShowType: JComboBox<String>
     private lateinit var cbDevices: JComboBox<String>
     private lateinit var cbDpModel: JComboBox<String>
     private lateinit var cbAllLog: JCheckBox
+    private lateinit var cbJekins: JCheckBox
     private var adapter: JListSelectAdapter
     private var appAdapter: JListSelectAdapter
 
@@ -82,9 +84,9 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
         do {
             if (sleepTimes++ >= maxTime) try {
                 sleepTimes = 0
-                when (cbShowType.selectedItem) {
-                    JEKINS -> queryJekinsJob()
-                    LOCAL -> queryLocalBuild()
+                when (cbJekins.isSelected) {
+                    true -> queryJekinsJob()
+                    false -> queryLocalBuild()
                 }
             } catch (e: Exception) {
             }
@@ -134,9 +136,9 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
         getRootPane().defaultButton = buttonOK
         title = "Builder"
         buttonOK.addActionListener {
-            when (cbShowType.selectedItem) {
-                JEKINS -> onJekinBuild()
-                LOCAL -> onLocalBuild()
+            when (cbJekins.isSelected) {
+                true -> onJekinBuild()
+                false -> onLocalBuild()
             }
         }
 
@@ -155,12 +157,11 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
 
 
         branchs.forEach { cbBranch.addItem(it) }
-        if(QToolGroup.isDachenProject(project)){
-            cbShowType.addItem(JEKINS)
-        }else cbShowType.isVisible = false
-        cbShowType.addItem(LOCAL)
-        if (lastShowType.isNotEmpty()) cbShowType.selectedItem = lastShowType
-        cbShowType.addActionListener { updateShowType() }
+        if (QToolGroup.isDachenProject(project)) {
+            cbJekins.isSelected = buildJekins
+        } else cbJekins.isVisible = false
+        cbJekins.addActionListener { updateShowType() }
+
         btnSetting.addActionListener { settingClick() }
         cbDpModel.selectedItem = configInfo.javaClass.getField("dependentModel").get(configInfo)?.toString()
                 ?: "localFirst"
@@ -210,22 +211,26 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
     val jekinLogClick = object : JlistSelectListener {
         override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean {
             val job = items.last().data as? JekinsJob ?: return true
-
-            if (job.displayName == null) {
-                Desktop.getDesktop().browse(URI(jobsUrl))
-                return true
+            when {
+                job.displayName == null -> Desktop.getDesktop().browse(URI(jobsUrl))
+                job.result != JekinsJob.SUCCESS -> JekinJobLog(project, job.url).showAndPack()
+                else -> {
+                    val apkName = "${job.showName}-${job.branch}"
+                    val url = "https://dev.downloads.mediportal.com.cn:9000/apk/$apkName.apk"
+                    val exitCode = Messages.showYesNoCancelDialog(project, "${job.displayName} ${job.appName} -> $url", apkName, "INSTALL", "LOG", "CANCEL", null)
+                    if (Messages.YES == exitCode) {
+                        val iDevice = UiUtils.getSelectDevice(cbDevices)
+                        if (iDevice != null) {
+                            prepareToInstall(iDevice, Collections.singletonList(Pair(url, apkName)))
+                        } else Messages.showMessageDialog("", "No devices found", null)
+                    } else if (exitCode == Messages.NO) JekinJobLog(project, job.url).showAndPack()
+                    else {
+                        isVisible = false
+                        isVisible = true
+                    }
+                }
             }
-            val apkName = "${job.showName}-${job.branch}"
-            val url = "https://dev.downloads.mediportal.com.cn:9000/apk/$apkName.apk"
-            if (job.result == JekinsJob.SUCCESS && Messages.OK == Messages.showOkCancelDialog(project, "${job.displayName} ${job.appName} -> $url", apkName, "Install", "ShowLog", null)) {
-                val iDevice = UiUtils.getSelectDevice(project, cbDevices)
-                if (iDevice != null) {
-                    prepareToInstall(iDevice, Collections.singletonList(Pair(url, apkName)))
-                } else Messages.showMessageDialog("", "No devices found", null)
-
-                return true
-            }
-            return JekinJobLog(project, job.url).showAndPack() != null
+            return true
         }
     }
 
@@ -233,7 +238,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
         override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean = true.apply {
             val urls = items.mapNotNull { m -> m.data?.toString()?.let { l -> l to "${m.title}->../${l.substringAfterLast("/")}" } }
             if (urls.isNotEmpty() && Messages.OK == Messages.showOkCancelDialog(urls.joinToString("\n") { it.second }, "Install Apk ?", null)) {
-                val iDevice = UiUtils.getSelectDevice(project, cbDevices)
+                val iDevice = UiUtils.getSelectDevice(cbDevices)
                 if (iDevice != null) {
                     prepareToInstall(iDevice, urls)
                 } else Messages.showMessageDialog("", "No devices found", null)
@@ -253,9 +258,9 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
             if (results.size == urls.size) ApplicationManager.getApplication().invokeAndWait {
 
                 val msg = urls.joinToString("\n") { "${results[it.first]}    ->    ${it.second}" }
-                if (failResult.isEmpty()) Messages.showMessageDialog(msg, "Install Result", null)
+                if (failResult.isEmpty()) Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Result", msg, NotificationType.INFORMATION).notify(project)
                 else if (Messages.OK == Messages.showOkCancelDialog("$msg\n Fail Item:\n ${failResult.joinToString("\n") { "${it.second} -> ${it.first}" }}"
-                                , "Install Result", "Install Fail Item", "CANCEL", null)) {
+                                , "Install Apk Result", "REINSTALL", "CANCEL", null)) {
                     prepareToInstall(iDevice, failResult)
                 }
             }
@@ -265,16 +270,16 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
     var sleepTimes = 0
 
     private fun updateShowType() {
-        lastShowType = cbShowType.selectedItem.toString()
+        buildJekins = cbJekins.isSelected
         val oldDatas = appAdapter.datas.filter { it.select }.map { it.title }
-        val newData = when (lastShowType) {
-            JEKINS -> {
+        val newData = when (buildJekins) {
+            true -> {
                 adapter.selectListener = jekinLogClick
                 cbBranch.isVisible = true
                 cbDpModel.isVisible = false
                 allModule.filter { it.type == SubModuleType.TYPE_APPLICATION }.map { JListInfo(it.name, select = activityModel.contains(it.name)) }.sortedBy { !it.select }
             }
-            LOCAL -> {
+            false -> {
                 adapter.selectListener = localLogClick
                 cbDpModel.isVisible = true
                 cbBranch.isVisible = false
@@ -283,12 +288,17 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
                         .map { JListInfo(it.name, select = activityModel.indexOf(it.name) == 0) }
                         .sortedBy { !activityModel.contains(it.title) }
             }
-            else -> appAdapter.datas
         }
-        UiUtils.initDevicesComboBox(project, cbDevices)
+        UiUtils.addDevicesComboBox(project, cbDevices)
         newData.forEach { if (oldDatas.contains(it.title)) it.select = true }
         appAdapter.setDatas(newData)
         sleepTimes = maxTime
+        title = "Builder" + (if (buildJekins) " (Jekins)" else "")
+    }
+
+    override fun dispose() {
+        UiUtils.removeDevicesComboBox(cbDevices)
+        super.dispose()
     }
 
     private fun settingClick() {
@@ -296,7 +306,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
         val type = cbType.selectedItem.toString()
         val selectApps = getSelectApps()
 
-        if ("Local" == cbShowType.selectedItem) return showBuildParams()
+        if (!cbJekins.isSelected) return showBuildParams()
 
 
         val exitCode = Messages.showYesNoCancelDialog("Current \nbranch:$branch , buildType:$type\nselectApps:${selectApps.joinToString(",")}", "Setting", "READ", "SAVE", "CANCEL", null)
@@ -424,7 +434,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
             Messages.showMessageDialog("Please select target module to build", "Miss Item", null)
             return
         }
-        val iDevice = UiUtils.getSelectDevice(project, cbDevices)
+        val iDevice = UiUtils.getSelectDevice(cbDevices)
                 ?: return Messages.showMessageDialog("", "No devices found", null)
 
         UiUtils.lastDevices = iDevice.serialNumber
@@ -479,10 +489,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
                 param["apkUrl"] = newPath.absolutePath
                 param["log"] = "Install"
                 writeLocalBuild(Collections.singletonList(param))
-                var installing = true
-                adbInstall(iDevice, Collections.singletonList(newPath.absolutePath)) { s, k, p, r -> installing = false }
-
-                while (installing) Thread.sleep(500)
+                prepareToInstall(iDevice, Collections.singletonList(Pair(newPath.absolutePath, param["title"]!!)))
             }
             param["endTime"] = System.currentTimeMillis().toString()
             param["status"] = if (success) "1" else "3"

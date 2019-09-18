@@ -73,7 +73,7 @@ class AdbTextDialog(var project: Project, var cbDevices: JComboBox<String>, var 
     }
 
     private fun toPhone(edit: Boolean, btn: JButton?) = ProgressManager.getInstance().runProcess({
-        val iDevice = UiUtils.getSelectDevice(project, cbDevices!!) ?: return@runProcess
+        val iDevice = UiUtils.getSelectDevice( cbDevices!!) ?: return@runProcess
         btn?.isEnabled = false
         if (!checkHelper(iDevice)) {
             btn?.isEnabled = true
@@ -88,7 +88,7 @@ class AdbTextDialog(var project: Project, var cbDevices: JComboBox<String>, var 
     }, null)
 
     private fun fromPhone(edit: Boolean, btn: JButton?) = ProgressManager.getInstance().runProcess({
-        val iDevice = UiUtils.getSelectDevice(project, cbDevices!!) ?: return@runProcess
+        val iDevice = UiUtils.getSelectDevice( cbDevices!!) ?: return@runProcess
         btn?.isEnabled = false
         if (!checkHelper(iDevice)) {
             btn?.isEnabled = true

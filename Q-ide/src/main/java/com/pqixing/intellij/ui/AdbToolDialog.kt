@@ -66,7 +66,7 @@ class AdbToolDialog(val project: Project, apkPath: String?) : BaseJDialog() {
         var ss = arrayListOf<JListInfo>()
         for (i in 0..100) ss.add(JListInfo(""))
         adapter.setDatas(ss)
-        UiUtils.initDevicesComboBox(project, devices!!)
+        UiUtils.addDevicesComboBox(project, devices!!)
         UiUtils.setTransfer(jlDatas) { f ->
             model = 0
             addApkPaths(f.filter { checkIsApk(it.name) }, true)
@@ -78,6 +78,10 @@ class AdbToolDialog(val project: Project, apkPath: String?) : BaseJDialog() {
         AdbTextDialog(project,devices,taText,btnFrom,btnTo,cbEdit).init()
     }
 
+    override fun dispose() {
+        UiUtils.removeDevicesComboBox(devices)
+        super.dispose()
+    }
     fun checkIsApk(url: String?) = url?.endsWith(".apk") ?: false
 
     private fun addApkPaths(files: List<File>, select: Boolean = false): List<JListInfo> {
@@ -135,7 +139,7 @@ class AdbToolDialog(val project: Project, apkPath: String?) : BaseJDialog() {
             Messages.showMessageDialog("Please select target apk to install", "Miss Item", null)
             return
         }
-        val iDevice = UiUtils.getSelectDevice(project, devices!!)
+        val iDevice = UiUtils.getSelectDevice( devices!!)
         if (iDevice == null) {
             Messages.showMessageDialog("Can not find device to run", "Miss Device", null)
             return
