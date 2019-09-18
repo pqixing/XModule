@@ -76,7 +76,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
     }
 
     fun addDevicesComboBox(project: Project, comboBox: JComboBox<String>) {
-        val ds = AndroidSdkUtils.getDebugBridge(project)?.devices?.map { Pair(it.getDevicesName(), it) }?.sortedBy { it.second.serialNumber == lastDevices }
+        val ds = AndroidSdkUtils.getDebugBridge(project)?.devices?.map { Pair(it.getDevicesName(), it) }?.sortedByDescending { it.second.serialNumber == lastDevices }
         if (ds != null) {
             devices.clear()
             devices.addAll(ds)
