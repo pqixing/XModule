@@ -9,13 +9,13 @@ intellij {
     updateSinceUntilBuild false
 }
 publishPlugin {
-
 // Bintray
     Properties properties = new Properties()
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
-    username properties.getProperty("jetbrains.user")
-    password properties.getProperty("jetbrains.psw")
+    token properties.getProperty("jetbrains.token")
+//    username properties.getProperty("jetbrains.user")
+//    password properties.getProperty("jetbrains.psw")
 //    channels 'nightly'
     channels 'stable'
 }
