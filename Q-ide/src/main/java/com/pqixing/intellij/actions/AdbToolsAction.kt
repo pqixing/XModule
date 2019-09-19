@@ -13,8 +13,6 @@ open class AdbToolsAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
-        val apkDialog = AdbToolDialog(project, e.getData(PlatformDataKeys.VIRTUAL_FILE)?.canonicalPath)
-        apkDialog.pack()
-        apkDialog.isVisible = true
+        AdbToolDialog(project, e.getData(PlatformDataKeys.VIRTUAL_FILE)?.canonicalPath).showAndPack()
     }
 }
