@@ -53,11 +53,6 @@
 
             <action id="Modularization.GitCheckout" class="com.pqixing.intellij.actions.GitCheckoutAction" text="GitCheckout"/>
 
-
-            <separator/>
-            <action id="Modularization.InstallApk" class="com.pqixing.intellij.actions.AdbToolsAction"
-                    text="AdbTool"/>
-
             <separator/>
             <action id="Modularization.DpsAnalyse"
                     class="com.pqixing.intellij.actions.DpsAnalyseAction" text="DpsAnalyse"/>

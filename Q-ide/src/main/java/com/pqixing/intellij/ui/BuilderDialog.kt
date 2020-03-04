@@ -101,7 +101,8 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
         val buildDir = File(cacheDir.parentFile, buildHistory)
         if (!buildDir.exists()) buildDir.mkdirs()
         val selects = appAdapter.datas.filter { it.select }.map { it.title }
-        val showLogs = (buildDir.listFiles() ?: emptyArray()).filter { it.isFile && it.name.endsWith(".log") }
+        val showLogs = (buildDir.listFiles()
+                ?: emptyArray()).filter { it.isFile && it.name.endsWith(".log") }
                 .sortedByDescending { it.name }.mapNotNull { FileUtils.readText(it) }
                 .mapNotNull {
                     val params = UrlUtils.getParams(it)
@@ -111,8 +112,10 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
 
                     if (!allLog && (curType != buildType || curBranch != branch || (selects.isNotEmpty() && !selects.contains(module)))) return@mapNotNull null
 
-                    val startTime = params["startTime"]?.toLongOrNull() ?: System.currentTimeMillis()
-                    val createTime = params["createTime"]?.toLongOrNull() ?: System.currentTimeMillis()
+                    val startTime = params["startTime"]?.toLongOrNull()
+                            ?: System.currentTimeMillis()
+                    val createTime = params["createTime"]?.toLongOrNull()
+                            ?: System.currentTimeMillis()
                     val status = params["status"]?.toIntOrNull() ?: 0
                     val buildLog = params["log"] ?: ""
                     val endTime = params["endTime"]?.toLongOrNull() ?: 0L
@@ -169,6 +172,10 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
             if (it.trim().isNotEmpty()) includes.add(it)
         }
         initUpdateAction()
+
+        UiUtils.setTransfer(contentPane) { f ->
+            onApkSelects(f.filter { it.endsWith(".apk") }.map { it.absolutePath to it.name } )
+        }
     }
 
 
@@ -235,14 +242,15 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
     }
 
     val localLogClick = object : JlistSelectListener {
-        override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean = true.apply {
-            val urls = items.mapNotNull { m -> m.data?.toString()?.let { l -> l to "${m.title}->../${l.substringAfterLast("/")}" } }
-            if (urls.isNotEmpty() && Messages.OK == Messages.showOkCancelDialog(urls.joinToString("\n") { it.second }, "Install Apk ?", null)) {
-                val iDevice = UiUtils.getSelectDevice(cbDevices)
-                if (iDevice != null) {
-                    prepareToInstall(iDevice, urls)
-                } else Messages.showMessageDialog("", "No devices found", null)
-            }
+        override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>) = onApkSelects(items.mapNotNull { m -> m.data?.toString()?.let { l -> l to "${m.title}->../${l.substringAfterLast("/")}" } }).let { true }
+    }
+
+    private fun onApkSelects(urls: List<Pair<String, String>>) {
+        if (urls.isNotEmpty() && Messages.OK == Messages.showOkCancelDialog(urls.joinToString("\n") { it.second }, "Install Apk ?", null)) {
+            val iDevice = UiUtils.getSelectDevice(cbDevices)
+            if (iDevice != null) {
+                prepareToInstall(iDevice, urls)
+            } else Messages.showMessageDialog("", "No devices found", null)
         }
     }
 
@@ -254,7 +262,8 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
         val failResult = mutableListOf<Pair<String, String>>()
         adbInstall(iDevice, urls.map { it.first }) { s, u, p, r ->
             results[u] = r
-            if (!s) failResult.add(Pair(if (p.isEmpty()) u else p, urls.find { it.first == u }?.second ?: ""))
+            if (!s) failResult.add(Pair(if (p.isEmpty()) u else p, urls.find { it.first == u }?.second
+                    ?: ""))
             if (results.size == urls.size) ApplicationManager.getApplication().invokeAndWait {
 
                 val msg = urls.joinToString("\n") { "${results[it.first]}    ->    ${it.second}" }

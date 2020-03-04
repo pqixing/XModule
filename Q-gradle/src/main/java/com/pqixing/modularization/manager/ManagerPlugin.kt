@@ -22,7 +22,7 @@ open class ManagerPlugin : BasePlugin() {
         project.extensions.create("manager", ManagerExtends::class.java, project)
     }
 
-    override val applyFiles: List<String> = listOf("com.module.manager", "com.module.git")
+    override val applyFiles: List<String> = listOf()
     override val ignoreFields: Set<String>
         get() = setOf(FileNames.USER_CONFIG, FileNames.IMPORT_KT)
 
