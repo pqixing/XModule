@@ -9,7 +9,6 @@ import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.modularization.utils.execute
-import com.pqixing.modularization.utils.init
 import org.eclipse.jgit.api.Git
 
 open class ToMavenTask : BaseTask() {
@@ -36,8 +35,8 @@ open class ToMavenTask : BaseTask() {
         val commitMsg = "${Keys.PREFIX_TO_MAVEN}?${Keys.LOG_BRANCH}=$branch&${Keys.LOG_MODULE}=$artifactId&${Keys.LOG_VERSION}=$version"
         val git = Git.open(VersionManager.repoGitDir)
         GitUtils.pull(git)
-        git.commit().setAllowEmpty(true).setMessage(commitMsg).init().execute()
-        git.push().init().execute()
+        git.commit().setAllowEmpty(true).setMessage(commitMsg).execute()
+        git.push().execute()
         ResultUtils.writeResult("$branch:$artifactId:$version")
     }
 

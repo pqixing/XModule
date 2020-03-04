@@ -30,7 +30,7 @@ object GitUtils {
     fun clone(gitUrl: String, gitDir: File, branchName: String = "master"): Git? {
         val git = Git.cloneRepository()
                 .setURI(gitUrl).setDirectory(gitDir).setBranch(branchName)
-                .init().execute()
+                .execute()
         if (git == null) {
             if (branchName != "master") return clone(gitUrl, gitDir, "master")
         } else {
@@ -40,7 +40,7 @@ object GitUtils {
                         .setCreateBranch(true)
                         .setStartPoint("refs/remotes/origin/master")
                         .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
-                        .init().execute()
+                        .execute()
             }
         }
         return git
@@ -58,7 +58,7 @@ object GitUtils {
             val refSpec = RefSpec()
                     .setSource(null)
                     .setDestination("refs/heads/$branchName");
-            git.push().setRefSpecs(refSpec).setRemote("origin").init().call();
+            git.push().setRefSpecs(refSpec).setRemote("origin").execute(false);
             Tools.println("Delete ${git.repository.directory.parentFile.name} branch -> $branchName")
             true
         } catch (e: Exception) {
@@ -74,9 +74,9 @@ object GitUtils {
     fun addAndPush(git: Git?, file: String, commitMsg: String, force: Boolean = false): Boolean {
         git ?: return false
         try {
-            git.pull().init().execute()
-            git.add().addFilepattern(file).init().call()
-            git.commit().setMessage(commitMsg).init().call()
+            git.pull().execute(false)
+            git.add().addFilepattern(file).execute(false)
+            git.commit().setMessage(commitMsg).execute(false)
             push(git, force)
         } catch (e: Exception) {
             Tools.println("addAndPush Exception -> $e")
@@ -93,8 +93,8 @@ object GitUtils {
     fun push(git: Git?, force: Boolean = false): Boolean {
         git ?: return false
         try {
-            val call = git.push().setForce(force).init().call()
-            Tools.println("Push ${git.repository.directory.parentFile.name} Complete push -> ${call.map { it.messages }}")
+            val call = git.push().setForce(force).execute(false)
+            Tools.println("Push ${git.repository.directory.parentFile.name} Complete push -> ${call?.map { it.messages }}")
         } catch (e: Exception) {
             Tools.println(" Exception push -> $e")
             return false
@@ -108,9 +108,9 @@ object GitUtils {
     fun pull(git: Git?): Boolean {
         git ?: return false
         return try {
-            val call = git.pull().init().call()
-            val isSuccessful = call.isSuccessful
-            Tools.println("Pull ${git.repository.directory.parentFile.name} Complete-> ${isSuccessful}  ${git.log().setMaxCount(1).call().map { "${it.committerIdent} -> ${it.fullMessage}" }[0]}")
+            val call = git.pull().execute(false)
+            val isSuccessful = call?.isSuccessful?:false
+            Tools.println("Pull ${git.repository.directory.parentFile.name} Complete-> $isSuccessful  ${git.log().setMaxCount(1).call().map { "${it.committerIdent} -> ${it.fullMessage}" }[0]}")
             isSuccessful
         } catch (e: Exception) {
             Tools.println(" Exception pull-> $e")
@@ -133,9 +133,9 @@ object GitUtils {
             return checkoutBranch(git, branchName, true)
         }
         //创建本地分支
-        val call = git.branchCreate().setName(branchName).init().call()
+        val call = git.branchCreate().setName(branchName).execute(false)
         //提交远程分支
-        git.push().add(call).init().call();
+        git.push().add(call).execute(false);
         //删除本地分支（以便于checkout远程分支，方便关联）,
         git.branchDelete().setBranchNames(branchName).call()
         //关联本地和远程分支
@@ -207,7 +207,7 @@ object GitUtils {
                             .setStartPoint(c.name)
                             .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
                 }
-                command.init().call()
+                command.execute()
                 Tools.println("Checkout ${git.repository.directory.parentFile.name}-> ${if (remote) "remote" else "local"} branch $branchName")
                 return git.repository.branch == branchName//是否切换成功
             }
@@ -253,43 +253,24 @@ object GitUtils {
 
 }
 
-fun <T> GitCommand<T>.init(provider: UsernamePasswordCredentialsProvider? = null): GitCommand<T> {
-    if (this is TransportCommand<*, *>) {
-        if (provider != null) setCredentialsProvider(provider)
-        else setCredentialsProvider(UsernamePasswordCredentialsProvider(GitUtils.credentials.getUserName(), GitUtils.credentials.getPassWord()))
-    }
-//    if (this is PullCommand) this.setProgressMonitor(PercentProgress())
-//    if (this is PushCommand) this.progressMonitor = PercentProgress()
-    if (this is CloneCommand) this.setProgressMonitor(PercentProgress())
-//    if (this is CheckoutCommand) this.setProgressMonitor(PercentProgress())
-    return this
-}
+fun <T> GitCommand<T>.execute(safe: Boolean = true): T? {
 
-fun <T> GitCommand<T>.execute(): T? = try {
-    Tools.println("Git task ->  ${javaClass.simpleName}")
-    call()
-//    Tools.println("Git task end -> ${javaClass.simpleName} : ${repo?.branch} : ${repo?.directory?.parentFile?.name} \n      result -> $call")
-} catch (e: Exception) {
-    ///home/pqixing/Desktop/gradleProject/Root/Document/.git
-//    FileUtils.delete(File(repository.directory, "index.lock"))
-    Tools.println(e.toString())
-    null
+    val exe = {
+        if (this is TransportCommand<*, *>) {
+            setTransportConfigCallback(GitSSHFactory.transportConfigCallback)
+            setCredentialsProvider(UsernamePasswordCredentialsProvider(GitUtils.credentials.getUserName(), GitUtils.credentials.getPassWord()))
+        }
+        if (this is CloneCommand) this.setProgressMonitor(PercentProgress())
+
+        Tools.println("Git task ->  ${javaClass.simpleName}")
+        call()
+    }
+    return if (safe) try {
+        exe()
+    } catch (e: Exception) {
+        Tools.println(e.toString())
+        null
+    } else exe()
 }
-//
-//fun Components.loadGitInfo(git: Git) {
-//    val repo = git.repository
-//    lastLog.branch = repo.branch
-//    val command = git.log().setMaxCount(1)
-//    if (rootName != name) command.addPath(name)
-//    lastLog.gitDir = repo.directory
-//    command.call().forEach { rev ->
-//        lastLog.author = rev.authorIdent.name
-//        lastLog.commitTime = rev.commitTime
-//        lastLog.message = rev.fullMessage
-//        lastLog.hash = rev.name
-//    }
-//    hasInit = true
-//    Tools.println("LoadGitInfo $name -> branch : ${lastLog.branch} log : ${lastLog.message}")
-//}
 
 

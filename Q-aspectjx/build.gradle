@@ -22,8 +22,8 @@ dependencies {
 //    compile 'commons-io:commons-io:2.4'
     compile files('libs/aspectjtools.jar')
 }
-ext.mVersion = "1.2.0"
-ext.mLocalVersion = "1.0.5"
+ext.mVersion = "1.3.0"
+ext.mLocalVersion = "0.1"
 ext.mArtifactId = "aspectjx"
 apply from: '../script/bintray.gradle'
 

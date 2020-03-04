@@ -79,8 +79,8 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
     fun checkVail() {
         if (dependMaven.isEmpty()) dependMaven.add(groupMaven)
         if (docRepoUrl.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "docRepoUrl can not be null!!!")
-        if (docRepoUser.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "docRepoUser can not be null!!!")
-        if (docRepoPsw.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "docRepoPsw can not be null!!!")
+//        if (docRepoUser.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "docRepoUser can not be null!!!")
+//        if (docRepoPsw.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "docRepoPsw can not be null!!!")
 
 //        if (groupName.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "groupName can not be null!!!")
 //        if (groupMaven.isEmpty()) ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "groupMaven can not be null!!!")

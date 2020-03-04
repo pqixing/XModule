@@ -47,7 +47,7 @@ def writeFile(String txt, File out) {
     writer.close()
 }
 
-ext.mVersion = "1.2.3"
-ext.mLocalVersion = "1.0.3"
+ext.mVersion = "1.3.0"
+ext.mLocalVersion = "0.1"
 ext.mArtifactId = "tools"
 apply from: '../script/bintray.gradle'
