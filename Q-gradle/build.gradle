@@ -39,12 +39,19 @@ dependencies {
 //    implementation files("../libs/Tools.jar")
     if (localBuild) {
         compileOnly project(":Q-tools")
+        compileOnly project(":Q-annotation")
         implementation "com.pqixing.gradle:tools:0.1"
-    } else implementation "com.pqixing.gradle:tools:1.2.3"
+        implementation "com.pqixing.gradle:annotation:0.1"
+    } else {
+        implementation "com.pqixing.gradle:tools:1.2.3"
+        implementation "com.pqixing.gradle:annotation:1.2.3"
+    }
     implementation gradleApi()
     implementation localGroovy()
     implementation "com.alibaba:fastjson:1.2.44"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'org.aspectj:aspectjrt:1.8.11'
+    implementation 'org.aspectj:aspectjtools:1.8.4'
     testImplementation 'junit:junit:4.12'
     implementation 'org.eclipse.jgit:org.eclipse.jgit:5.6.1.202002131546-r'
     compileOnly 'com.android.tools.build:gradle:3.4.1'

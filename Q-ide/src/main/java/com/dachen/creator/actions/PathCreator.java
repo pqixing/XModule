@@ -53,6 +53,6 @@ public class PathCreator extends AnAction {
         } else {
             e.getPresentation().setEnabled(false);
         }
-        e.getPresentation().setVisible(QToolGroup.Companion.isDachenProject(e.getProject()));
+        e.getPresentation().setVisible(QToolGroup.Companion.isModulariztionProject(e.getProject()));
     }
 }

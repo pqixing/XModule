@@ -1,10 +1,12 @@
 package com.pqixing.modularization.android
 
 
+import com.android.build.gradle.AppExtension
 import com.pqixing.Tools
 import com.pqixing.model.SubModule
 import com.pqixing.model.SubModuleType
 import com.pqixing.modularization.FileNames
+import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.dps.DpsExtends
@@ -13,7 +15,6 @@ import com.pqixing.modularization.android.tasks.BuildApkTask
 import com.pqixing.modularization.android.tasks.DpsAnalysisTask
 import com.pqixing.modularization.android.tasks.PrepareDevTask
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.maven.ToMavenCheckTask
@@ -72,10 +73,6 @@ open class AndroidPlugin : BasePlugin() {
     lateinit var processInnerDps: Runnable
     override fun apply(project: Project) {
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
-        //在工程处理后，处理组件依赖
-        extHelper.setExtMethod(project, "endConfig") {
-            Tools.println("--------------endConfig() is deprecated and do nothing,you can remove it")
-        }
         extHelper.setExtMethod(project, "doAfterEvaluate") { if (it is Closure<*>) doAfterList.add(it) }
         project.afterEvaluate {
             processInnerDps.run()
@@ -98,6 +95,13 @@ open class AndroidPlugin : BasePlugin() {
         project.extensions.add(Keys.CONFIG_MODULE, moduleConfig)
         //在工程处理后，处理组件依赖
         processInnerDps = Runnable {
+            if(buildAsApp&&dpsExt.enableTransform) {
+                val android = project.extensions.getByType(AppExtension::class.java)
+                //开始注解切入
+                android.registerTransform(PqxTransform())
+
+            }
+
             dpsManager = DpsManager(this@AndroidPlugin, dpsExt)
             val dependencies = dpsManager.resolveDps()
             val dpPath = FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dependencies, true)

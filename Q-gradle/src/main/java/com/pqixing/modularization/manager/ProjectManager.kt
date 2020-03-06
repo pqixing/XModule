@@ -71,11 +71,11 @@ object ProjectManager : OnClear {
         if (apiModule) {
             val moduleDir = File(codeRootDir, subModule.path)
             with(File(moduleDir, "build.gradle")) {
-                if (!exists()) FileUtils.writeText(this, "apply plugin: 'com.module.android'\n endConfig()\n ")
+                if (!exists()) FileUtils.writeText(this, "apply plugin: 'com.module.android' ")
             }
-            val name = TextUtils.numOrLetter(project.name)
-            val packageName = "${ManagerPlugin.getExtends().groupName.replace(".", "/")}/auto/router/$name"
-            val className = "${TextUtils.firstUp(name)}Paths"
+            val name = TextUtils.numOrLetter(project.name.replace("_api",""))
+            val packageName = "${ManagerPlugin.getExtends().groupName.replace(".", "/")}/auto/router/${name}api"
+            val className = "${TextUtils.firstUp(name)}ApiPaths"
             with(File(moduleDir, "java/$packageName/$className.java")) {
                 if (!exists()) FileUtils.writeText(this, "package ${packageName.replace("/", ".")};\nfinal class $className {}")
             }

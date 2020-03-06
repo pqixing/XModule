@@ -13,6 +13,7 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
     internal var compiles = HashSet<DpComponents>()
     internal var devCompiles = HashSet<DpComponents>()
     val manager = ManagerPlugin.getExtends()
+    var enableTransform = true
 
     /**
      * 上传到Maven的版本
