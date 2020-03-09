@@ -14,11 +14,16 @@ public class AnnotationInfo {
 
     private static final HashMap<String, Class> path2Class = new HashMap<>();
 
-    public static final long buildTime = 0;
+    private static final long buildTime = 0;
+
 
     static {
         loadInvokeClass();
         initClassByNames();
+    }
+
+    public static long getBuildTime() {
+        return buildTime;
     }
 
     private static void initClassByNames() {
@@ -31,6 +36,7 @@ public class AnnotationInfo {
                 e.printStackTrace();
             }
         }
+        routeActivity.clear();
         for (String s : routeFragment) {
             try {
                 Class<?> aClass = Class.forName(s);
@@ -40,6 +46,7 @@ public class AnnotationInfo {
                 e.printStackTrace();
             }
         }
+        routeFragment.clear();
         for (String s : routeServers) {
             try {
                 Class<?> aClass = Class.forName(s);
@@ -49,7 +56,7 @@ public class AnnotationInfo {
                 e.printStackTrace();
             }
         }
-
+        routeServers.clear();
     }
 
 
