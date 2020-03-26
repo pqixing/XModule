@@ -79,10 +79,10 @@ object ProjectManager : OnClear {
             with(File(moduleDir, "java/$packageName/$className.java")) {
                 if (!exists()) FileUtils.writeText(this, "package ${packageName.replace("/", ".")};\nfinal class $className {}")
             }
-            with(File(moduleDir, "resources/values/strings.xml")) {
-                if (!exists()) FileUtils.writeText(this, "<resources></resources>")
-
-            }
+//            with(File(moduleDir, "resources/values/strings.xml")) {
+//                if (!exists()) FileUtils.writeText(this, "<resources></resources>")
+//
+//            }
             //写入空清单文件
             with(File(moduleDir, "AndroidManifest.xml")) {
                 if (!exists()) {

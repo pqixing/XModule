@@ -174,7 +174,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
         initUpdateAction()
 
         UiUtils.setTransfer(contentPane) { f ->
-            onApkSelects(f.filter { it.endsWith(".apk") }.map { it.absolutePath to it.name } )
+            onApkSelects(f.filter { it.endsWith(".apk") }.map { it.absolutePath to it.name })
         }
     }
 
@@ -460,6 +460,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
             params
         }
         writeLocalBuild(allMap)
+        isVisible = false
         startLocalBuild(0, allMap, iDevice)
     }
 
@@ -477,8 +478,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
     private fun startLocalBuild(index: Int, params: List<Map<String, String>>, iDevice: IDevice) {
         if (index >= params.size) return ApplicationManager.getApplication().invokeAndWait {
             buttonOK.isVisible = true
-            isVisible = false
-            isVisible = true
+            if (!isVisible) dispose()
             countLocalBuild()
         }
         val param = params[index].toMutableMap()

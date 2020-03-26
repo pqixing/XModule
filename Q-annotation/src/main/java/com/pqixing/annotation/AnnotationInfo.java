@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class AnnotationInfo {
-    private static final HashSet<String> runActivity = new HashSet<>();
-    private static final HashSet<String> runModules = new HashSet<>();
+    public static final HashSet<String> runActivity = new HashSet<>();
+    public static final HashSet<String> runModules = new HashSet<>();
     private static final HashSet<String> routeActivity = new HashSet<>();
     private static final HashSet<String> routeFragment = new HashSet<>();
     private static final HashSet<String> routeServers = new HashSet<>();
 
-    private static final HashSet<String> buildConfigs = new HashSet<>();
+    public static final HashSet<String> buildConfigs = new HashSet<>();
 
     private static final HashMap<String, Class> path2Class = new HashMap<>();
 
@@ -28,38 +28,38 @@ public class AnnotationInfo {
 
     private static void initClassByNames() {
         for (String s : routeActivity) {
-            try {
-                Class<?> aClass = Class.forName(s);
-                RouterActivity annotation = aClass.getAnnotation(RouterActivity.class);
-                path2Class.put(annotation.name(), aClass);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            Class<?> aClass = forName(s);
+            if (aClass == null) continue;
+            RouterActivity annotation = aClass.getAnnotation(RouterActivity.class);
+            if (annotation == null) continue;
+            path2Class.put(annotation.name(), aClass);
         }
         routeActivity.clear();
         for (String s : routeFragment) {
-            try {
-                Class<?> aClass = Class.forName(s);
-                RouterFragment annotation = aClass.getAnnotation(RouterFragment.class);
-                path2Class.put(annotation.name(), aClass);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            Class<?> aClass = forName(s);
+            if (aClass == null) continue;
+            RouterFragment annotation = aClass.getAnnotation(RouterFragment.class);
+            if (annotation == null) continue;
+            path2Class.put(annotation.name(), aClass);
         }
         routeFragment.clear();
         for (String s : routeServers) {
-            try {
-                Class<?> aClass = Class.forName(s);
-                RouteSevers annotation = aClass.getAnnotation(RouteSevers.class);
-                path2Class.put(annotation.name(), aClass);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+            Class<?> aClass = forName(s);
+            if (aClass == null) continue;
+            RouteSevers annotation = aClass.getAnnotation(RouteSevers.class);
+            if (annotation == null) continue;
+            path2Class.put(annotation.name(), aClass);
         }
         routeServers.clear();
     }
 
-
+    public static Class forName(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException ignored) {
+        }
+        return null;
+    }
 
     private static void loadInvokeClass() {
     }
