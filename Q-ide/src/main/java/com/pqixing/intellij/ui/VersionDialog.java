@@ -8,6 +8,7 @@ import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMo
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
+import com.pqixing.EnvKeys;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 import com.pqixing.intellij.utils.GitHelper;
@@ -102,7 +103,7 @@ public class VersionDialog extends BaseJDialog {
         if (targetBranch.isEmpty()) return;
         String runTaskId = System.currentTimeMillis() + "";
         HashMap<String, String> envs = new HashMap<>(GradleUtils.INSTANCE.getDefEnvs());
-        envs.put("taskBranch", targetBranch);
+        envs.put(EnvKeys.opBranch, targetBranch);
         StringBuilder tagBrans = new StringBuilder();
         for (JListInfo j : adapter.getDatas()) {
             if (j.getSelect()) {
@@ -110,7 +111,7 @@ public class VersionDialog extends BaseJDialog {
                 tagBrans.append(split[split.length - 1]).append(",");
             }
         }
-        envs.put("tagBranchs", tagBrans.toString());
+        envs.put("tagBranch", tagBrans.toString());
 
         GradleUtils.INSTANCE.runTask(project, Arrays.asList(":VersionIndex", ":VersionTag"),
                 ProgressExecutionMode.IN_BACKGROUND_ASYNC, false

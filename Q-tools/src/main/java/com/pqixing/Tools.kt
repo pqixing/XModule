@@ -18,7 +18,14 @@ object Tools : ILog {
             System.exit(exitCode)
         }
     }
-    fun println(exitCode: Int, l: String?) = if(exitCode<0) printError(exitCode,l)else Tools.println(l)
+
+    fun println(exitCode: Int, l: String?) = if (exitCode < 0) printError(exitCode, l) else Tools.println(l)
 
     var logger: ILog = this
+}
+
+fun String.getEnvValue(): String? = try {
+    System.getProperty(this)
+} catch (e: Exception) {
+    null
 }

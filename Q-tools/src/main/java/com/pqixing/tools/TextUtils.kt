@@ -1,5 +1,7 @@
 package com.pqixing.tools
 
+import com.pqixing.getEnvValue
+
 
 object TextUtils {
     var count = 0
@@ -116,15 +118,7 @@ object TextUtils {
      * @param key
      * @return
      */
-    fun getSystemEnv(key: String): String? {
-        var v: String? = null
-        try {
-            v = System.getProperty(key)
-        } catch (e: Exception) {
-        }
-
-        return v
-    }
+    fun getSystemEnv(key: String): String? =key.getEnvValue()
 
     /**
      * 拼接url

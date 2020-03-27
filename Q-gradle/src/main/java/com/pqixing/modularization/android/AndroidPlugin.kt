@@ -44,6 +44,7 @@ open class AndroidPlugin : BasePlugin() {
      * application类型工程
      */
     var isApp = false
+
     /**
      * 作为app运行  library工程也可以
      */
@@ -83,6 +84,10 @@ open class AndroidPlugin : BasePlugin() {
                 }
                 c.run()
             }
+
+            project.tasks.find { t -> t.name == "clean" }?.doLast {
+                FileUtils.delete(File(project.projectDir, "build"))
+            }
         }
         this.p = project
         project.extensions.extraProperties.set(project.name, this)
@@ -95,7 +100,7 @@ open class AndroidPlugin : BasePlugin() {
         project.extensions.add(Keys.CONFIG_MODULE, moduleConfig)
         //在工程处理后，处理组件依赖
         processInnerDps = Runnable {
-            if(buildAsApp&&dpsExt.enableTransform) {
+            if (buildAsApp && dpsExt.enableTransform) {
                 val android = project.extensions.getByType(AppExtension::class.java)
                 //开始注解切入
                 android.registerTransform(PqxTransform())

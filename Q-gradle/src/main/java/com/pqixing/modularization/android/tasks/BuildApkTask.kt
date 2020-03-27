@@ -1,57 +1,54 @@
 package com.pqixing.modularization.android.tasks
 
+import com.android.build.gradle.AppExtension
 import com.pqixing.Tools
-import com.pqixing.modularization.JGroovyHelper
-import com.pqixing.modularization.android.AndroidPlugin
+import com.pqixing.EnvKeys
+import com.pqixing.getEnvValue
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.IExtHelper
-import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import java.io.File
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 
 open class BuildApkTask : BaseTask() {
-    var outputFile: File? = null
-    var buildType = ""
+    private var buildType: String
+    private var buildApkPath: String?
 
     //解析出第一个Dev渠道的构建任务，防止有渠道包
     init {
-        //如果当前有buildApk任务,则初始化
-        if (ManagerPlugin.getPlugin().runTaskNames.contains(":${project.name}:BuildApk"))
-            project.afterEvaluate { p ->
-                val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
-                val plugin = AndroidPlugin.getPluginByProject(project)
-
-                val types = arrayListOf("dev", "debug", "inTest", "outTest", "release")
-                val apkType = TextUtils.getSystemEnv("buildApkType")
-                if (apkType?.isNotEmpty() == true) {
-                    types.remove(apkType)
-                    types.add(0, apkType)
-                }
-                val androidOut = extHelper.getAndroidOut(project, if (plugin.buildAsApp) "application" else "library")
-
-                for (t in types) {
-                    outputFile = androidOut[t] ?: continue
-                    this@BuildApkTask.dependsOn("assemble${TextUtils.firstUp(t)}")
-                    buildType = t
-                    break
-                }
-
-            }
+        buildType = EnvKeys.buildApkType.getEnvValue() ?: "release"
+        buildApkPath = EnvKeys.buildApkPath.getEnvValue()
+        this.dependsOn("assemble${TextUtils.firstUp(buildType)}")
     }
 
     override fun runTask() {
         Tools.println("BuildApk Type -> $buildType")
-        if (outputFile == null || !outputFile!!.exists() || !outputFile!!.name.endsWith(".apk")) {
-            Tools.printError(-1, "Can not fount apk with path :${outputFile?.absolutePath}")
-        } else {
-            var buildApkPath = AndroidPlugin.getPluginByProject(project).config.taskResultFile
-            if (buildApkPath.isEmpty()) buildApkPath = outputFile!!.absolutePath
-            else FileUtils.copy(outputFile!!, File(buildApkPath))
+        val application: AppExtension = project.extensions.getByName("android") as? AppExtension
+                ?: return
+        val find = application.applicationVariants.find { it.buildType.name == buildType } ?: return
 
-            ResultUtils.writeResult(buildApkPath)
+        val outFile = find.outputs.last().outputFile
+
+        val newOutFile = File(outFile.parentFile, "${project.name}-${find.versionCode}-${find.versionName}-${SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(Date())}.apk")
+
+        outFile.renameTo(newOutFile)
+
+        val outPath = buildApkPath ?: return ResultUtils.writeResult(newOutFile.absolutePath)
+
+        val copyFile = File(outPath)
+        if (copyFile.name.endsWith(".apk")) {
+            FileUtils.copy(newOutFile, copyFile)
+            ResultUtils.writeResult(outPath)
+        }else if(!copyFile.exists()){
+            copyFile.mkdirs()
         }
 
+        if (copyFile.isDirectory) {
+            FileUtils.copy(newOutFile, File(copyFile, newOutFile.name))
+            ResultUtils.writeResult("${outPath}/${newOutFile.name}")
+        }
     }
 }

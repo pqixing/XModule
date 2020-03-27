@@ -1,6 +1,8 @@
 package com.pqixing.modularization.manager.tasks
 
+import com.pqixing.EnvKeys
 import com.pqixing.Tools
+import com.pqixing.getEnvValue
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.base.BaseTask
@@ -18,11 +20,10 @@ open class DeleteBranchTask : BaseTask() {
 
     override fun runTask() {
         val extends = ManagerPlugin.getExtends()
-        val info = extends.config
-        if (info.screctKey != Keys.SCRECTKEY) {
+        if (EnvKeys.screctKey.getEnvValue() != Keys.SCRECTKEY) {
             Tools.printError(-1,"DeleteBranch Exception -> check password error!!!")
         }
-        var targetBranch = info.taskBranch
+        var targetBranch = EnvKeys.opBranch.getEnvValue()?:return
         if (targetBranch == extends.docRepoBranch) Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete current branch $targetBranch , please change branch before delete!!")
         if (targetBranch == "master") Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete master !!")
 

@@ -1,6 +1,8 @@
 package com.pqixing.modularization.manager.tasks
 
+import com.pqixing.EnvKeys
 import com.pqixing.Tools
+import com.pqixing.getEnvValue
 import com.pqixing.model.SubModuleType
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
@@ -26,11 +28,10 @@ open class LoadAllBranchModuleTask: BaseTask() {
 
 
     override fun runTask() {
-        val extends = ManagerPlugin.getExtends()
         //当前分支
 //        val curBranch = extends.docRepoBranch
         //需要合并到当前的指定分支
-        val checkBranch = extends.config.taskBranch
+        val checkBranch = EnvKeys.opBranch.getEnvValue()?:return
 //        if (curBranch == mergeBranch) {
 //            Tools.println("Merge branch is the same as local branch $curBranch")
 //            return

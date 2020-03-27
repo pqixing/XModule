@@ -7,6 +7,7 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
+import com.pqixing.EnvKeys
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.ToMavenDialog
 import com.pqixing.intellij.utils.TaskCallBack
@@ -42,8 +43,7 @@ class ToMavenAction : AnAction() {
         var runTaskId = ""
         var excute = 0
         var envs = GradleUtils.defEnvs.toMutableMap().apply {
-            put("toMavenUnCheck", dialog.unCheckCode)
-            put("toMavenDesc", dialog.desc)
+            put(EnvKeys.toMavenUnCheck, dialog.unCheckCode)
         }
 
         override fun onTaskEnd(success: Boolean, result: String?) {

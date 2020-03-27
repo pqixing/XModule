@@ -19,7 +19,7 @@ public class Config {
     /**
      * 本地目录的根目录，用来查找本地目录，以及下载Clone
      */
-    public String codeRoot = "../CodeSrc";
+    public String codeRoot = "";
 
     /**
      * 用户名称,可用于git和maven上传时使用
@@ -68,34 +68,12 @@ public class Config {
      */
     public String buildDir = "default";
 
-    /**
-     * 部分重要操作需要的密码
-     */
-    public String screctKey = "";
-    /**
-     * 运行类型,gradle,plugin,ide
-     */
-    public String syncType = "gradle";
-
-    /**
-     * Task任务运行产物拷贝至指定目录,请注意dir 或者 file类型
-     */
-    public String taskResultFile = "";
 
     /**
      * 同步根目录的build.gradle文件(使用doc目录下的文件进行覆盖)
      */
     public boolean syncBuildFile = true;
 
-    /**
-     * 运行task任务时,目标分支
-     */
-    public String taskBranch = "";
-
-    /**
-     * 打标签时,需要tag的分支
-     */
-    public String tagBranchs = "";
     /**
      * toMaven时,忽略检查项目
      * 0:UnCheck null

@@ -73,7 +73,7 @@ class InCludes {
                     includes = parseInclude(value.trim(), rootDir, gradle)
                     break
                 case "codeRoot":
-                    codeRoot = value.isEmpty() ? "src" : value
+                    codeRoot = value
                     break
                 default: gradle.println("not found  -> $value")
             }

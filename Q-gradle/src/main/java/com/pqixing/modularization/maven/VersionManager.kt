@@ -1,6 +1,8 @@
 package com.pqixing.modularization.maven
 
+import com.pqixing.EnvKeys
 import com.pqixing.Tools
+import com.pqixing.getEnvValue
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
@@ -282,15 +284,15 @@ object VersionManager : OnClear {
      */
     fun createVersionTag(): Boolean {
         val plugin = ManagerPlugin.getPlugin()
-        val info = plugin.config
-        val taskBranch = info.taskBranch.substring(info.taskBranch.lastIndexOf("/") + 1)//直接获取名称,不要origin
+        val opBranch = EnvKeys.opBranch.getEnvValue()?:return false
+        val taskBranch = opBranch.substring(opBranch.lastIndexOf("/") + 1)//直接获取名称,不要origin
         if (taskBranch.isEmpty() || taskBranch == "master") {
             Tools.printError(-1, "createVersionTag taskBranch is empty, please input taskBranch!!")
             return false
         }
         //拷贝一份
         val fallbacks = matchingFallbacks.toMutableList()
-        info.tagBranchs.split(",").map { it.split("/").last().trim() }.forEach { if (it.isNotEmpty() && !fallbacks.contains(it)) fallbacks.add(it) }
+        (EnvKeys.tagBranch.getEnvValue()?:"").split(",").map { it.split("/").last().trim() }.forEach { if (it.isNotEmpty() && !fallbacks.contains(it)) fallbacks.add(it) }
 
         val matchKeys = fallbacks.map { "$groupName.$it." }
         val tagVersions = curVersions.filter { c -> matchKeys.any { f -> c.key.startsWith(f) } }

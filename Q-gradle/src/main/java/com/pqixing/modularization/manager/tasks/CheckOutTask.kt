@@ -1,5 +1,7 @@
 package com.pqixing.modularization.manager.tasks
 
+import com.pqixing.EnvKeys
+import com.pqixing.getEnvValue
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.FileManager
@@ -18,9 +20,7 @@ open class CheckOutTask : BaseTask() {
     }
 
     override fun runTask() {
-        val extends = ManagerPlugin.getExtends()
-        var targetBranch = extends.config.taskBranch ?: ""
-        if (targetBranch.isEmpty()) targetBranch = extends.docRepoBranch
+        var targetBranch = EnvKeys.opBranch.getEnvValue() ?: return
 
         val fail = ArrayList<String>()
         GitUtils.open(FileManager.templetRoot)?.apply {

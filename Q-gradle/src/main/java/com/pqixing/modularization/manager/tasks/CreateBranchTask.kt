@@ -1,5 +1,7 @@
 package com.pqixing.modularization.manager.tasks
 
+import com.pqixing.EnvKeys
+import com.pqixing.getEnvValue
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerPlugin
@@ -15,9 +17,7 @@ open class CreateBranchTask : BaseTask() {
     }
 
     override fun runTask() {
-        val extends = ManagerPlugin.getExtends()
-        val info = extends.config
-        var targetBranch = info.taskBranch
+        var targetBranch = EnvKeys.opBranch.getEnvValue()?:return
 
         val fail = ArrayList<String>()
         ProjectManager.projectXml.projects

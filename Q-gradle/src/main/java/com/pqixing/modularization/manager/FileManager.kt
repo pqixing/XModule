@@ -90,7 +90,7 @@ object FileManager : OnClear {
         if (extends.config.syncBuildFile&&GitUtils.isGitDir(templetRoot)) {
             FileUtils.writeText(File(rootDir, "build.gradle"), File(rootDir, "templet/build.gradle").readText(), true)
             FileUtils.writeText(File(rootDir, "gradle.properties"), File(rootDir, "templet/gradle.properties").readText(), true)
-            FileUtils.writeText(File(rootDir, "gradle/wrapper/gradle-wrapper.properties"), File(rootDir, "templet/gradle-wrapper.properties").readText(), true)
+            FileUtils.writeText(File(rootDir, "gradle/wrapper/gradle-wrapper.properties"), File(rootDir, "templet/gradles/wrapper/gradle-wrapper.properties").readText(), true)
         }
     }
 

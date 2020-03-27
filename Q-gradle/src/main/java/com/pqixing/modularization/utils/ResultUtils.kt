@@ -1,6 +1,8 @@
 package com.pqixing.modularization.utils
 
+import com.pqixing.EnvKeys
 import com.pqixing.Tools
+import com.pqixing.getEnvValue
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.tools.FileUtils
@@ -17,7 +19,7 @@ import java.util.*
 object ResultUtils {
 
     //是否是通过ide调用
-    val ide = "ide" == TextUtils.getSystemEnv("syncType")
+    val ide = "ide" == EnvKeys.syncType.getEnvValue()
 
     /**
      * 输出结果，用于Ide的交互获取

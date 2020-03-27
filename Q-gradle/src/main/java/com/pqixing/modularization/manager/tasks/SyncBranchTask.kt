@@ -1,5 +1,7 @@
 package com.pqixing.modularization.manager.tasks
 
+import com.pqixing.EnvKeys
+import com.pqixing.getEnvValue
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.FileManager
@@ -15,9 +17,9 @@ import java.io.File
 open class SyncBranchTask : BaseTask() {
     override fun runTask() {
         val extends = ManagerPlugin.getExtends()
-        var targetBranch = extends.config.taskBranch ?: ""
+        var targetBranch = EnvKeys.opBranch.getEnvValue()?:return
         //获取需要更新的模块
-        var modules = extends.config.tagBranchs?.split(",")?.map { it.trim() }?.toSet()?: emptySet()
+        var modules = EnvKeys.tagBranch.getEnvValue()?.split(",")?.map { it.trim() }?.toSet()?: emptySet()
         if (targetBranch.isEmpty()) ResultUtils.writeResult("targetBranch can not be empty", -1);
 
         val fail = ArrayList<String>()

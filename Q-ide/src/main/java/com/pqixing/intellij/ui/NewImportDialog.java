@@ -133,7 +133,7 @@ public class NewImportDialog extends BaseJDialog {
 
         setVisible(false);
         Map<String, String> envs = new HashMap<>(GradleUtils.INSTANCE.getDefEnvs());
-        envs.put("taskBranch", branch);
+        envs.put("opBranch", branch);
         GradleUtils.INSTANCE.runTask(project, Collections.singletonList(":LoadAllBranchModule")
                 , ProgressExecutionMode.IN_BACKGROUND_ASYNC
                 , false, System.currentTimeMillis() + "", envs, (s, l) -> {
@@ -435,8 +435,7 @@ public class NewImportDialog extends BaseJDialog {
     }
 
     public String getCodeRootStr() {
-        String item = tvCodeRoot.getSelectedItem().toString().trim();
-        return item.isEmpty() ? "../CodeSrc" : item;
+        return tvCodeRoot.getSelectedItem().toString().trim();
     }
 
     public List<String> getImports() {
