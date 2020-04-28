@@ -29,6 +29,8 @@
     <depends>Git4Idea</depends>
     <depends>org.jetbrains.android</depends>
     <actions>
+
+
         <group id="QTools" popup="true" text="QTools" class="com.pqixing.intellij.actions.QToolGroup">
             <add-to-group group-id="BuildMenu" anchor="first"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
@@ -41,19 +43,23 @@
                     text="Builder">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift B"/>
             </action>
+
             <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
                     text="ToMaven"/>
+            <separator/>
+
+            <action id="Modularization.OpenAction" class="com.pqixing.intellij.actions.OpenNewAction" text="MDProject">
+                <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
+                <add-to-group group-id="FileMenu" anchor="first"/>
+            </action>
+            <action id="Modularization.FormatAction" class="com.pqixing.intellij.actions.FormatAction"
+                    text="FormatProject">
+                <add-to-group group-id="ViewMenu" anchor="last"/>
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt F"/>
+            </action>
 
             <separator/>
-            <action id="Modularization.GitSync"
-                    class="com.pqixing.intellij.actions.GitSyncAction" text="GitClone"/>
-            <action id="Modularization.GitMerge"
-                    class="com.pqixing.intellij.actions.GitBranchAction" text="GitMerge"/>
 
-
-            <action id="Modularization.GitCheckout" class="com.pqixing.intellij.actions.GitCheckoutAction" text="GitCheckout"/>
-
-            <separator/>
             <action id="Modularization.DpsAnalyse"
                     class="com.pqixing.intellij.actions.DpsAnalyseAction" text="DpsAnalyse"/>
             <action id="Modularization.ReIndexVersion"
@@ -63,6 +69,16 @@
             <action id="Modularization.routercreator"
                     class="com.pqixing.intellij.actions.RouteCreate" text="PathCreator"
                     description="router auto create code"/>
+            <separator/>
+        </group>
+        <group id="QTools.GitBatch" popup="true" text="GitBatch" class="com.pqixing.intellij.actions.QToolGroup">
+            <add-to-group group-id="VcsGroups" anchor="last"/>
+            <add-to-group group-id="QTools" anchor="last"/>
+            <action id="Modularization.GitSync" class="com.pqixing.intellij.actions.GitSyncAction" text="Clone"/>
+            <action id="Modularization.GitMerge"
+                    class="com.pqixing.intellij.actions.GitBranchAction" text="Merge"/>
+            <action id="Modularization.GitCheckout" class="com.pqixing.intellij.actions.GitCheckoutAction"
+                    text="Checkout"/>
         </group>
     </actions>
 </idea-plugin>
