@@ -8,6 +8,8 @@ import com.pqixing.modularization.manager.tasks.*
 import com.pqixing.modularization.maven.VersionIndexTask
 import com.pqixing.modularization.maven.VersionTagTask
 import com.pqixing.modularization.utils.ResultUtils
+import org.gradle.BuildAdapter
+import org.gradle.BuildResult
 import org.gradle.api.Project
 
 /**
@@ -62,12 +64,12 @@ open class ManagerPlugin : BasePlugin() {
             }
         }
 
-//        project.gradle.addListener(object : BuildAdapter() {
-//            override fun buildFinished(result: BuildResult) {
-//                BasePlugin.onClear()
-//                Tools.println("buildFinished -> spend: ${System.currentTimeMillis() - startTime} ms")
-//            }
-//        })
+        project.gradle.addListener(object : BuildAdapter() {
+            override fun buildFinished(result: BuildResult) {
+                BasePlugin.onClear()
+                Tools.println("buildFinished -> spend: ${System.currentTimeMillis() - startTime} ms")
+            }
+        })
     }
 
     private fun initTools(project: Project) {

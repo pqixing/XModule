@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.pqixing.modularization.idea</id>
     <name>Modularization</name>
-    <version>1.9.7</version>
+    <version>2.0.0</version>
     <vendor email="pqixing86@gmail.com" url="https://github.com/pqixing/modularization">pqixing
     </vendor>
 
@@ -10,7 +10,7 @@
     </description>
 
     <change-notes>
-        Builder support!! Adb Text support!! Adb Install support!!
+        Support for cvte env, remove all inner setting!!
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->

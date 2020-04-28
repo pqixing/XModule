@@ -232,6 +232,7 @@ object VersionManager : OnClear {
      */
     private fun indexCacheVersion(lastUpdate: Int, curVersions: HashMap<String, String>) {
         //cacheMap中的最后更新时间与git版本号的最后更新时间不一致，尝试更新
+//        Tools.println("indexCacheVersion $repoLastCommit -> $lastUpdate")
         if (repoLastCommit > lastUpdate) {
             /**从日志中读取版本号**/
             val git = Git.open(repoGitDir)
@@ -255,7 +256,7 @@ object VersionManager : OnClear {
      * 把每个版本的最后版本号添加
      */
     private fun addVersion(curVersions: HashMap<String, String>, groupId: String, artifactId: String, version: List<String>) {
-        Tools.println("addVersion -> $groupId $artifactId $version")
+//        Tools.println("addVersion -> $groupId $artifactId $version")
         val addV = StringBuffer()
         //倒叙查询
         for (i in version.size - 1 downTo 0) {
@@ -379,9 +380,9 @@ object VersionManager : OnClear {
                 val url = getFullUrl("${b.replace(".", "/")}/$m/maven-metadata.xml", mavenUrl)
 
                 val metaStr = readNetUrl(url)
-                Tools.println("request -> $url -> $metaStr")
                 if (metaStr.isNotEmpty()) kotlin.runCatching{
                     val meta = XmlHelper.parseMetadata(metaStr)
+                    Tools.println("request -> $url -> ${meta.versions}")
                     addVersion(versions, meta.groupId.trim(), meta.artifactId.trim(), meta.versions)
                 }
             }

@@ -27,21 +27,18 @@ buildscript {
 
 ext.localMavenUri = uri("/Users/pqx/Documents/Code/repo")
 //本地Maven调试
-ext.localBuild = true
+ext.localBuild = false
 group = "com.pqixing.gradle"
 
 allprojects {
     repositories {
-//          maven{
-//                url "https://dl.bintray.com/pqixing86/modularization"
-//          }
+          maven{
+                url "https://dl.bintray.com/pqixing86/modularization"
+          }
         mavenLocal()
         maven {
             url "http://maven.aliyun.com/nexus/content/groups/public"
         }
         google()
-//        maven {
-//            url "http://192.168.0.70:8081/repository/androidgroup/"
-//        }
     }
 }

@@ -91,7 +91,7 @@ open class ToMavenCheckTask : BaseTask() {
         extHelper.setMavenInfo(project
                 , extends.groupMaven
                 , extends.mavenUserName
-                , extends.mavenPassWord
+                , String(Base64.getDecoder().decode(extends.mavenPassWord.toByteArray(Charsets.UTF_8)))
                 , groupId
                 , artifactId
                 , version
