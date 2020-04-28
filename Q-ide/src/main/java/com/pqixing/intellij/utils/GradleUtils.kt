@@ -59,26 +59,24 @@ object GradleUtils {
     }
 
     private fun initSocket(): Int {
-        val s = serverSocket ?: createServer(8890)?:return 8890
-        if (serverSocket == null) {
-            serverSocket = s
-            Thread {
-                while (true) {
-                    acceptNewInput(s.accept())
-                }
-            }.start()
-        }
+        val s = serverSocket?.takeIf { !it.isClosed } ?: createServer(19990,19990) ?: return 19990
+        if(s!= serverSocket) Thread {
+            while (!s.isClosed) {
+                acceptNewInput(s.accept())
+            }
+        }.start()
+        serverSocket = s
         return s.localPort
     }
 
     private fun acceptNewInput(accept: Socket) = Thread {
         val inputStream = accept.getInputStream().bufferedReader()
-        while (true) {
+
+        while (accept.isConnected) {
             val r = inputStream.readLine() ?: break
             resultLogs.add(r)
-            if(resultLogs.size>20) resultLogs.removeAt(0)
-
-            System.out.println(Thread.currentThread().name + r)
+            if (resultLogs.size > 20) resultLogs.removeAt(0)
+//            System.out.println(Thread.currentThread().name + r)
         }
         accept.close()
     }.start()
@@ -86,10 +84,11 @@ object GradleUtils {
     /**
      * 绑定新的端口
      */
-    private fun createServer(port: Int): ServerSocket? = if(port>10000) null  else try {
+    private fun createServer(first: Int,port: Int): ServerSocket? = if (port-first > 50) null else try {
         ServerSocket(port)
     } catch (e: Exception) {
-        createServer(port + 1)
+        e.printStackTrace()
+        createServer(first,port + 1)
     }
 
 

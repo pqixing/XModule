@@ -8,10 +8,7 @@ import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.interfaces.OnClear
-import com.pqixing.modularization.manager.ExceptionManager
-import com.pqixing.modularization.manager.FileManager
-import com.pqixing.modularization.manager.ManagerExtends
-import com.pqixing.modularization.manager.ManagerPlugin
+import com.pqixing.modularization.manager.*
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
@@ -19,6 +16,7 @@ import com.pqixing.tools.PropertiesUtils
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.ListBranchCommand
 import java.io.File
 import java.net.URL
 import java.text.DateFormat
@@ -257,6 +255,7 @@ object VersionManager : OnClear {
      * 把每个版本的最后版本号添加
      */
     private fun addVersion(curVersions: HashMap<String, String>, groupId: String, artifactId: String, version: List<String>) {
+        Tools.println("addVersion -> $groupId $artifactId $version")
         val addV = StringBuffer()
         //倒叙查询
         for (i in version.size - 1 downTo 0) {
@@ -284,7 +283,7 @@ object VersionManager : OnClear {
      */
     fun createVersionTag(): Boolean {
         val plugin = ManagerPlugin.getPlugin()
-        val opBranch = EnvKeys.opBranch.getEnvValue()?:return false
+        val opBranch = EnvKeys.opBranch.getEnvValue() ?: return false
         val taskBranch = opBranch.substring(opBranch.lastIndexOf("/") + 1)//直接获取名称,不要origin
         if (taskBranch.isEmpty() || taskBranch == "master") {
             Tools.printError(-1, "createVersionTag taskBranch is empty, please input taskBranch!!")
@@ -292,7 +291,8 @@ object VersionManager : OnClear {
         }
         //拷贝一份
         val fallbacks = matchingFallbacks.toMutableList()
-        (EnvKeys.tagBranch.getEnvValue()?:"").split(",").map { it.split("/").last().trim() }.forEach { if (it.isNotEmpty() && !fallbacks.contains(it)) fallbacks.add(it) }
+        (EnvKeys.tagBranch.getEnvValue()
+                ?: "").split(",").map { it.split("/").last().trim() }.forEach { if (it.isNotEmpty() && !fallbacks.contains(it)) fallbacks.add(it) }
 
         val matchKeys = fallbacks.map { "$groupName.$it." }
         val tagVersions = curVersions.filter { c -> matchKeys.any { f -> c.key.startsWith(f) } }
@@ -313,18 +313,21 @@ object VersionManager : OnClear {
         if (!GitUtils.isGitDir(repoGitDir)) prepareVersions()
         val plugin = ManagerPlugin.getPlugin()
         val extends = plugin.getExtends(ManagerExtends::class.java)
-        val maven = extends.groupMavenView
+        val maven = extends.groupMaven
         val groupUrl = extends.groupName.replace(".", "/")
         Tools.println("parseNetVersions  start -> $groupUrl")
         val start = System.currentTimeMillis()
         versions.clear()
-        if (!maven.startsWith("http")) {
-            parseLocalVersion(File(maven, groupUrl), versions)
-        } else parseNetVersions(getFullUrl(groupUrl, maven), versions, extends.groupName)
-        Tools.println("parseNetVersions  end -> ${System.currentTimeMillis() - start} ms")
-        versions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
         //上传版本好到服务端
         val git = Git.open(repoGitDir)
+
+        if (!maven.startsWith("http")) {
+            parseLocalVersion(File(maven, groupUrl), versions)
+        } else parseNetVersionsForTarget(maven, groupName, git, versions)
+
+        Tools.println("parseNetVersions  end -> ${System.currentTimeMillis() - start} ms")
+        versions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
+
         GitUtils.pull(git)
 
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
@@ -363,6 +366,26 @@ object VersionManager : OnClear {
         if (url.startsWith("http:")) return url
         if (baseUrl.endsWith("/")) return "$baseUrl$url"
         return "$baseUrl/$url"
+    }
+
+    fun parseNetVersionsForTarget(baseUrl: String, groupName: String, git: Git, versions: HashMap<String, String>) {
+        val allModules = ProjectManager.projectXml.allSubModules().map { it.name }
+        GitUtils.pull(git)
+        val mavenUrl = getFullUrl(groupName.replace(".", "/"), baseUrl)
+        val allBranchs = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call().map { it.name.replace(Regex(".*/"), "") }.toSet()
+
+        allBranchs.forEach { b ->
+            allModules.forEach { m ->
+                val url = getFullUrl("${b.replace(".", "/")}/$m/maven-metadata.xml", mavenUrl)
+
+                val metaStr = readNetUrl(url)
+                Tools.println("request -> $url -> $metaStr")
+                if (metaStr.isNotEmpty()) kotlin.runCatching{
+                    val meta = XmlHelper.parseMetadata(metaStr)
+                    addVersion(versions, meta.groupId.trim(), meta.artifactId.trim(), meta.versions)
+                }
+            }
+        }
     }
 
     /**

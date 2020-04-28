@@ -29,7 +29,7 @@ repositories {
         dirs "libs"
     }
 }
-ext.mLocalVersion = "0.1"
+ext.mLocalVersion = "0.2"
 ext.mVersion = "1.3.0"
 ext.mArtifactId = "modularization"
 apply from: '../script/bintray.gradle'

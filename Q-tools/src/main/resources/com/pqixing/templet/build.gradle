@@ -39,7 +39,6 @@ manager {
     docRepoUser ""//docGit的用户，如不填，取projectInfo文件中的配置
     docRepoPsw ""//docGit的密码，如不填，取projectInfo文件中的配置
     groupMaven "$rootDir.absolutePath/repo"//用于上传Maven仓库(nexus搭建的私服,其它类型未测试)
-    groupMavenView ""  //用来解析groupMaven版本号的信息,默认与groupMaven相同,如nexus私服的访问地址不一致, 可单独配置
     groupName "com.pqixing.demo"//上传仓库的组名
 
     mavenUserName  ""//用于上传Maven的用户名

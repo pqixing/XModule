@@ -55,7 +55,7 @@
             <action id="Modularization.FormatAction" class="com.pqixing.intellij.actions.FormatAction"
                     text="FormatProject">
                 <add-to-group group-id="ViewMenu" anchor="last"/>
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt F"/>
+                <keyboard-shortcut keymap="$default" first-keystroke="alt F"/>
             </action>
 
             <separator/>
