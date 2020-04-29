@@ -51,6 +51,7 @@ public class VersionDialog extends BaseJDialog {
     JListSelectAdapter adapter;
 
     public VersionDialog(Project project) {
+        super(project);
         setContentPane(contentPane);
         setModal(false);
         getRootPane().setDefaultButton(buttonOK);

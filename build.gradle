@@ -32,10 +32,10 @@ group = "com.pqixing.gradle"
 
 allprojects {
     repositories {
+        mavenLocal()
           maven{
                 url "https://dl.bintray.com/pqixing86/modularization"
           }
-        mavenLocal()
         maven {
             url "http://maven.aliyun.com/nexus/content/groups/public"
         }

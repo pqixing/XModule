@@ -57,7 +57,7 @@ abstract class BaseGitAction : AnAction() {
         branchNames += branches.localBranches.map { it.name }
         branchNames += branches.remoteBranches.map { it.name }
         val rootBranch = rootRepo.currentBranchName;
-        val dialog = GitOperatorDialog(this.javaClass.simpleName.replace("Action", ""), rootBranch, allDatas)
+        val dialog = GitOperatorDialog(project,this.javaClass.simpleName.replace("Action", ""), rootBranch, allDatas)
         dialog.setOnOperatorChange {
             dialog.adapter.setDatas(filterDatas(allDatas, dialog.operatorCmd))
             updateLog(dialog)

@@ -10,7 +10,7 @@ import java.net.URL
 import java.util.*
 import javax.swing.*
 
-class JekinJobLog(val project: Project, val jobUrl: String) : BaseJDialog() {
+class JekinJobLog(val project: Project, val jobUrl: String) : BaseJDialog(project) {
     private lateinit var contentPane: JPanel
     private lateinit var tpLog: JTextPane
     private lateinit var stopButton: JButton

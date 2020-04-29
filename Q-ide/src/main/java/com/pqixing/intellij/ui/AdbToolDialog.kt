@@ -22,7 +22,7 @@ import java.io.File
 import java.util.*
 import javax.swing.*
 
-class AdbToolDialog(val project: Project, apkPath: String?) : BaseJDialog() {
+class AdbToolDialog(val project: Project, apkPath: String?) : BaseJDialog(project) {
     private lateinit var contentPane: JPanel
     private lateinit var buttonOK: JButton
     private lateinit var jParams: JTextField

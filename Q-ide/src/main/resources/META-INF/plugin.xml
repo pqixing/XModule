@@ -48,12 +48,12 @@
                     text="ToMaven"/>
             <separator/>
 
-            <action id="Modularization.OpenAction" class="com.pqixing.intellij.actions.OpenNewAction" text="MDProject">
+            <action id="Modularization.OpenAction" class="com.pqixing.intellij.actions.OpenNewAction" text="OpenPJ">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="FileMenu" anchor="first"/>
             </action>
             <action id="Modularization.FormatAction" class="com.pqixing.intellij.actions.FormatAction"
-                    text="FormatProject">
+                    text="FormatPJS">
                 <add-to-group group-id="ViewMenu" anchor="last"/>
                 <keyboard-shortcut keymap="$default" first-keystroke="alt F"/>
             </action>

@@ -22,7 +22,7 @@ open class OpenNewAction : AnAction() {
 
         val defaultProject = ProjectManagerImpl.getInstance().defaultProject
         val p = e.project
-        val showAndPack = OpenNewProjectDialog()
+        val showAndPack = OpenNewProjectDialog(project)
         showAndPack.tvFilePick.addActionListener {
             FileChooser.chooseFiles( FileChooserDescriptor(false,true,false,false,false,false)
                     , defaultProject, p?.baseDir?.parent) { files: List<VirtualFile> ->

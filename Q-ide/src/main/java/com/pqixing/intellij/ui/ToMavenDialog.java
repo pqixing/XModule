@@ -1,5 +1,6 @@
 package com.pqixing.intellij.ui;
 
+import com.intellij.openapi.project.Project;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 import com.pqixing.intellij.utils.UiUtils;
@@ -27,7 +28,8 @@ public class ToMavenDialog extends BaseJDialog {
     JListSelectAdapter adapter;
     private Runnable onOk;
 
-    public ToMavenDialog(List<JListInfo> datas, String moduleName) {
+    public ToMavenDialog(Project project,List<JListInfo> datas, String moduleName) {
+        super(project);
         setContentPane(contentPane);
         setModal(false);
         setLocation(400, 300);

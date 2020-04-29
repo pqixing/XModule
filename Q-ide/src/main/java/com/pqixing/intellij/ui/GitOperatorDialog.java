@@ -1,6 +1,7 @@
 package com.pqixing.intellij.ui;
 
 import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
@@ -59,7 +60,8 @@ public class GitOperatorDialog extends BaseJDialog {
         this.onOk = onOk;
     }
 
-    public GitOperatorDialog(String title, String curBranch, List<JListInfo> datas) {
+    public GitOperatorDialog(Project project,String title, String curBranch, List<JListInfo> datas) {
+        super(project);
         setContentPane(contentPane);
         setModal(false);
         getRootPane().setDefaultButton(buttonOK);

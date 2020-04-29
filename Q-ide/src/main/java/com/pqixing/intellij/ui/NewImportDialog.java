@@ -62,6 +62,7 @@ public class NewImportDialog extends BaseJDialog {
     private final String TAG = "-------------------";
 
     public NewImportDialog(@NotNull Project project, @NotNull List<String> imports, @NotNull List<JListInfo> allInfos, @NotNull List<String> branchs, String dpModel, String codeRoot) {
+        super(project);
         setContentPane(contentPane);
         setModal(false);
 //        getRootPane().setDefaultButton(buttonOK);

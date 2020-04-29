@@ -31,7 +31,7 @@ class ToMavenAction : AnAction() {
                 .filter { it.name != project.name && (filters == null || it.name == moduleName || filters.contains(it.name)) }
                 .map { JListInfo(it.name, "", 0, it.name == moduleName || it.name == "${moduleName}_api") }
 
-        val dialog = ToMavenDialog(tModules, moduleName);
+        val dialog = ToMavenDialog(project,tModules, moduleName);
         dialog.setOnOk { toMaven(dialog, tModules) }
         dialog.pack()
         dialog.isVisible = true

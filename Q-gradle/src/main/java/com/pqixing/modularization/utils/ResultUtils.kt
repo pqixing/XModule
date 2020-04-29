@@ -55,7 +55,7 @@ object ResultUtils {
      * 尝试通过socket写入数据
      */
     private fun writeToSocket(log: String) = try {
-        val socket = Socket("localhost", getProperty("ideSocketPort")?.toInt() ?: 8890)
+        val socket = Socket("localhost", getProperty("ideSocketPort")?.toInt() ?: 19990)
         val outputStream = socket.getOutputStream().bufferedWriter()//获取一个输出流，向服务端发送信息
         outputStream.write(log + "\n")
         outputStream.flush()

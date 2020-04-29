@@ -1,5 +1,7 @@
 package com.pqixing.intellij.ui;
 
+import com.intellij.openapi.project.Project;
+
 import javax.swing.*;
 import java.awt.event.*;
 
@@ -18,7 +20,8 @@ public class OpenNewProjectDialog extends BaseJDialog {
     }
 
 
-    public OpenNewProjectDialog() {
+    public OpenNewProjectDialog(Project project) {
+        super(project);
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -60,12 +63,5 @@ public class OpenNewProjectDialog extends BaseJDialog {
     private void onCancel() {
         // add your code here if necessary
         dispose();
-    }
-
-    public static void main(String[] args) {
-        OpenNewProjectDialog dialog = new OpenNewProjectDialog();
-        dialog.pack();
-        dialog.setVisible(true);
-        System.exit(0);
     }
 }

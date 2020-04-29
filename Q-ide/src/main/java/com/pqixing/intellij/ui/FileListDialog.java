@@ -30,6 +30,7 @@ public class FileListDialog extends BaseJDialog {
 
 
     public FileListDialog(Project project, List<JListInfo> datas, List<File> filePath, Runnable onRevert) {
+        super(project);
         setContentPane(contentPane);
         setModal(false);
         this.project = project;

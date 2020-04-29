@@ -43,7 +43,7 @@ import javax.swing.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class BuilderDialog(val project: Project, val configInfo: Any, val activityModel: List<String>, val allModule: Set<SubModule>, val branchs: List<String>) : BaseJDialog() {
+class BuilderDialog(val project: Project, val configInfo: Any, val activityModel: List<String>, val allModule: Set<SubModule>, val branchs: List<String>) : BaseJDialog(project) {
     companion object {
         var buildJekins = true
         var showAllLocalModule = false
