@@ -20,11 +20,14 @@ public class BaseJDialog extends JDialog {
         JDialog put = showDialogs.put(getClass().getName(), this);
         if (put != null) put.dispose();
         GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+        TestDialog td = null;
         if(devices!=null&&devices.length>1) {
-            Point location = new TestDialog(pj0).location();
+            td = new TestDialog(pj0);
+            td.show();
+            Point location = td.getLocation();
             setLocation(location.x - getWidth() / 2, location.y - getHeight() / 2);
         }else setLocationRelativeTo(null);
-
+        if(td!=null) td.unShow();
         getRootPane().registerKeyboardAction(a -> onCapsLockClick(), KeyStroke.getKeyStroke(KeyEvent.VK_CAPS_LOCK, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 

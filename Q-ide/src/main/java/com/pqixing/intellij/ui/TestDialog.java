@@ -18,6 +18,9 @@ public class TestDialog extends DialogWrapper {
         dispose();
         return location;
     }
+    public void  unShow(){
+        dispose();
+    }
     @Nullable
     @Override
     protected JComponent createCenterPanel() {
