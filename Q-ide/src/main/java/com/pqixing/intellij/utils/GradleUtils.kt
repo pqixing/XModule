@@ -10,6 +10,7 @@ import com.intellij.openapi.externalSystem.model.execution.ExternalSystemTaskExe
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode
 import com.intellij.openapi.externalSystem.task.TaskCallback
 import com.intellij.openapi.externalSystem.util.ExternalSystemUtil
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.VfsUtil
@@ -26,6 +27,7 @@ object GradleUtils {
     val resultLogs = mutableListOf<String>()//读取的结果
     var serverSocket: ServerSocket? = null
     val defPort: Int = 8451
+    var formatPjs = hashSetOf<String>()
 
     fun runTask(project: Project
                 , tasks: List<String>
@@ -81,7 +83,9 @@ object GradleUtils {
                     val projectUrl = UiUtils.base64Decode(params["url"]!!.toString())
                     val target = ProjectManager.getInstance().openProjects.find { it.basePath == projectUrl }
                     if (target != null) {
-                        Thread.sleep(2222)
+                        val sleepTime = if(formatPjs.contains(target.basePath)) 2222L else 5222L
+                        formatPjs.add(target.basePath?:"")
+                        Thread.sleep(sleepTime)
                         UiUtils.formatProject(target)
                     }
                 }
