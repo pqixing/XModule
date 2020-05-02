@@ -35,6 +35,7 @@ import javax.swing.event.PopupMenuListener
 
 object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
     override fun deviceConnected(p0: IDevice) {
+        Thread.sleep(1000)
         if (devices.find { p0.serialNumber == it.second.serialNumber } == null) {
             val newItem = Pair(p0.getDevicesName(), p0)
             devices.add(newItem)

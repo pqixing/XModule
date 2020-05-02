@@ -6,10 +6,12 @@ import com.pqixing.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.manager.FileManager.rootDir
+import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.TextUtils
 import groovy.lang.GroovyClassLoader
 import org.gradle.api.Project
 import java.io.File
+import java.util.*
 
 open class ManagerExtends(project: Project) : BaseExtension(project) {
 
@@ -18,20 +20,33 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
      */
     var mavenUserName = ""
         get() = if (field.isNotEmpty()) field else config.userName
+
     /**
      * 上传到maven的密码
      */
     var mavenPassWord = ""
         get() = if (field.isNotEmpty()) field else config.passWord
+        set(value) {
+            when {
+                value.isEmpty() -> field = value
+                value.startsWith("sk:") -> field =ResultUtils.base64Decode(value.substring(3))
+                else -> {
+                    field = value
+                    Tools.println("Warming!!! suggest config mavenPassWord $value -> ${"sk:"+ResultUtils.base64Encode(value)}")
+                }
+            }
+        }
 
     /**
      * 文档工程地址
      */
     var docRepoUrl = ""
+
     /**
      *
      */
     var docRepoBranch = ""
+
     /**
      * 文档工程用户名,不配置默认使用ProjectInfo中
      */
@@ -39,11 +54,22 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
         get() = if (field.isNotEmpty()) field else config.userName
     var docRepoPsw = ""
         get() = if (field.isNotEmpty()) field else config.passWord
+        set(value) {
+            when {
+                value.isEmpty() -> field = value
+                value.startsWith("sk:") -> field =ResultUtils.base64Decode(value.substring(3))
+                else -> {
+                    field = value
+                    Tools.println("Warming!!! suggest config docRepoPsw $value -> ${"sk:"+ResultUtils.base64Encode(value)}")
+                }
+            }
+        }
 
     /**
      * 包名
      */
     var groupName = ""
+
     /**
      * 上传组件的Maven地址，下载地址请到Doc目录的Manger目录进行配置
      */
@@ -53,10 +79,12 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
      * 添加依赖地址，如果为空，默认使用groupMaven
      */
     var dependMaven: MutableList<String> = arrayListOf()
+
     /**
      * 依赖匹配传递，如果当前分支无对应依赖包，则按照
      */
     var matchingFallbacks: MutableList<String> = arrayListOf("master")
+
     /**
      * 默认基础版本，如果ToMaven或者是依赖时没有配置，默认使用1.0
      */
@@ -66,6 +94,7 @@ open class ManagerExtends(project: Project) : BaseExtension(project) {
      * 支持忽略版本的模块
      */
     var emptyVersions = mutableListOf<String>()
+
     /**
      * 是否支持忽略版本号
      */
