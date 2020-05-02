@@ -7,7 +7,19 @@ import com.android.tools.apk.analyzer.AndroidApplicationInfo
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
 import com.android.tools.idea.sdk.AndroidSdks
 import com.dachen.creator.utils.LogWrap
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.vfs.VfsUtil
+import com.pqixing.help.XmlHelper
+import com.pqixing.model.ProjectXmlModel
+import com.pqixing.tools.FileUtils
+import com.pqixing.tools.PropertiesUtils
+import groovy.lang.GroovyClassLoader
 import org.jetbrains.android.sdk.AndroidSdkUtils
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
@@ -40,13 +52,67 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
 
     }
 
-    val IDE_PROPERTIES = ".idea/modularization.properties"
+    val IDE_PROPERTIES = ".idea/caches/import.properties"
+    val IML_PROPERTIES = ".idea/caches/iml.properties"
     var lastDevices = ""
     val devices = ArrayList<Pair<String, IDevice>>()
     val comboxs = ArrayList<JComboBox<String>>()
+    var lastModify = 0L
 
     init {
         AndroidDebugBridge.addDeviceChangeListener(this)
+    }
+
+    fun formatProject(project: Project?) = ApplicationManager.getApplication().invokeLater {
+        val p = project ?: return@invokeLater
+        ApplicationManager.getApplication().runWriteAction {
+            p.save()
+            val xml = File(p.basePath, ".idea/modules.xml")
+            if (lastModify == xml.lastModified()) return@runWriteAction
+
+            xml.writeText(xml.readText().replace(Regex("group=\".*\""), ""))
+            VfsUtil.findFileByIoFile(xml, true)?.refresh(false, false)
+            lastModify = xml.lastModified()
+
+            val imls = File(project.basePath,IML_PROPERTIES)
+            val pimls = PropertiesUtils.readProperties(imls)
+
+            val projectXmlFile = File(p.basePath, "templet/project.xml")
+            if (!projectXmlFile.exists()) return@runWriteAction
+
+            val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
+            val clazz = GroovyClassLoader().parseClass(File(p.basePath, "Config.java"))
+            val newInstance = clazz.newInstance()
+            val codeRoot = clazz.getField("codeRoot").get(newInstance).toString()
+
+            val manager = ModuleManager.getInstance(project)
+
+            manager.modules.toList().forEach {
+                val path = getImlPath(codeRoot,projectXml,it.name)
+                if(path!=null){
+                    pimls[path] = it.moduleFilePath
+                }
+            }
+            PropertiesUtils.writeProperties(imls,pimls)
+//            ApplicationManager.getApplication().invokeLater {
+//                Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Build Finish", "format project", NotificationType.INFORMATION).notify(p)
+//            }
+        }
+    }
+
+    /**
+     * 加载模块
+     */
+    fun loadModule(manager: ModuleManager, filePath: String) {
+        if (File(filePath).exists()) try {
+            manager.loadModule(filePath)
+        } finally {
+        }
+    }
+
+    fun getImlPath(codeRoot: String, projectXml: ProjectXmlModel, title: String): String? {
+        val path = projectXml.findSubModuleByName(title)?.path ?: return null
+        return "$codeRoot/$path"
     }
 
     fun setTransfer(component: JComponent, block: (files: List<File>) -> Unit) {
@@ -85,7 +151,8 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
         comboxs.add(comboBox)
     }
 
-    fun IDevice.getDevicesName() = avdName ?: "${getProperty("ro.product.manufacturer")} ${getProperty("ro.product.model")}"
+    fun IDevice.getDevicesName() = avdName
+            ?: "${getProperty("ro.product.manufacturer")} ${getProperty("ro.product.model")}"
 
     fun removeDevicesComboBox(comboBox: JComboBox<String>) = comboxs.remove(comboBox)
 
@@ -117,4 +184,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
         e.printStackTrace()
         null
     }
+
+    fun base64Encode(source:String)= String(Base64.getEncoder().encode(source.toByteArray(Charsets.UTF_8)),Charsets.UTF_8)
+    fun base64Decode(source:String)= String(Base64.getDecoder().decode(source.toByteArray(Charsets.UTF_8)),Charsets.UTF_8)
 }

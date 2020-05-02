@@ -67,7 +67,7 @@ open class ManagerPlugin : BasePlugin() {
         project.gradle.addListener(object : BuildAdapter() {
             override fun buildFinished(result: BuildResult) {
                 BasePlugin.onClear()
-                Tools.println("buildFinished -> spend: ${System.currentTimeMillis() - startTime} ms")
+                ResultUtils.notifyBuildFinish(project,System.currentTimeMillis() - startTime)
             }
         })
     }

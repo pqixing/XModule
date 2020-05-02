@@ -76,8 +76,8 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
 
     val format = SimpleDateFormat("MM-dd HH:mm", Locale.CHINA)
 
-    val cacheDir: File = File(project.basePath, ".idea/cache/net")
-    val configFile: File = File(project.basePath, ".idea/cache/config/jkconfig")
+    val cacheDir: File = File(project.basePath, ".idea/caches/net")
+    val configFile: File = File(project.basePath, ".idea/caches/config/jkconfig")
     var includes: MutableSet<String> = mutableSetOf()
     var installParam = "-r -t"
     private val updateCmd = Runnable {

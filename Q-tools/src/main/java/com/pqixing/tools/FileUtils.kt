@@ -52,7 +52,7 @@ object FileUtils {
     fun copy(from: File, to: File): Boolean {
         if (!from.exists()) return false
         delete(to)
-        if (from.isDirectory) from.listFiles().forEach { copy(it, File(to, it.name)) }
+        if (from.isDirectory) from.listFiles()?.forEach { copy(it, File(to, it.name)) }
         else {
             to.parentFile.mkdirs()
             from.inputStream().copyTo(to.outputStream())
@@ -64,7 +64,7 @@ object FileUtils {
     @JvmStatic
     fun moveDir(from: File, to: File): Boolean {
         if (!from.exists()) return false
-        if (from.isDirectory) from.listFiles().forEach { moveDir(it, File(to, it.name)) }
+        if (from.isDirectory) from.listFiles()?.forEach { moveDir(it, File(to, it.name)) }
         else {
             to.parentFile.mkdirs()
             from.renameTo(to)

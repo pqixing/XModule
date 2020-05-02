@@ -20,9 +20,11 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.NewImportDialog
 import com.pqixing.intellij.utils.GitHelper
+import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.model.ProjectXmlModel
 import com.pqixing.model.SubModuleType
 import com.pqixing.tools.FileUtils
+import com.pqixing.tools.PropertiesUtils
 import git4idea.GitUtil
 import groovy.lang.GroovyClassLoader
 import java.io.File
@@ -67,7 +69,8 @@ class ImportAction : AnAction() {
             override fun run(indicator: ProgressIndicator) {
                 val codePath = File(basePath, dialog.codeRootStr).canonicalPath
                 saveConfig(configFile, dialog)
-                val includeMaps = getImport(projectXml, dialog.imports.filter { !it.contains("#") }.toMutableSet(), codePath, dialog.imports.filter { it.contains("#") })
+
+                val includeMaps = getImport(projectXml, dialog.imports.filter { !it.contains("#") }.toMutableSet(), dialog.codeRootStr, dialog.imports.filter { it.contains("#") })
                 val import = dialog.importModel == "Import" && importByIde(includeMaps)
 
                 val maps = projectXml.allSubModules()
@@ -134,7 +137,7 @@ class ImportAction : AnAction() {
     /**
      * 解析需要导入的工程
      */
-    private fun getImport(projectXml: ProjectXmlModel, includes: MutableSet<String>, codePath: String, moreInclude: List<String>): Map<String, String> {
+    private fun getImport(projectXml: ProjectXmlModel, includes: MutableSet<String>, codeRoot: String, moreInclude: List<String>): Map<String, String> {
         if (moreInclude.isNotEmpty()) moreInclude.sortedWith(Comparator { t, t1 ->
             (if (t.contains("#")) t.substring(0, 1) else "A").compareTo(if (t1.contains("#")) t1.substring(0, 1) else "A")
         }).forEach { v ->
@@ -144,14 +147,13 @@ class ImportAction : AnAction() {
             else if (v.startsWith("D#")) includes.addAll(handleDps(File(basePath), l))
             else if (v.startsWith("ED#")) includes.removeAll(handleDps(File(basePath), l))
         }
-
-        return includes.map { Pair(it, getImlPath(codePath, projectXml, it)) }.toMap(mutableMapOf())
+        val pimls = PropertiesUtils.readProperties(File(project.basePath,UiUtils.IML_PROPERTIES))
+        return includes.map { m ->  Pair(m, pimls[UiUtils.getImlPath(codeRoot, projectXml, m)]?.toString()?:"")  }.toMap(mutableMapOf())
     }
 
     private fun handleDps(rootDir: File, module: String) = FileUtils.readText(File(rootDir, "build/dps/$module.dp"))?.split(",")?.map { it.trim() }?.toSet()
             ?: emptySet()
 
-    private fun getImlPath(codePath: String, projectXml: ProjectXmlModel, title: String) = "$codePath/${projectXml.findSubModuleByName(title)?.path}/$title.iml"
 
     private fun saveConfig(configgFile: File, dialog: NewImportDialog) = ApplicationManager.getApplication().invokeLater {
         ApplicationManager.getApplication().runWriteAction {
@@ -179,18 +181,12 @@ class ImportAction : AnAction() {
                 if (imls.remove(m.moduleFilePath) || projectName == m.name) return@forEach
                 manager.disposeModule(m)
             }
-            imls.forEach { i -> loadModule(manager, i) }
+            ApplicationManager.getApplication().runWriteAction {
+                imls.forEach { i -> UiUtils.loadModule(manager, i) }
+            }
         }
         return imls.size == includes.size
     }
 
-    /**
-     * 加载模块
-     */
-    private fun loadModule(manager: ModuleManager, filePath: String) = ApplicationManager.getApplication().runWriteAction {
-        if (File(filePath).exists()) try {
-            manager.loadModule(filePath)
-        } finally {
-        }
-    }
+
 }

@@ -8,6 +8,7 @@ public class Keys {
     public static final String PREFIX_TO_MAVEN = "build://aar";
     public static final String PREFIX_LOG = "build://log";
     public static final String PREFIX_IDE_LOG = "ide://log";
+    public static final String PREFIX_IDE_NOTIFY = "ide://notify";
     public static final String LOG_MODULE = "module";
     public static final String LOG_BRANCH = "branch";
     public static final String LOG_VERSION = "version";
@@ -78,10 +79,7 @@ public class Keys {
      * 远程配置项
      */
     public static final String REMOTE_CONFIG = "remoteConfig";
-    /**
-     * 全局配置名称
-     */
-    public static final String GLOBAL_CONFIG_NAME = "modularization.properties";
+
     /**
      * 全局隐藏配置名称
      */

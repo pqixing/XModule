@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Locale;
 
 public class StringUtils {
-
     /**
      * 将string按需要格式化,前面加缩进符,后面加换行符
      * @param tabNum 缩进量

@@ -6,8 +6,8 @@ import com.pqixing.getEnvValue
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.tools.FileUtils
-import com.pqixing.tools.TextUtils
 import org.gradle.api.GradleException
+import org.gradle.api.Project
 import java.io.File
 import java.net.Socket
 import java.util.*
@@ -17,24 +17,27 @@ import java.util.*
  * 用于Ide的工具
  */
 object ResultUtils {
+    var lastIdePort = -1
+    val defPort = 8451
 
     //是否是通过ide调用
-    val ide = "ide" == EnvKeys.syncType.getEnvValue()
+    val ide
+        get() = "ide" == EnvKeys.syncType.getEnvValue()
 
     /**
      * 输出结果，用于Ide的交互获取
      * @param exitCode 退出标记 0 表示正常退出，1表示异常退出
      */
     fun writeResult(msg: String, exitCode: Int = 0, exit: Boolean = exitCode != 0) {
-        Tools.println(msg)
         val log = "${Keys.PREFIX_IDE_LOG}?${Keys.RUN_TASK_ID}=${getProperty(Keys.RUN_TASK_ID)
                 ?: System.currentTimeMillis()}&endTime=${System.currentTimeMillis()}&exitCode=$exitCode&msg=$msg"
 
-        if (ide && !writeToSocket(log)) {
+        if (ide && !writeToSocket(log, getProperty("ideSocketPort")?.toInt() ?: defPort)) {
+            Tools.println(msg)
             val rootDir = ManagerPlugin.getPlugin().rootDir
             var logCount = 0
             do {
-                val ideFile = File(rootDir, ".idea/modularization.log${logCount++}")
+                val ideFile = File(rootDir, ".idea/caches/task.log${logCount++}")
                 //只保留10条记录
                 val logs = LinkedList<String>()
                 FileUtils.readText(ideFile)?.lines()?.apply {
@@ -51,18 +54,35 @@ object ResultUtils {
         if (exit) throw  GradleException(msg)
     }
 
+    fun notifyBuildFinish(rootProject: Project, spend: Long) {
+        val rootdir = rootProject.rootDir
+        //非idea工程，不处理
+        if (File(rootdir, ".idea").exists()) {
+            val str = "${Keys.PREFIX_IDE_NOTIFY}?task=${rootProject.gradle.startParameter.taskNames.joinToString(",")}&type=buildFinished&spend=$spend&url=${String(Base64.getEncoder().encode(rootdir.absolutePath.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)}"
+            if (lastIdePort > 0) writeToSocket(str, lastIdePort)
+            else {
+                var cur = defPort
+                while ((cur - defPort) < 20) if (writeToSocket(str, cur++)) break
+            }
+        }
+        Tools.println("buildFinished -> spend: $spend ms")
+    }
+
     /**
      * 尝试通过socket写入数据
      */
-    private fun writeToSocket(log: String) = try {
-        val socket = Socket("localhost", getProperty("ideSocketPort")?.toInt() ?: 19990)
+    private fun writeToSocket(log: String, port: Int) = try {
+        val socket = Socket("localhost", port)
         val outputStream = socket.getOutputStream().bufferedWriter()//获取一个输出流，向服务端发送信息
         outputStream.write(log + "\n")
         outputStream.flush()
         outputStream.close()
         socket.close()
+        Tools.println("writeToSocket $port -> $log")
+        lastIdePort = port
         true
     } catch (e: Exception) {
+        Tools.println("writeToSocket $port -> $log ${e.message}")
         false
     }
 
