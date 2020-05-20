@@ -7,6 +7,7 @@ import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.AndroidPlugin
+import com.pqixing.modularization.android.MDPlugin
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
@@ -32,7 +33,7 @@ import kotlin.collections.HashSet
  * 2，
  */
 open class DpsAnalysisTask : BaseTask() {
-    val plugin = AndroidPlugin.getPluginByProject(project)
+    val plugin = project.MDPlugin()
     val groupName = ManagerPlugin.getExtends().groupName
     val dir = File(plugin.cacheDir, "report")
     val temp = File(dir, "AndroidReport.txt")
@@ -94,7 +95,7 @@ open class DpsAnalysisTask : BaseTask() {
         }
         val resultStr = StringBuilder()
         result["CreateTime"] = Date().toLocaleString()
-        result.forEach { k, v ->
+        result.forEach { (k, v) ->
             val version = v.split("->").last().trim()
             resultStr.append("$k=$version\n")
             versions[k] = version

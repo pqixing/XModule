@@ -3,6 +3,7 @@ package com.pqixing.modularization.android.dps
 import com.pqixing.Tools
 import com.pqixing.model.SubModule
 import com.pqixing.modularization.android.AndroidPlugin
+import com.pqixing.modularization.android.MDPlugin
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
@@ -21,7 +22,7 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
     var toMavenVersion = ""
         get() = if (subModule.isApiModule()) {
             val n = subModule.parent!!.name
-            val dpsExt = AndroidPlugin.getPluginByProject(plugin.project.rootProject.findProject(n)!!).dpsManager.dpsExt
+            val dpsExt = plugin.project.rootProject.findProject(n)!!.MDPlugin().dpsManager.dpsExt
             dpsExt.toMavenVersion
         } else {
             if (field.isEmpty()) {
@@ -35,7 +36,7 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
     var toMavenDesc = ""
         get() = if (subModule.isApiModule()) {
             val n = subModule.parent!!.name
-            val dpsExt = AndroidPlugin.getPluginByProject(plugin.project.rootProject.findProject(n)!!).dpsManager.dpsExt
+            val dpsExt = plugin.project.rootProject.findProject(n)!!.MDPlugin().dpsManager.dpsExt
             dpsExt.toMavenDesc
         } else {
             val desc = TextUtils.getSystemEnv("toMavenDesc")

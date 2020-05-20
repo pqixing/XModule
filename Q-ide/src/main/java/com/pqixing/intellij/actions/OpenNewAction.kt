@@ -16,13 +16,11 @@ import java.io.File
 
 open class OpenNewAction : AnAction() {
 
-    lateinit var project: Project
-
     override fun actionPerformed(e: AnActionEvent) {
 
         val defaultProject = ProjectManagerImpl.getInstance().defaultProject
         val p = e.project
-        val showAndPack = OpenNewProjectDialog(project)
+        val showAndPack = OpenNewProjectDialog(p)
         showAndPack.tvFilePick.addActionListener {
             FileChooser.chooseFiles( FileChooserDescriptor(false,true,false,false,false,false)
                     , defaultProject, p?.baseDir?.parent) { files: List<VirtualFile> ->

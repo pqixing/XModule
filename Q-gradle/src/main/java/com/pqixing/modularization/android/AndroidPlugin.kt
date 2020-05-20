@@ -164,8 +164,6 @@ open class AndroidPlugin : BasePlugin() {
         }
         buildAsApp = filter == ":${project.name}:BuildApk" || filter.matches(Regex(":${project.name}:assemble.*?Dev"))
     }
-
-    companion object {
-        fun getPluginByProject(project: Project): AndroidPlugin = project.extensions.extraProperties.get(project.name) as AndroidPlugin
-    }
 }
+
+fun Project.MDPlugin() = this.extensions.extraProperties.get(this.name) as AndroidPlugin

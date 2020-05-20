@@ -6,13 +6,14 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.IExtHelper
+import com.pqixing.modularization.android.MDPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.modularization.utils.execute
 import org.eclipse.jgit.api.Git
 
 open class ToMavenTask : BaseTask() {
-    val plugin = AndroidPlugin.getPluginByProject(project)
+    val plugin = project.MDPlugin()
 
     init {
         if (plugin.subModule.type != SubModuleType.TYPE_APPLICATION) {

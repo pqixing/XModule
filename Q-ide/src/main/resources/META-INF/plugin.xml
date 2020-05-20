@@ -52,7 +52,7 @@
                     text="ToMaven"/>
             <separator/>
 
-            <action id="Modularization.OpenAction" class="com.pqixing.intellij.actions.OpenNewAction" text="OpenPJ">
+            <action id="Modularization.OpenAction" class="com.pqixing.intellij.actions.OpenNewAction" text="OpenNew">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="FileMenu" anchor="first"/>
             </action>

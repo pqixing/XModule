@@ -10,6 +10,7 @@ import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.IExtHelper
+import com.pqixing.modularization.android.MDPlugin
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.utils.GitUtils
@@ -27,6 +28,10 @@ import java.util.*
 open class ToMavenCheckTask : BaseTask() {
     init {
         group = ""
+        val mdPlugin = project.MDPlugin()
+        if (mdPlugin.subModule.isApiModule()) {//如果是Api模块，则依赖主模块的clean方法，强行导入主模块
+            this.dependsOn(":${mdPlugin.subModule.parent?.name}:clean")
+        }
     }
 
     /**
@@ -50,7 +55,7 @@ open class ToMavenCheckTask : BaseTask() {
         val extends = ManagerPlugin.getExtends()
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
-        val plugin = AndroidPlugin.getPluginByProject(project)
+        val plugin = project.MDPlugin()
         val dpsExtends = plugin.getExtends(DpsExtends::class.java)
         val subModule = plugin.subModule
 //        val lastLog = plugin.subModule
@@ -142,7 +147,7 @@ open class ToMavenCheckTask : BaseTask() {
         val commitTime = params["commitTime"]?.toInt() ?: 0
         if (hash == revCommit.name || revCommit.commitTime < commitTime) {
             //距离上次提交没有变更时,视为成功
-            ResultUtils.writeResult("$matchBranch:$artifactId:$baseVersion.$lastVersion The code are not change", 0, unCheck(2)!=0)
+            ResultUtils.writeResult("$matchBranch:$artifactId:$baseVersion.$lastVersion The code are not change", 0, unCheck(2) != 0)
         }
     }
 
@@ -155,7 +160,7 @@ open class ToMavenCheckTask : BaseTask() {
         if (unCheck < 4) return unCheck - oldType
 
         val newType = 1 shl (oldType + 3)
-        return Math.min(0,(unCheck and newType) - 1)
+        return Math.min(0, (unCheck and newType) - 1)
     }
 
     private fun checkBaseVersion(baseVersion: String) {
