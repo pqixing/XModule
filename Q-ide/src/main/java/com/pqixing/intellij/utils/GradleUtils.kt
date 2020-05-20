@@ -2,24 +2,24 @@ package com.pqixing.intellij.utils
 
 import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.notification.Notification
+import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.externalSystem.model.ProjectSystemId
 import com.intellij.openapi.externalSystem.model.execution.ExternalSystemTaskExecutionSettings
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode
 import com.intellij.openapi.externalSystem.task.TaskCallback
 import com.intellij.openapi.externalSystem.util.ExternalSystemUtil
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.openapi.vfs.VfsUtil
+import com.pqixing.intellij.actions.FormatAction
 import com.pqixing.tools.UrlUtils
 import java.io.File
 import java.net.ServerSocket
 import java.net.Socket
-import java.nio.charset.Charset
-import java.util.*
 
 object GradleUtils {
     val defEnvs = mapOf(Pair("include", "Auto"), Pair("dependentModel", "mavenOnly"), Pair("buildDir", "IDE"), Pair("syncType", "ide"))
@@ -27,7 +27,6 @@ object GradleUtils {
     val resultLogs = mutableListOf<String>()//读取的结果
     var serverSocket: ServerSocket? = null
     val defPort: Int = 8451
-    var formatPjs = hashSetOf<String>()
 
     fun runTask(project: Project
                 , tasks: List<String>
@@ -62,7 +61,8 @@ object GradleUtils {
     }
 
     fun tryInitSocket(defPort: Int): Int {
-        val s = serverSocket?.takeIf { !it.isClosed } ?: createServer(defPort, defPort) ?: return defPort
+        val s = serverSocket?.takeIf { !it.isClosed } ?: createServer(defPort, defPort)
+        ?: return defPort
         if (s != serverSocket) Thread {
             while (!s.isClosed) {
                 acceptNewInput(s.accept())
@@ -72,6 +72,7 @@ object GradleUtils {
         return s.localPort
     }
 
+    var showFormats = mutableMapOf<String, Int>()
     private fun acceptNewInput(accept: Socket) = Thread {
         val inputStream = accept.getInputStream().bufferedReader()
 
@@ -79,14 +80,38 @@ object GradleUtils {
             val r = inputStream.readLine() ?: break
             if (r.startsWith("ide://notify")) {//通知ide刷新
                 val params = UrlUtils.getParams(r)
-                if (params["type"] == "buildFinished") {
+                if (params["type"] == "buildFinished" && params["task"] == "prepareKotlinBuildScriptModel") {
                     val projectUrl = UiUtils.base64Decode(params["url"]!!.toString())
+                    val showFormat = showFormats[projectUrl] ?: 0
                     val target = ProjectManager.getInstance().openProjects.find { it.basePath == projectUrl }
-                    if (target != null) {
-                        val sleepTime = if(formatPjs.contains(target.basePath)) 2222L else 5222L
-                        formatPjs.add(target.basePath?:"")
-                        Thread.sleep(sleepTime)
-                        UiUtils.formatProject(target)
+                    if (showFormat >= 0 && target != null) {
+                        if (showFormat == 1) {
+                            //延迟3秒格式化
+                            Thread.sleep(3000L)
+                            UiUtils.formatProject(target)
+                        } else {
+                            val n = Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Sync Finish", "", NotificationType.INFORMATION)
+                            n.addAction(object : NotificationAction("Don't Show") {
+                                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                                    showFormats[projectUrl] = -1
+                                    n.expire()
+                                }
+                            })
+                            n.addAction(object : NotificationAction("Format Project") {
+                                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                                    UiUtils.formatProject(target)
+                                    n.expire()
+                                }
+                            })
+                            n.addAction(object : NotificationAction("Format Auto") {
+                                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                                    UiUtils.formatProject(target)
+                                    showFormats[projectUrl] = 1
+                                    n.expire()
+                                }
+                            })
+                            n.notify(target)
+                        }
                     }
                 }
             } else {
