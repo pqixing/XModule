@@ -13,7 +13,7 @@
         Support for cvte env
         fix dialog location on multi devices
         fix import project
-        fix project format
+        fix compatibility
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
