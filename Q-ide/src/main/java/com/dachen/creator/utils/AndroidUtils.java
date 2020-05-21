@@ -1,12 +1,5 @@
 package com.dachen.creator.utils;
 
-import com.android.ddmlib.AndroidDebugBridge;
-import com.android.ddmlib.IDevice;
-import com.android.tools.apk.analyzer.AaptInvoker;
-import com.android.tools.apk.analyzer.AndroidApplicationInfo;
-import com.android.tools.idea.apk.viewer.ApkParser;
-import com.android.tools.idea.sdk.AndroidSdks;
-import com.android.tools.log.LogWrapper;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -15,21 +8,10 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.xml.XmlDocument;
 
-import com.pqixing.intellij.adapter.JListInfo;
-import com.pqixing.intellij.utils.UiUtils;
-import kotlin.Pair;
-import org.jetbrains.android.sdk.AndroidSdkUtils;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class AndroidUtils {

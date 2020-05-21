@@ -5,8 +5,8 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.impl.ProjectManagerImpl
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.pqixing.intellij.ui.OpenNewProjectDialog
 import com.pqixing.intellij.utils.GitHelper
@@ -19,17 +19,17 @@ open class OpenNewAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
 
         val defaultProject = ProjectManagerImpl.getInstance().defaultProject
-        val p = e.project
+        val p = e.project?:return
         val showAndPack = OpenNewProjectDialog(p)
         showAndPack.tvFilePick.addActionListener {
             FileChooser.chooseFiles( FileChooserDescriptor(false,true,false,false,false,false)
-                    , defaultProject, p?.baseDir?.parent) { files: List<VirtualFile> ->
+                    , defaultProject, LocalFileSystem.getInstance().findFileByPath(p.basePath!!)?.parent) { files: List<VirtualFile> ->
                 files.firstOrNull()?.let {
                     showAndPack.tvDir.text = it.canonicalPath
                 }
             }
         }
-        if(p!=null)  showAndPack.tvDir.text = p.baseDir.parent.canonicalPath
+        if(p!=null)  showAndPack.tvDir.text = LocalFileSystem.getInstance().findFileByPath(p.basePath!!)!!.parent.canonicalPath
         showAndPack.setOnOk {
             var dir = File(showAndPack.tvDir.text.trim(), "CRoot")
             var i = 0

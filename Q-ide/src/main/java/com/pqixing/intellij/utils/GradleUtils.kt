@@ -86,8 +86,8 @@ object GradleUtils {
                     val target = ProjectManager.getInstance().openProjects.find { it.basePath == projectUrl }
                     if (showFormat >= 0 && target != null) {
                         if (showFormat == 1) {
-                            //延迟3秒格式化
-                            Thread.sleep(3000L)
+                            //延迟2秒格式化
+                            Thread.sleep(2000L)
                             UiUtils.formatProject(target)
                         } else {
                             val n = Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Sync Finish", "", NotificationType.INFORMATION)
@@ -113,6 +113,7 @@ object GradleUtils {
                             n.notify(target)
                         }
                     }
+
                 }
             } else {
                 resultLogs.add(r)

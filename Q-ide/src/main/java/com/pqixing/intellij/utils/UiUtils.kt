@@ -7,35 +7,29 @@ import com.android.tools.apk.analyzer.AndroidApplicationInfo
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
 import com.android.tools.idea.sdk.AndroidSdks
 import com.dachen.creator.utils.LogWrap
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.VfsUtil
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.ProjectXmlModel
-import com.pqixing.tools.FileUtils
 import com.pqixing.tools.PropertiesUtils
 import groovy.lang.GroovyClassLoader
 import org.jetbrains.android.sdk.AndroidSdkUtils
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
-import java.awt.event.ActionEvent
 import java.io.File
 import java.util.*
-import javax.swing.JButton
 import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.TransferHandler
-import javax.swing.event.PopupMenuEvent
-import javax.swing.event.PopupMenuListener
 
 object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
     override fun deviceConnected(p0: IDevice) {
-        Thread.sleep(1000)
+        for (i in 0..6) {
+            if ((p0.avdName ?: p0.getProperty("ro.product.model")) != null) break
+            Thread.sleep(500)//睡眠2.5秒钟，等待连接成功
+        }
         if (devices.find { p0.serialNumber == it.second.serialNumber } == null) {
             val newItem = Pair(p0.getDevicesName(), p0)
             devices.add(newItem)
@@ -75,30 +69,34 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
             VfsUtil.findFileByIoFile(xml, true)?.refresh(false, false)
             lastModify = xml.lastModified()
 
-            val imls = File(project.basePath,IML_PROPERTIES)
-            val pimls = PropertiesUtils.readProperties(imls)
-
-            val projectXmlFile = File(p.basePath, "templet/project.xml")
-            if (!projectXmlFile.exists()) return@runWriteAction
-
-            val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
-            val clazz = GroovyClassLoader().parseClass(File(p.basePath, "Config.java"))
-            val newInstance = clazz.newInstance()
-            val codeRoot = clazz.getField("codeRoot").get(newInstance).toString()
-
-            val manager = ModuleManager.getInstance(project)
-
-            manager.modules.toList().forEach {
-                val path = getImlPath(codeRoot,projectXml,it.name)
-                if(path!=null){
-                    pimls[path] = it.moduleFilePath
-                }
-            }
-            PropertiesUtils.writeProperties(imls,pimls)
+            collectImls(project, p)
 //            ApplicationManager.getApplication().invokeLater {
 //                Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Build Finish", "format project", NotificationType.INFORMATION).notify(p)
 //            }
         }
+    }
+
+    private fun collectImls(project: Project, p: Project) {
+        val imls = File(project.basePath, IML_PROPERTIES)
+        val pimls = PropertiesUtils.readProperties(imls)
+
+        val projectXmlFile = File(p.basePath, "templet/project.xml")
+        if (!projectXmlFile.exists()) return
+
+        val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
+        val clazz = GroovyClassLoader().parseClass(File(p.basePath, "Config.java"))
+        val newInstance = clazz.newInstance()
+        val codeRoot = clazz.getField("codeRoot").get(newInstance).toString()
+
+        val manager = ModuleManager.getInstance(project)
+
+        manager.modules.toList().forEach {
+            val path = getImlPath(codeRoot, projectXml, it.name)
+            if (path != null) {
+                pimls[path] = it.moduleFilePath
+            }
+        }
+        PropertiesUtils.writeProperties(imls, pimls)
     }
 
     /**
@@ -186,6 +184,6 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
         null
     }
 
-    fun base64Encode(source:String)= String(Base64.getEncoder().encode(source.toByteArray(Charsets.UTF_8)),Charsets.UTF_8)
-    fun base64Decode(source:String)= String(Base64.getDecoder().decode(source.toByteArray(Charsets.UTF_8)),Charsets.UTF_8)
+    fun base64Encode(source: String) = String(Base64.getEncoder().encode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
+    fun base64Decode(source: String) = String(Base64.getDecoder().decode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
 }

@@ -54,20 +54,6 @@ public class ClassModify extends ClassVisitor {
             v = new LoadTransformer(v, access, name, desc, pkg, visitor, buildConfigClass);
         return v;
     }
-
-    @Override
-    public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-//        System.out.println("visitField  -> name = "+name +" desc ="+desc + "value = "+value );
-        switch (name) {
-            case "buildTimeStr":
-                value = System.currentTimeMillis()+"";
-                break;
-            case "buildTime":
-                value = System.currentTimeMillis();
-                break;
-        }
-        return super.visitField(access, name, desc, signature, value);
-    }
 //
 //    /**
 //     * HashSet<String> :likes
@@ -174,6 +160,12 @@ class LoadTransformer extends GeneratorAdapter {
                 super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/util/HashSet", "add", "(Ljava/lang/Object;)" + org.objectweb.asm.Type.BOOLEAN_TYPE, false);
                 super.visitInsn(Opcodes.POP);
             }
+
+            super.visitFieldInsn(Opcodes.GETSTATIC, pkg, "configs", "Ljava/util/ArrayList;");
+            super.visitLdcInsn(System.currentTimeMillis()+"");
+            super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/util/ArrayList", "add", "(Ljava/lang/Object;)" + org.objectweb.asm.Type.BOOLEAN_TYPE, false);
+            super.visitInsn(Opcodes.POP);
+
         }
         super.visitInsn(opcode);
     }

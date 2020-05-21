@@ -157,7 +157,7 @@ class PqxVisitor : ClassVisitor(Opcodes.ASM5, null) {
     override fun visitAnnotation(desc: String?, visible: Boolean): AnnotationVisitor? {
         if (visible) {
             results.find { it.first == desc }?.let {
-                println("visitAnnotation -> desc " + desc + " " + className + " c" + hashCode());
+//                println("visitAnnotation -> desc " + desc + " " + className + " c" + hashCode());
                 it.second.add(className)
             }
         }

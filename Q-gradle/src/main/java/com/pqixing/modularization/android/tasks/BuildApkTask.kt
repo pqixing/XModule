@@ -4,6 +4,7 @@ import com.android.build.gradle.AppExtension
 import com.pqixing.Tools
 import com.pqixing.EnvKeys
 import com.pqixing.getEnvValue
+import com.pqixing.modularization.android.MDPlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
@@ -14,13 +15,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 open class BuildApkTask : BaseTask() {
-    private var buildType: String
-    private var buildApkPath: String?
+    private var buildType: String = EnvKeys.buildApkType.getEnvValue() ?: "release"
+    private var buildApkPath: String? = EnvKeys.buildApkPath.getEnvValue()
 
     //解析出第一个Dev渠道的构建任务，防止有渠道包
     init {
-        buildType = EnvKeys.buildApkType.getEnvValue() ?: "release"
-        buildApkPath = EnvKeys.buildApkPath.getEnvValue()
+        val plugin = project.MDPlugin()
+        if(!plugin.isApp)  buildType = "dev"
         this.dependsOn("assemble${TextUtils.firstUp(buildType)}")
     }
 

@@ -4,8 +4,8 @@ apply plugin: 'java'
 apply plugin: 'kotlin'
 intellij {
     pluginName 'Modularization'
-    version 'IC-2018.1'
-    plugins = ['android','git4idea']
+    version 'IC-2020.1.1'
+    plugins = ['android','git4idea',"java"]
     updateSinceUntilBuild false
 }
 publishPlugin {

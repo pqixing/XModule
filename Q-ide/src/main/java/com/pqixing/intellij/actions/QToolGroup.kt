@@ -14,13 +14,13 @@ class QToolGroup : DefaultActionGroup() {
             GradleUtils.tryInitSocket(GradleUtils.defPort)
         }
 
-        fun isModulariztionProject(project: Project?): Boolean =project?.baseDir?.findChild("templet")?.findChild("project.xml")?.exists()==true
+        fun isModulariztionProject(project: Project?): Boolean = File(project?.basePath,"templet/project.xml").exists()
 
         fun isDachenProject(project: Project?): Boolean =false
 
     }
 
-    override fun update(e: AnActionEvent?) {
+    override fun update(e: AnActionEvent) {
         super.update(e)
         //启动后，尝试打开socket连接，接收gradle插件的通知
         GradleUtils.tryInitSocket(GradleUtils.defPort)

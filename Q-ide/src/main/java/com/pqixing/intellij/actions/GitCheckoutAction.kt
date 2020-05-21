@@ -10,7 +10,7 @@ import java.io.File
 class GitCheckoutAction : BaseGitAction() {
 
     override fun checkUrls(urls: Map<String, String>): Boolean = true
-    override fun update(e: AnActionEvent?) {
+    override fun update(e: AnActionEvent) {
         e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
     }
     override fun initDialog(dialog: GitOperatorDialog) {

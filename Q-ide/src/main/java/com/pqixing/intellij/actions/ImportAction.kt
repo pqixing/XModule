@@ -34,7 +34,7 @@ class ImportAction : AnAction() {
     lateinit var project: Project
     lateinit var basePath: String
 
-    override fun update(e: AnActionEvent?) {
+    override fun update(e: AnActionEvent) {
         e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
     }
 
@@ -88,7 +88,7 @@ class ImportAction : AnAction() {
                 }
 
                 //如果快速导入不成功,则,同步一次
-                if (!import) ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
+                /*if (!import)*/ ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
                 Thread.sleep(2000)//先睡眠2秒,然后检查git管理是否有缺少
                 ApplicationManager.getApplication().invokeLater {
                     if (dialog.syncVcs()) {

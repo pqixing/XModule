@@ -17,6 +17,22 @@ object TextUtils {
     fun numOrLetter(str: String): String {
         return str.trim().replace("[^0-9a-zA-Z]".toRegex(), "")
     }
+    /**
+     * 只保留数字和字母
+     * @param str
+     * @return
+     */
+    fun letter(str: String): String {
+        return str.trim().replace("[^a-zA-Z]".toRegex(), "")
+    }
+    /**
+     * 只保留数字和字母
+     * @param str
+     * @return
+     */
+    fun letter(str: String,def:String): String {
+        return letter(str).takeIf { it.isNotEmpty() }?:def
+    }
 
 
     fun firstUp(source: String): String {

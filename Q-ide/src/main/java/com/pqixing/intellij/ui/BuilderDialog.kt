@@ -45,7 +45,7 @@ import kotlin.collections.HashMap
 
 class BuilderDialog(val project: Project, val configInfo: Any, val activityModel: List<String>, val allModule: Set<SubModule>, val branchs: List<String>) : BaseJDialog(project) {
     companion object {
-        var buildJekins = true
+        var buildJekins = false
         var showAllLocalModule = false
         var versionPath = ""
         var maxRecord = 50
@@ -107,10 +107,10 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
                 .mapNotNull {
                     val params = UrlUtils.getParams(it)
                     val branch = params["branch"] ?: ""
-                    val buildType = params["buildType"] ?: ""
+                    val buildApkType = params["buildApkType"] ?: ""
                     val module = params["title"] ?: ""
 
-                    if (!allLog && (curType != buildType || curBranch != branch || (selects.isNotEmpty() && !selects.contains(module)))) return@mapNotNull null
+                    if (!allLog && (curType != buildApkType || curBranch != branch || (selects.isNotEmpty() && !selects.contains(module)))) return@mapNotNull null
 
                     val startTime = params["startTime"]?.toLongOrNull()
                             ?: System.currentTimeMillis()
@@ -125,7 +125,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
                         else -> "Spend : " + getTimeText(endTime - startTime)
                     }
                     var title = "${format.format(Date(createTime))}  $module"
-                    if (allLog) title += "  $branch  $buildType"
+                    if (allLog) title += "  $branch  $buildApkType"
                     JListInfo(title, log, staue = status).apply { data = params["apkUrl"] }
                 }
         adapter.setDatas(showLogs)
@@ -318,7 +318,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
         if (!cbJekins.isSelected) return showBuildParams()
 
 
-        val exitCode = Messages.showYesNoCancelDialog("Current \nbranch:$branch , buildType:$type\nselectApps:${selectApps.joinToString(",")}", "Setting", "READ", "SAVE", "CANCEL", null)
+        val exitCode = Messages.showYesNoCancelDialog("Current \nbranch:$branch , buildApkType:$type\nselectApps:${selectApps.joinToString(",")}", "Setting", "READ", "SAVE", "CANCEL", null)
         if (exitCode == Messages.CANCEL) return
         val save = exitCode == Messages.NO
         val readText = FileUtils.readText(configFile) ?: ""
@@ -456,7 +456,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
 
         var i = 0
         val allMap = selectItem.map { it.title }.map { m ->
-            val params = mapOf("branch" to branch, "buildType" to type, "createTime" to (createTime + i++).toString(), "title" to m, "dependentModel" to cbDpModel.selectedItem.toString())
+            val params = mapOf("branch" to branch, "buildApkType" to type, "createTime" to (createTime + i++).toString(), "title" to m, "dependentModel" to cbDpModel.selectedItem.toString())
             params
         }
         writeLocalBuild(allMap)
@@ -506,16 +506,16 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
             startLocalBuild(index + 1, params, iDevice)
         }
 
-        val cleanCallBack = TaskCallBack { _, _ ->
-            GradleUtils.runTask(project, listOf(":$title:PrepareDev", ":$title:BuildApk")
-                    , activateToolWindowBeforeRun = true
-                    , envs = mapOf("include" to if (dpModel == "mavenOnly") title else "${includes.joinToString(",")},$title", "dependentModel" to dpModel, "versionFile" to versionPath)
-                    , callback = buildCallBack)
-        }
-        GradleUtils.runTask(project, listOf(":$title:clean")
+//        val cleanCallBack = TaskCallBack { _, _ ->
+        GradleUtils.runTask(project, listOf(":$title:clean", ":$title:PrepareDev", ":$title:BuildApk")
                 , activateToolWindowBeforeRun = true
-                , envs = mapOf("include" to title, "dependentModel" to dpModel)
-                , callback = cleanCallBack)
+                , envs = mapOf("include" to if (dpModel == "mavenOnly") title else "${includes.joinToString(",")},$title", "dependentModel" to dpModel, "versionFile" to versionPath)
+                , callback = buildCallBack)
+//        }
+//        GradleUtils.runTask(project, listOf(":$title:clean")
+//                , activateToolWindowBeforeRun = true
+//                , envs = mapOf("include" to title, "dependentModel" to dpModel)
+//                , callback = cleanCallBack)
     }
 
     private fun countLocalBuild() = ApplicationManager.getApplication().runWriteAction {

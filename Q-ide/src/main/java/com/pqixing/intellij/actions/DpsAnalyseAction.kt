@@ -19,7 +19,7 @@ import java.io.File
 
 class DpsAnalyseAction : AnAction() {
     lateinit var project: Project
-    override fun update(e: AnActionEvent?) {
+    override fun update(e: AnActionEvent) {
         e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project) && e?.getData(LangDataKeys.MODULE) != null
     }
 

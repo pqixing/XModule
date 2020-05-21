@@ -11,7 +11,7 @@ import git4idea.actions.GitCloneAction
 import java.io.File
 
 class GitBranchAction : BaseGitAction() {
-    override fun update(e: AnActionEvent?) {
+    override fun update(e: AnActionEvent) {
         e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
     }
 

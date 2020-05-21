@@ -18,15 +18,14 @@ import java.io.File
 open class BuilderAction : AnAction() {
     lateinit var project: Project
     lateinit var basePath: String
-    override fun update(e: AnActionEvent?) {
+    override fun update(e: AnActionEvent) {
         super.update(e)
-        e?.presentation?.isVisible = QToolGroup.isModulariztionProject(e?.project)
+        e.presentation?.isVisible = QToolGroup.isModulariztionProject(e?.project)
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
-        val fromContextMenu = e.isFromContextMenu//从菜单进入,否则,其他方式唤醒
         val projectXmlFile = File(basePath, "templet/project.xml")
         val configFile = File(basePath, "Config.java")
 
@@ -36,7 +35,6 @@ open class BuilderAction : AnAction() {
             return
         }
         val allSubModule = XmlHelper.parseProjectXml(projectXmlFile).allSubModules()
-        if (!fromContextMenu) BuilderDialog.buildJekins = false//快捷键唤起时,默认优先切换到本地构建模式
         BuilderDialog(project, getConfigInfo(configFile), getActivityModules(e, allSubModule), allSubModule, getBranches()).showAndPack()
     }
 

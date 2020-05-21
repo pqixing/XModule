@@ -12,10 +12,8 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
 import com.pqixing.intellij.utils.GitHelper
-import com.pqixing.model.ProjectXmlModel
 import com.pqixing.tools.FileUtils
 import git4idea.GitUtil
-import git4idea.history.GitLogUtil
 import git4idea.repo.GitRepository
 import groovy.lang.GroovyClassLoader
 import java.io.File
@@ -57,7 +55,7 @@ abstract class BaseGitAction : AnAction() {
         branchNames += branches.localBranches.map { it.name }
         branchNames += branches.remoteBranches.map { it.name }
         val rootBranch = rootRepo.currentBranchName;
-        val dialog = GitOperatorDialog(project,this.javaClass.simpleName.replace("Action", ""), rootBranch, allDatas)
+        val dialog = GitOperatorDialog(project, this.javaClass.simpleName.replace("Action", ""), rootBranch, allDatas)
         dialog.setOnOperatorChange {
             dialog.adapter.setDatas(filterDatas(allDatas, dialog.operatorCmd))
             updateLog(dialog)
@@ -115,9 +113,9 @@ abstract class BaseGitAction : AnAction() {
                 info.staue = if (repo == null) 3 else 0
             }
             "push" -> {
-                info.log = cacheLog ?: repo?.let {
-                    GitLogUtil.collectFullDetails(project, repo.root, "origin/${it.currentBranchName}..${it.currentBranchName}").size.toString() + " -> " + it.currentBranch?.findTrackedBranch(repo)?.name
-                } ?: "Project No Exists"
+                info.log = cacheLog
+                        ?: repo?.currentBranch?.let { GitHelper.state(project, repo)?.size?.toString() + " -> " + it.findTrackedBranch(repo)?.name }
+                                ?: "Project No Exists"
                 info.staue = if (repo == null) 3 else 0
             }
         }

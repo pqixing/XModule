@@ -22,7 +22,7 @@ import javax.swing.JList
 class GitStateAction : BaseGitAction, JlistSelectListener {
     //    val TIP = "A:All;  C:Conflict;  P:Push";
     var commitMsg = ""//提交的文本
-    override fun update(e: AnActionEvent?) {
+    override fun update(e: AnActionEvent) {
         e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
     }
     override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean {

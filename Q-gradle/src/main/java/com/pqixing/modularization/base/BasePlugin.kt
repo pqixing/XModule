@@ -85,7 +85,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     fun createIgnoreFile() {
         val ignoreFile = project.file(FileNames.GIT_IGNORE)
 
-        val defSets = mutableSetOf("build", "*.iml")
+        val defSets = mutableSetOf("build", "*.iml","src/dev")
         defSets += ignoreFields
         val old = FileUtils.readText(ignoreFile) ?: ""
         old.lines().forEach { line -> defSets.remove(trimIgnoreKey(line.trim())) }

@@ -7,7 +7,7 @@ import git4idea.GitUtil
 import java.io.File
 
 class GitSyncAction : BaseGitAction() {
-    override fun update(e: AnActionEvent?) {
+    override fun update(e: AnActionEvent) {
         e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
     }
     override fun checkUrls(urls: Map<String, String>): Boolean=true
