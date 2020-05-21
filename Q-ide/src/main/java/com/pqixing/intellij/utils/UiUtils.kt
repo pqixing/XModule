@@ -26,10 +26,6 @@ import javax.swing.TransferHandler
 
 object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
     override fun deviceConnected(p0: IDevice) {
-        for (i in 0..6) {
-            if ((p0.avdName ?: p0.getProperty("ro.product.model")) != null) break
-            Thread.sleep(500)//睡眠2.5秒钟，等待连接成功
-        }
         if (devices.find { p0.serialNumber == it.second.serialNumber } == null) {
             val newItem = Pair(p0.getDevicesName(), p0)
             devices.add(newItem)
@@ -151,7 +147,8 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
     }
 
     fun IDevice.getDevicesName() = avdName
-            ?: "${getProperty("ro.product.manufacturer")} ${getProperty("ro.product.model")}"
+            ?: getProperty("ro.product.model")?.let { "${getProperty("ro.product.manufacturer")} $it" }
+            ?: serialNumber
 
     fun removeDevicesComboBox(comboBox: JComboBox<String>) = comboxs.remove(comboBox)
 
