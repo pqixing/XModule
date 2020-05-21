@@ -83,7 +83,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) : OnClear {
         onSelfCompile()
 
         val dps = dpsExt.compiles.toMutableSet()
-        if (plugin.justSync || plugin.buildAsApp) dpsExt.devCompiles.forEach {
+        if (plugin.buildAsApp) dpsExt.devCompiles.forEach {
             dps.add(it.apply { dpType = "dev" })
         }
 

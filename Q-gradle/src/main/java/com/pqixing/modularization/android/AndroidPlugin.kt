@@ -37,8 +37,8 @@ open class AndroidPlugin : BasePlugin() {
 
         if (!isApp) project.apply(mapOf<String, String>("plugin" to "maven"))
         //如果是Library模块运行，设置ApplicationId
-        if (buildAsApp && !isApp){
-            extHelper.setApplicationId(project, "com.${TextUtils.letter(ManagerPlugin.getExtends().docRepoBranch,"libraryrun")}.${TextUtils.letter(project.name,"app")}".toLowerCase())
+        if (buildAsApp && !isApp) {
+            extHelper.setApplicationId(project, "com.${TextUtils.letter(ManagerPlugin.getExtends().docRepoBranch, "libraryrun")}.${TextUtils.letter(project.name, "app")}".toLowerCase())
         }
     }
 
@@ -52,11 +52,6 @@ open class AndroidPlugin : BasePlugin() {
      */
     var buildAsApp = false
 
-    /**
-     * 只是同步工程，不是编译任务
-     */
-    var justSync = false
-
     lateinit var subModule: SubModule
 
 
@@ -65,7 +60,7 @@ open class AndroidPlugin : BasePlugin() {
             if (isApp) return listOf("com.module.application")
             val libraryGradle = if (subModule.isApiModule()) "com.module.api" else "com.module.library"
             //如果是独立运行，或者是本地同步时，包含dev分支
-            if (buildAsApp || justSync) return listOf(libraryGradle, "com.module.dev")
+            if (buildAsApp) return listOf(libraryGradle, "com.module.dev")
             return listOf(libraryGradle, "com.module.maven")
         }
     override val ignoreFields: Set<String> = emptySet()
@@ -116,36 +111,6 @@ open class AndroidPlugin : BasePlugin() {
             Tools.println("result:$dpPath")
         }
     }
-//
-//    private fun compatOldPlugin(dpsExt: DpsExtends) {
-////
-//        val javaCacheDir = File(cacheDir, "java")
-//        val groupName = ManagerPlugin.getExtends().groupName
-//        val configStr = StringBuilder("package auto.$groupName.${TextUtils.numOrLetter(project.name).toLowerCase()};\n")
-//                .append("public class ${TextUtils.className(project.name)}Config { \n")
-//        //Config文件输出
-//        val DP_CONFIGS_NAMES = dpsExt.compiles.map { "auto.$groupName.${TextUtils.numOrLetter(it.moduleName).toLowerCase()}.${TextUtils.className(it.moduleName)}Config" }
-//                .sortedBy { it }.toString()
-//        configStr.append("public static final String  DP_CONFIGS_NAMES = \"${DP_CONFIGS_NAMES.replace("[", "").replace("]", "")}\";\n")
-//        val CONFIG = "auto.$groupName.${TextUtils.numOrLetter(project.name).toLowerCase()}.${TextUtils.className(project.name)}"
-//        configStr.append("public static final String  LAUNCH_CONFIG = \"${CONFIG}Launch\";\n")
-//        val NAME = TextUtils.numOrLetter(project.name).toLowerCase()
-//        configStr.append("public static final String  NAME = \"$NAME\";\n").append("}")
-//
-//        val filePath = "auto.$groupName.${TextUtils.numOrLetter(project.name).toLowerCase()}.${TextUtils.className(project.name)}Config".replace(".", "/") + ".java"
-//        FileUtils.writeText(File(javaCacheDir, filePath), configStr.toString(), true)
-//
-//        val enterFile = File(javaCacheDir, "auto/com/pqixing/configs/Enter.java")
-//        if (buildAsApp) {
-//            val enterStr = StringBuilder("package auto.com.pqixing.configs;\n public class Enter { \n")
-//                    .append("public static final String  LAUNCH = \"${CONFIG}Launch\";\n")
-//                    .append("public static final String  CONFIG = \"${CONFIG}Config\";\n")
-//                    .append("}")
-//            FileUtils.writeText(enterFile, enterStr.toString(), true)
-//        } else FileUtils.delete(enterFile)
-//
-//
-//    }
 
     /**
      * 检查插件类型
@@ -160,10 +125,6 @@ open class AndroidPlugin : BasePlugin() {
         val projectPre = ":${project.name}"
         val filter = getGradle().startParameter.taskNames.lastOrNull { it.startsWith(projectPre) }
                 ?: ""
-        if (filter.isEmpty() || filter.matches(Regex(":${project.name}:generate.*?Sources"))) {
-            justSync = true
-            return
-        }
         buildAsApp = filter == ":${project.name}:BuildApk" || filter.matches(Regex(":${project.name}:assemble.*?Dev"))
     }
 }

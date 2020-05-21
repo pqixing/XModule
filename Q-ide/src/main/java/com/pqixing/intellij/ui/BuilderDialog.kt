@@ -369,7 +369,8 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
             val size = sortFile?.size ?: 0
             if (size > 230) ApplicationManager.getApplication().invokeLater {
                 ApplicationManager.getApplication().runWriteAction {
-                    sortFile?.sortedBy { it.name }?.forEachIndexed { index, file -> if (size - index > 200) FileUtils.delete(file) }
+                    var index = 0
+                    sortFile?.sortedBy { it.name }?.forEach { file -> if (size - index++ > 200) FileUtils.delete(file) }
                 }
             }
         }
@@ -521,8 +522,9 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
     private fun countLocalBuild() = ApplicationManager.getApplication().runWriteAction {
         val buildDir = File(cacheDir.parentFile, buildHistory)
         if (!buildDir.exists()) return@runWriteAction
-        buildDir.listFiles()?.filter { it.isFile && it.name.endsWith(".log") }?.sortedByDescending { it.name }?.forEachIndexed { index, file ->
-            if (index >= 50) {
+        var index = 0
+        buildDir.listFiles()?.filter { it.isFile && it.name.endsWith(".log") }?.sortedByDescending { it.name }?.forEach { file ->
+            if (index++ >= 50) {
                 val apkUrl = UrlUtils.getParams(FileUtils.readText(file))["apkUrl"]
                 FileUtils.delete(file)
                 if (apkUrl?.isNotEmpty() == true) FileUtils.delete(File(apkUrl))
@@ -576,12 +578,13 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
             override fun run(indicator: ProgressIndicator) {
                 val oldMax = maxTime
                 maxTime = 8
+                var index = 0
                 //开始运行
-                runApps.forEachIndexed { index, app ->
+                runApps.forEach { app ->
                     indicator.text = "Start Build $app"
                     safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${URLEncoder.encode(TextUtils.removeLineAndMark(allModule.find { it.name == app }?.introduce?.replace(" ", "")
                             ?: ""), "utf-8")}&BuildUser=${TextUtils.removeLineAndMark(configInfo.javaClass.getField("userName").get(configInfo).toString())}")
-                    Thread.sleep(if (index == 0) 2000 else 500)//延迟500毫秒再进行请求,避免出现问题
+                    Thread.sleep(if (index++ == 0) 2000 else 500)//延迟500毫秒再进行请求,避免出现问题
                 }
                 indicator.text = "Querying Result,Please Wait"
                 Thread.sleep(3000)
