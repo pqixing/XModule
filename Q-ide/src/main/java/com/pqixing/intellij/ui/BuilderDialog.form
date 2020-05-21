@@ -34,7 +34,6 @@
             <properties>
               <editable value="true"/>
               <model>
-                <item value="dev"/>
                 <item value="debug"/>
                 <item value="release"/>
               </model>
