@@ -74,8 +74,9 @@ open class RouteCreate : AnAction() {
         for (f in clazz.allFields) when {
             f.name.startsWith("Activity_") -> {
                 gnCode(code, fullPath, f)
-                code.append("public void startActivity(Context context,Class clazz,int requestCode){if(clazz==null){ clazz = com.pqixing.annotation.AnnotationInfo.findClassByPath(PATH);}Intent intent = new Intent(context, clazz);intent.putExtras(bundle);if (context instanceof Activity) { ((Activity) context).startActivityForResult(intent, requestCode); } else { intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);context.startActivity(intent); }}")
-                code.append("public void startActivity(Context context,int requestCode){startActivity(context,com.pqixing.annotation.AnnotationInfo.findClassByPath(PATH),requestCode);}}\n")
+                code.append("public void startActivity(Context context,Class<?> clazz,int requestCode){if(clazz==null){ clazz = com.pqixing.annotation.AnnotationInfo.findClassByPath(PATH);}intent.setClass(context,clazz);;if (context instanceof Activity) { ((Activity) context).startActivityForResult(intent, requestCode); } else { intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);context.startActivity(intent); }}")
+                code.append("public void startActivity(Context context,int requestCode){startActivity(context,com.pqixing.annotation.AnnotationInfo.findClassByPath(PATH),requestCode);}")
+                code.append("public void startActivity(Context context){startActivity(context,-1);}}\n")
             }
             f.name.startsWith("Fragment_") -> {
                 gnCode(code, fullPath, f)
@@ -95,25 +96,27 @@ open class RouteCreate : AnAction() {
         val tartClazz = f.children.find { it is PsiClassObjectAccessExpression }?.text?.replace(".class", "")
         code.append("\npublic static class $clazzName{\n")
                 .append("public static final String PATH=\"$fullPath.${f.name}\";\n")
-                .append("public static  $tartClazz s = null;")
-        code.append("public static $tartClazz getServers(boolean keep){ $tartClazz o = s==null?($tartClazz)com.pqixing.annotation.AnnotationInfo.findObjectByPath(PATH):s;s = keep?o:null;return o;}}\n")
+                .append("public static  $tartClazz temp = null;")
+        code.append("public static $tartClazz getServers(boolean keep){ $tartClazz o = temp==null?($tartClazz)com.pqixing.annotation.AnnotationInfo.findObjectByPath(PATH):temp;temp = keep?o:null;return o;}}\n")
     }
 
     private fun gnCode(code: StringBuilder, fullPath: String, f: PsiField) {
         val clazzName = f.name
         code.append("\npublic static class $clazzName{\n")
                 .append("public static final String PATH=\"$fullPath.${f.name}\";\n")
-                .append("public final Bundle bundle = new Bundle();")
-                .append("public static $clazzName with(Bundle bundle){$clazzName a = new $clazzName();a.bundle.putAll(bundle);return a;};     ")
-                .append("public static $clazzName with(){$clazzName a = new $clazzName();return a;};     ")
+                .append("public Intent intent;")
+                .append("public static $clazzName with(Intent src){$clazzName temp = new $clazzName();temp.intent = src==null?new Intent():new Intent(src);return temp;};     ")
+                .append("public static $clazzName with(){return with(null);};     ")
                 .append("private  $clazzName(){};\n")
+                .append("public $clazzName addFlags(int flags){intent.addFlags(flags);return this;}public $clazzName setFlags(int flags){intent.setFlags(flags);return this;};public $clazzName putExtras(Bundle src){intent.putExtras(src);return this;};")
 
         f.children.find { it is PsiLiteralExpression }
                 ?.text?.replace("\"", "")
                 ?.split(",")?.forEach {
                     val s = it.split(":")
-                    if (s.size >= 2) code.append("public ${s[1]} get${TextUtils.firstUp(s[0])}(){return bundle.get${TextUtils.firstUp(s[1])}(\"${s[0]}\");}")
-                            .append("public $clazzName set${TextUtils.firstUp(s[0])}(${s[1]} ${s[0]}){bundle.put${TextUtils.firstUp(s[1])}(\"${s[0]}\",${s[0]});return this;}\n")
+                    if (s.size >= 2) code.append("public ${s[1]} get${TextUtils.firstUp(s[0])}(){Bundle b = intent.getExtras();if(b==null) b = new Bundle(); return b.get${TextUtils.firstUp(s[1])}(\"${s[0]}\");}")
+                            .append("public $clazzName set${TextUtils.firstUp(s[0])}(${s[1]} ${s[0]}){intent.putExtra(\"${s[0]}\",${s[0]});return this;}\n")
+
                 }
 
 

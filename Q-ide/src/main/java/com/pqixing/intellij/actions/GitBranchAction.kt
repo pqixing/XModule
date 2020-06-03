@@ -49,7 +49,7 @@ class GitBranchAction : BaseGitAction() {
             Messages.showMessageDialog(project, "Target branch is not allowed to be the same as local branch", localBranch, null)
             return false
         }
-        val branchs = allDatas.mapNotNull { getRepo(it.title) }.mapNotNull { if (localBranch == it.currentBranchName) null else "${it.root.name}  ->  ${it.currentBranchName}" }
+        val branchs = allDatas.filter { it.select }.mapNotNull { getRepo(it.title) }.mapNotNull { if (localBranch == it.currentBranchName) null else "${it.root.name}  ->  ${it.currentBranchName}" }
         if (branchs.isNotEmpty()) {
             val exitCode = Messages.showOkCancelDialog(project, "Those project branch are not equals local branch!! \n ${branchs.joinToString { it + "\n" }}", localBranch, "ToCheckOut", "Cancel", null)
             if (exitCode == Messages.OK) {

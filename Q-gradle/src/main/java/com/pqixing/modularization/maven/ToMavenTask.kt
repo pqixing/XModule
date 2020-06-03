@@ -17,9 +17,8 @@ open class ToMavenTask : BaseTask() {
 
     init {
         if (plugin.subModule.type != SubModuleType.TYPE_APPLICATION) {
-            this.dependsOn("uploadArchives", "ToMavenCheck", "clean")
-            project.getTasksByName("clean", false)?.forEach { it.mustRunAfter("ToMavenCheck") }
-            project.getTasksByName("uploadArchives", false)?.forEach { it.mustRunAfter("clean") }
+            this.dependsOn("uploadArchives")
+            project.getTasksByName("uploadArchives", false).forEach { it.dependsOn("ToMavenCheck") }
         }
     }
 

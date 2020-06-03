@@ -43,7 +43,7 @@ class Script {
     void addIncludeProject(org.gradle.api.initialization.Settings setting, String name, File projectDir, String type) {
         setting.include(":$name")
         setting.findProject(":$name").projectDir = projectDir
-        if (type == "library_api") {
+        if (type == "library_api"||type == "application") {
             setting.include(":${name}_api")
             setting.findProject(":${name}_api").projectDir = new File(projectDir, "src/api")
         }

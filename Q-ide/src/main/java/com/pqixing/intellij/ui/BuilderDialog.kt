@@ -6,8 +6,10 @@ import com.android.ddmlib.IDevice
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
 import com.dachen.creator.JekinsJob
 import com.intellij.notification.Notification
+import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -16,6 +18,8 @@ import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.intellij.actions.QToolGroup
+import com.pqixing.intellij.actions.QuicklyBuildAction
+import com.pqixing.intellij.actions.QuicklyParam
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.adapter.JlistSelectListener
@@ -267,8 +271,9 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
             if (results.size == urls.size) ApplicationManager.getApplication().invokeAndWait {
 
                 val msg = urls.joinToString("\n") { "${results[it.first]}    ->    ${it.second}" }
-                if (failResult.isEmpty()) Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Result", msg, NotificationType.INFORMATION).notify(project)
-                else if (Messages.OK == Messages.showOkCancelDialog("$msg\n Fail Item:\n ${failResult.joinToString("\n") { "${it.second} -> ${it.first}" }}"
+//                if (failResult.isEmpty()) Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Result", msg, NotificationType.INFORMATION).notify(project)
+//                else
+                if (failResult.isNotEmpty() && Messages.OK == Messages.showOkCancelDialog("$msg\n Fail Item:\n ${failResult.joinToString("\n") { "${it.second} -> ${it.first}" }}"
                                 , "Install Apk Result", "REINSTALL", "CANCEL", null)) {
                     prepareToInstall(iDevice, failResult)
                 }
@@ -457,15 +462,14 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
 
         var i = 0
         val allMap = selectItem.map { it.title }.map { m ->
-            val params = mapOf("branch" to branch, "buildApkType" to type, "createTime" to (createTime + i++).toString(), "title" to m, "dependentModel" to cbDpModel.selectedItem.toString())
-            params
+            mapOf("branch" to branch, "buildApkType" to type, "createTime" to (createTime + i++).toString(), "title" to m, "dependentModel" to cbDpModel.selectedItem.toString())
         }
         writeLocalBuild(allMap)
         isVisible = false
         startLocalBuild(0, allMap, iDevice)
     }
 
-    private fun writeLocalBuild(params: List<Map<String, String>>) = ApplicationManager.getApplication().invokeAndWait {
+    fun writeLocalBuild(params: List<Map<String, String>>) = ApplicationManager.getApplication().invokeAndWait {
         ApplicationManager.getApplication().runWriteAction {
             val buildDir = File(cacheDir.parentFile, buildHistory)
             params.forEach { p ->
@@ -476,11 +480,31 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
         }
     }
 
-    private fun startLocalBuild(index: Int, params: List<Map<String, String>>, iDevice: IDevice) {
+    fun startLocalBuild(index: Int, params: List<Map<String, String>>, iDevice: IDevice) {
         if (index >= params.size) return ApplicationManager.getApplication().invokeAndWait {
             buttonOK.isVisible = true
             if (!isVisible) dispose()
             countLocalBuild()
+
+            val n = Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Success", "", NotificationType.INFORMATION)
+            n.addAction(object : NotificationAction("Remove Quickly") {
+                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                    QuicklyBuildAction.quicklyTask.removeIf { it.projectPath == project.basePath }
+                    n.expire()
+                }
+            })
+            n.addAction(object : NotificationAction("Quickly Build") {
+                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                    QuicklyBuildAction.quicklyTask.removeIf { it.projectPath == project.basePath }
+                    QuicklyBuildAction.quicklyTask.add(QuicklyParam().apply {
+                        deviceId = iDevice.serialNumber
+                        projectPath = project.basePath?:""
+                        this.params = params
+                    })
+                    n.expire()
+                }
+            })
+            n.notify(project)
         }
         val param = params[index].toMutableMap()
         val title = param["title"] ?: ""
@@ -508,7 +532,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
         }
 
 //        val cleanCallBack = TaskCallBack { _, _ ->
-        GradleUtils.runTask(project, listOf(":$title:clean", ":$title:PrepareDev", ":$title:BuildApk")
+        GradleUtils.runTask(project, listOf(":$title:PrepareDev", ":$title:BuildApk")
                 , activateToolWindowBeforeRun = true
                 , envs = mapOf("include" to if (dpModel == "mavenOnly") title else "${includes.joinToString(",")},$title", "dependentModel" to dpModel, "versionFile" to versionPath)
                 , callback = buildCallBack)
