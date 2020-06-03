@@ -139,7 +139,6 @@ public class MVPCodeFactory {
         return StringUtils.formatSingleLine(0, "package " + AndroidUtils.getFilePackageName(dir) + ";") +
                 "\n" +
                 StringUtils.formatSingleLine(0, " import android.os.Bundle;") +
-                StringUtils.formatSingleLine(0, "import android.support.regester.Nullable;") +
                 StringUtils.formatSingleLine(0, "import android.view.LayoutInflater;") +
                 StringUtils.formatSingleLine(0, "import android.view.View;") +
                 StringUtils.formatSingleLine(0, "import android.view.ViewGroup;") +
@@ -164,7 +163,7 @@ public class MVPCodeFactory {
                 StringUtils.formatSingleLine(0, "       }") +
                 "\n" +
                 StringUtils.formatSingleLine(0, "       @Override") +
-                StringUtils.formatSingleLine(0, "       public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {") +
+                StringUtils.formatSingleLine(0, "       public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {") +
                 StringUtils.formatSingleLine(0, "               return super.onCreateView(inflater, container, savedInstanceState);") +
                 StringUtils.formatSingleLine(0, "       }") +
                 "\n" +

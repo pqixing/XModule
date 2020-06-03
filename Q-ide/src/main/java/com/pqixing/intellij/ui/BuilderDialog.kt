@@ -486,25 +486,25 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
             if (!isVisible) dispose()
             countLocalBuild()
 
-            val n = Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Success", "", NotificationType.INFORMATION)
-            n.addAction(object : NotificationAction("Remove Quickly") {
-                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-                    QuicklyBuildAction.quicklyTask.removeIf { it.projectPath == project.basePath }
-                    n.expire()
-                }
-            })
-            n.addAction(object : NotificationAction("Quickly Build") {
-                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-                    QuicklyBuildAction.quicklyTask.removeIf { it.projectPath == project.basePath }
-                    QuicklyBuildAction.quicklyTask.add(QuicklyParam().apply {
-                        deviceId = iDevice.serialNumber
-                        projectPath = project.basePath?:""
-                        this.params = params
-                    })
-                    n.expire()
-                }
-            })
-            n.notify(project)
+//            val n = Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Success", "", NotificationType.INFORMATION)
+//            n.addAction(object : NotificationAction("Remove Quickly") {
+//                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+//                    QuicklyBuildAction.quicklyTask.removeIf { it.projectPath == project.basePath }
+//                    n.expire()
+//                }
+//            })
+//            n.addAction(object : NotificationAction("Quickly Build") {
+//                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+//                    QuicklyBuildAction.quicklyTask.removeIf { it.projectPath == project.basePath }
+//                    QuicklyBuildAction.quicklyTask.add(QuicklyParam().apply {
+//                        deviceId = iDevice.serialNumber
+//                        projectPath = project.basePath?:""
+//                        this.params = params
+//                    })
+//                    n.expire()
+//                }
+//            })
+//            n.notify(project)
         }
         val param = params[index].toMutableMap()
         val title = param["title"] ?: ""
