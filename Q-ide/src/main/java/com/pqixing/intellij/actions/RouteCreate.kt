@@ -1,6 +1,6 @@
 package com.pqixing.intellij.actions
 
-import com.dachen.creator.utils.AndroidUtils
+import com.pqixing.creator.utils.AndroidUtils
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent

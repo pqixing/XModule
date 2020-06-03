@@ -1,4 +1,4 @@
-package com.dachen.creator.actions
+package com.pqixing.creator.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent

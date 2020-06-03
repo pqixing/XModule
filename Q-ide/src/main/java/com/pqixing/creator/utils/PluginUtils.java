@@ -1,4 +1,4 @@
-package com.dachen.creator.utils;
+package com.pqixing.creator.utils;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;

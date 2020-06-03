@@ -1,6 +1,6 @@
-package com.dachen.creator.actions;
+package com.pqixing.creator.actions;
 
-import com.dachen.creator.core.gennerator.RouterCreatorGenerator;
+import com.pqixing.creator.core.gennerator.RouterCreatorGenerator;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;

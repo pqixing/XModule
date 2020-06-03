@@ -1,12 +1,12 @@
-package com.dachen.creator.core.gennerator;
+package com.pqixing.creator.core.gennerator;
 
-import com.dachen.creator.utils.AndroidUtils;
-import com.dachen.creator.utils.PluginUtils;
+import com.pqixing.creator.utils.AndroidUtils;
+import com.pqixing.creator.utils.PluginUtils;
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import com.dachen.creator.core.MVPCodeFactory;
+import com.pqixing.creator.core.MVPCodeFactory;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;

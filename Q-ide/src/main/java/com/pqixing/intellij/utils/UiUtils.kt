@@ -6,7 +6,7 @@ import com.android.tools.apk.analyzer.AaptInvoker
 import com.android.tools.apk.analyzer.AndroidApplicationInfo
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
 import com.android.tools.idea.sdk.AndroidSdks
-import com.dachen.creator.utils.LogWrap
+import com.pqixing.creator.utils.LogWrap
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project

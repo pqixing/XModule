@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.android.ddmlib.IDevice
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
-import com.dachen.creator.JekinsJob
+import com.pqixing.creator.JekinsJob
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType

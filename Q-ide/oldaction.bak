@@ -61,12 +61,12 @@
             <action id="ClearCache" class="com.pqixing.intellij.actions.RunAction" text="ClearCache"
                     description="ClearCache"/>
             <separator/>
-            <action id="com.libiao.routercreator" class="com.dachen.creator.actions.PathCreator" text="PathCreator"
+            <action id="com.libiao.routercreator" class="PathCreator" text="PathCreator"
                     description="router auto create code"/>
 
-            <action id="com.libiao.mvpcreator" class="com.dachen.creator.actions.MvpCreator" text="MvpCreator"
+            <action id="com.libiao.mvpcreator" class="MvpCreator" text="MvpCreator"
                     description="auto create MVP code"/>
 
-            <action id="com.libiao.modelcreator" class="com.dachen.creator.actions.ModelCreator" text="ModelCreator"
+            <action id="com.libiao.modelcreator" class="ModelCreator" text="ModelCreator"
                     description="auto create model code"/>
         </group>

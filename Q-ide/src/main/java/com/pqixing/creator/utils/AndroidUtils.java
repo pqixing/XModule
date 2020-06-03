@@ -1,4 +1,4 @@
-package com.dachen.creator.utils;
+package com.pqixing.creator.utils;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -25,7 +25,11 @@ public class AndroidUtils {
                 "main" + File.separator +
                 "java" + File.separator +
                 getAppPackageName(project, modulePath).replace(".", File.separator);
-        return LocalFileSystem.getInstance().findFileByPath(path);
+        File dir = new File(path);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return LocalFileSystem.getInstance().refreshAndFindFileByIoFile(dir);
     }
 
     /**

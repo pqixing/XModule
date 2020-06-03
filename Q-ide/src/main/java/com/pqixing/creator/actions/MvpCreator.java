@@ -1,6 +1,6 @@
-package com.dachen.creator.actions;
+package com.pqixing.creator.actions;
 
-import com.dachen.creator.core.gennerator.MVPCreatorGenerator;
+import com.pqixing.creator.core.gennerator.MVPCreatorGenerator;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
@@ -8,17 +8,11 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
-import com.pqixing.intellij.actions.QToolGroup;
 
 public class MvpCreator extends AnAction   {
-
-    @Override
-    public void update(AnActionEvent e) {
-        super.update(e);
-        e.getPresentation().setVisible(QToolGroup.Companion.isDachenProject(e.getProject()));
-    }
 
     private String classPrefix;
     @Override
@@ -29,8 +23,7 @@ public class MvpCreator extends AnAction   {
             Messages.showWarningDialog("请选中要生成mvp代码的组件!", "CreateMvpTemplateCode");
             return;
         }
-        String path = module.getModuleFilePath();
-        String realPath = path.substring(0, path.lastIndexOf("/"));
+        String realPath = ModuleRootManager.getInstance(module).getContentRoots()[0].getPath();
         InputValidator validator = new InputValidator() {
             @Override
             public boolean checkInput(String s) {
@@ -46,7 +39,7 @@ public class MvpCreator extends AnAction   {
         com.intellij.openapi.util.Pair<String, Boolean> p = Messages.showInputDialogWithCheckBox(
                 "please input class prefix",
                 module.getName(),
-                "create Activity ?",
+                "Activity?",
                 true,
                 true,
                 Messages.getQuestionIcon(), "", validator);

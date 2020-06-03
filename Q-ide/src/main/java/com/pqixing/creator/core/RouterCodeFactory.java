@@ -1,9 +1,8 @@
-package com.dachen.creator.core;
+package com.pqixing.creator.core;
 
-import com.dachen.creator.utils.StringUtils;
+import com.pqixing.creator.utils.StringUtils;
 import com.intellij.psi.*;
 import com.intellij.psi.javadoc.PsiDocComment;
-import com.pqixing.tools.TextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
