@@ -71,9 +71,9 @@
             <action id="Modularization.routercreator"
                     class="com.pqixing.intellij.actions.RouteCreate" text="PathCreator"
                     description="router auto create code"/>
-            <separator/>
             <action id="com.libiao.mvpcreator" class="com.pqixing.creator.actions.MvpCreator" text="MvpCreator"
                     description="auto create MVP code"/>
+            <separator/>
         </group>
         <group id="QTools.GitBatch" popup="true" text="GitBatch" class="com.pqixing.intellij.actions.QToolGroup">
             <add-to-group group-id="VcsGroups" anchor="last"/>
