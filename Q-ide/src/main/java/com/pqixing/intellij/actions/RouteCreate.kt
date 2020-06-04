@@ -80,7 +80,9 @@ open class RouteCreate : AnAction() {
             }
             f.name.startsWith("Fragment_") -> {
                 gnCode(code, fullPath, f)
-                code.append("public Object findFragment(){return com.pqixing.annotation.AnnotationInfo.findObjectByPath(PATH);}}\n")
+                code.append("public androidx.fragment.app.Fragment findFragment(){" +
+                        "androidx.fragment.app.Fragment fragment = ((androidx.fragment.app.Fragment)com.pqixing.annotation.AnnotationInfo.findObjectByPath(PATH));" +
+                        "fragment.setArguments(intent.getExtras());return fragment;}}\n")
 
             }
             f.name.startsWith("Server_") -> gnServers(code, fullPath, f)

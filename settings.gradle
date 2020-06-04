@@ -1,2 +1,2 @@
-include ":Q-tools",":Q-gradle",":Q-ide","Q-annotation","Q-mvpbase"//,"Q-keyboard","Q-aspectjx"
+include ":Q-tools",":Q-gradle",":Q-ide","Q-annotation","Q-androidbase"//,"Q-keyboard","Q-aspectjx"
 //include "Q-mvpbase"//,"Q-keyboard","Q-aspectjx"

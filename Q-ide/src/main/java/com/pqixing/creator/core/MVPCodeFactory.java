@@ -9,7 +9,7 @@ public class MVPCodeFactory {
     public static String generatContract(VirtualFile dir, String moduleName){
         return StringUtils.formatSingleLine(0, "package " + AndroidUtils.getFilePackageName(dir) + ";") +
                 "\n" +
-                StringUtils.formatSingleLine(0, "import  com.pqixing.common.constract.BaseContract;") +
+                StringUtils.formatSingleLine(0, "import  com.pqixing.mvp.constract.BaseContract;") +
 //                StringUtils.formatSingleLine(0, "import  com.example.suzhan.plugintest.BaseContract;") +
                 "\n" +
                 StringUtils.formatSingleLine(0, "public interface "+moduleName+"Contract {") +
@@ -58,7 +58,7 @@ public class MVPCodeFactory {
         String parentPkg = getParentPkg(dir);
         return StringUtils.formatSingleLine(0, "package " + AndroidUtils.getFilePackageName(dir) + ";") +
                 "\n" +
-                StringUtils.formatSingleLine(0, "import  com.pqixing.common.model.BaseModel;") +
+                StringUtils.formatSingleLine(0, "import  com.pqixing.mvp.model.BaseModel;") +
 //                StringUtils.formatSingleLine(0, "import  com.example.suzhan.plugintest.BaseModel;") +
                 StringUtils.formatSingleLine(0, "import  "+ parentPkg +".contract."+moduleName+"Contract;") +
                 "\n" +
@@ -83,8 +83,8 @@ public class MVPCodeFactory {
                 "\n" +
 //                StringUtils.formatSingleLine(0, "import  com.example.suzhan.plugintest.BaseContract;") +
 //                StringUtils.formatSingleLine(0, "import  com.example.suzhan.plugintest.BasePresenter;") +
-                StringUtils.formatSingleLine(0, "import  com.pqixing.common.constract.BaseContract;") +
-                StringUtils.formatSingleLine(0, "import  com.pqixing.common.presenter.BasePresenter;") +
+                StringUtils.formatSingleLine(0, "import  com.pqixing.mvp.constract.BaseContract;") +
+                StringUtils.formatSingleLine(0, "import  com.pqixing.mvp.presenter.BasePresenter;") +
                 StringUtils.formatSingleLine(0, "import  "+ getParentPkg(dir) +".contract."+moduleName+"Contract;") +
                 StringUtils.formatSingleLine(0, "import  "+ getParentPkg(dir) +".model."+moduleName+"Model;") +
                 "\n" +
@@ -106,8 +106,8 @@ public class MVPCodeFactory {
     public static String generatActivity(VirtualFile dir, String moduleName){
         return StringUtils.formatSingleLine(0, "package " + AndroidUtils.getFilePackageName(dir) + ";") +
                 "\n" +
-                StringUtils.formatSingleLine(0, "import  com.pqixing.common.constract.BaseContract;") +
-                StringUtils.formatSingleLine(0, "import  com.pqixing.common.views.activity.MVPBaseActivity;") +
+                StringUtils.formatSingleLine(0, "import  com.pqixing.mvp.constract.BaseContract;") +
+                StringUtils.formatSingleLine(0, "import  com.pqixing.mvp.views.activity.MVPBaseActivity;") +
 //                StringUtils.formatSingleLine(0, "import  com.example.suzhan.plugintest.BaseContract;") +
 //                StringUtils.formatSingleLine(0, "import  com.example.suzhan.plugintest.MVPBaseActivity;") +
                 StringUtils.formatSingleLine(0, " import android.os.Bundle;") +
@@ -142,8 +142,8 @@ public class MVPCodeFactory {
                 StringUtils.formatSingleLine(0, "import android.view.LayoutInflater;") +
                 StringUtils.formatSingleLine(0, "import android.view.View;") +
                 StringUtils.formatSingleLine(0, "import android.view.ViewGroup;") +
-                StringUtils.formatSingleLine(0, "import  com.pqixing.common.constract.BaseContract;") +
-                StringUtils.formatSingleLine(0, "import  com.pqixing.common.views.fragment.MVPBaseFragment;") +
+                StringUtils.formatSingleLine(0, "import  com.pqixing.mvp.constract.BaseContract;") +
+                StringUtils.formatSingleLine(0, "import  com.pqixing.mvp.views.fragment.MVPBaseFragment;") +
 //                StringUtils.formatSingleLine(0, "import  com.example.suzhan.plugintest.BaseContract;") +
 //                StringUtils.formatSingleLine(0, "import  com.example.suzhan.plugintest.MVPBaseFragment;") +
                 StringUtils.formatSingleLine(0, "import  "+ getParentPkg(dir) +".contract."+moduleName+"Contract;") +
