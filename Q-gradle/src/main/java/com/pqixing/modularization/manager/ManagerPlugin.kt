@@ -7,6 +7,7 @@ import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.manager.tasks.*
 import com.pqixing.modularization.maven.VersionIndexTask
 import com.pqixing.modularization.maven.VersionTagTask
+import com.pqixing.modularization.utils.Logger
 import com.pqixing.modularization.utils.ResultUtils
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
@@ -18,13 +19,18 @@ import org.gradle.api.Project
  */
 
 open class ManagerPlugin : BasePlugin() {
+    init {
+        Tools.logger = Logger()
+    }
     override fun callBeforeApplyMould() {
-        project.extensions.create("manager", ManagerExtends::class.java, project)
+
     }
 
     override val applyFiles: List<String> = listOf()
     override val ignoreFields: Set<String>
         get() = setOf(FileNames.USER_CONFIG, FileNames.IMPORT_KT)
+
+    lateinit var args: ArgsExtends
 
     @Override
     override fun linkTask() = listOf(
@@ -40,51 +46,36 @@ open class ManagerPlugin : BasePlugin() {
             , SyncBranchTask::class.java
     )
 
-    override fun apply(project: Project) {
-        plugin = this
 
+    override fun apply(project: Project) {
+        val startTime = System.currentTimeMillis()
         //在每个工程开始同步之前，检查状态，下载，切换分支等等
         project.gradle.beforeProject { ProjectManager.checkProject(it) }
 
-        val startTime = System.currentTimeMillis()
-        initTools(project)
+        args = ArgsExtends().load(project)
+
         super.apply(project)
-        BasePlugin.onStart()
 
-        FileManager.checkFileExist(this)
+        FileManager.checkFileExist(project)
 
-        FileManager.trySyncFile(getExtends())
+        FileManager.trySyncFile(args)
+
         project.afterEvaluate {
-            val extends = getExtends(ManagerExtends::class.java)
-            extHelper.setExtValue(project, "groupName", extends.groupName)
-            extends.checkVail()
+            val extends = getExtends(ArgsExtends::class.java)
+            extHelper.setExtValue(project, "groupName", extends.projectXml.mavenGroup)
             FileManager.checkDocument(this)
             project.allprojects { p ->
-                extHelper.addRepositories(p, extends.dependMaven)
+                extHelper.addRepositories(p, arrayListOf(extends.projectXml.mavenUrl))
             }
         }
 
         project.gradle.addListener(object : BuildAdapter() {
             override fun buildFinished(result: BuildResult) {
-                BasePlugin.onClear()
-                ResultUtils.notifyBuildFinish(project,System.currentTimeMillis() - startTime)
+                ResultUtils.notifyBuildFinish(project, System.currentTimeMillis() - startTime)
             }
         })
     }
-
-    private fun initTools(project: Project) {
-        Tools.logger=object : ILog {
-            override fun printError(exitCode: Int, l: String?) = ResultUtils.writeResult(l
-                    ?: "", exitCode,true)
-
-            override fun println(l: String?) = System.out.println(l)
-        }
-    }
-
-    companion object {
-        private lateinit var plugin: ManagerPlugin
-
-        fun getPlugin() = plugin
-        fun getExtends() = plugin.getExtends(ManagerExtends::class.java)
-    }
 }
+
+fun Project.getEnv() = project.rootProject.plugins.getPlugin(ManagerPlugin::class.java)
+fun Project.getArgs() = getEnv().args

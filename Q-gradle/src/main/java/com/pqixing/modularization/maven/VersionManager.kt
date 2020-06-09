@@ -7,7 +7,6 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.manager.*
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
@@ -26,35 +25,12 @@ import kotlin.Comparator
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
-object VersionManager : OnClear {
-    val matchingFallbacks get() = ManagerPlugin.getExtends().matchingFallbacks.toMutableList()
-    val groupName get() = ManagerPlugin.getExtends().groupName
+class VersionManager(val args: ArgsExtends) {
+    val matchingFallbacks get() =args.projectXml.matchingFallbacks.toMutableList()
+    val groupName get() = args.projectXml.mavenGroup
 
-    init {
-        BasePlugin.addClearLister(this)
-    }
-
-    override fun start() {
-    }
-
-    override fun clear() {
-        curVersions.clear()
-        targetVersion.clear()
-        branchVersion.clear()
-        matchingFallbacks.clear()
-        repoLastCommit = 0
-    }
-
-    //版本号的管理工程,迁回root目录下,方便调试和查看
-    var repoGitDir: File = File(".")
-        get() {
-            //删除旧的目录
-            FileUtils.delete(File(FileManager.rootDir, "build/version"))
-            return FileManager.templetRoot
-        }
 
     private var repoLastCommit = 0
-
 
     /**
      * 当前最新的版本信息
@@ -165,7 +141,7 @@ object VersionManager : OnClear {
         branchVersion[branch] = branchMap
         //将基础版本放入
         branchMap.putAll(curVersions)
-        val branchFile = File(repoGitDir, getBranchVersionName(branch))
+        val branchFile = File(args.env.templetRoot, getBranchVersionName(branch))
         PropertiesUtils.readProperties(branchFile).forEach {
             branchMap[it.key.toString()] = it.value.toString()
         }
@@ -179,8 +155,8 @@ object VersionManager : OnClear {
      */
     private fun readTargetVersions() {
         targetVersion[FileNames.MODULARIZATION] = FileNames.MODULARIZATION
-        val info = ManagerPlugin.getPlugin().config
-        PropertiesUtils.readProperties(File(info?.versionFile)).forEach {
+        val info = args.config
+        PropertiesUtils.readProperties(File(info.versionFile)).forEach {
             targetVersion[it.key.toString()] = it.value.toString()
         }
     }
@@ -190,7 +166,7 @@ object VersionManager : OnClear {
         prepareVersions()
         curVersions[FileNames.MODULARIZATION] = FileNames.MODULARIZATION
 
-        val baseVersion = File(repoGitDir, "versions/version.properties")
+        val baseVersion = File(args.env.templetRoot, "versions/version.properties")
         val basePros = PropertiesUtils.readProperties(baseVersion)
         if (basePros.isNotEmpty()) PropertiesUtils.readProperties(baseVersion).forEach {
             curVersions[it.key.toString()] = it.value.toString()
@@ -207,16 +183,15 @@ object VersionManager : OnClear {
      * 检查version Git的状态
      */
     private fun prepareVersions() {
-        val extends = ManagerPlugin.getExtends()
         val vBranch = "_v2"
-        val git = GitUtils.open(repoGitDir)
-                ?: GitUtils.clone(extends.docRepoUrl, repoGitDir, vBranch)
+        val git = GitUtils.open(args.env.templetRoot)
+                ?: GitUtils.clone(args.projectXml.templetUrl, args.env.templetRoot, vBranch)
         if (git == null) {
             ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "can not find version repo!!")
             return
         }
         //如果是ToMaven,则更新,否则,不需要每次都更新
-        if (ManagerPlugin.getPlugin().runTaskNames.toString().contains("ToMaven")) git.pull()
+        if (args.runTaskNames.toString().contains("ToMaven")) git.pull()
 //        if (!GitUtils.checkoutBranch(git, vBranch, true)) {
 //            if (!GitUtils.createBranch(git, vBranch)) {
 //                ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "can checkout to branch : $vBranch")
@@ -235,7 +210,7 @@ object VersionManager : OnClear {
 //        Tools.println("indexCacheVersion $repoLastCommit -> $lastUpdate")
         if (repoLastCommit > lastUpdate) {
             /**从日志中读取版本号**/
-            val git = Git.open(repoGitDir)
+            val git = Git.open(args.env.templetRoot)
             run out@{
                 git.log().call().forEach { rev ->
                     //如果当前记录比最后更新时间小，则无需再更新，因为已经在version里面了
@@ -276,14 +251,13 @@ object VersionManager : OnClear {
     fun indexVersionFromNet() {
         curVersions.clear()
         branchVersion.clear()
-        indexVersionFromNet(File(repoGitDir, "versions/version.properties"), curVersions)
+        indexVersionFromNet(File(args.env.templetRoot, "versions/version.properties"), curVersions)
     }
 
     /**
      * 创建一个分支的版本号Tag标签
      */
     fun createVersionTag(): Boolean {
-        val plugin = ManagerPlugin.getPlugin()
         val opBranch = EnvKeys.opBranch.getEnvValue() ?: return false
         val taskBranch = opBranch.substring(opBranch.lastIndexOf("/") + 1)//直接获取名称,不要origin
         if (taskBranch.isEmpty() || taskBranch == "master") {
@@ -298,10 +272,10 @@ object VersionManager : OnClear {
         val matchKeys = fallbacks.map { "$groupName.$it." }
         val tagVersions = curVersions.filter { c -> matchKeys.any { f -> c.key.startsWith(f) } }
 
-        val branchFile = File(repoGitDir, getBranchVersionName(taskBranch))
+        val branchFile = File(args.env.templetRoot, getBranchVersionName(taskBranch))
         PropertiesUtils.writeProperties(branchFile, tagVersions.toProperties())
         ResultUtils.writeResult(branchFile.absolutePath)
-        val git = Git.open(repoGitDir)
+        val git = Git.open(args.env.templetRoot)
         GitUtils.addAndPush(git, "versions", "createVersionTag $taskBranch ${DateFormat.getDateTimeInstance().format(Date())}", true)
         GitUtils.close(git)
         return true
@@ -311,16 +285,15 @@ object VersionManager : OnClear {
      * 从网络获取最新的版本号信息
      */
     private fun indexVersionFromNet(outFile: File, versions: HashMap<String, String>) {
-        if (!GitUtils.isGitDir(repoGitDir)) prepareVersions()
-        val plugin = ManagerPlugin.getPlugin()
-        val extends = plugin.getExtends(ManagerExtends::class.java)
-        val maven = extends.groupMaven
-        val groupUrl = extends.groupName.replace(".", "/")
+        if (!GitUtils.isGitDir(args.env.templetRoot)) prepareVersions()
+        val extends = args
+        val maven = extends.projectXml.mavenUrl
+        val groupUrl = extends.projectXml.mavenGroup.replace(".", "/")
         Tools.println("parseNetVersions  start -> $groupUrl")
         val start = System.currentTimeMillis()
         versions.clear()
         //上传版本好到服务端
-        val git = Git.open(repoGitDir)
+        val git = Git.open(args.env.templetRoot)
 
         if (!maven.startsWith("http")) {
             parseLocalVersion(File(maven, groupUrl), versions)
@@ -370,7 +343,7 @@ object VersionManager : OnClear {
     }
 
     fun parseNetVersionsForTarget(baseUrl: String, groupName: String, git: Git, versions: HashMap<String, String>) {
-        val allModules = ProjectManager.projectXml.allSubModules().map { it.name }
+        val allModules = args.projectXml.allSubModules().map { it.name }
         GitUtils.pull(git)
         val mavenUrl = getFullUrl(groupName.replace(".", "/"), baseUrl)
         val allBranchs = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call().map { it.name.replace(Regex(".*/"), "") }.toSet()

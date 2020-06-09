@@ -1,55 +1,48 @@
 package com.pqixing.model
 
 class ProjectXmlModel(val baseUrl: String) {
+    var templetUrl = ""
+
+    var mavenUrl = ""
+    var mavenGroup = ""
+    var mavenUser = ""
+    var mavenPsw = ""
+    var createSrc = false
+    var matchingFallbacks = mutableListOf<String>()
+    var baseVersion = "1.0"
+
     val projects = mutableListOf<ProjectModel>()
-    private val maps = HashMap<String, SubModule>()
     fun findSubModuleByName(name: String): SubModule? {
-        if (maps.isEmpty()) for (p in projects) {
-            for (m in p.submodules) {
-                maps[m.name] = m
-            }
+        for (p in projects) for (m in p.submodules) {
+            if (name == m.name) return m
         }
-        return maps[name]
+        return null
     }
 
     fun allSubModules() = mutableSetOf<SubModule>().apply {
         projects.forEach { this.addAll(it.submodules) }
     }
-
-    fun findProjectBySubName(name: String) = findSubModuleByName(name)?.project
-
 }
 
-data class ProjectModel(val name: String, val introduce: String, val url: String) {
+data class ProjectModel(val name: String, var path: String, val introduce: String, val url: String) {
     var branch: String = ""
     val submodules = mutableListOf<SubModule>()
-
-    fun addSubModule(sm: SubModule) {
-        submodules.add(sm)
-        if (sm.type == SubModuleType.TYPE_LIBRARY_API) {
-            sm.type = SubModuleType.TYPE_LIBRARY
-            val api = SubModule(sm.project, "${sm.name}_api", sm.introduce, "${sm.path}/src/api", SubModuleType.TYPE_LIBRARY_API)
-            api.parent = sm
-            sm.child = api
-            submodules.add(api)
-        }
-    }
 }
 
-data class SubModule(val project: ProjectModel, val name: String, val introduce: String, val path: String, var type: String = SubModuleType.TYPE_LIBRARY) {
-    var parent:SubModule?=null
-    var child:SubModule?=null
+data class SubModule(val name: String) {
+    lateinit var project: ProjectModel
+    var path: String = ""
+    lateinit var introduce: String
+    var isApplication = false
+
+    var type: String = "library"
+    var attachModel: SubModule? = null
+    var apiModel: SubModule? = null
+
+    //    var apiModel:SubModule?=null//该模块的api模块
     fun getBranch() = project.branch
-    fun findApi()=child
-    fun findParent()=parent
+    fun findApi() = apiModel
 
-    fun isApiModule() = type == SubModuleType.TYPE_LIBRARY_API
-    private var api: SubModule? = null
+    fun hasAttach() = attachModel != null
     var hasCheck = false
-}
-
-object SubModuleType {
-    val TYPE_LIBRARY = "library"
-    val TYPE_APPLICATION = "application"
-    val TYPE_LIBRARY_API = "library_api"
 }

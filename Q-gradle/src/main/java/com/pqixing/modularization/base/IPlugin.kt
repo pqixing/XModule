@@ -1,6 +1,5 @@
 package com.pqixing.modularization.base
 
-import com.pqixing.Config
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.invocation.Gradle
@@ -14,7 +13,6 @@ interface IPlugin {
     val rootDir: File
 
     val project: Project
-    val config: Config
     fun getTask(taskClass: Class<out Task>): Set<Task>
     fun linkTask(): List<Class<out Task>>
 

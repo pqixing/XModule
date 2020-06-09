@@ -5,11 +5,6 @@ import com.alibaba.fastjson.JSONObject
 import com.android.ddmlib.IDevice
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
 import com.pqixing.creator.JekinsJob
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationAction
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
-import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -18,8 +13,6 @@ import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.intellij.actions.QToolGroup
-import com.pqixing.intellij.actions.QuicklyBuildAction
-import com.pqixing.intellij.actions.QuicklyParam
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.adapter.JlistSelectListener
@@ -291,14 +284,14 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
                 adapter.selectListener = jekinLogClick
                 cbBranch.isVisible = true
                 cbDpModel.isVisible = false
-                allModule.filter { it.type == SubModuleType.TYPE_APPLICATION }.map { JListInfo(it.name, select = activityModel.contains(it.name)) }.sortedBy { !it.select }
+                allModule.filter { it.isApplication }.map { JListInfo(it.name, select = activityModel.contains(it.name)) }.sortedBy { !it.select }
             }
             false -> {
                 adapter.selectListener = localLogClick
                 cbDpModel.isVisible = true
                 cbBranch.isVisible = false
-                allModule.filter { showAllLocalModule || it.type == SubModuleType.TYPE_APPLICATION || it.child != null || activityModel.contains(it.name) }
-                        .sortedBy { it.type != SubModuleType.TYPE_APPLICATION }
+                allModule.filter { showAllLocalModule || it.isApplication || it.apiModel != null || activityModel.contains(it.name) }
+                        .sortedBy { !it.isApplication }
                         .map { JListInfo(it.name, select = activityModel.indexOf(it.name) == 0) }
                         .sortedBy { !activityModel.contains(it.title) }
             }

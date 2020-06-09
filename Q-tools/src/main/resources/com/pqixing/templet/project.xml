@@ -1,6 +1,24 @@
-<git baseUrl="http://192.168.3.200/android">
-    <project name="Project1" introduce="代码目录介绍" url="http://192.168.3.200/android/Document.git" />
-    <project name="Project1" introduce="代码目录介绍">
-        <submodule name="module1" introduce="Git 内的模块定义" />
+<!--type="application,library"  api="this,moduleName" createSrc="false" -->
+<git baseUrl="http://192.168.3.200/android"
+     templetUrl="http://192.168.3.200/android/Document.git"
+
+     mavenUrl="https://artifactory.gz.cvte.cn/artifactory/SR_maven_releases_local/"
+     mavenGroup="com.robot.android"
+     mavenUser="pengqixing"
+     mavenPsw="sk:WGluZzYzNzU1"
+
+     createSrc="false"
+     baseVersion="1.0"
+     matchingFallbacks="master"
+>
+    <group name="security" introduce="产品线1">
+        <project name="Project1" introduce="代码目录介绍" url="http://192.168.3.200/android/Document.git"/>
+    </group>
+
+    <project name="Project1" introduce="代码目录介绍"> <!--ur="http://192.168.3.200/android/Document.git"-->
+        <submodule name="module1" introduce="Git 内的模块定义" api="module2" type="application"/>
+        <group name="group1" introduce="Git 内的模块定义">
+            <submodule name="module2" introduce="Git 内的模块定义" api="this" type="library"/>
+        </group>
     </project>
 </git>

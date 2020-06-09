@@ -7,6 +7,7 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import java.io.File
@@ -23,13 +24,13 @@ open class CheckOutTask : BaseTask() {
         var targetBranch = EnvKeys.opBranch.getEnvValue() ?: return
 
         val fail = ArrayList<String>()
-        GitUtils.open(FileManager.templetRoot)?.apply {
+        GitUtils.open(project.getArgs().env.templetRoot)?.apply {
             val check = GitUtils.checkoutBranch(this, targetBranch, true)
             if (!check) fail.add(project.rootDir.name)
             close()
         }
-        ProjectManager.projectXml.projects.forEach {
-            val dir = File(ProjectManager.codeRootDir, it.name)
+        project.getArgs().projectXml.projects.forEach {
+            val dir = File(project.getArgs().env.codeRootDir, it.name)
             if (!GitUtils.isGitDir(dir)) return@forEach
             GitUtils.open(dir)?.apply {
                 val check = GitUtils.checkoutBranch(this, targetBranch, true)

@@ -3,11 +3,11 @@ package com.pqixing.modularization.manager.tasks
 import com.pqixing.EnvKeys
 import com.pqixing.Tools
 import com.pqixing.getEnvValue
-import com.pqixing.model.SubModuleType
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.maven.VersionManager
 import com.pqixing.modularization.utils.ResultUtils
 
@@ -41,14 +41,14 @@ open class LoadAllBranchModuleTask: BaseTask() {
 //        val checkBranch = if (mergeIndex <= curIndex) mergeBranch else curBranch
 
         //查找出,当前分支,所有上传过的模块,在合并前先导入AS
-        val byBranch = VersionManager.findAllModuleByBranch(checkBranch)
+        val byBranch = project.getArgs().versions.findAllModuleByBranch(checkBranch)
 //        Tools.println("All module by branch $checkBranch-> $byBranch")
 
         val result = StringBuilder("")
 
-        ProjectManager.projectXml.projects.forEach { p ->
+        project.getArgs().projectXml.projects.forEach { p ->
             p.submodules.forEach { s ->
-                if (s.type == SubModuleType.TYPE_APPLICATION) {
+                if (s.isApplication) {
                     result.append(s.name).append(",")
                 }
             }

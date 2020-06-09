@@ -1,10 +1,10 @@
 package com.pqixing.modularization.android.tasks
 
-import com.pqixing.model.SubModuleType
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.android.MDPlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.FileManager
+import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
@@ -15,11 +15,11 @@ open class PrepareDevTask : BaseTask() {
     }
 
     override fun runTask() {
-        if (project.MDPlugin().subModule.type == SubModuleType.TYPE_APPLICATION) {
+        if (project.MDPlugin().subModule.isApplication) {
             return//如果是App类型,不需要设置运行
         }
         val devDir = File(project.projectDir, "src/dev")
-        val from = File(FileManager.templetRoot, "android")
+        val from = File(project.getArgs().env.templetRoot, "android")
 
         val manifest = "AndroidManifest.xml"
         File(devDir, manifest).apply {

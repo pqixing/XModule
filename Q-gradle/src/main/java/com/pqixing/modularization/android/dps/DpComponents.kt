@@ -17,6 +17,7 @@ class DpComponents(project: Project) : BaseExtension(project) {
      * 该依赖,在配置xml中的信息
      */
     lateinit var subModule: SubModule
+
     /**
      * 当前模块是否使用了本地依赖
      */
@@ -37,12 +38,12 @@ class DpComponents(project: Project) : BaseExtension(project) {
 
     var branch: String = ""
 
-    var excludes: HashSet<Pair<String?, String?>> = HashSet()
+    var justApi = false
 
-    /**
-     * 依赖中的依赖树
-     */
-    var dpComponents: HashSet<DpComponents> = HashSet()
+    var apiVersion = ""
+        get() = if (field.isEmpty()) version else field
+
+    var excludes: HashSet<Pair<String?, String?>> = HashSet()
 
     override fun toString(): String {
         return "DpComponents(localCompile=$localCompile, moduleName='$moduleName', scope='$scope', version='$version', branch='$branch')"

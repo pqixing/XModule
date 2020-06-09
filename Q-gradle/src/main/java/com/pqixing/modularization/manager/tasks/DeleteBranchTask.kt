@@ -9,6 +9,7 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.utils.ResultUtils
 import java.io.File
 
@@ -19,19 +20,19 @@ open class DeleteBranchTask : BaseTask() {
     }
 
     override fun runTask() {
-        val extends = ManagerPlugin.getExtends()
+        val extends = project.getArgs()
         if (EnvKeys.screctKey.getEnvValue() != Keys.SCRECTKEY) {
             Tools.printError(-1,"DeleteBranch Exception -> check password error!!!")
         }
         var targetBranch = EnvKeys.opBranch.getEnvValue()?:return
-        if (targetBranch == extends.docRepoBranch) Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete current branch $targetBranch , please change branch before delete!!")
+        if (targetBranch == extends.env.templetBranch) Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete current branch $targetBranch , please change branch before delete!!")
         if (targetBranch == "master") Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete master !!")
 
         val fail = ArrayList<String>()
-        ProjectManager.projectXml.projects
-                .map { File(ProjectManager.codeRootDir, it.name) }
+        extends.projectXml.projects
+                .map { File(extends.env.codeRootDir, it.name) }
                 .toMutableList().apply {
-                    add(FileManager.templetRoot)
+                    add(extends.env.templetRoot)
                 }.forEach {
                     val git = GitUtils.open(it) ?: return@forEach
                     if (!GitUtils.pull(git) || !GitUtils.delete(git, targetBranch)) fail.add(it.name)

@@ -4,7 +4,6 @@ package com.pqixing.modularization.android
 import com.android.build.gradle.AppExtension
 import com.pqixing.Tools
 import com.pqixing.model.SubModule
-import com.pqixing.model.SubModuleType
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.JGroovyHelper
@@ -17,6 +16,7 @@ import com.pqixing.modularization.android.tasks.PrepareDevTask
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.maven.ToMavenCheckTask
 import com.pqixing.modularization.maven.ToMavenTask
 import com.pqixing.tools.FileUtils
@@ -38,7 +38,7 @@ open class AndroidPlugin : BasePlugin() {
         if (!isApp) project.apply(mapOf<String, String>("plugin" to "maven"))
         //如果是Library模块运行，设置ApplicationId
         if (buildAsApp && !isApp) {
-            extHelper.setApplicationId(project, "com.${TextUtils.letter(ManagerPlugin.getExtends().docRepoBranch, "libraryrun")}.${TextUtils.letter(project.name, "app")}".toLowerCase())
+            extHelper.setApplicationId(project, "com.${TextUtils.letter(project.getArgs().env.templetBranch, "libraryrun")}.${TextUtils.letter(project.name, "app")}".toLowerCase())
         }
     }
 
@@ -58,7 +58,7 @@ open class AndroidPlugin : BasePlugin() {
     override val applyFiles: List<String>
         get() {
             if (isApp) return listOf("com.module.application")
-            val libraryGradle = if (subModule.isApiModule()) "com.module.api" else "com.module.library"
+            val libraryGradle = if (subModule.hasAttach()) "com.module.api" else "com.module.library"
             //如果是独立运行，或者是本地同步时，包含dev分支
             if (buildAsApp) return listOf(libraryGradle, "com.module.dev")
             return listOf(libraryGradle, "com.module.maven")
@@ -86,8 +86,7 @@ open class AndroidPlugin : BasePlugin() {
                 FileUtils.delete(File(project.projectDir, "build"))
             }
         }
-        this.p = project
-        project.extensions.extraProperties.set(project.name, this)
+
         initSubModule(project)
         //如果是空同步，不做任何处理
         val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, this, ProjectManager.checkProject(project))
@@ -116,8 +115,8 @@ open class AndroidPlugin : BasePlugin() {
      * 检查插件类型
      */
     private fun initSubModule(project: Project) {
-        subModule = ProjectManager.projectXml.findSubModuleByName(project.name) ?: return
-        isApp = subModule.type == SubModuleType.TYPE_APPLICATION
+        subModule = project.getArgs().projectXml.findSubModuleByName(project.name) ?: return
+        isApp = subModule.isApplication
         if (isApp) {
             buildAsApp = true
             return
@@ -129,4 +128,4 @@ open class AndroidPlugin : BasePlugin() {
     }
 }
 
-fun Project.MDPlugin() = this.extensions.extraProperties.get(this.name) as AndroidPlugin
+fun Project.MDPlugin() = this.plugins.getPlugin(AndroidPlugin::class.java)

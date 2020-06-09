@@ -4,8 +4,6 @@ import com.pqixing.EnvKeys
 import com.pqixing.Tools
 import com.pqixing.getEnvValue
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.tools.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import java.io.File
@@ -20,6 +18,7 @@ object ResultUtils {
     var lastIdePort = -1
     val defPort = 8451
 
+
     //是否是通过ide调用
     val ide
         get() = "ide" == EnvKeys.syncType.getEnvValue()
@@ -32,25 +31,7 @@ object ResultUtils {
         val log = "${Keys.PREFIX_IDE_LOG}?${Keys.RUN_TASK_ID}=${getProperty(Keys.RUN_TASK_ID)
                 ?: System.currentTimeMillis()}&endTime=${System.currentTimeMillis()}&exitCode=$exitCode&msg=$msg"
 
-        if (ide && !writeToSocket(log, getProperty("ideSocketPort")?.toInt() ?: defPort)) {
-            Tools.println(msg)
-            val rootDir = ManagerPlugin.getPlugin().rootDir
-            var logCount = 0
-            do {
-                val ideFile = File(rootDir, ".idea/caches/task.log${logCount++}")
-                //只保留10条记录
-                val logs = LinkedList<String>()
-                FileUtils.readText(ideFile)?.lines()?.apply {
-                    for (i in 0 until (Math.min(19, size))) {
-                        logs.addFirst(get(size - 1 - i))
-                    }
-                }
-                logs.add(log)
-                FileUtils.writeText(ideFile, logs.joinToString("\n"))
-
-                Thread.sleep(500)
-            } while (!ideFile.readText().endsWith(log) && logCount <= 7)//如果写入失败并且次数小于6次,则尝试继续写入
-        }
+        if (ide) writeToSocket(log, getProperty("ideSocketPort")?.toInt() ?: defPort)
         if (exit) throw  GradleException(msg)
     }
 
@@ -93,6 +74,6 @@ object ResultUtils {
         null
     }
 
-    fun base64Encode(source:String)= String(Base64.getEncoder().encode(source.toByteArray(Charsets.UTF_8)),Charsets.UTF_8)
-    fun base64Decode(source:String)= String(Base64.getDecoder().decode(source.toByteArray(Charsets.UTF_8)),Charsets.UTF_8)
+    fun base64Encode(source: String) = String(Base64.getEncoder().encode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
+    fun base64Decode(source: String) = String(Base64.getDecoder().decode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
 }

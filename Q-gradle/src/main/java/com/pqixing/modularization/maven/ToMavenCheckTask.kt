@@ -2,17 +2,15 @@ package com.pqixing.modularization.maven
 
 import com.pqixing.Tools
 import com.pqixing.model.SubModule
+import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.android.AndroidPlugin
+import com.pqixing.modularization.android.MDPlugin
 import com.pqixing.modularization.android.dps.DpComponents
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.IExtHelper
-import com.pqixing.modularization.android.MDPlugin
-import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.TextUtils
@@ -29,8 +27,8 @@ open class ToMavenCheckTask : BaseTask() {
     init {
         group = ""
         val mdPlugin = project.MDPlugin()
-        if (mdPlugin.subModule.isApiModule()) {//如果是Api模块，则依赖主模块的clean方法，强行导入主模块
-            this.dependsOn(":${mdPlugin.subModule.parent?.name}:clean")
+        if (mdPlugin.subModule.hasAttach()) {//如果是Api模块，则依赖主模块的clean方法，强行导入主模块
+            this.dependsOn(":${mdPlugin.subModule.attachModel?.name}:clean")
         }
     }
 
@@ -45,14 +43,14 @@ open class ToMavenCheckTask : BaseTask() {
 
     override fun start() {
         try {
-            unCheck = ManagerPlugin.getExtends().config.toMavenUnCheck.toInt()
+            unCheck = project.getArgs().config.toMavenUnCheck.toInt()
         } catch (e: Exception) {
             Tools.println(e.toString())
         }
     }
 
     override fun runTask() {
-        val extends = ManagerPlugin.getExtends()
+        val extends = project.getArgs()
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
         val plugin = project.MDPlugin()
@@ -60,12 +58,12 @@ open class ToMavenCheckTask : BaseTask() {
         val subModule = plugin.subModule
 //        val lastLog = plugin.subModule
         val artifactId = subModule.name
-        if (subModule.getBranch() != extends.docRepoBranch) {
-            Tools.println(unCheck(1), "${subModule.name} branch is ${subModule.getBranch()} , Doc branch ${extends.docRepoBranch} does not match")
+        if (subModule.getBranch() != extends.env.templetBranch) {
+            Tools.println(unCheck(1), "${subModule.name} branch is ${subModule.getBranch()} , Doc branch ${extends.env.templetBranch} does not match")
             return
         }
 
-        val open = GitUtils.open(File(ProjectManager.codeRootDir, subModule.project.name))
+        val open = GitUtils.open(File(extends.env.codeRootDir, subModule.project.name))
         if (open == null) {
             Tools.printError(-1, "${subModule.project.name} Git open fail, please check")
             return
@@ -76,13 +74,13 @@ open class ToMavenCheckTask : BaseTask() {
         checkLoseDps(plugin.dpsManager.loseList)
 
         val branch = open.repository.branch
-        val groupId = "${extends.groupName}.$branch"
+        val groupId = "${extends.projectXml.mavenGroup}.$branch"
         val baseVersion = dpsExtends.toMavenVersion
         checkBaseVersion(baseVersion)
 
         checkGitStatus(open, subModule)
 
-        val v = VersionManager.getNewerVersion(branch, artifactId, baseVersion)
+        val v = project.getArgs().versions.getNewerVersion(branch, artifactId, baseVersion)
         val revCommit = loadGitInfo(open, subModule)
         if (revCommit == null) {
             Tools.printError(-1, "${subModule.name} Can not load git info!!")
@@ -94,9 +92,9 @@ open class ToMavenCheckTask : BaseTask() {
 
         val name = "${Keys.PREFIX_LOG}?hash=${revCommit.name}&commitTime=${revCommit.commitTime}&message=${revCommit.fullMessage}&desc=${dpsExtends.toMavenDesc}"
         extHelper.setMavenInfo(project
-                , extends.groupMaven
-                , extends.mavenUserName
-                , extends.mavenPassWord
+                , extends.projectXml.mavenUrl
+                , extends.projectXml.mavenUser.takeIf { it.isNotEmpty() } ?: extends.config.userName
+                , extends.getPsw(extends.projectXml.mavenPsw.takeIf { it.isNotEmpty() } ?: extends.config.passWord)
                 , groupId
                 , artifactId
                 , version
@@ -128,11 +126,11 @@ open class ToMavenCheckTask : BaseTask() {
         //检查Maven仓库最后的一个版本的信息
         var lastVersion = v
         var matchBranch = branch
-        val match = ManagerPlugin.getExtends().matchingFallbacks
+        val match = project.getArgs().projectXml.matchingFallbacks
         var i = match.indexOf(matchBranch)
         while (lastVersion < 0 && i < match.size) {
             matchBranch = if (i < 0) branch else match[i]
-            lastVersion = VersionManager.getNewerVersion(matchBranch, artifactId, baseVersion)
+            lastVersion = project.getArgs().versions.getNewerVersion(matchBranch, artifactId, baseVersion)
             i++
         }
         //一条记录都没有，新组件
@@ -142,7 +140,7 @@ open class ToMavenCheckTask : BaseTask() {
         if (matchBranch != branch) {
             Tools.println(unCheck(1), "$artifactId Not allow user the same base version on new branch")
         }
-        val params = UrlUtils.getParams(DpsManager.getPom(matchBranch, artifactId, "$baseVersion.$lastVersion").name)
+        val params = UrlUtils.getParams(DpsManager.getPom(project,matchBranch, artifactId, "$baseVersion.$lastVersion").name)
         val hash = params["hash"] ?: ""
         val commitTime = params["commitTime"]?.toInt() ?: 0
         if (hash == revCommit.name || revCommit.commitTime < commitTime) {

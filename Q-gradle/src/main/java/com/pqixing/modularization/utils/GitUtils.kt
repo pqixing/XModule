@@ -1,7 +1,6 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.Tools
-import com.pqixing.modularization.manager.GitCredential
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.*
 import org.eclipse.jgit.lib.Ref
@@ -10,7 +9,8 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
 
 object GitUtils {
-    val credentials: ICredential = GitCredential()
+    var gitUser:String = ""
+    var gitPsw:String = ""
 
     fun open(file: File?): Git? {
         if (file?.exists() == false) return null
@@ -20,6 +20,7 @@ object GitUtils {
             null
         }
     }
+
 
     /**
      * clone
@@ -258,7 +259,7 @@ fun <T> GitCommand<T>.execute(safe: Boolean = true): T? {
     val exe = {
         if (this is TransportCommand<*, *>) {
             setTransportConfigCallback(GitSSHFactory.transportConfigCallback)
-            setCredentialsProvider(UsernamePasswordCredentialsProvider(GitUtils.credentials.getUserName(), GitUtils.credentials.getPassWord()))
+            setCredentialsProvider(UsernamePasswordCredentialsProvider(GitUtils.gitUser, GitUtils.gitPsw))
         }
         if (this is CloneCommand) this.setProgressMonitor(PercentProgress())
 

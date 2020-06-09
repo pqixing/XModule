@@ -3,7 +3,6 @@ package com.pqixing.help
 import com.pqixing.model.ProjectModel
 import com.pqixing.model.ProjectXmlModel
 import com.pqixing.model.SubModule
-import com.pqixing.model.SubModuleType
 import com.pqixing.tools.CheckUtils
 import groovy.util.Node
 import groovy.util.NodeList
@@ -32,7 +31,7 @@ object XmlHelper {
             val dependency = it as? Node ?: continue
             val gid = getChildNodeValue(dependency, "groupId")
             if (gid.startsWith(matchGroup)) {
-                pom.dependency.add(pairToStr(gid, getChildNodeValue(dependency, "artifactId")))
+                pom.dependency.add("$gid,${getChildNodeValue(dependency, "artifactId")}")
             }
             if (!first && pom.allExclude.isEmpty()) continue
 
@@ -89,43 +88,97 @@ object XmlHelper {
     fun parseProjectXml(txt: File): ProjectXmlModel {
 
         val node = XmlParser().parseText(txt.readText())
-        val baseUrl = node.get("@baseUrl").toString()
-        val xmlModel = ProjectXmlModel(baseUrl)
-        node.getAt(QName("project")).forEach {
-            val p: Node = it as? Node ?: return@forEach
+        val xmlModel = ProjectXmlModel(node.get("@baseUrl")?.toString() ?: "")
+        xmlModel.templetUrl = node.get("@templetUrl")?.toString() ?: ""
+        xmlModel.mavenUrl = node.get("@mavenUrl")?.toString() ?: ""
+        xmlModel.mavenGroup = node.get("@mavenGroup")?.toString() ?: ""
+        xmlModel.mavenUser = node.get("@mavenUser")?.toString() ?: ""
+        xmlModel.mavenPsw = node.get("@mavenPsw")?.toString() ?: ""
+        xmlModel.createSrc = node.get("@createSrc") == "true"
+        xmlModel.baseVersion = node.get("@baseVersion")?.toString()?:""
+        xmlModel.matchingFallbacks.addAll ((node.get("@matchingFallbacks")?.toString()?:"").split(",").filter { it.isNotEmpty() })
 
-            val rootName = p.get("@name").toString()
-            var introduce = p.get("@introduce").toString()
-            val type = p.get("@type")?.toString() ?: SubModuleType.TYPE_LIBRARY
-
-            //该工程的git地址
-            var gitUrl: String = p.get("@url")?.toString() ?: ""
-            if (CheckUtils.isEmpty(gitUrl)) gitUrl = "$baseUrl/$rootName.git"
-            val project = ProjectModel(rootName, introduce, gitUrl)
-            xmlModel.projects.add(project)
-
-            val children = p.getAt(QName("submodule"))
-            if (children.isEmpty()) {
-                project.addSubModule(SubModule(project, rootName, introduce, rootName, type))
-            } else children.forEach { c ->
-                if (c is Node) {
-                    val name = c.get("@name").toString()
-                    val t = c.get("@type")?.toString() ?: SubModuleType.TYPE_LIBRARY
-                    introduce = c.get("@introduce").toString()
-                    project.addSubModule(SubModule(project, name, introduce, "$rootName/$name", t))
-                }
+        parseProjects(xmlModel, node, "")
+        xmlModel.allSubModules().forEach {
+            val api = it.apiModel ?: return@forEach
+            if (api.path.isEmpty()) {
+                it.apiModel = xmlModel.findSubModuleByName(api.name)
             }
         }
-
         return xmlModel
     }
 
-    /**
-     *
-     */
-    fun pairToStr(p: Pair<String?, String?>): String = "${p.first},${p.second}"
+    private fun parseProjects(xmlModel: ProjectXmlModel, node: Node?, path: String) {
+        node ?: return
+        //解析分组
+        node.getAt(QName("group"))?.forEach {
+            val group: Node = it as? Node ?: return@forEach
+            parseProjects(xmlModel, group, "$path/${group.get("@name")?.toString() ?: ""}")
+        }
 
-    fun pairToStr(first: String?, second: String): String = "$first,$second"
+        node.getAt(QName("project")).forEach {
+            val p: Node = it as? Node ?: return@forEach
+
+            val name = p.get("@name").toString()
+            var introduce = p.get("@introduce").toString()
+
+
+            //该工程的git地址
+            var gitUrl: String = p.get("@url")?.toString() ?: ""
+
+            if (CheckUtils.isEmpty(gitUrl)) gitUrl = "${xmlModel.baseUrl}/$name.git"
+
+            val project = ProjectModel(name, "$path/$name", introduce, gitUrl)
+
+
+            xmlModel.projects.add(project)
+
+            //type不为空，本身也作为一个模块添加
+            if (p.get("@type") != null) addNewSubModule(project, p, path)
+
+            parseSubModule(project, p, path)
+        }
+    }
+
+    private fun parseSubModule(project: ProjectModel, node: Node?, path: String) {
+        node ?: return
+        //解析分组
+        node.getAt(QName("group"))?.forEach {
+            val group: Node = it as? Node ?: return@forEach
+            parseSubModule(project, group, "$path/${group.get("@name")?.toString() ?: ""}")
+        }
+
+        node.getAt(QName("submodule"))?.forEach {
+            val s: Node = it as? Node ?: return@forEach
+            addNewSubModule(project, s, path)
+        }
+    }
+
+    private fun addNewSubModule(project: ProjectModel, node: Node?, path: String) {
+        node ?: return
+        val name = node.get("@name")?.toString() ?: return
+        val subModule = SubModule(name)
+        subModule.path = "$path/$name"
+        subModule.introduce = node.get("@introduce")?.toString() ?: ""
+        subModule.isApplication = node.get("@type") == "application"
+        subModule.project = project
+        project.submodules.add(subModule)
+
+        val apiName = node.get("@api")?.toString() ?: return
+        if (apiName == "this") {//添加附属api模块
+            val api = SubModule("${name}_api")
+            api.path = "${subModule.path}/src/api"
+            subModule.introduce = "api for $name"
+            subModule.isApplication = false
+            subModule.project = project
+            subModule.attachModel = subModule
+
+            subModule.apiModel = api
+            project.submodules.add(subModule)
+        } else {
+            subModule.attachModel = SubModule(apiName)
+        }
+    }
 
     fun strToPair(s: String): Pair<String?, String?> {
         val i = s.indexOf(",")

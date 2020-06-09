@@ -5,6 +5,7 @@ import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import java.io.File
 
@@ -17,12 +18,12 @@ open class PullProjectTask : BaseTask() {
     }
 
     override fun runTask() {
-        GitUtils.open(FileManager.templetRoot)?.apply {
+        GitUtils.open(project.getArgs().env.templetRoot)?.apply {
             GitUtils.pull(this)
             close()
         }
-        ProjectManager.projectXml.projects.forEach {
-            val dir = File(ProjectManager.codeRootDir, it.name)
+        project.getArgs().projectXml.projects.forEach {
+            val dir = File(project.getArgs().env.codeRootDir, it.name)
             if (!GitUtils.isGitDir(dir)) return@forEach
             Tools.println("          start pull-> ${dir.name} ${it.url}")
             GitUtils.open(dir)?.apply {

@@ -1,13 +1,10 @@
 package com.pqixing.modularization.base
 
 
-import com.pqixing.Config
 import com.pqixing.modularization.FileNames
-import com.pqixing.modularization.JGroovyHelper
-import com.pqixing.modularization.interfaces.OnClear
 import com.pqixing.modularization.IExtHelper
-import com.pqixing.modularization.manager.FileManager
-import com.pqixing.modularization.manager.ManagerPlugin
+import com.pqixing.modularization.JGroovyHelper
+import com.pqixing.modularization.manager.getArgs
 import com.pqixing.tools.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -20,14 +17,10 @@ import java.io.File
  */
 
 abstract class BasePlugin : Plugin<Project>, IPlugin {
-    var runTaskNames = mutableListOf<String>()
     lateinit var p: Project
     val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
     protected abstract val applyFiles: List<String>
-
-    override val config: Config
-        get() = ManagerPlugin.getExtends().config
 
     override val project: Project
         get() = p
@@ -47,18 +40,10 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         }
 
     override fun apply(project: Project) {
-        runTaskNames = project.gradle.startParameter.taskNames.toMutableList()
-        initProject(project)
-    }
-
-    override fun getGradle(): Gradle = p.gradle
-
-
-    protected fun initProject(project: Project) {
         this.p = project
         createIgnoreFile()
 
-        val file = File(FileManager.templetRoot, "gradles")
+        val file = File(project.getArgs().env.templetRoot, "gradles")
         extHelper.setExtValue(project, "gradles", file.absolutePath)
 
         callBeforeApplyMould()
@@ -69,6 +54,8 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         }
         linkTask().forEach { onTaskCreate(it, BaseTask.task(project, it)) }
     }
+
+    override fun getGradle(): Gradle = p.gradle
 
     protected fun onTaskCreate(taskClass: Class<*>, task: Task) {
 
@@ -85,7 +72,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     fun createIgnoreFile() {
         val ignoreFile = project.file(FileNames.GIT_IGNORE)
 
-        val defSets = mutableSetOf("build", "*.iml","src/dev")
+        val defSets = mutableSetOf("build", "*.iml", "src/dev")
         defSets += ignoreFields
         val old = FileUtils.readText(ignoreFile) ?: ""
         old.lines().forEach { line -> defSets.remove(trimIgnoreKey(line.trim())) }
@@ -102,21 +89,5 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
         if (key.startsWith("/")) start++
         if (key.endsWith("/")) end--
         return key.substring(start, end)
-    }
-
-
-
-    companion object {
-        val listeners = mutableSetOf<OnClear>()
-        fun addClearLister(l: OnClear) {
-            listeners.add(l)
-        }
-
-        fun onClear() {
-            listeners.forEach { it.clear() }
-        }
-        fun onStart(){
-            listeners.forEach { it.start() }
-        }
     }
 }

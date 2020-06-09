@@ -7,26 +7,27 @@ import com.pqixing.modularization.android.MDPlugin
 import com.pqixing.modularization.base.BaseExtension
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.manager.getEnv
 import com.pqixing.tools.TextUtils
 import groovy.lang.Closure
 
 open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : BaseExtension(plugin.project) {
     internal var compiles = HashSet<DpComponents>()
     internal var devCompiles = HashSet<DpComponents>()
-    val manager = ManagerPlugin.getExtends()
+    val manager = project.getEnv()
     var enableTransform = true
 
     /**
      * 上传到Maven的版本
      */
     var toMavenVersion = ""
-        get() = if (subModule.isApiModule()) {
-            val n = subModule.parent!!.name
+        get() = if (subModule.hasAttach()) {
+            val n = subModule.attachModel!!.name
             val dpsExt = plugin.project.rootProject.findProject(n)!!.MDPlugin().dpsManager.dpsExt
             dpsExt.toMavenVersion
         } else {
             if (field.isEmpty()) {
-                field = ManagerPlugin.getExtends().baseVersion
+                field = manager.args.projectXml.baseVersion
             }
             field
         }
@@ -34,8 +35,8 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
      * 上传到Maven的描述
      */
     var toMavenDesc = ""
-        get() = if (subModule.isApiModule()) {
-            val n = subModule.parent!!.name
+        get() = if (subModule.hasAttach()) {
+            val n = subModule.attachModel!!.name
             val dpsExt = plugin.project.rootProject.findProject(n)!!.MDPlugin().dpsManager.dpsExt
             dpsExt.toMavenDesc
         } else {
@@ -78,7 +79,7 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
             inner.emptyVersion = true
             inner.version = "+"
         }
-        inner.subModule = ProjectManager.findSubModuleByName(inner.moduleName)!!
+        inner.subModule = manager.args.projectXml.findSubModuleByName(inner.moduleName)!!
         val apiModule = inner.subModule.findApi()
         if (apiModule == null) {
             container.add(inner)

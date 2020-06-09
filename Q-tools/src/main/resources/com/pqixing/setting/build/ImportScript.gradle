@@ -1,17 +1,17 @@
-//version=1.0,date=2019.02.22
+//version=1.1,date=2020.06.10
+package com.pqixing.setting.build
 try {
-    new Script().runScript(rootDir, gradle)
+    Script.runScript(rootDir, gradle)
 } catch (Exception e) {
     new File(rootDir, "build/ImportScript.gradle").delete(); throw new RuntimeException(e)
 }
-
 /**
  * 导入脚本
  */
 class Script {
-    final String defaultXmlPath = "templet/project.xml"
+    static final  String defaultXmlPath = "templet/project.xml"
 
-    public void runScript(File rootDir, Gradle gradle) {
+    public static void runScript(File rootDir, Gradle gradle) {
         File defaultXml = new File(rootDir, defaultXmlPath)
         if (!defaultXml.exists()) return
         def c = new InCludes(rootDir, gradle)
@@ -22,33 +22,55 @@ class Script {
         Node gitNode = new XmlParser().parse(defaultXml)
 
         gradle.settingsEvaluated { org.gradle.api.initialization.Settings setting ->
-            gitNode.project.each { Node p ->
-                String name = p.@name
-                String type = p.@type
-                def childens = p.submodule
-                if (childens.size() > 0) childens.each { Node s ->
-                    String s_name = s.@name
-                    String s_type = s.@type
 
-                    if (includes.find {
-                        it == s_name || it == "${s_name}_api"
-                    } != null) addIncludeProject(setting, s_name, new File(rootDir, "$codeRoot/$name/$s_name"), s_type)
-                } else if (includes.find {
-                    it == name || it == "${name}_api"
-                } != null) addIncludeProject(setting, name, new File(rootDir, "$codeRoot/$name"), type)
+            def paths = new HashMap<String, String>()
+            loadProjectPath(includes,paths, gitNode, codeRoot)
+
+            includes.each {i->
+                def result = paths.get(i)
+                if(result !=null){
+                    setting.include(":$i")
+                    setting.findProject(":$i").projectDir = new File(result)
+                }
             }
         }
     }
 
-    void addIncludeProject(org.gradle.api.initialization.Settings setting, String name, File projectDir, String type) {
-        setting.include(":$name")
-        setting.findProject(":$name").projectDir = projectDir
-        if (type == "library_api"||type == "application") {
-            setting.include(":${name}_api")
-            setting.findProject(":${name}_api").projectDir = new File(projectDir, "src/api")
+    static void loadProjectPath(HashSet<String> includes, HashMap<String, String> paths, Node node, String path) {
+        def groups = node.group
+        if (groups.size() > 0) groups.each { Node n ->
+            loadProjectPath(includes, paths, n, path + "/${n.@name}")
         }
-//        setting.println("include -> project=$name path=$projectDir.absolutePath; type=$type")
+
+        def projects = node.project
+        if (projects.size() > 0) groups.each { Node p ->
+            loadModulePath(includes, paths, p, path + "/${p.@name}")
+            if (p.@type != null) addModulePath(includes, paths, p, path)
+        }
     }
+
+    static  void loadModulePath(HashSet<String> includes, HashMap<String, String> paths, Node node, String path) {
+        def groups = node.group
+        if (groups.size() > 0) groups.each { Node n ->
+            loadModulePath(includes, paths, n, path + "/${n.@name}")
+        }
+
+        def submodules = node.submodule
+        if (submodules.size() > 0) submodules.each { Node s ->
+            addModulePath(includes, paths, s, path)
+        }
+    }
+
+    static void addModulePath(HashSet<String> includes, HashMap<String, String> paths, Node node, String path) {
+        def name = node.@name+""
+        paths.put(name,"$path/$name")
+        def api = node.@api
+        if(api!=null){
+            def apiStr = api.toString()
+            includes.add("this"== apiStr?"${name}_api":apiStr)
+        }
+    }
+
 }
 
 /**
