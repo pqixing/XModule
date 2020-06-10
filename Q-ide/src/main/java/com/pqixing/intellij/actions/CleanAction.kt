@@ -47,7 +47,7 @@ class CleanAction : AnAction() {
         codeRoots.remove(codeRoot)
         codeRoots.add(0, codeRoot)
         //查找出本地所有存在的模块
-        val cleanDialog = CleanDialog(project, codeRoots, projectXml.projects.map { it.name }, projectXml.allSubModules().map { it.path })
+        val cleanDialog = CleanDialog(project, codeRoots, projectXml.projects.map { it.path }, projectXml.allSubModules().map { it.path })
         val cleanTask = object : Task.Backgroundable(project, "Start Clean") {
             override fun run(indicator: ProgressIndicator) {
 

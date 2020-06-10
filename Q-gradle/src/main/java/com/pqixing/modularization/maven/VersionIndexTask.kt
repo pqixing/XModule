@@ -1,7 +1,6 @@
 package com.pqixing.modularization.maven
 
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.utils.ResultUtils
 import java.io.File

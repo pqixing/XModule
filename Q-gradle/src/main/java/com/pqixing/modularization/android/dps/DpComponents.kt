@@ -22,6 +22,7 @@ class DpComponents(project: Project) : BaseExtension(project) {
      * 当前模块是否使用了本地依赖
      */
     var localCompile = false
+
     var moduleName: String = ""
 
     var dpType = ""
@@ -32,16 +33,19 @@ class DpComponents(project: Project) : BaseExtension(project) {
      */
     var scope = SCOP_RUNTIME
 
+    /**
+     * 版本号配置   1  匹配大版本号为1.开头的版本号，  同理 1.0    1.0.0
+     */
     var version: String = ""
 
-    var emptyVersion = false
+    /**
+     * 如果配置版本号不存在，自动匹配正确的版本号
+     */
+    var matchAuto = false
 
     var branch: String = ""
 
     var justApi = false
-
-    var apiVersion = ""
-        get() = if (field.isEmpty()) version else field
 
     var excludes: HashSet<Pair<String?, String?>> = HashSet()
 

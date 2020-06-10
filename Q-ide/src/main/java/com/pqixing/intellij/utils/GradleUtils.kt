@@ -48,8 +48,8 @@ object GradleUtils {
         ExternalSystemUtil.runTask(settings, DefaultRunExecutor.EXECUTOR_ID, project, GRADLE, object : TaskCallback {
             override fun onSuccess() {
                 if (callback != null) {
-                    val result = GradleUtils.getResult(project, runTaskId)
-                    callback.onTaskEnd(result?.first, result?.second)
+                    val result = getResult(project, runTaskId)
+                    callback.onTaskEnd(result.first, result.second)
                 }
             }
 
@@ -145,21 +145,9 @@ object GradleUtils {
     }
 
     fun getResult(project: Project, runTaskId: String) = parseResult(resultLogs.toList(), runTaskId)
-            ?: getResult(project, getLogFile(project.basePath!!), runTaskId)
 
-    /**
-     * 读取Gradle任务完成的毁掉
-     */
-    private fun getResult(project: Project, logFile: Array<File>?, runTaskId: String): Pair<Boolean, String> {
-        project.save()
-        if (logFile != null) for (f in logFile) {
-            if (!f.exists()) continue
-            return parseResult(f.readLines(), runTaskId) ?: continue
-        }
-        return Pair(false, "No Result")
-    }
 
-    private fun parseResult(logs: List<String>, runTaskId: String): Pair<Boolean, String>? {
+    private fun parseResult(logs: List<String>, runTaskId: String): Pair<Boolean, String> {
         val millis = System.currentTimeMillis()
         for (i in logs.size - 1 downTo 0) {
             val params = UrlUtils.getParams(logs[i])
@@ -168,13 +156,6 @@ object GradleUtils {
             if (millis - endTime > 10000) break//如果任务运行时间,大于结果读取时间10秒钟,则直接判定失败
             if (runTaskId == taskId) return Pair("0" == params["exitCode"], params["msg"] ?: "")
         }
-        return null
-    }
-
-
-    fun getLogFile(basePath: String): Array<File>? {
-        val file = File(basePath, ".idea/caches")
-        return if (file.exists()) file.listFiles { _, s -> s.contains("task.log") }
-        else emptyArray()
+        return Pair(false, "No Result")
     }
 }

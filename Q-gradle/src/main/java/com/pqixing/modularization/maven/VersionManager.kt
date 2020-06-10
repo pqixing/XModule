@@ -6,8 +6,8 @@ import com.pqixing.getEnvValue
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.manager.*
+import com.pqixing.modularization.manager.ArgsExtends
+import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
@@ -187,7 +187,7 @@ class VersionManager(val args: ArgsExtends) {
         val git = GitUtils.open(args.env.templetRoot)
                 ?: GitUtils.clone(args.projectXml.templetUrl, args.env.templetRoot, vBranch)
         if (git == null) {
-            ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "can not find version repo!!")
+            ProjectManager.thow(ProjectManager.EXCEPTION_SYNC, "can not find version repo!!")
             return
         }
         //如果是ToMaven,则更新,否则,不需要每次都更新

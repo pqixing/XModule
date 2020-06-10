@@ -57,6 +57,7 @@
 
             <action id="Modularization.OpenAction" class="com.pqixing.intellij.actions.OpenNewAction" text="OpenNew">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
+                <add-to-group group-id="AndroidToolsGroup" anchor="first"/>
             </action>
 
 

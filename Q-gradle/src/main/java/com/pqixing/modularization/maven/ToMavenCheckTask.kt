@@ -63,9 +63,9 @@ open class ToMavenCheckTask : BaseTask() {
             return
         }
 
-        val open = GitUtils.open(File(extends.env.codeRootDir, subModule.project.name))
+        val open = GitUtils.open(File(extends.env.codeRootDir, subModule.project.path))
         if (open == null) {
-            Tools.printError(-1, "${subModule.project.name} Git open fail, please check")
+            Tools.printError(-1, "${subModule.project.path} Git open fail, please check")
             return
         }
 

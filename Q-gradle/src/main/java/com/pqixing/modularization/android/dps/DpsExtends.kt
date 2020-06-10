@@ -31,6 +31,7 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
             }
             field
         }
+
     /**
      * 上传到Maven的描述
      */
@@ -74,28 +75,33 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
             closure.call()
         }
         if (inner.version.isEmpty()) {
-//            inner.version = manager.baseVersion
-            //默认不配置的情况下,使用最新的版本号
-            inner.emptyVersion = true
-            inner.version = "+"
+            //默认不配置的情况下,使用使用基础版本号
+            inner.version = manager.args.projectXml.baseVersion
         }
+
+        inner.matchAuto = inner.version.contains("*")
+        inner.version = inner.version.replace("*","")
         inner.subModule = manager.args.projectXml.findSubModuleByName(inner.moduleName)!!
+
         val apiModule = inner.subModule.findApi()
         if (apiModule == null) {
             container.add(inner)
             return
         }
+        //先尝试加载
         val apiComponents = DpComponents(plugin.project).apply {
             moduleName = apiModule.name
             branch = inner.branch
             version = inner.version
+            matchAuto = true
             dpType = inner.dpType
             this.scope = scope
             subModule = apiModule
         }
-        inner.scope = DpsExtends.SCOP_RUNTIME
         container.add(apiComponents)
-        if (plugin.buildAsApp) container.add(inner)
+
+        inner.scope = SCOP_RUNTIME
+        if (plugin.buildAsApp && !inner.justApi) container.add(inner)
     }
 
     fun compile(moduleName: String) = compile(moduleName, null)

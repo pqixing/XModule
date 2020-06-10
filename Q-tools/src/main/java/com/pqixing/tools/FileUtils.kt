@@ -20,7 +20,8 @@ object FileUtils {
      * @param checkChange 检查是否有变化，如果没有变化，则不写入
      */
     @JvmStatic
-    fun writeText(file: File, text: String, checkChange: Boolean = false): String {
+    fun writeText(file: File?, text: String, checkChange: Boolean = false): String {
+        file?:return ""
         if (checkChange && readText(file) == text) return file.path
         if (!file.parentFile.exists()) file.parentFile.mkdirs()
         with(file.writer()) {

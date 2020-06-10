@@ -1,5 +1,4 @@
 //version=1.1,date=2020.06.10
-package com.pqixing.setting.build
 try {
     Script.runScript(rootDir, gradle)
 } catch (Exception e) {
@@ -20,11 +19,12 @@ class Script {
 
         //解析default xml 加载所有的git信息
         Node gitNode = new XmlParser().parse(defaultXml)
+        def paths = new HashMap<String, String>()
+        loadProjectPath(includes,paths, gitNode, codeRoot)
+
+//        println("Parse paths = $paths")
 
         gradle.settingsEvaluated { org.gradle.api.initialization.Settings setting ->
-
-            def paths = new HashMap<String, String>()
-            loadProjectPath(includes,paths, gitNode, codeRoot)
 
             includes.each {i->
                 def result = paths.get(i)
@@ -43,7 +43,8 @@ class Script {
         }
 
         def projects = node.project
-        if (projects.size() > 0) groups.each { Node p ->
+//        println("loadProjectPath -------> ${projects}")
+        if (projects.size() > 0) projects.each { Node p ->
             loadModulePath(includes, paths, p, path + "/${p.@name}")
             if (p.@type != null) addModulePath(includes, paths, p, path)
         }

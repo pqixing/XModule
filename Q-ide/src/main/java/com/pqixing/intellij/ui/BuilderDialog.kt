@@ -21,7 +21,6 @@ import com.pqixing.intellij.utils.GradleUtils
 import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.model.SubModule
-import com.pqixing.model.SubModuleType
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils

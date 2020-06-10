@@ -3,12 +3,12 @@ package com.pqixing.modularization.android.dps
 import com.pqixing.Tools
 import com.pqixing.help.MavenPom
 import com.pqixing.help.XmlHelper
-import com.pqixing.modularization.JGroovyHelper
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.IExtHelper
 import com.pqixing.modularization.manager.*
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
+import groovy.lang.Closure
 import org.gradle.api.Project
 import java.io.File
 import java.net.URL
@@ -53,24 +53,20 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
     }
 
     //组件工程
-    lateinit var compileModel: String
-    lateinit var args: ArgsExtends
-    lateinit var project: Project
-
+    var project: Project = plugin.project
+    var args: ArgsExtends = project.getArgs()
+    var compileModel: String = args.config.dependentModel ?: "mavenOnly"
     val loseList = mutableListOf<String>()
-
-    init {
-        project = plugin.project
-        compileModel = project.getArgs().config.dependentModel ?: "mavenOnly"
-        args = project.getArgs()
-    }
 
     //处理依赖
     fun resolveDps(): String {
         val excludes: HashSet<String> = HashSet()
         val includes: ArrayList<String> = ArrayList()
 
-        onSelfCompile()
+        val apiModel = plugin.subModule.apiModel
+        if (apiModel != null) {
+            dpsExt.compile("${apiModel.name}:${dpsExt.toMavenVersion}*")
+        }
 
         val dps = dpsExt.compiles.toMutableSet()
         if (plugin.buildAsApp) dpsExt.devCompiles.forEach {
@@ -87,10 +83,10 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
                     else -> onMavenCompile(dpc, includes, excludes)
                 }
                 if (!compile) loseList.add(dpc.moduleName)
+
                 val newVersion = project.getArgs().versions.getVersion(dpc.branch, dpc.moduleName, "+")
                 if (!newVersion.second.startsWith(dpc.version) && newVersion.second.trim() != "+" && dpc.version.trim() != "+")
                     dpsV.add("${dpc.version} -> ${newVersion.second} -> compile \"${dpc.moduleName}:${newVersion.second.substringBeforeLast(".")}\"")
-                if (dpc.emptyVersion) dpc.version = newVersion.second
             }
             if (dpsV.isNotEmpty())
                 Tools.println("----------------------Has New Version----------------------\n ${dpsV.joinToString("\n")}")
@@ -104,11 +100,6 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
             else Tools.printError(-1, "ResolveDps -> lose dps -> $loseList")
         }
 
-        val emptyVersions = dps.filter { it.emptyVersion }
-        if (emptyVersions.isNotEmpty()) {
-            val emptyModule = emptyVersions.joinToString("\n") { "compile \"${it.moduleName}:${it.version.substringBeforeLast(".")}\"" }
-            Tools.println(-1, "----------------------ERROR:Empty version Add to emptyVersions or configuration version----------------------\n$emptyModule")
-        }
 
         val sb = java.lang.StringBuilder("dependencies {  // isApp : ${plugin.isApp} -> buildAsApp : ${plugin.buildAsApp}\n")
         includes.forEach { sb.append(it).append("\n") }
@@ -125,19 +116,6 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
         return args.runTaskNames.find { it.contains("${apiChild.name}:ToMaven") } != null
     }
 
-
-    /**
-     * 处理自身的依赖，主要针对Library_api类型
-     */
-    private fun onSelfCompile() {
-        val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
-        extHelper.addSourceDir(plugin.project, File(plugin.cacheDir, "java").absolutePath)
-
-        //如果当前模块，有api模块，则，默认添加对api模块的依赖
-        val apiModule = plugin.subModule.findApi() ?: return
-        dpsExt.compile("${apiModule.name}:${dpsExt.toMavenVersion}")
-    }
-
     /**
      * 重新凭借scope
      */
@@ -150,8 +128,11 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
      * 添加一个仓库依赖
      */
     private fun onMavenCompile(dpc: DpComponents, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
-        val dpVersion = args.versions.getVersion(dpc.branch, dpc.moduleName, dpc.version)
-        if (dpVersion.first.isEmpty()) return false
+        var dpVersion = args.versions.getVersion(dpc.branch, dpc.moduleName, dpc.version)
+        if (dpVersion.first.isEmpty() && dpc.matchAuto) dpVersion = args.versions.getVersion(dpc.branch, dpc.moduleName, "+")
+        if (dpVersion.first.isEmpty()) {
+            return false
+        }
         var c = ""
         if (dpVersion.second == dpc.version) {
             c = " ;force = true ;"
@@ -196,12 +177,11 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
      * 本地进行工程依赖
      */
     private fun onLocalCompile(dpc: DpComponents, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
-        val localProject = plugin.project.rootProject.allprojects.find { it.name == dpc.moduleName }
-                ?: return false
-        if (!dpc.subModule.hasCheck) ProjectManager.checkProject(localProject)
+        if (ProjectManager.tryCheckProject(project, dpc.moduleName) == null) return false
+
         val branch = dpc.subModule.getBranch()
         if (branch != plugin.subModule.getBranch() && !args.config.allowDpDiff) {
-            Tools.println("onLocalCompile can not dependent other branch project!!!${dpc.moduleName} $branch")
+            Tools.println("    branch diff ${dpc.moduleName} -> $branch")
             return false
         }
         //如果该依赖没有本地导入，不进行本地依赖

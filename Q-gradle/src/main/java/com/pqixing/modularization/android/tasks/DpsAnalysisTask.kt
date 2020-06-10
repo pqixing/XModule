@@ -9,11 +9,7 @@ import com.pqixing.modularization.android.MDPlugin
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.manager.FileManager
-import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.manager.getArgs
-import com.pqixing.modularization.maven.VersionManager
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
@@ -265,7 +261,7 @@ open class DpsAnalysisTask : BaseTask() {
         val tags = args.versions.curVersions.toProperties()
         tags.putAll(args.versions.findBranchVersion(branch))
         tags["TargetName"] = plugin.subModule.name
-        GitUtils.open(File(args.env.codeRootDir, plugin.subModule.project.name))?.runCatching {
+        GitUtils.open(File(args.env.codeRootDir, plugin.subModule.project.path))?.runCatching {
             tags["TargetBranch"] = branch
             tags["TargetRevision"] = getLastRevision(this, plugin.subModule.path.substringAfterLast("/", "")) ?: ""
             tags["TargetProjectRevision"] = getLastRevision(this, "") ?: ""

@@ -4,12 +4,9 @@ import com.pqixing.EnvKeys
 import com.pqixing.Tools
 import com.pqixing.getEnvValue
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.manager.FileManager
-import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.manager.getArgs
+import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import java.io.File
 
@@ -30,7 +27,7 @@ open class DeleteBranchTask : BaseTask() {
 
         val fail = ArrayList<String>()
         extends.projectXml.projects
-                .map { File(extends.env.codeRootDir, it.name) }
+                .map { File(extends.env.codeRootDir, it.path) }
                 .toMutableList().apply {
                     add(extends.env.templetRoot)
                 }.forEach {

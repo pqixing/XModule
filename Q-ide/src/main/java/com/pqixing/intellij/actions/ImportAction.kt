@@ -1,12 +1,15 @@
 package com.pqixing.intellij.actions
 
+import com.android.tools.idea.gradle.project.sync.GradleSyncInvoker
+import com.android.tools.idea.gradle.project.sync.GradleSyncListener
+import com.google.wireless.android.sdk.stats.GradleSyncStats
 import com.intellij.dvcs.repo.VcsRepositoryManager
-import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.module.impl.ModuleManagerImpl
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -20,9 +23,9 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.NewImportDialog
 import com.pqixing.intellij.utils.GitHelper
+import com.pqixing.intellij.utils.MyModuleGraph
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.model.ProjectXmlModel
-import com.pqixing.model.SubModuleType
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.PropertiesUtils
 import git4idea.GitUtil
@@ -55,7 +58,7 @@ class ImportAction : AnAction() {
         val dependentModel = clazz.getField("dependentModel").get(newInstance).toString()
 
         val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
-        val infoMaps = projectXml.allSubModules().filter { it.type != SubModuleType.TYPE_LIBRARY_API }.map { Pair(it.name, JListInfo(it.name, it.introduce.trim())) }.toMap(mutableMapOf())
+        val infoMaps = projectXml.allSubModules().filter { it.attachModel == null }.map { Pair(it.name, JListInfo(it.name, it.introduce.trim())) }.toMap(mutableMapOf())
         val repo = GitHelper.getRepo(File(basePath, "templet"), project)
         val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
         val localBranch = repo.currentBranchName ?: "master"
@@ -71,11 +74,10 @@ class ImportAction : AnAction() {
                 saveConfig(configFile, dialog)
 
                 val includeMaps = getImport(projectXml, dialog.imports.filter { !it.contains("#") }.toMutableSet(), dialog.codeRootStr, dialog.imports.filter { it.contains("#") })
-                val import = dialog.importModel == "Import" && importByIde(includeMaps)
 
                 val maps = projectXml.allSubModules()
                         .filter { includeMaps.containsKey(it.name) }
-                        .map { Pair(codePath + "/" + it.project.name, it.project.url) }
+                        .map { codePath + "/" + it.project.path to it.project.url }
                         .toMap(mutableMapOf())
                 maps.forEach { map ->
                     File(map.key).apply {
@@ -87,34 +89,52 @@ class ImportAction : AnAction() {
                     }
                 }
 
-                //如果快速导入不成功,则,同步一次
-                /*if (!import)*/ ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
-                Thread.sleep(2000)//先睡眠2秒,然后检查git管理是否有缺少
-                ApplicationManager.getApplication().invokeLater {
-                    if (dialog.syncVcs()) {
-                        //根据导入的CodeRoot目录,自动更改AS的版本管理
-                        val pVcs: ProjectLevelVcsManagerImpl = ProjectLevelVcsManagerImpl.getInstance(project) as ProjectLevelVcsManagerImpl
-                        pVcs.directoryMappings = projectXml.projects
-                                .map { codePath + "/" + it.name }
-                                .filter { GitUtil.isGitRoot(File(it)) }
-                                .map { VcsDirectoryMapping(it, "Git") }
-                                .toMutableList().apply {
-                                    add(0, VcsDirectoryMapping(File(basePath, "templet").canonicalPath, "Git"))
-                                }
-                        pVcs.notifyDirectoryMappingChanged()
-                    } else {
-                        /**
-                         * 所有代码的跟目录
-                         * 对比一下,当前导入的所有工程,是否都在version管理中,如果没有,提示用户进行管理
-                         */
-                        val controlPaths = VcsRepositoryManager.getInstance(project).repositories.filter { it.presentableUrl.startsWith(codePath) }.map { it.presentableUrl }
-                        val gitPaths = maps.keys
-                        gitPaths.removeAll(controlPaths)
-                        if (gitPaths.isNotEmpty())
-                            Messages.showMessageDialog("Those project had import but not in Version Control\n ${gitPaths.joinToString { "\n" + it }} \n Please check Setting -> Version Control After Sync!!", "Miss Vcs Control", null)
-                    }
-                }
+                val manager = ModuleManagerImpl.getInstance(project)
+                var filed = ModuleManagerImpl::class.java.getDeclaredField("myModuleModel")
+                filed.isAccessible = true
+                val myModuleModel =  filed.get(manager)
+                val myModuleGroupPath = myModuleModel.javaClass.getDeclaredField("myModuleGroupPath")
+                myModuleGroupPath.isAccessible = true
+                myModuleGroupPath.set(myModuleModel, MyModuleGraph())
 
+                //如果快速导入不成功,则,同步一次
+//                /*if (!import)*/ ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
+                GradleSyncInvoker.getInstance().requestProjectSync(project, GradleSyncStats.Trigger.TRIGGER_USER_SYNC_ACTION,object : GradleSyncListener{
+
+                    override fun syncFailed(project: Project, errorMessage: String) {
+                        importByIde(includeMaps)
+                        syncSucceeded(project)
+                    }
+                    override fun syncSucceeded(project: Project) {
+//                        Thread.sleep(2000)//先睡眠2秒,然后检查git管理是否有缺少
+//                        UiUtils.formatProject(project)
+
+
+
+                        if (dialog.syncVcs()) {
+                            //根据导入的CodeRoot目录,自动更改AS的版本管理
+                            val pVcs: ProjectLevelVcsManagerImpl = ProjectLevelVcsManagerImpl.getInstance(project) as ProjectLevelVcsManagerImpl
+                            pVcs.directoryMappings = projectXml.projects
+                                    .map { codePath + "/" + it.path }
+                                    .filter { GitUtil.isGitRoot(File(it)) }
+                                    .map { VcsDirectoryMapping(it, "Git") }
+                                    .toMutableList().apply {
+                                        add(0, VcsDirectoryMapping(File(basePath, "templet").canonicalPath, "Git"))
+                                    }
+                            pVcs.notifyDirectoryMappingChanged()
+                        } else {
+                            /**
+                             * 所有代码的跟目录
+                             * 对比一下,当前导入的所有工程,是否都在version管理中,如果没有,提示用户进行管理
+                             */
+                            val controlPaths = VcsRepositoryManager.getInstance(project).repositories.filter { it.presentableUrl.startsWith(codePath) }.map { it.presentableUrl }
+                            val gitPaths = maps.keys
+                            gitPaths.removeAll(controlPaths)
+                            if (gitPaths.isNotEmpty())
+                                Messages.showMessageDialog("Those project had import but not in Version Control\n ${gitPaths.joinToString { "\n" + it }} \n Please check Setting -> Version Control After Sync!!", "Miss Vcs Control", null)
+                        }
+                    }
+                })
             }
         }
         dialog.btnConfig.addActionListener {
@@ -147,8 +167,10 @@ class ImportAction : AnAction() {
             else if (v.startsWith("D#")) includes.addAll(handleDps(File(basePath), l))
             else if (v.startsWith("ED#")) includes.removeAll(handleDps(File(basePath), l))
         }
-        val pimls = PropertiesUtils.readProperties(File(project.basePath,UiUtils.IML_PROPERTIES))
-        return includes.map { m ->  Pair(m, pimls[UiUtils.getImlPath(codeRoot, projectXml, m)]?.toString()?:"")  }.toMap(mutableMapOf())
+        val pimls = PropertiesUtils.readProperties(File(project.basePath, UiUtils.IML_PROPERTIES))
+        return includes.map { m ->
+            Pair(m, pimls[UiUtils.getImlPath(codeRoot, projectXml, m)]?.toString() ?: "")
+        }.toMap(mutableMapOf())
     }
 
     private fun handleDps(rootDir: File, module: String) = FileUtils.readText(File(rootDir, "build/dps/$module.dp"))?.split(",")?.map { it.trim() }?.toSet()

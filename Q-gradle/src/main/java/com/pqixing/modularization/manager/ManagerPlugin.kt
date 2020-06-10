@@ -3,6 +3,7 @@ package com.pqixing.modularization.manager
 import com.pqixing.Tools
 import com.pqixing.interfaces.ILog
 import com.pqixing.modularization.FileNames
+import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.manager.tasks.*
 import com.pqixing.modularization.maven.VersionIndexTask
@@ -11,6 +12,7 @@ import com.pqixing.modularization.utils.Logger
 import com.pqixing.modularization.utils.ResultUtils
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
+import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 /**
@@ -22,6 +24,7 @@ open class ManagerPlugin : BasePlugin() {
     init {
         Tools.logger = Logger()
     }
+
     override fun callBeforeApplyMould() {
 
     }
@@ -48,34 +51,43 @@ open class ManagerPlugin : BasePlugin() {
 
 
     override fun apply(project: Project) {
+        allPlugins[project] = this
         val startTime = System.currentTimeMillis()
         //在每个工程开始同步之前，检查状态，下载，切换分支等等
-        project.gradle.beforeProject { ProjectManager.checkProject(it) }
+//        project.gradle.beforeProject { ProjectManager.checkProject(it) }
 
         args = ArgsExtends().load(project)
 
         super.apply(project)
 
-        FileManager.checkFileExist(project)
+        ProjectManager.checkFileExist(project)
 
-        FileManager.trySyncFile(args)
+        ProjectManager.trySyncFile(args)
 
-        project.afterEvaluate {
-            val extends = getExtends(ArgsExtends::class.java)
-            extHelper.setExtValue(project, "groupName", extends.projectXml.mavenGroup)
-            FileManager.checkDocument(this)
-            project.allprojects { p ->
-                extHelper.addRepositories(p, arrayListOf(extends.projectXml.mavenUrl))
-            }
+//        project.afterEvaluate {
+        extHelper.setExtValue(project, "groupName", args.projectXml.mavenGroup)
+        ProjectManager.checkDocument(this)
+
+
+        project.allprojects { p ->
+            ProjectManager.checkProject(p)
+            extHelper.addRepositories(p, arrayListOf(args.projectXml.mavenUrl))
         }
+//        }
 
         project.gradle.addListener(object : BuildAdapter() {
             override fun buildFinished(result: BuildResult) {
+                args.clear()
+                allPlugins.remove(project)
+                project.allprojects { allPlugins.remove(it) }
+
                 ResultUtils.notifyBuildFinish(project, System.currentTimeMillis() - startTime)
             }
         })
     }
 }
 
-fun Project.getEnv() = project.rootProject.plugins.getPlugin(ManagerPlugin::class.java)
+internal val allPlugins = hashMapOf<Project, Plugin<Project>>()
+
+fun Project.getEnv() = allPlugins[project.rootProject] as ManagerPlugin
 fun Project.getArgs() = getEnv().args

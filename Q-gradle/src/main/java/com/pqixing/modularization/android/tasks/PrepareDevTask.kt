@@ -1,11 +1,8 @@
 package com.pqixing.modularization.android.tasks
 
-import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.android.MDPlugin
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.manager.FileManager
 import com.pqixing.modularization.manager.getArgs
-import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import java.io.File

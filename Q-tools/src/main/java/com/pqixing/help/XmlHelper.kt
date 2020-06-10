@@ -1,5 +1,6 @@
 package com.pqixing.help
 
+import com.pqixing.Tools
 import com.pqixing.model.ProjectModel
 import com.pqixing.model.ProjectXmlModel
 import com.pqixing.model.SubModule
@@ -136,7 +137,7 @@ object XmlHelper {
             //type不为空，本身也作为一个模块添加
             if (p.get("@type") != null) addNewSubModule(project, p, path)
 
-            parseSubModule(project, p, path)
+            parseSubModule(project, p, path+"/"+p.get("@name")?.toString())
         }
     }
 
@@ -168,15 +169,15 @@ object XmlHelper {
         if (apiName == "this") {//添加附属api模块
             val api = SubModule("${name}_api")
             api.path = "${subModule.path}/src/api"
-            subModule.introduce = "api for $name"
-            subModule.isApplication = false
-            subModule.project = project
-            subModule.attachModel = subModule
+            api.introduce = "api for $name"
+            api.isApplication = false
+            api.project = project
+            api.attachModel = subModule
 
             subModule.apiModel = api
-            project.submodules.add(subModule)
+            project.submodules.add(api)
         } else {
-            subModule.attachModel = SubModule(apiName)
+            subModule.apiModel = SubModule(apiName)
         }
     }
 

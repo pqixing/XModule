@@ -3,9 +3,6 @@ package com.pqixing.modularization.manager.tasks
 import com.pqixing.EnvKeys
 import com.pqixing.getEnvValue
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.manager.FileManager
-import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
@@ -22,7 +19,7 @@ open class CreateBranchTask : BaseTask() {
         val args = project.getArgs();
         val fail = ArrayList<String>()
         args.projectXml.projects
-                .map { File(args.env.codeRootDir, it.name) }
+                .map { File(args.env.codeRootDir, it.path) }
                 .toMutableList().apply {
                     add(args.env.templetRoot)
                 }.forEach {

@@ -4,9 +4,6 @@ import com.pqixing.EnvKeys
 import com.pqixing.getEnvValue
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.manager.FileManager
-import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
@@ -31,7 +28,7 @@ open class SyncBranchTask : BaseTask() {
         }
         //更新相关的工程
         extends.projectXml.allSubModules().filter { modules.contains(it.name) }.map { it.project }.toSet().forEach {
-            val dir = File(extends.env.codeRootDir, it.name)
+            val dir = File(extends.env.codeRootDir, it.path)
             if (GitUtils.isGitDir(dir)) GitUtils.open(dir)?.apply {
                 val check = GitUtils.checkoutBranch(this, targetBranch, true)&&GitUtils.pull(this)//更新
                 if (!check) fail.add(dir.name)

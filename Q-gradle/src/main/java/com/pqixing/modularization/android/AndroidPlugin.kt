@@ -16,6 +16,7 @@ import com.pqixing.modularization.android.tasks.PrepareDevTask
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.manager.ManagerPlugin
 import com.pqixing.modularization.manager.ProjectManager
+import com.pqixing.modularization.manager.allPlugins
 import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.maven.ToMavenCheckTask
 import com.pqixing.modularization.maven.ToMavenTask
@@ -68,12 +69,16 @@ open class AndroidPlugin : BasePlugin() {
     override fun linkTask(): List<Class<out Task>> = mutableListOf(DpsAnalysisTask::class.java, PrepareDevTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java, BuildApkTask::class.java)
     var doAfterList: MutableList<Runnable> = mutableListOf()
     lateinit var dpsManager: DpsManager
-    lateinit var processInnerDps: Runnable
     override fun apply(project: Project) {
+        this.p = project
+        allPlugins[project] = this
+
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         extHelper.setExtMethod(project, "doAfterEvaluate") { if (it is Closure<*>) doAfterList.add(it) }
+        var processInnerDps: Runnable? = null
         project.afterEvaluate {
-            processInnerDps.run()
+            processInnerDps?.run()
+            if(processInnerDps==null) Tools.println("--------------error processInnerDps is null-------------- ")
             doAfterList.forEach { c ->
                 if (c is Closure<*>) {
                     c.delegate = project
@@ -91,16 +96,12 @@ open class AndroidPlugin : BasePlugin() {
         //如果是空同步，不做任何处理
         val dpsExt = project.extensions.create(Keys.CONFIG_DPS, DpsExtends::class.java, this, ProjectManager.checkProject(project))
         super.apply(project)
-        //创建配置读取
-        val moduleConfig = CompatDps(project, dpsExt)
-        project.extensions.add(Keys.CONFIG_MODULE, moduleConfig)
         //在工程处理后，处理组件依赖
         processInnerDps = Runnable {
             if (buildAsApp && dpsExt.enableTransform) {
                 val android = project.extensions.getByType(AppExtension::class.java)
                 //开始注解切入
                 android.registerTransform(PqxTransform())
-
             }
 
             dpsManager = DpsManager(this@AndroidPlugin, dpsExt)
@@ -128,4 +129,4 @@ open class AndroidPlugin : BasePlugin() {
     }
 }
 
-fun Project.MDPlugin() = this.plugins.getPlugin(AndroidPlugin::class.java)
+fun Project.MDPlugin() = allPlugins[project] as AndroidPlugin
