@@ -5,9 +5,7 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.externalSystem.model.ProjectSystemId
 import com.intellij.openapi.externalSystem.model.execution.ExternalSystemTaskExecutionSettings
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode
@@ -15,9 +13,7 @@ import com.intellij.openapi.externalSystem.task.TaskCallback
 import com.intellij.openapi.externalSystem.util.ExternalSystemUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
-import com.pqixing.intellij.actions.FormatAction
 import com.pqixing.tools.UrlUtils
-import java.io.File
 import java.net.ServerSocket
 import java.net.Socket
 
@@ -42,9 +38,7 @@ object GradleUtils {
         settings.externalProjectPath = project.basePath
         val port = tryInitSocket(defPort)
         val env = defEnvs.toMutableMap().apply { putAll(envs);put("run_task_id", runTaskId);put("ideSocketPort", port.toString()) }.filter { it.value.isNotEmpty() }
-//        settings.env = env
         settings.vmOptions = getVmOpions(env)
-//        initLogFile(project)
         ExternalSystemUtil.runTask(settings, DefaultRunExecutor.EXECUTOR_ID, project, GRADLE, object : TaskCallback {
             override fun onSuccess() {
                 if (callback != null) {
@@ -72,49 +66,14 @@ object GradleUtils {
         return s.localPort
     }
 
-    var showFormats = mutableMapOf<String, Int>()
+    var showTips = true
     private fun acceptNewInput(accept: Socket) = Thread {
         val inputStream = accept.getInputStream().bufferedReader()
 
         while (accept.isConnected) {
             val r = inputStream.readLine() ?: break
             if (r.startsWith("ide://notify")) {//通知ide刷新
-                val params = UrlUtils.getParams(r)
-                if (params["type"] == "buildFinished" && params["task"] == "prepareKotlinBuildScriptModel") {
-                    val projectUrl = UiUtils.base64Decode(params["url"]!!.toString())
-                    val showFormat = showFormats[projectUrl] ?: 0
-                    val target = ProjectManager.getInstance().openProjects.find { it.basePath == projectUrl }
-                    if (showFormat >= 0 && target != null) {
-                        if (showFormat == 1) {
-                            //延迟2秒格式化
-                            Thread.sleep(2000L)
-                            UiUtils.formatProject(target)
-                        } else {
-                            val n = Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Sync Finish", "", NotificationType.INFORMATION)
-                            n.addAction(object : NotificationAction("Don't Show") {
-                                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-                                    showFormats[projectUrl] = -1
-                                    n.expire()
-                                }
-                            })
-                            n.addAction(object : NotificationAction("Format Project") {
-                                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-                                    UiUtils.formatProject(target)
-                                    n.expire()
-                                }
-                            })
-                            n.addAction(object : NotificationAction("Format Auto") {
-                                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-                                    UiUtils.formatProject(target)
-                                    showFormats[projectUrl] = 1
-                                    n.expire()
-                                }
-                            })
-                            n.notify(target)
-                        }
-                    }
-
-                }
+//                tryNotifyIde(r)
             } else {
                 resultLogs.add(r)
                 if (resultLogs.size > 20) resultLogs.removeAt(0)
@@ -123,6 +82,30 @@ object GradleUtils {
         }
         accept.close()
     }.start()
+
+    private fun tryNotifyIde(r: String) {
+        val params = UrlUtils.getParams(r)
+        if (params["type"] == "buildFinished" && params["task"] == "prepareKotlinBuildScriptModel") {
+            val projectUrl = UiUtils.base64Decode(params["url"]!!.toString())
+            val target = ProjectManager.getInstance().openProjects.find { it.basePath == projectUrl }
+            if (showTips && target != null && !UiUtils.checkIfFormat(target)) {
+                val n = Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Sync Finish", "", NotificationType.INFORMATION)
+                n.addAction(object : NotificationAction("Don't Show") {
+                    override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                        showTips = false
+                        n.expire()
+                    }
+                })
+                n.addAction(object : NotificationAction("Format Project") {
+                    override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+//                        UiUtils.formatModule(target)
+                        n.expire()
+                    }
+                })
+                n.notify(target)
+            }
+        }
+    }
 
     /**
      * 绑定新的端口

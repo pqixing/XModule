@@ -156,9 +156,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
 
 
         branchs.forEach { cbBranch.addItem(it) }
-        if (QToolGroup.isDachenProject(project)) {
-            cbJekins.isSelected = buildJekins
-        } else cbJekins.isVisible = false
+        cbJekins.isVisible = false
         cbJekins.addActionListener { updateShowType() }
 
         btnSetting.addActionListener { settingClick() }

@@ -106,6 +106,7 @@ object XmlHelper {
                 it.apiModel = xmlModel.findSubModuleByName(api.name)
             }
         }
+        node.localText()
         return xmlModel
     }
 

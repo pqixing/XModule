@@ -15,6 +15,9 @@ open class FormatAction : AnAction() {
     lateinit var project: Project
 
     override fun actionPerformed(e: AnActionEvent) {
-        UiUtils.formatProject(e.project)
+        val target = e.project ?: return
+        target.save()
+        val moduleFile = VfsUtil.findFileByIoFile(File(target.basePath, ".idea/modules.xml"), true)
+        UiUtils.formatModule(target,moduleFile)
     }
 }

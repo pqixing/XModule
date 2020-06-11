@@ -6,15 +6,16 @@ import com.android.tools.apk.analyzer.AaptInvoker
 import com.android.tools.apk.analyzer.AndroidApplicationInfo
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
 import com.android.tools.idea.sdk.AndroidSdks
-import com.pqixing.creator.utils.LogWrap
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.vfs.*
+import com.pqixing.creator.utils.LogWrap
 import com.pqixing.help.XmlHelper
+import com.pqixing.intellij.ui.NewImportDialog
 import com.pqixing.model.ProjectXmlModel
-import com.pqixing.tools.PropertiesUtils
-import groovy.lang.GroovyClassLoader
+import com.pqixing.tools.PropertiesUtils.readProperties
 import org.jetbrains.android.sdk.AndroidSdkUtils
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
@@ -24,7 +25,7 @@ import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.TransferHandler
 
-object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
+object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener {
     override fun deviceConnected(p0: IDevice) {
         if (devices.find { p0.serialNumber == it.second.serialNumber } == null) {
             val newItem = Pair(p0.getDevicesName(), p0)
@@ -48,66 +49,64 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener {
     var lastDevices = ""
     val devices = ArrayList<Pair<String, IDevice>>()
     val comboxs = ArrayList<JComboBox<String>>()
-    var lastModify = 0L
+    val ftModules = mutableMapOf<String, Boolean?>()
 
     init {
         AndroidDebugBridge.addDeviceChangeListener(this)
+        LocalFileSystem.getInstance().addVirtualFileListener(this)
     }
 
-    fun formatProject(project: Project?) = ApplicationManager.getApplication().invokeLater {
-        val p = project ?: return@invokeLater
-        ApplicationManager.getApplication().runWriteAction {
-            p.save()
-            val xml = File(p.basePath, ".idea/modules.xml")
-            if (lastModify == xml.lastModified()) return@runWriteAction
+    override fun contentsChanged(event: VirtualFileEvent) {
+        if (event.fileName != "modules.xml" || !event.file.path.endsWith(".idea/modules.xml")) return
+        val moduleXml = event.file
+        val target = ProjectManager.getInstance().openProjects.find { moduleXml.path.startsWith(it.basePath ?: "") }
+                ?: return
+        target.save()
+        //格式化iml文件
+        if (checkIfFormat(target)) formatModule(target, moduleXml)
+    }
 
-            xml.writeText(xml.readText().replace(Regex("group=\".*\""), ""))
-            VfsUtil.findFileByIoFile(xml, true)?.refresh(false, false)
-            lastModify = xml.lastModified()
-
-            collectImls(project, p)
-//            ApplicationManager.getApplication().invokeLater {
-//                Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Build Finish", "format project", NotificationType.INFORMATION).notify(p)
-//            }
+    fun checkIfFormat(target: Project?): Boolean {
+        target ?: return false
+        var format = ftModules[target.basePath]
+        if (format == null) {
+            val properties = readProperties(File(target.basePath, IDE_PROPERTIES))
+            format = "Y" == properties.getProperty(NewImportDialog.FORMAT_KEY, "Y")
+            ftModules[target.basePath!!] = format
         }
+        return format
     }
 
-    private fun collectImls(project: Project, p: Project) {
-        val imls = File(project.basePath, IML_PROPERTIES)
-        val pimls = PropertiesUtils.readProperties(imls)
+    fun formatModule(target: Project, moduleXml: VirtualFile?) {
+        val projectXmlFile = File(target.basePath, "templet/project.xml")
+        if (moduleXml == null || !projectXmlFile.exists()) return
 
-        val projectXmlFile = File(p.basePath, "templet/project.xml")
-        if (!projectXmlFile.exists()) return
-
-        val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
-        val clazz = GroovyClassLoader().parseClass(File(p.basePath, "Config.java"))
-        val newInstance = clazz.newInstance()
-        val codeRoot = clazz.getField("codeRoot").get(newInstance).toString()
-
-        val manager = ModuleManager.getInstance(project)
-
-        manager.modules.toList().forEach {
-            val path = getImlPath(codeRoot, projectXml, it.name)
-            if (path != null) {
-                pimls[path] = it.moduleFilePath
+        val ins = moduleXml.inputStream.reader()
+        val txtLines = ins.readLines()
+        ins.close()
+        val tag = "<!--end-->"
+        if (txtLines.lastOrNull()?.endsWith(tag) == true) return
+        invokeLaterOnWriteThread(Runnable {
+            val iml = ".iml"
+            val rex = Regex("group=\".*\"")
+            val groups = XmlHelper.parseProjectXml(projectXmlFile).allSubModules().map { it.name to it.path.substringBeforeLast("/").let { p -> if (p.startsWith("/")) p.substring(1) else p } }.toMap()
+            val newTxt = txtLines.map {
+                val i = it.indexOf(iml)
+                it.replace(rex, if (i > 0) groups[it.substring(0, i).substringAfterLast("/")]?.let { l -> "group=\"$l\"" }
+                        ?: "" else "")
             }
-        }
-        PropertiesUtils.writeProperties(imls, pimls)
+
+            val txt = newTxt.joinToString("\n") + "\n<!--${Date().toLocaleString()}--> $tag"
+            val w = moduleXml.getOutputStream(object : SafeWriteRequestor {}).writer()
+            w.write(txt)
+            w.close()
+            target.save()
+
+        })
     }
 
-    /**
-     * 加载模块
-     */
-    fun loadModule(manager: ModuleManager, filePath: String) {
-        if (File(filePath).exists()) try {
-            manager.loadModule(filePath)
-        } finally {
-        }
-    }
-
-    fun getImlPath(codeRoot: String, projectXml: ProjectXmlModel, title: String): String? {
-        val path = projectXml.findSubModuleByName(title)?.path ?: return null
-        return "$codeRoot/$path"
+    fun invokeLaterOnWriteThread(action: Runnable) = ApplicationManager.getApplication().invokeLater {
+        ApplicationManager.getApplication().runWriteAction(action)
     }
 
     fun setTransfer(component: JComponent, block: (files: List<File>) -> Unit) {

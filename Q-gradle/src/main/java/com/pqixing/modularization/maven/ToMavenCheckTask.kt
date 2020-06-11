@@ -60,7 +60,6 @@ open class ToMavenCheckTask : BaseTask() {
         val artifactId = subModule.name
         if (subModule.getBranch() != extends.env.templetBranch) {
             Tools.println(unCheck(1), "${subModule.name} branch is ${subModule.getBranch()} , Doc branch ${extends.env.templetBranch} does not match")
-            return
         }
 
         val open = GitUtils.open(File(extends.env.codeRootDir, subModule.project.path))

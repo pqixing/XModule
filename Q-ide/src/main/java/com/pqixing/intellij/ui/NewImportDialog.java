@@ -14,8 +14,6 @@ import com.pqixing.tools.TextUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -29,6 +27,7 @@ public class NewImportDialog extends BaseJDialog {
     public static final String BING_KEY = "syncRoot";
     public static final String IMPORT_KEY = "IMPORT";
     public static final String VCS_KEY = "vcs";
+    public static final String FORMAT_KEY = "format";
     private static final String CODEROOTS_KEY = "codeRoots";
     private JPanel contentPane;
     private JButton buttonOK;
@@ -50,6 +49,7 @@ public class NewImportDialog extends BaseJDialog {
     private JButton loadDpsButton;
     private JPanel jpSelect;
     private JScrollPane jpOthers;
+    private JCheckBox cbFormat;
 
     //已选中导入的工程
     private List<String> imports;
@@ -83,6 +83,8 @@ public class NewImportDialog extends BaseJDialog {
         properties = PropertiesUtils.INSTANCE.readProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()));
         syncBranch = properties.getProperty(BING_KEY, "N").equals("Y");
         cbVcs.setSelected("Y".equals(properties.getProperty(VCS_KEY, "Y")));
+        cbFormat.setSelected("Y".equals(properties.getProperty(FORMAT_KEY, "Y")));
+
         initDpModel(dpModel);
         initCodeRoot(branchs.get(0), codeRoot);
         initLoadButtons(branchs);
@@ -98,6 +100,10 @@ public class NewImportDialog extends BaseJDialog {
             jpMore.setVisible(cbMore.isSelected());
         });
         jpMore.setVisible(cbMore.isSelected());
+    }
+
+    public boolean format() {
+        return cbFormat.isSelected();
     }
 
     public boolean syncVcs() {
@@ -396,6 +402,10 @@ public class NewImportDialog extends BaseJDialog {
         String oldVcs = properties.getProperty(VCS_KEY);
         properties.setProperty(VCS_KEY, newVcs);
 
+        String newFormat = format() ? "Y" : "N";
+        String oldFormat = properties.getProperty(FORMAT_KEY);
+        properties.setProperty(FORMAT_KEY, newFormat);
+
         String importKey = IMPORT_KEY + TextUtils.INSTANCE.numOrLetter(getSelectBranch());
         String newImport = list2Str(getImports());
         String oldImports = properties.getProperty(importKey);
@@ -409,8 +419,10 @@ public class NewImportDialog extends BaseJDialog {
             codeRoots.remove(codeRoots.size() - 1);
         }
         properties.setProperty(CODEROOTS_KEY, list2Str(codeRoots));
+        //更新监听
+        UiUtils.INSTANCE.getFtModules().put(project.getBasePath(), newFormat.equals("Y"));
 
-        if (!newVcs.equals(oldVcs) || !newKey.equals(oldBind) || !newImport.equals(oldImports) || !exists)
+        if (!newFormat.equals(oldFormat) || !newVcs.equals(oldVcs) || !newKey.equals(oldBind) || !newImport.equals(oldImports) || !exists)
             ApplicationManager.getApplication().runWriteAction(() -> PropertiesUtils.INSTANCE.writeProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()), properties));
     }
 
