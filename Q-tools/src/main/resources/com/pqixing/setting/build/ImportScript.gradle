@@ -22,7 +22,7 @@ class Script {
         def paths = new HashMap<String, String>()
         loadProjectPath(includes,paths, gitNode, codeRoot)
 
-//        println("Parse paths = $paths")
+        println("Parse codeRoot = $codeRoot include = $includes\n paths = $paths")
 
         gradle.settingsEvaluated { org.gradle.api.initialization.Settings setting ->
 
@@ -65,11 +65,15 @@ class Script {
     static void addModulePath(HashSet<String> includes, HashMap<String, String> paths, Node node, String path) {
         def name = node.@name+""
         paths.put(name,"$path/$name")
+        if(!includes.contains(name)) return
         def api = node.@api
-        if(api!=null){
-            def apiStr = api.toString()
-            includes.add("this"== apiStr?"${name}_api":apiStr)
-        }
+        if(api==null) return
+        def apiStr = api.toString()
+        if(api=="this"){
+            def apiName = "${name}_api"
+            includes.add(apiName)
+            paths.put(apiName,"$path/$name/src/api")
+        }else includes.add(apiStr)
     }
 
 }
@@ -101,7 +105,7 @@ class InCludes {
                 default: gradle.println("not found  -> $value")
             }
         }
-        println("Parse include = $includes codeRoot = $codeRoot")
+//        println("Parse include = $includes codeRoot = $codeRoot")
     }
 
     private HashSet<String> parseInclude(String include, File rootDir, Gradle gradle) {

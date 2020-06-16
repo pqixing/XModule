@@ -6,15 +6,16 @@ import com.android.tools.apk.analyzer.AaptInvoker
 import com.android.tools.apk.analyzer.AndroidApplicationInfo
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
 import com.android.tools.idea.sdk.AndroidSdks
+import com.intellij.openapi.application.Application
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.NamedComponent
+import com.intellij.openapi.components.ProjectComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.*
 import com.pqixing.creator.utils.LogWrap
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.NewImportDialog
-import com.pqixing.model.ProjectXmlModel
 import com.pqixing.tools.PropertiesUtils.readProperties
 import org.jetbrains.android.sdk.AndroidSdkUtils
 import java.awt.datatransfer.DataFlavor
@@ -24,20 +25,24 @@ import java.util.*
 import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.TransferHandler
+import kotlin.concurrent.thread
 
-object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener {
+object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, Runnable, NamedComponent {
     override fun deviceConnected(p0: IDevice) {
-        if (devices.find { p0.serialNumber == it.second.serialNumber } == null) {
-            val newItem = Pair(p0.getDevicesName(), p0)
-            devices.add(newItem)
-            comboxs.forEach { it.addItem(newItem.first) }
-        }
+        addTask(1000, Runnable {
+            val newList = comboxs.toList()
+            comboxs.clear()
+            newList.forEach {
+                addDevicesComboBox(ProjectManager.getInstance().openProjects.first(), it)
+            }
+        })
     }
 
     override fun deviceDisconnected(p0: IDevice) {
         val item = devices.find { p0.serialNumber == it.second.serialNumber } ?: return
         devices.remove(item)
         comboxs.forEach { it.removeItem(item.first) }
+        ApplicationManager.getApplication().getComponent(UiUtils::class.java)
     }
 
     override fun deviceChanged(p0: IDevice?, p1: Int) {
@@ -45,15 +50,42 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener {
     }
 
     val IDE_PROPERTIES = ".idea/caches/import.properties"
-    val IML_PROPERTIES = ".idea/caches/iml.properties"
+    val IML_PROPERTIES = ".idea/caches/iml.properti es"
     var lastDevices = ""
     val devices = ArrayList<Pair<String, IDevice>>()
     val comboxs = ArrayList<JComboBox<String>>()
     val ftModules = mutableMapOf<String, Boolean?>()
+    val lock = Object()
+    val tasks: LinkedList<Pair<Long, Runnable>> = LinkedList()
 
     init {
         AndroidDebugBridge.addDeviceChangeListener(this)
         LocalFileSystem.getInstance().addVirtualFileListener(this)
+        Thread(this,"uiThread").start()
+    }
+
+    fun onLockChange(l: Boolean) = try {
+        synchronized(lock) {
+            if (l) lock.wait() else lock.notifyAll()
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+
+    fun addTask(sleep: Long = 0, task: Runnable) {
+        tasks.add(sleep to task)
+        onLockChange(false)
+    }
+
+    override fun run() {
+        while (true) {
+            if (tasks.isEmpty()) onLockChange(true)
+            val t = tasks.pollFirst()
+            if (t != null) {
+                if (t.first > 0) Thread.sleep(t.first)
+                t.second.run()
+            }
+        }
     }
 
     override fun contentsChanged(event: VirtualFileEvent) {
@@ -62,8 +94,9 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener {
         val target = ProjectManager.getInstance().openProjects.find { moduleXml.path.startsWith(it.basePath ?: "") }
                 ?: return
         target.save()
-        //格式化iml文件
-        if (checkIfFormat(target)) formatModule(target, moduleXml)
+
+        //格式化iml文件,//1.5秒后再次检测，防止格式化不生效
+        if (formatModule(target, moduleXml)) addTask(2000, Runnable { formatModule(target, moduleXml) })
     }
 
     fun checkIfFormat(target: Project?): Boolean {
@@ -77,32 +110,41 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener {
         return format
     }
 
-    fun formatModule(target: Project, moduleXml: VirtualFile?) {
+    fun formatModule(target: Project, moduleXml: VirtualFile?, formatFoce: Boolean = false): Boolean {
         val projectXmlFile = File(target.basePath, "templet/project.xml")
-        if (moduleXml == null || !projectXmlFile.exists()) return
+        if (moduleXml == null || !projectXmlFile.exists()) return false
 
         val ins = moduleXml.inputStream.reader()
         val txtLines = ins.readLines()
         ins.close()
         val tag = "<!--end-->"
-        if (txtLines.lastOrNull()?.endsWith(tag) == true) return
+        if (!formatFoce && txtLines.lastOrNull()?.endsWith(tag) == true) return false
+
         invokeLaterOnWriteThread(Runnable {
+            target.save()
             val iml = ".iml"
             val rex = Regex("group=\".*\"")
-            val groups = XmlHelper.parseProjectXml(projectXmlFile).allSubModules().map { it.name to it.path.substringBeforeLast("/").let { p -> if (p.startsWith("/")) p.substring(1) else p } }.toMap()
+            val groups = XmlHelper.parseProjectXml(projectXmlFile).allSubModules().map {
+                var path = if (it.hasAttach()) "APIS" else it.path.substringBeforeLast("/")
+                if (path.startsWith("/")) path = path.substring(1)
+                it.name to path
+            }.toMap()
+
             val newTxt = txtLines.map {
                 val i = it.indexOf(iml)
-                it.replace(rex, if (i > 0) groups[it.substring(0, i).substringAfterLast("/")]?.let { l -> "group=\"$l\"" }
-                        ?: "" else "")
+                val moduleName = it.substring(0, i.coerceAtLeast(0)).substringAfterLast("/")
+                val newGroup = if (moduleName == target.name) moduleName else groups[moduleName] ?: ""
+                it.replace(rex, "group=\"$newGroup\"")
             }
 
             val txt = newTxt.joinToString("\n") + "\n<!--${Date().toLocaleString()}--> $tag"
             val w = moduleXml.getOutputStream(object : SafeWriteRequestor {}).writer()
             w.write(txt)
             w.close()
+            moduleXml.refresh(false, true)
             target.save()
-
         })
+        return true
     }
 
     fun invokeLaterOnWriteThread(action: Runnable) = ApplicationManager.getApplication().invokeLater {
@@ -141,6 +183,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener {
             devices.clear()
             devices.addAll(ds)
         }
+        comboBox.removeAllItems()
         devices.forEach { comboBox.addItem(it.first) }
         comboxs.add(comboBox)
     }

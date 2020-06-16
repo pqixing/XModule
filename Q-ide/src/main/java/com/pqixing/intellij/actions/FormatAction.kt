@@ -18,6 +18,7 @@ open class FormatAction : AnAction() {
         val target = e.project ?: return
         target.save()
         val moduleFile = VfsUtil.findFileByIoFile(File(target.basePath, ".idea/modules.xml"), true)
-        UiUtils.formatModule(target,moduleFile)
+        UiUtils.addTask(100, Runnable { UiUtils.formatModule(target,moduleFile,true) })
+
     }
 }
