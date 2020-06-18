@@ -8,6 +8,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.project.impl.ProjectManagerImpl
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
+import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.OpenNewProjectDialog
 import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.tools.FileUtils
@@ -18,18 +19,23 @@ open class OpenNewAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
 
-        val defaultProject = ProjectManagerImpl.getInstance().defaultProject
-        val p = e.project?:return
-        val showAndPack = OpenNewProjectDialog(p)
+        val defaultProject = e.project ?: ProjectManagerImpl.getInstance().defaultProject
+        val rootDir = e.project?.let { LocalFileSystem.getInstance().findFileByPath(it.basePath!!) }
+        val showAndPack = OpenNewProjectDialog(defaultProject)
         showAndPack.tvFilePick.addActionListener {
-            FileChooser.chooseFiles( FileChooserDescriptor(false,true,false,false,false,false)
-                    , defaultProject, LocalFileSystem.getInstance().findFileByPath(p.basePath!!)?.parent) { files: List<VirtualFile> ->
+            FileChooser.chooseFiles(FileChooserDescriptor(false, true, false, false, false, false)
+                    , defaultProject, rootDir?.parent) { files: List<VirtualFile> ->
                 files.firstOrNull()?.let {
                     showAndPack.tvDir.text = it.canonicalPath
                 }
             }
         }
-        if(p!=null)  showAndPack.tvDir.text = LocalFileSystem.getInstance().findFileByPath(p.basePath!!)!!.parent.canonicalPath
+        if (rootDir != null) {
+            showAndPack.tvDir.text = rootDir.canonicalPath ?: ""
+            val tl = File(rootDir.path, "templet/project.xml")
+            if (tl.exists()) showAndPack.tvGitUrl.text = XmlHelper.parseProjectXml(tl).templetUrl
+        }
+
         showAndPack.setOnOk {
             var dir = File(showAndPack.tvDir.text.trim(), "CRoot")
             var i = 0
@@ -40,8 +46,8 @@ open class OpenNewAction : AnAction() {
             val doClone = GitHelper.getGit().clone(defaultProject, dir, gitUrl, "templet").exitCode == 0
             FileUtils.copy(File(dir, "templet/build.gradle"), File(dir, "build.gradle"))
             FileUtils.copy(File(dir, "templet/Config.java"), File(dir, "Config.java"))
-            if (doClone){
-                ProjectUtil.openOrImport(File(dir, "build.gradle").absolutePath, p?:defaultProject, true)
+            if (doClone) {
+                ProjectUtil.openOrImport(File(dir, "build.gradle").absolutePath, defaultProject, true)
             }
         }
         showAndPack.showAndPack()

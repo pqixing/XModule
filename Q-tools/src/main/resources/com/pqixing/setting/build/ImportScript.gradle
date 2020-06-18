@@ -15,7 +15,7 @@ class Script {
         if (!defaultXml.exists()) return
         def c = new InCludes(rootDir, gradle)
         HashSet<String> includes = c.includes
-        def codeRoot = c.codeRoot
+        def codeRoot = new File(rootDir,c.codeRoot).canonicalPath
 
         //解析default xml 加载所有的git信息
         Node gitNode = new XmlParser().parse(defaultXml)
@@ -30,7 +30,9 @@ class Script {
                 def result = paths.get(i)
                 if(result !=null){
                     setting.include(":$i")
-                    setting.findProject(":$i").projectDir = new File(result)
+                    def pro = setting.findProject(":$i")
+                    pro.projectDir = new File(result)
+                    pro.setBuildFileName("build")
                 }
             }
         }

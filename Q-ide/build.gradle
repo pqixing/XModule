@@ -10,7 +10,7 @@ intellij {
 }
 publishPlugin {
 // Bintray
-    Properties properties = new Properties()
+    def properties = new java.util.Properties()
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
     token properties.getProperty("jetbrains.token")

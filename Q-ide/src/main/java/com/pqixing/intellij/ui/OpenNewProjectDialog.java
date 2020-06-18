@@ -25,7 +25,7 @@ public class OpenNewProjectDialog extends BaseJDialog {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
-        setTitle("打开新工程");
+        setTitle("Open New Project");
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onOK();
