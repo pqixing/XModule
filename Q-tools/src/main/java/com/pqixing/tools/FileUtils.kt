@@ -89,7 +89,8 @@ object FileUtils {
 
     fun mergeFile(target: File, mergeFiles: List<File>, replace: (txt: String) -> String = { it }) {
         val txt = StringBuilder()
-        mergeFiles.forEach { txt.append("\n").append(readText(it)) }
+        mergeFiles.forEach { readText(it)?.let { t -> txt.append("\n$t") } }
         writeText(target, replace(txt.toString()))
+        Tools.println("Merge Gradle::[${mergeFiles.joinToString(",") { it.name }}] >> ${target.absolutePath}")
     }
 }

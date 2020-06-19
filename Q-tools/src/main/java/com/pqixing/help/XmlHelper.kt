@@ -91,7 +91,7 @@ object XmlHelper {
         val xmlModel = ProjectXmlModel(node.get("@baseUrl")?.toString() ?: "")
         xmlModel.basicUrl = node.get("@basicUrl")?.toString() ?: ""
         xmlModel.mavenUrl = node.get("@mavenUrl")?.toString() ?: ""
-        xmlModel.group = node.get("@mavenGroup")?.toString() ?: ""
+        xmlModel.group = node.get("@group")?.toString() ?: ""
         xmlModel.mavenUser = node.get("@mavenUser")?.toString() ?: ""
         xmlModel.mavenPsw = node.get("@mavenPsw")?.toString() ?: ""
         xmlModel.createSrc = node.get("@createSrc") == "true"

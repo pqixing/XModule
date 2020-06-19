@@ -42,7 +42,7 @@ class EnvArgs(val rootDir: File, val config: Config) {
     var basicBranch: String = "master"
 
     var basicDir: File = File(rootDir, FileNames.BASIC)
-    var dpsFile: File = File(basicDir, FileNames.DPS_MODULES)
+    var dpsFile: File = File(basicDir, FileNames.GRADLE_DEPENDENCIES)
     var xmlFile: File = File(basicDir, FileNames.PROJECT_XML)
 
     var codeRootDir: File = File(File(rootDir, config.codeRoot).canonicalPath)

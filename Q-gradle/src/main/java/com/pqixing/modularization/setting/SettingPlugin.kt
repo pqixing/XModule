@@ -48,7 +48,7 @@ class SettingPlugin : Plugin<Settings> {
     lateinit var args: ArgsExtends
     override fun apply(setting: Settings) {
         Tools.logger = Logger()
-
+        Tools.println("> Configure project :${setting.rootProject.name}")
         val start = System.currentTimeMillis()
         val key =setting.gradle.hashCode()
         settings[key] = WeakReference(this)
@@ -76,15 +76,12 @@ class SettingPlugin : Plugin<Settings> {
         args.runTaskNames.addAll(taskNames)
 
         //加载依赖文件
-        val oldTxt = FileUtils.readText(env.dpsFile) ?: ""
-        val append = StringBuilder()
-        val dpTxt = "{\n    toMavenVersion=\"${projectXml.baseVersion}\"\n    apiVersion=\"\"\n}"
-        for (module in projectXml.allModules()) {
-            setting.extensions.add(module.name, DpsExtends(module.name, this))
-            if (!oldTxt.matches(Regex("${module.name} *?[{].*?}", RegexOption.DOT_MATCHES_ALL))) append.append("\n//${module.introduce}\n${module.name}$dpTxt")
-        }
-        kotlin.runCatching { setting.apply(mapOf("from" to env.dpsFile.absolutePath)) }
-        if (append.isNotEmpty()) FileUtils.writeText(env.dpsFile, "$oldTxt$append")
+        for (module in projectXml.allModules()) setting.extensions.add(module.name, DpsExtends(module.name, this))
+        if(env.dpsFile.exists())setting.apply(mapOf("from" to env.dpsFile.absolutePath))
+
+        //追加未添加到文件的工程
+       val newTxt = (FileUtils.readText(env.dpsFile) ?: "") + args.dpsContainer.values.filter { !it.hadConfig }.joinToString("\n") { "${it.name}{\n    version = \"${projectXml.baseVersion}\"\n    apiVersion = \"\"\n}" }
+        FileUtils.writeText(env.dpsFile, newTxt)
 
         //解析include进行工程导入
         ImportScript(args, setting).startLoad()

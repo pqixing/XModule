@@ -26,10 +26,5 @@ public class FileNames {
     /**
      * 配置文件
      */
-    public static final String IMPORT_KT = "import.kt";
-    /**
-     * 配置文件
-     */
     public static final String PROJECT_XML = "project.xml";
-    public static final String DPS_MODULES = "module.dps";
 }

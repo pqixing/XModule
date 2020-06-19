@@ -11,7 +11,7 @@ class DpsExtends(val name: String, val manager: SettingPlugin) {
     val args: ArgsExtends = manager.args
     var subModule = args.projectXml.findModule(name)!!
     var enableTransform = true
-
+    var hadConfig = false
     init {
         args.dpsContainer[name] = this
     }
@@ -23,7 +23,11 @@ class DpsExtends(val name: String, val manager: SettingPlugin) {
      * 上传到Maven的版本
      */
     var version = ""
-        get() = subModule?.attachModule?.let { manager.args.dpsContainer[it.name]?.apiVersion }
+        set(value) {
+            hadConfig = true
+            field = value
+        }
+        get() = subModule.attachModule?.let { manager.args.dpsContainer[it.name]?.apiVersion }
                 ?: if (field.isEmpty()) manager.args.projectXml.baseVersion else field
 
 

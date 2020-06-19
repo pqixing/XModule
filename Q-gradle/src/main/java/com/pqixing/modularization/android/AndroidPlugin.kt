@@ -67,7 +67,7 @@ open class AndroidPlugin : BasePlugin() {
             }
 
             dpsManager = DpsManager(this, dpsExt)
-            project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dpsManager.resolveDps(), true).also {  Tools.println("resolveDps:$it") }))
+            project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dpsManager.resolveDps(), true).also {  Tools.println("Depend:$it") }))
 
 
             doAfterList.forEach { c ->
