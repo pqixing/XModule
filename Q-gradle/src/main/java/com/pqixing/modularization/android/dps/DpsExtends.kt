@@ -5,13 +5,13 @@ import com.pqixing.modularization.setting.SettingPlugin
 import com.pqixing.modularization.setting.ArgsExtends
 import groovy.lang.Closure
 
-class DpsExtends(val name: String, val manager: SettingPlugin) {
-    internal var compiles = HashSet<DpComponents>()
-    internal var devCompiles = HashSet<DpComponents>()
-    val args: ArgsExtends = manager.args
+class DpsExtends(val name: String, val args: ArgsExtends) {
+    internal var compiles = HashSet<DpsModel>()
+    internal var devCompiles = HashSet<DpsModel>()
     var subModule = args.projectXml.findModule(name)!!
     var enableTransform = true
     var hadConfig = false
+
     init {
         args.dpsContainer[name] = this
     }
@@ -27,12 +27,13 @@ class DpsExtends(val name: String, val manager: SettingPlugin) {
             hadConfig = true
             field = value
         }
-        get() = subModule.attachModule?.let { manager.args.dpsContainer[it.name]?.apiVersion }
-                ?: if (field.isEmpty()) manager.args.projectXml.baseVersion else field
+        get() = subModule.attachModule?.let { args.dpsContainer[it.name]?.apiVersion }
+                ?: if (field.isEmpty()) args.projectXml.baseVersion else field
 
 
-    private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null) {
-        val inner = DpComponents()
+    private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpsModel>, closure: Closure<Any?>? = null) {
+        if (name.isEmpty()) return
+        val inner = DpsModel()
         //根据 ： 号分割
         val split = name.split(":")
         when (split.size) {
@@ -61,12 +62,12 @@ class DpsExtends(val name: String, val manager: SettingPlugin) {
         }
         if (inner.version.isEmpty()) {
             //默认不配置的情况下,使用使用基础版本号
-            inner.version = manager.args.projectXml.baseVersion
+            inner.version = args.projectXml.baseVersion
         }
 
         inner.matchAuto = inner.version.contains("*")
         inner.version = inner.version.replace("*", "")
-        inner.module = manager.args.projectXml.findModule(inner.moduleName)!!
+        inner.module = args.projectXml.findModule(inner.moduleName) ?: return
 
         val apiModule = inner.module.findApi()
         if (apiModule == null) {
@@ -74,7 +75,7 @@ class DpsExtends(val name: String, val manager: SettingPlugin) {
             return
         }
         //先尝试加载
-        val apiComponents = DpComponents().apply {
+        val apiComponents = DpsModel().apply {
             moduleName = apiModule.name
             branch = inner.branch
             version = inner.version
@@ -86,7 +87,7 @@ class DpsExtends(val name: String, val manager: SettingPlugin) {
         container.add(apiComponents)
 
         inner.scope = SCOP_RUNTIME
-        if (manager.args.runAsApp(subModule) && !inner.justApi) container.add(inner)
+        if (args.runAsApp(subModule) && !inner.justApi) container.add(inner)
     }
 
     fun compile(moduleName: String) = compile(moduleName, null)
@@ -99,18 +100,6 @@ class DpsExtends(val name: String, val manager: SettingPlugin) {
     fun devCompile(moduleName: String, closure: Closure<Any?>? = null) {
         compile(moduleName, SCOP_API, devCompiles)
     }
-
-    @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))
-    fun add(moduleName: String) = compile(moduleName)
-
-    @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))
-    fun add(moduleName: String, closure: Closure<Any?>? = null) = compile(moduleName, closure)
-
-    @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))
-    fun addImpl(moduleName: String) = compile(moduleName)
-
-    @Deprecated("Use Api instep", ReplaceWith("api(moduleName, closure)"))
-    fun addImpl(moduleName: String, closure: Closure<Any?>? = null) = compile(moduleName, closure)
 
     companion object {
         val SCOP_API = "api"

@@ -8,7 +8,7 @@ import com.pqixing.modularization.android.dps.DpsExtends.Companion.SCOP_RUNTIME
  * 依赖的组件
  */
 
-class DpComponents() {
+class DpsModel() {
 
     /**
      * 该依赖,在配置xml中的信息

@@ -126,7 +126,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
     /**
      * 添加一个仓库依赖
      */
-    private fun onMavenCompile(dpc: DpComponents, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
+    private fun onMavenCompile(dpc: DpsModel, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
         var dpVersion = args.versions.getVersion(dpc.branch, dpc.moduleName, dpc.version)
         if (dpVersion.first.isEmpty() && dpc.matchAuto) dpVersion = args.versions.getVersion(dpc.branch, dpc.moduleName, "+")
         if (dpVersion.first.isEmpty()) {
@@ -175,7 +175,7 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
     /**
      * 本地进行工程依赖
      */
-    private fun onLocalCompile(dpc: DpComponents, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
+    private fun onLocalCompile(dpc: DpsModel, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
         val branch = dpc.module.getBranch()
         if (branch != plugin.module.getBranch() && !args.config.allowDpDiff) {
             Tools.println("    branch diff ${dpc.moduleName} -> $branch")

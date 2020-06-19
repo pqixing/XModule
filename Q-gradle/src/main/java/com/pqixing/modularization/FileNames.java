@@ -14,7 +14,7 @@ public class FileNames {
     /**
      * 依赖输出路径
      */
-    public static final String GRADLE_DEPENDENCIES = "dependencies.gradle";
+    public static final String GRADLE_DEPENDENCIES = "depend.gradle";
     /**
      * 配置文件
      */

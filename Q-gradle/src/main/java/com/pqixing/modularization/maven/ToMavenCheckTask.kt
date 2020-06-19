@@ -6,7 +6,7 @@ import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.helper.JGroovyHelper
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.pluginModule
-import com.pqixing.modularization.android.dps.DpComponents
+import com.pqixing.modularization.android.dps.DpsModel
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
@@ -170,7 +170,7 @@ open class ToMavenCheckTask : BaseTask() {
         }
     }
 
-    private fun checkLocalDps(compiles: HashSet<DpComponents>) {
+    private fun checkLocalDps(compiles: HashSet<DpsModel>) {
         val map = compiles.filter { it.localCompile }.map { it.moduleName }
         if (map.isNotEmpty()) {
             Tools.printError(-1, "${project.name} Contain local project, please remove it before upload -> $map")

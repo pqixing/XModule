@@ -50,7 +50,7 @@ class SettingPlugin : Plugin<Settings> {
         Tools.logger = Logger()
         Tools.println("> Configure project :${setting.rootProject.name}")
         val start = System.currentTimeMillis()
-        val key =setting.gradle.hashCode()
+        val key = setting.gradle.hashCode()
         settings[key] = WeakReference(this)
 
         Tools.logger = Logger()
@@ -76,11 +76,13 @@ class SettingPlugin : Plugin<Settings> {
         args.runTaskNames.addAll(taskNames)
 
         //加载依赖文件
-        for (module in projectXml.allModules()) setting.extensions.add(module.name, DpsExtends(module.name, this))
-        if(env.dpsFile.exists())setting.apply(mapOf("from" to env.dpsFile.absolutePath))
+        for (module in projectXml.allModules()) setting.extensions.add(module.name, DpsExtends(module.name, args))
+
+        if (env.dpsFile.exists()) setting.apply(mapOf("from" to env.dpsFile.absolutePath.also { Tools.println("Apply Depend::$it") }))
 
         //追加未添加到文件的工程
-       val newTxt = (FileUtils.readText(env.dpsFile) ?: "") + args.dpsContainer.values.filter { !it.hadConfig }.joinToString("\n") { "${it.name}{\n    version = \"${projectXml.baseVersion}\"\n    apiVersion = \"\"\n}" }
+        val newTxt = (FileUtils.readText(env.dpsFile)
+                ?: "") + args.dpsContainer.values.filter { !it.hadConfig }.joinToString("\n") { "${it.name}{\n    version = \"${projectXml.baseVersion}\"\n    apiVersion = \"\"\n    compile(\"\"){}\n}" }
         FileUtils.writeText(env.dpsFile, newTxt)
 
         //解析include进行工程导入
