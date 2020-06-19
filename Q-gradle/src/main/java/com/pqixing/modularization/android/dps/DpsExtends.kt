@@ -1,53 +1,34 @@
 package com.pqixing.modularization.android.dps
 
 import com.pqixing.Tools
-import com.pqixing.model.SubModule
-import com.pqixing.modularization.android.AndroidPlugin
-import com.pqixing.modularization.android.MDPlugin
-import com.pqixing.modularization.base.BaseExtension
-import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.modularization.manager.ProjectManager
-import com.pqixing.modularization.manager.getEnv
-import com.pqixing.tools.TextUtils
+import com.pqixing.modularization.setting.SettingPlugin
+import com.pqixing.modularization.setting.ArgsExtends
 import groovy.lang.Closure
 
-open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : BaseExtension(plugin.project) {
+class DpsExtends(val name: String, val manager: SettingPlugin) {
     internal var compiles = HashSet<DpComponents>()
     internal var devCompiles = HashSet<DpComponents>()
-    val manager = project.getEnv()
+    val args: ArgsExtends = manager.args
+    var subModule = args.projectXml.findModule(name)!!
     var enableTransform = true
+
+    init {
+        args.dpsContainer[name] = this
+    }
+
+    var apiVersion = ""
+        get() = if (field.isEmpty()) version else field
 
     /**
      * 上传到Maven的版本
      */
-    var toMavenVersion = ""
-        get() = if (subModule.hasAttach()) {
-            val n = subModule.attachModel!!.name
-            val dpsExt = plugin.project.rootProject.findProject(n)!!.MDPlugin().dpsManager.dpsExt
-            dpsExt.toMavenVersion
-        } else {
-            if (field.isEmpty()) {
-                field = manager.args.projectXml.baseVersion
-            }
-            field
-        }
-
-    /**
-     * 上传到Maven的描述
-     */
-    var toMavenDesc = ""
-        get() = if (subModule.hasAttach()) {
-            val n = subModule.attachModel!!.name
-            val dpsExt = plugin.project.rootProject.findProject(n)!!.MDPlugin().dpsManager.dpsExt
-            dpsExt.toMavenDesc
-        } else {
-            val desc = TextUtils.getSystemEnv("toMavenDesc")
-            if (desc?.isNotEmpty() == true) desc else field
-        }
+    var version = ""
+        get() = subModule?.attachModule?.let { manager.args.dpsContainer[it.name]?.apiVersion }
+                ?: if (field.isEmpty()) manager.args.projectXml.baseVersion else field
 
 
     private fun compile(name: String, scope: String = SCOP_COMPILE, container: HashSet<DpComponents>, closure: Closure<Any?>? = null) {
-        val inner = DpComponents(project)
+        val inner = DpComponents()
         //根据 ： 号分割
         val split = name.split(":")
         when (split.size) {
@@ -80,28 +61,28 @@ open class DpsExtends(val plugin: AndroidPlugin, val subModule: SubModule) : Bas
         }
 
         inner.matchAuto = inner.version.contains("*")
-        inner.version = inner.version.replace("*","")
-        inner.subModule = manager.args.projectXml.findSubModuleByName(inner.moduleName)!!
+        inner.version = inner.version.replace("*", "")
+        inner.module = manager.args.projectXml.findModule(inner.moduleName)!!
 
-        val apiModule = inner.subModule.findApi()
+        val apiModule = inner.module.findApi()
         if (apiModule == null) {
             container.add(inner)
             return
         }
         //先尝试加载
-        val apiComponents = DpComponents(plugin.project).apply {
+        val apiComponents = DpComponents().apply {
             moduleName = apiModule.name
             branch = inner.branch
             version = inner.version
             matchAuto = true
             dpType = inner.dpType
             this.scope = scope
-            subModule = apiModule
+            module = apiModule
         }
         container.add(apiComponents)
 
         inner.scope = SCOP_RUNTIME
-        if (plugin.buildAsApp && !inner.justApi) container.add(inner)
+        if (manager.args.runAsApp(subModule) && !inner.justApi) container.add(inner)
     }
 
     fun compile(moduleName: String) = compile(moduleName, null)

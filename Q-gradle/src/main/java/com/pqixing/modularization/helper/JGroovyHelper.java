@@ -1,4 +1,4 @@
-package com.pqixing.modularization;
+package com.pqixing.modularization.helper;
 
 import com.pqixing.modularization.impl.GExtHelper;
 import org.gradle.api.Action;

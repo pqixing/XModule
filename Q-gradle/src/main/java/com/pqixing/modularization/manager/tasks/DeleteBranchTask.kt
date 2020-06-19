@@ -22,14 +22,14 @@ open class DeleteBranchTask : BaseTask() {
             Tools.printError(-1,"DeleteBranch Exception -> check password error!!!")
         }
         var targetBranch = EnvKeys.opBranch.getEnvValue()?:return
-        if (targetBranch == extends.env.templetBranch) Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete current branch $targetBranch , please change branch before delete!!")
+        if (targetBranch == extends.env.basicBranch) Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete current branch $targetBranch , please change branch before delete!!")
         if (targetBranch == "master") Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete master !!")
 
         val fail = ArrayList<String>()
         extends.projectXml.projects
                 .map { File(extends.env.codeRootDir, it.path) }
                 .toMutableList().apply {
-                    add(extends.env.templetRoot)
+                    add(extends.env.basicDir)
                 }.forEach {
                     val git = GitUtils.open(it) ?: return@forEach
                     if (!GitUtils.pull(git) || !GitUtils.delete(git, targetBranch)) fail.add(it.name)

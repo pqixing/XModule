@@ -17,7 +17,6 @@ import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.ui.Messages
-import com.intellij.openapi.ui.MultiLineLabelUI
 import com.intellij.openapi.vcs.VcsDirectoryMapping
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
 import com.intellij.openapi.vfs.VfsUtil
@@ -60,7 +59,7 @@ class ImportAction : AnAction() {
         val dependentModel = clazz.getField("dependentModel").get(newInstance).toString()
 
         val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
-        val infoMaps = projectXml.allSubModules().filter { it.attachModel == null }.map { Pair(it.name, JListInfo(it.name, it.introduce.trim())) }.toMap(mutableMapOf())
+        val infoMaps = projectXml.allModules().filter { it.attachModule == null }.map { Pair(it.name, JListInfo(it.name, it.introduce.trim())) }.toMap(mutableMapOf())
         val repo = GitHelper.getRepo(File(basePath, "templet"), project)
         val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
         val localBranch = repo.currentBranchName ?: "master"
@@ -77,9 +76,9 @@ class ImportAction : AnAction() {
 
                 val codePath = File(basePath, dialog.codeRootStr).canonicalPath
                 //下载代码
-                val gitPaths = projectXml.allSubModules().filter { allIncludes.contains(it.name) }
+                val gitPaths = projectXml.allModules().filter { allIncludes.contains(it.name) }
                         .map { it.project }.toSet().map { File(codePath, it.path) to it.url }.toMap().toMutableMap()
-                gitPaths[File(basePath, "templet")] = projectXml.templetUrl
+                gitPaths[File(basePath, "templet")] = projectXml.basicUrl
 
                 gitPaths.filter { !GitUtil.isGitRoot(it.key) }.forEach {
                     indicator.text = "Start Clone... ${it.value} "
@@ -90,7 +89,7 @@ class ImportAction : AnAction() {
                 }
 
                 val pimls = allIml()
-                val importImls = projectXml.allSubModules().filter { allIncludes.contains(it.name) }
+                val importImls = projectXml.allModules().filter { allIncludes.contains(it.name) }
                         .mapNotNull { pimls[File(codePath, it.path).canonicalPath]?.toString() }
 
                 ApplicationManager.getApplication().invokeLater { importByIde(project, importImls.toMutableList()) }

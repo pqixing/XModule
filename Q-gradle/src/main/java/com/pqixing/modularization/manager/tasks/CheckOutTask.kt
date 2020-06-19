@@ -21,7 +21,7 @@ open class CheckOutTask : BaseTask() {
         var targetBranch = EnvKeys.opBranch.getEnvValue() ?: return
 
         val fail = ArrayList<String>()
-        GitUtils.open(project.getArgs().env.templetRoot)?.apply {
+        GitUtils.open(project.getArgs().env.basicDir)?.apply {
             val check = GitUtils.checkoutBranch(this, targetBranch, true)
             if (!check) fail.add(project.rootDir.name)
             close()

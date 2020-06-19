@@ -1,48 +1,49 @@
 package com.pqixing.model
 
 class ProjectXmlModel(val baseUrl: String) {
-    var templetUrl = ""
+    var basicUrl = ""
 
     var mavenUrl = ""
-    var mavenGroup = ""
     var mavenUser = ""
     var mavenPsw = ""
+    var group = ""
     var createSrc = false
     var matchingFallbacks = mutableListOf<String>()
     var baseVersion = "1.0"
 
     val projects = mutableListOf<ProjectModel>()
-    fun findSubModuleByName(name: String): SubModule? {
-        for (p in projects) for (m in p.submodules) {
+    fun findModule(name: String): Module? {
+        for (p in projects) for (m in p.modules) {
             if (name == m.name) return m
         }
         return null
     }
 
-    fun allSubModules() = mutableSetOf<SubModule>().apply {
-        projects.forEach { this.addAll(it.submodules) }
+    fun allModules() = mutableSetOf<Module>().apply {
+        projects.forEach { this.addAll(it.modules) }
     }
 }
 
 data class ProjectModel(val name: String, var path: String, val introduce: String, val url: String) {
     var branch: String = ""
-    val submodules = mutableListOf<SubModule>()
+    val modules = mutableListOf<Module>()
 }
 
-data class SubModule(val name: String) {
+data class Module(val name: String) {
     lateinit var project: ProjectModel
     var path: String = ""
     lateinit var introduce: String
-    var isApplication = false
-
-    var type: String = "library"
-    var attachModel: SubModule? = null
-    var apiModel: SubModule? = null
+    val isAndroid:Boolean
+        get() = type == "application" ||type== "library"
+    val isApplication
+        get() = type == "application"
+    var type: String = ""
+    var attachModule: Module? = null
+    var apiModule: Module? = null
 
     //    var apiModel:SubModule?=null//该模块的api模块
     fun getBranch() = project.branch
-    fun findApi() = apiModel
+    fun findApi() = apiModule
 
-    fun hasAttach() = attachModel != null
-    var hasCheck = false
+    fun attach() = attachModule != null
 }

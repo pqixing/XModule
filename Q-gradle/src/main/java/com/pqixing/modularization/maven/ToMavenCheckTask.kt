@@ -1,11 +1,11 @@
 package com.pqixing.modularization.maven
 
 import com.pqixing.Tools
-import com.pqixing.model.SubModule
-import com.pqixing.modularization.IExtHelper
-import com.pqixing.modularization.JGroovyHelper
+import com.pqixing.model.Module
+import com.pqixing.modularization.helper.IExtHelper
+import com.pqixing.modularization.helper.JGroovyHelper
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.android.MDPlugin
+import com.pqixing.modularization.android.pluginModule
 import com.pqixing.modularization.android.dps.DpComponents
 import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.android.dps.DpsManager
@@ -26,9 +26,9 @@ import java.util.*
 open class ToMavenCheckTask : BaseTask() {
     init {
         group = ""
-        val mdPlugin = project.MDPlugin()
-        if (mdPlugin.subModule.hasAttach()) {//如果是Api模块，则依赖主模块的clean方法，强行导入主模块
-            this.dependsOn(":${mdPlugin.subModule.attachModel?.name}:clean")
+        val mdPlugin = project.pluginModule()
+        if (mdPlugin.module.attach()) {//如果是Api模块，则依赖主模块的clean方法，强行导入主模块
+            this.dependsOn(":${mdPlugin.module.attachModule?.name}:clean")
         }
     }
 
@@ -53,13 +53,13 @@ open class ToMavenCheckTask : BaseTask() {
         val extends = project.getArgs()
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
-        val plugin = project.MDPlugin()
+        val plugin = project.pluginModule()
         val dpsExtends = plugin.getExtends(DpsExtends::class.java)
-        val subModule = plugin.subModule
+        val subModule = plugin.module
 //        val lastLog = plugin.subModule
         val artifactId = subModule.name
-        if (subModule.getBranch() != extends.env.templetBranch) {
-            Tools.println(unCheck(1), "${subModule.name} branch is ${subModule.getBranch()} , Doc branch ${extends.env.templetBranch} does not match")
+        if (subModule.getBranch() != extends.env.basicBranch) {
+            Tools.println(unCheck(1), "${subModule.name} branch is ${subModule.getBranch()} , Doc branch ${extends.env.basicBranch} does not match")
         }
 
         val open = GitUtils.open(File(extends.env.codeRootDir, subModule.project.path))
@@ -73,8 +73,8 @@ open class ToMavenCheckTask : BaseTask() {
         checkLoseDps(plugin.dpsManager.loseList)
 
         val branch = open.repository.branch
-        val groupId = "${extends.projectXml.mavenGroup}.$branch"
-        val baseVersion = dpsExtends.toMavenVersion
+        val groupId = "${extends.projectXml.group}.$branch"
+        val baseVersion = dpsExtends.version
         checkBaseVersion(baseVersion)
 
         checkGitStatus(open, subModule)
@@ -89,7 +89,7 @@ open class ToMavenCheckTask : BaseTask() {
 
         val version = "$baseVersion.${v + 1}"
 
-        val name = "${Keys.PREFIX_LOG}?hash=${revCommit.name}&commitTime=${revCommit.commitTime}&message=${revCommit.fullMessage}&desc=${dpsExtends.toMavenDesc}"
+        val name = "${Keys.PREFIX_LOG}?hash=${revCommit.name}&commitTime=${revCommit.commitTime}&message=${revCommit.fullMessage}}"
         extHelper.setMavenInfo(project
                 , extends.projectXml.mavenUrl
                 , extends.projectXml.mavenUser.takeIf { it.isNotEmpty() } ?: extends.config.userName
@@ -104,9 +104,9 @@ open class ToMavenCheckTask : BaseTask() {
         extHelper.setExtValue(project, Keys.LOG_MODULE, artifactId)
     }
 
-    private fun checkGitStatus(git: Git, subModule: SubModule) {
-        if (!GitUtils.checkIfClean(git, getRelativePath(subModule.path))) {
-            Tools.println(unCheck(3), "${subModule.name} Code not clean")
+    private fun checkGitStatus(git: Git, module: Module) {
+        if (!GitUtils.checkIfClean(git, getRelativePath(module.path))) {
+            Tools.println(unCheck(3), "${module.name} Code not clean")
         }
     }
 
@@ -186,9 +186,9 @@ open class ToMavenCheckTask : BaseTask() {
         return if (of > 0) return path.substring(of + 1) else null
     }
 
-    fun loadGitInfo(git: Git, subModule: SubModule): RevCommit? {
+    fun loadGitInfo(git: Git, module: Module): RevCommit? {
         val command = git.log().setMaxCount(1)
-        getRelativePath(subModule.path)?.apply { command.addPath(this) }
+        getRelativePath(module.path)?.apply { command.addPath(this) }
         return command.call().find { true }
     }
 

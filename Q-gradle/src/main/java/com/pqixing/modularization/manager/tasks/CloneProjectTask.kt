@@ -3,8 +3,6 @@ package com.pqixing.modularization.manager.tasks
 import com.pqixing.Tools
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
@@ -26,7 +24,7 @@ open class CloneProjectTask : BaseTask() {
             FileUtils.delete(dir)
         }
         Tools.println("          start clone-> ${dir.name} ${it.url}")
-        GitUtils.clone(it.url, dir, project.getArgs().env.templetBranch)?.close()
+        GitUtils.clone(it.url, dir, project.getArgs().env.basicBranch)?.close()
         (if (GitUtils.isGitDir(dir)) clones else fails).add("\n${dir.name}:${it.url}")
     }
 

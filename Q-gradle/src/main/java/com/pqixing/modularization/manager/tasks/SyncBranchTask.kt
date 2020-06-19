@@ -21,13 +21,13 @@ open class SyncBranchTask : BaseTask() {
         if (targetBranch.isEmpty()) ResultUtils.writeResult("targetBranch can not be empty", -1);
 
         val fail = ArrayList<String>()
-        GitUtils.open(extends.env.templetRoot)?.apply {
+        GitUtils.open(extends.env.basicDir)?.apply {
             val check =GitUtils.checkoutBranch(this, targetBranch, true)&&GitUtils.pull(this)//更新
             if (!check) fail.add(project.rootDir.name)
             close()
         }
         //更新相关的工程
-        extends.projectXml.allSubModules().filter { modules.contains(it.name) }.map { it.project }.toSet().forEach {
+        extends.projectXml.allModules().filter { modules.contains(it.name) }.map { it.project }.toSet().forEach {
             val dir = File(extends.env.codeRootDir, it.path)
             if (GitUtils.isGitDir(dir)) GitUtils.open(dir)?.apply {
                 val check = GitUtils.checkoutBranch(this, targetBranch, true)&&GitUtils.pull(this)//更新

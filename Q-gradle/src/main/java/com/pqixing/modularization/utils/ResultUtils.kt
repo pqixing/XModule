@@ -23,6 +23,10 @@ object ResultUtils {
     val ide
         get() = "ide" == EnvKeys.syncType.getEnvValue()
 
+    fun thow(error: String?) {
+        throw GradleException(error)
+    }
+
     /**
      * 输出结果，用于Ide的交互获取
      * @param exitCode 退出标记 0 表示正常退出，1表示异常退出
@@ -35,18 +39,17 @@ object ResultUtils {
         if (exit) throw  GradleException(msg)
     }
 
-    fun notifyBuildFinish(rootProject: Project, spend: Long) {
-        val rootdir = rootProject.rootDir
+    fun ideProject(rootDir: File) = File(rootDir, ".idea").exists()
+
+    fun notifyIde(rootDir: File, params: Map<String, String>) {
         //非idea工程，不处理
-        if (File(rootdir, ".idea").exists()) {
-            val str = "${Keys.PREFIX_IDE_NOTIFY}?task=${rootProject.gradle.startParameter.taskNames.joinToString(",")}&type=buildFinished&spend=$spend&url=${String(Base64.getEncoder().encode(rootdir.absolutePath.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)}"
-            if (lastIdePort > 0) writeToSocket(str, lastIdePort)
-            else {
-                var cur = defPort
-                while ((cur - defPort) < 20) if (writeToSocket(str, cur++)) break
-            }
+        if (!ideProject(rootDir)) return
+        val str = "${Keys.PREFIX_IDE_NOTIFY}?${params.map { "${it.key}=${it.value}" }.joinToString("&")}"
+        if (lastIdePort > 0) writeToSocket(str, lastIdePort)
+        else {
+            var cur = defPort
+            while ((cur - defPort) < 20) if (writeToSocket(str, cur++)) break
         }
-        Tools.println("buildFinished -> spend: $spend ms")
     }
 
     /**

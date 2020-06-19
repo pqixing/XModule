@@ -50,9 +50,7 @@ public class GExtHelper implements IGExtHelper {
     @Override
     void addRepositories(Project project, @NotNull List<String> dependMaven) {
         project.repositories {
-            dependMaven.each { l ->
-                maven { url l }
-            }
+            dependMaven.each { l -> if(l.startsWith("http")) maven { url l } else maven { url project.uri(l) }  }
         }
     }
 

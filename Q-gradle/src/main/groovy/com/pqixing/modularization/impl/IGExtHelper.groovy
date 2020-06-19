@@ -6,7 +6,7 @@ import org.gradle.api.invocation.Gradle
 import org.jetbrains.annotations.NotNull
 
 /**
- * @see com.pqixing.modularization.IExtHelper
+ * @see com.pqixing.modularization.helper.IExtHelper
  */
 interface IGExtHelper {
     public Object getExtValue(Project project, String key);

@@ -1,9 +1,8 @@
 package com.pqixing.help
 
-import com.pqixing.Tools
 import com.pqixing.model.ProjectModel
 import com.pqixing.model.ProjectXmlModel
-import com.pqixing.model.SubModule
+import com.pqixing.model.Module
 import com.pqixing.tools.CheckUtils
 import groovy.util.Node
 import groovy.util.NodeList
@@ -90,20 +89,21 @@ object XmlHelper {
 
         val node = XmlParser().parseText(txt.readText())
         val xmlModel = ProjectXmlModel(node.get("@baseUrl")?.toString() ?: "")
-        xmlModel.templetUrl = node.get("@templetUrl")?.toString() ?: ""
+        xmlModel.basicUrl = node.get("@basicUrl")?.toString() ?: ""
         xmlModel.mavenUrl = node.get("@mavenUrl")?.toString() ?: ""
-        xmlModel.mavenGroup = node.get("@mavenGroup")?.toString() ?: ""
+        xmlModel.group = node.get("@mavenGroup")?.toString() ?: ""
         xmlModel.mavenUser = node.get("@mavenUser")?.toString() ?: ""
         xmlModel.mavenPsw = node.get("@mavenPsw")?.toString() ?: ""
         xmlModel.createSrc = node.get("@createSrc") == "true"
-        xmlModel.baseVersion = node.get("@baseVersion")?.toString()?:""
-        xmlModel.matchingFallbacks.addAll ((node.get("@matchingFallbacks")?.toString()?:"").split(",").filter { it.isNotEmpty() })
+        xmlModel.baseVersion = node.get("@baseVersion")?.toString() ?: ""
+        xmlModel.matchingFallbacks.addAll((node.get("@matchingFallbacks")?.toString()
+                ?: "").split(",").filter { it.isNotEmpty() })
 
         parseProjects(xmlModel, node, "")
-        xmlModel.allSubModules().forEach {
-            val api = it.apiModel ?: return@forEach
+        xmlModel.allModules().forEach {
+            val api = it.apiModule ?: return@forEach
             if (api.path.isEmpty()) {
-                it.apiModel = xmlModel.findSubModuleByName(api.name)
+                it.apiModule = xmlModel.findModule(api.name)
             }
         }
         node.localText()
@@ -136,49 +136,49 @@ object XmlHelper {
             xmlModel.projects.add(project)
 
             //type不为空，本身也作为一个模块添加
-            if (p.get("@type") != null) addNewSubModule(project, p, path)
+            if (p.get("@type") != null) addNewModule(project, p, path)
 
-            parseSubModule(project, p, path+"/"+p.get("@name")?.toString())
+            parseModule(project, p, path + "/" + p.get("@name")?.toString())
         }
     }
 
-    private fun parseSubModule(project: ProjectModel, node: Node?, path: String) {
+    private fun parseModule(project: ProjectModel, node: Node?, path: String) {
         node ?: return
         //解析分组
         node.getAt(QName("group"))?.forEach {
             val group: Node = it as? Node ?: return@forEach
-            parseSubModule(project, group, "$path/${group.get("@name")?.toString() ?: ""}")
+            parseModule(project, group, "$path/${group.get("@name")?.toString() ?: ""}")
         }
 
-        node.getAt(QName("submodule"))?.forEach {
+        node.getAt(QName("module"))?.forEach {
             val s: Node = it as? Node ?: return@forEach
-            addNewSubModule(project, s, path)
+            addNewModule(project, s, path)
         }
     }
 
-    private fun addNewSubModule(project: ProjectModel, node: Node?, path: String) {
+    private fun addNewModule(project: ProjectModel, node: Node?, path: String) {
         node ?: return
         val name = node.get("@name")?.toString() ?: return
-        val subModule = SubModule(name)
-        subModule.path = "$path/$name"
-        subModule.introduce = node.get("@introduce")?.toString() ?: ""
-        subModule.isApplication = node.get("@type") == "application"
-        subModule.project = project
-        project.submodules.add(subModule)
+        val module = Module(name)
+        module.path = "$path/$name"
+        module.introduce = node.get("@introduce")?.toString() ?: ""
+        module.type = node.get("@type")?.toString() ?: "library"
+        module.project = project
+        project.modules.add(module)
 
         val apiName = node.get("@api")?.toString() ?: return
         if (apiName == "this") {//添加附属api模块
-            val api = SubModule("${name}_api")
-            api.path = "${subModule.path}/src/api"
+            val api = Module("${name}_api")
+            api.path = "${module.path}/src/api"
             api.introduce = "api for $name"
-            api.isApplication = false
+            api.type = "library"
             api.project = project
-            api.attachModel = subModule
+            api.attachModule = module
 
-            subModule.apiModel = api
-            project.submodules.add(api)
+            module.apiModule = api
+            project.modules.add(api)
         } else {
-            subModule.apiModel = SubModule(apiName)
+            module.apiModule = Module(apiName)
         }
     }
 

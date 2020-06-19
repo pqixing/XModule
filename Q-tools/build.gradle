@@ -6,33 +6,19 @@ dependencies {
     compileOnly localGroovy()
     testImplementation 'junit:junit:4.12'
 }
-
+compileJava{
+    sourceCompatibility=JavaVersion.VERSION_1_8
+    targetCompatibility=JavaVersion.VERSION_1_8
+}
 ext.mainDir = new File(projectDir, "src/main")
 ext.resourceDir = new File(mainDir, "resources/com/pqixing")
 ext.javaFileDir = new File(mainDir, "java/com/pqixing")
+
 task("copyClass") {
     group = "build"
     doFirst {
         def fileName = "Config.java"
-        writeFile("//" + new File(javaFileDir, fileName).text, new File(resourceDir, "setting/$fileName"))
-
-        StringBuilder sb = new StringBuilder("package com.pqixing\nobject Templet {")
-        def dir = resourceDir
-        dir.eachFile { f ->
-            if (f.isFile()) sb.append("\nval ${f.name.replace(".", "_")} = \"$f.name\" ")
-            else {
-                sb.append("\nval $f.name = listOf( ")
-                f.eachFile { f1 ->
-                    if (f1.isDirectory()) f1.eachFile { f2 ->
-                        sb.append("\"$f1.name/$f2.name\",")
-                    } else sb.append("\"$f1.name\",")
-                }
-                sb.deleteCharAt(sb.length() - 1)
-                sb.append(")")
-            }
-        }
-        sb.append("\n}")
-        writeFile(sb.toString(), new File(javaFileDir, "Templet.kt"))
+        writeFile("//" + new File(javaFileDir, fileName).text, new File(resourceDir, fileName))
     }
 }
 

@@ -16,33 +16,13 @@ public class FileNames {
      */
     public static final String GRADLE_DEPENDENCIES = "dependencies.gradle";
     /**
-     * Android依赖路径
-     */
-    public static final String FILE_ANDROID_DP = "android.dp";
-    /**
-     * 内部依赖版本日志
-     */
-    public static final String FILE_INNER_DP = "inner.dp";
-    /**
-     * 当前最新的版本号
-     */
-    public static final String FILE_VERSION_DP = "version.dp";
-    /**
-     * 版本号控制
-     */
-    public static final String DIR_VERSIONS = "versions";
-    /**
-     * 排序过后的以来关系
-     */
-    public static final String FILE_SORT_DP = "level.dp";
-    /**
-     * 依赖版本号名称
-     */
-    public static final String FILE_VERSION = "versions.properties";
-    /**
      * 配置文件
      */
     public static final String USER_CONFIG = "Config.java";
+    /**
+     * 模板目录
+     */
+    public static final String BASIC = "basic";
     /**
      * 配置文件
      */
@@ -50,11 +30,6 @@ public class FileNames {
     /**
      * 配置文件
      */
-    public static final String SETTINGS_GRADLE = "settings.gradle";
-    public static final String IMPORTPROJECT_GRADLE = "ImportProject.gradle";
-    public static final String MANAGER = "manager";
-    public static final String ROOT = "root";
-    public static final String CODE_ROOT = "codeRootDir";
     public static final String PROJECT_XML = "project.xml";
-    public static final String MAVEN_METADATA = "maven-metadata.xml";
+    public static final String DPS_MODULES = "module.dps";
 }

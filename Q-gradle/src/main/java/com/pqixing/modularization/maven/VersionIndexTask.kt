@@ -19,6 +19,6 @@ open class VersionIndexTask : BaseTask() {
 
     override fun end() {
         //执行完成，输出文件路径
-        ResultUtils.writeResult(File(project.getArgs().env.templetRoot, "versions/version.properties").absolutePath)
+        ResultUtils.writeResult(File(project.getArgs().env.basicDir, "versions/version.properties").absolutePath)
     }
 }

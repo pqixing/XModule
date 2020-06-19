@@ -3,9 +3,7 @@ package com.pqixing.intellij.actions
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.application.Application
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.application.ex.ApplicationManagerEx
 import com.intellij.openapi.application.impl.ApplicationImpl
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -47,7 +45,7 @@ class CleanAction : AnAction() {
         codeRoots.remove(codeRoot)
         codeRoots.add(0, codeRoot)
         //查找出本地所有存在的模块
-        val cleanDialog = CleanDialog(project, codeRoots, projectXml.projects.map { it.path }, projectXml.allSubModules().map { it.path })
+        val cleanDialog = CleanDialog(project, codeRoots, projectXml.projects.map { it.path }, projectXml.allModules().map { it.path })
         val cleanTask = object : Task.Backgroundable(project, "Start Clean") {
             override fun run(indicator: ProgressIndicator) {
 

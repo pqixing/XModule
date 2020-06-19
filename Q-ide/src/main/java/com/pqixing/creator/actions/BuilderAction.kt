@@ -3,7 +3,6 @@ package com.pqixing.creator.actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataKey
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
@@ -11,7 +10,6 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.actions.QToolGroup
 import com.pqixing.intellij.ui.BuilderDialog
 import com.pqixing.intellij.utils.GitHelper
-import com.pqixing.model.SubModule
 import groovy.lang.GroovyClassLoader
 import java.io.File
 
@@ -34,15 +32,15 @@ open class BuilderAction : AnAction() {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
             return
         }
-        val allSubModule = XmlHelper.parseProjectXml(projectXmlFile).allSubModules()
+        val allSubModule = XmlHelper.parseProjectXml(projectXmlFile).allModules()
         BuilderDialog(project, getConfigInfo(configFile), getActivityModules(e, allSubModule), allSubModule, getBranches()).showAndPack()
     }
 
     private fun getConfigInfo(configFile: File) = GroovyClassLoader().parseClass(configFile).newInstance()
 
-    private fun getActivityModules(e: AnActionEvent, allSubModule: MutableSet<SubModule>): MutableList<String> {
+    private fun getActivityModules(e: AnActionEvent, allModule: MutableSet<com.pqixing.model.Module>): MutableList<String> {
         val curModule = e.getData(DataKey.create<Module>("module"))?.name
-        val moduleNames = allSubModule.map { it.name }
+        val moduleNames = allModule.map { it.name }
         val activityModules = ModuleManager.getInstance(project).sortedModules.filter { moduleNames.contains(it.name) }.mapNotNull { it.name }.toMutableList()
         if (curModule != null) {
             activityModules.remove(curModule)

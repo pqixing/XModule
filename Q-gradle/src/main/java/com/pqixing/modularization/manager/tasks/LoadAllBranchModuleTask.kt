@@ -5,10 +5,7 @@ import com.pqixing.Tools
 import com.pqixing.getEnvValue
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.manager.ManagerPlugin
-import com.pqixing.modularization.manager.ProjectManager
 import com.pqixing.modularization.manager.getArgs
-import com.pqixing.modularization.maven.VersionManager
 import com.pqixing.modularization.utils.ResultUtils
 
 /**
@@ -29,25 +26,16 @@ open class LoadAllBranchModuleTask: BaseTask() {
 
     override fun runTask() {
         //当前分支
-//        val curBranch = extends.docRepoBranch
         //需要合并到当前的指定分支
         val checkBranch = EnvKeys.opBranch.getEnvValue()?:return
-//        if (curBranch == mergeBranch) {
-//            Tools.println("Merge branch is the same as local branch $curBranch")
-//            return
-//        }
-//        val curIndex = extends.matchingFallbacks.indexOf(curBranch)
-//        val mergeIndex = extends.matchingFallbacks.indexOf(mergeBranch)
-//        val checkBranch = if (mergeIndex <= curIndex) mergeBranch else curBranch
 
         //查找出,当前分支,所有上传过的模块,在合并前先导入AS
         val byBranch = project.getArgs().versions.findAllModuleByBranch(checkBranch)
-//        Tools.println("All module by branch $checkBranch-> $byBranch")
 
         val result = StringBuilder("")
 
         project.getArgs().projectXml.projects.forEach { p ->
-            p.submodules.forEach { s ->
+            p.modules.forEach { s ->
                 if (s.isApplication) {
                     result.append(s.name).append(",")
                 }

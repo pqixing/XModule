@@ -9,8 +9,14 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
 
 object GitUtils {
-    var gitUser:String = ""
-    var gitPsw:String = ""
+    var gitUser: String = ""
+    var gitPsw: String = ""
+
+    fun getPsw(value: String): String {
+        if (value.startsWith("sk:")) return ResultUtils.base64Decode(value.substring(3))
+        Tools.println("Warming::password suggest $value -> ${"sk:" + ResultUtils.base64Encode(value)}")
+        return value
+    }
 
     fun open(file: File?): Git? {
         if (file?.exists() == false) return null
@@ -29,6 +35,7 @@ object GitUtils {
      * @return
      */
     fun clone(gitUrl: String, gitDir: File, branchName: String = "master"): Git? {
+        if (gitDir.exists()) FileUtils.delete(gitDir)
         val git = Git.cloneRepository()
                 .setURI(gitUrl).setDirectory(gitDir).setBranch(branchName)
                 .execute()
@@ -110,7 +117,7 @@ object GitUtils {
         git ?: return false
         return try {
             val call = git.pull().execute(false)
-            val isSuccessful = call?.isSuccessful?:false
+            val isSuccessful = call?.isSuccessful ?: false
             Tools.println("Pull ${git.repository.directory.parentFile.name} Complete-> $isSuccessful  ${git.log().setMaxCount(1).call().map { "${it.committerIdent} -> ${it.fullMessage}" }[0]}")
             isSuccessful
         } catch (e: Exception) {

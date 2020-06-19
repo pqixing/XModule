@@ -2,9 +2,9 @@ package com.pqixing.modularization.base
 
 
 import com.pqixing.modularization.FileNames
-import com.pqixing.modularization.IExtHelper
-import com.pqixing.modularization.JGroovyHelper
-import com.pqixing.modularization.manager.getArgs
+import com.pqixing.modularization.helper.IExtHelper
+import com.pqixing.modularization.helper.JGroovyHelper
+import com.pqixing.modularization.setting.SettingPlugin
 import com.pqixing.tools.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -20,7 +20,6 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     lateinit var p: Project
     val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
-    protected abstract val applyFiles: List<String>
 
     override val project: Project
         get() = p
@@ -41,17 +40,9 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
 
     override fun apply(project: Project) {
         this.p = project
+        SettingPlugin.addPlugin(project,this)
         createIgnoreFile()
 
-        val file = File(project.getArgs().env.templetRoot, "gradles")
-        extHelper.setExtValue(project, "gradles", file.absolutePath)
-
-        callBeforeApplyMould()
-        applyFiles.forEach {
-            val f = File(file, "$it.gradle")
-            if (f.exists() && f.isFile)
-                project.apply(mapOf<String, String>("from" to f.absolutePath))
-        }
         linkTask().forEach { onTaskCreate(it, BaseTask.task(project, it)) }
     }
 

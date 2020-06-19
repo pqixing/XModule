@@ -1,22 +1,19 @@
 package com.pqixing.modularization.android.dps
 
-import com.pqixing.model.SubModule
+import com.pqixing.model.Module
 import com.pqixing.modularization.android.dps.DpsExtends.Companion.SCOP_RUNTIME
-import com.pqixing.modularization.base.BaseExtension
-import com.pqixing.modularization.manager.ProjectManager
-import org.gradle.api.Project
 
 /**
  * Created by pqixing on 17-12-25.
  * 依赖的组件
  */
 
-class DpComponents(project: Project) : BaseExtension(project) {
+class DpComponents() {
 
     /**
      * 该依赖,在配置xml中的信息
      */
-    lateinit var subModule: SubModule
+    lateinit var module: Module
 
     /**
      * 当前模块是否使用了本地依赖

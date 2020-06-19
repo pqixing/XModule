@@ -12,7 +12,6 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.pqixing.intellij.actions.QToolGroup
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.adapter.JlistSelectListener
@@ -20,7 +19,7 @@ import com.pqixing.intellij.utils.DachenHelper
 import com.pqixing.intellij.utils.GradleUtils
 import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils
-import com.pqixing.model.SubModule
+import com.pqixing.model.Module
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
@@ -39,7 +38,7 @@ import javax.swing.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class BuilderDialog(val project: Project, val configInfo: Any, val activityModel: List<String>, val allModule: Set<SubModule>, val branchs: List<String>) : BaseJDialog(project) {
+class BuilderDialog(val project: Project, val configInfo: Any, val activityModel: List<String>, val allModule: Set<Module>, val branchs: List<String>) : BaseJDialog(project) {
     companion object {
         var buildJekins = false
         var showAllLocalModule = false
@@ -287,7 +286,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
                 adapter.selectListener = localLogClick
                 cbDpModel.isVisible = true
                 cbBranch.isVisible = false
-                allModule.filter { showAllLocalModule || it.isApplication || it.apiModel != null || activityModel.contains(it.name) }
+                allModule.filter { showAllLocalModule || it.isApplication || it.apiModule != null || activityModel.contains(it.name) }
                         .sortedBy { !it.isApplication }
                         .map { JListInfo(it.name, select = activityModel.indexOf(it.name) == 0) }
                         .sortedBy { !activityModel.contains(it.title) }

@@ -21,7 +21,7 @@ open class CreateBranchTask : BaseTask() {
         args.projectXml.projects
                 .map { File(args.env.codeRootDir, it.path) }
                 .toMutableList().apply {
-                    add(args.env.templetRoot)
+                    add(args.env.basicDir)
                 }.forEach {
                     val git = GitUtils.open(it) ?: return@forEach
                     if (!GitUtils.checkIfClean(git) || !GitUtils.createBranch(git, targetBranch)) fail.add(it.name)

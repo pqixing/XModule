@@ -6,10 +6,8 @@ import com.android.tools.apk.analyzer.AaptInvoker
 import com.android.tools.apk.analyzer.AndroidApplicationInfo
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
 import com.android.tools.idea.sdk.AndroidSdks
-import com.intellij.openapi.application.Application
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.NamedComponent
-import com.intellij.openapi.components.ProjectComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.*
@@ -25,7 +23,6 @@ import java.util.*
 import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.TransferHandler
-import kotlin.concurrent.thread
 
 object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, Runnable, NamedComponent {
     override fun deviceConnected(p0: IDevice) {
@@ -124,8 +121,8 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
             target.save()
             val iml = ".iml"
             val rex = Regex("group=\".*\"")
-            val groups = XmlHelper.parseProjectXml(projectXmlFile).allSubModules().map {
-                var path = if (it.hasAttach()) "APIS" else it.path.substringBeforeLast("/")
+            val groups = XmlHelper.parseProjectXml(projectXmlFile).allModules().map {
+                var path = if (it.attach()) "APIS" else it.path.substringBeforeLast("/")
                 if (path.startsWith("/")) path = path.substring(1)
                 it.name to path
             }.toMap()

@@ -33,7 +33,7 @@ open class OpenNewAction : AnAction() {
         if (rootDir != null) {
             showAndPack.tvDir.text = rootDir.canonicalPath ?: ""
             val tl = File(rootDir.path, "templet/project.xml")
-            if (tl.exists()) showAndPack.tvGitUrl.text = XmlHelper.parseProjectXml(tl).templetUrl
+            if (tl.exists()) showAndPack.tvGitUrl.text = XmlHelper.parseProjectXml(tl).basicUrl
         }
 
         showAndPack.setOnOk {

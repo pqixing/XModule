@@ -3,13 +3,13 @@ package com.pqixing.tools
 import com.pqixing.Tools
 import java.io.Closeable
 import java.io.File
-import java.io.FileInputStream
+import java.lang.StringBuilder
 
 object FileUtils {
     var clazz: Class<*> = Tools::class.java
 
     @JvmStatic
-    fun getTextFromResource(name: String): String {
+    fun fromRes(name: String): String {
         val reader = clazz.getResourceAsStream(name).reader()
         val text = reader.readText()
         reader.close()
@@ -21,7 +21,7 @@ object FileUtils {
      */
     @JvmStatic
     fun writeText(file: File?, text: String, checkChange: Boolean = false): String {
-        file?:return ""
+        file ?: return ""
         if (checkChange && readText(file) == text) return file.path
         if (!file.parentFile.exists()) file.parentFile.mkdirs()
         with(file.writer()) {
@@ -81,9 +81,15 @@ object FileUtils {
         } else "$source$targetTx"
     }
 
-    fun closeSafe(stream: Closeable) =try{
+    fun closeSafe(stream: Closeable) = try {
         stream.close()
-    }catch (e:Exception){
+    } catch (e: Exception) {
         e.printStackTrace()
+    }
+
+    fun mergeFile(target: File, mergeFiles: List<File>, replace: (txt: String) -> String = { it }) {
+        val txt = StringBuilder()
+        mergeFiles.forEach { txt.append("\n").append(readText(it)) }
+        writeText(target, replace(txt.toString()))
     }
 }

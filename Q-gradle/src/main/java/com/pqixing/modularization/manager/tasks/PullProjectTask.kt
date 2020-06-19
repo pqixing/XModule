@@ -16,7 +16,7 @@ open class PullProjectTask : BaseTask() {
     }
 
     override fun runTask() {
-        GitUtils.open(project.getArgs().env.templetRoot)?.apply {
+        GitUtils.open(project.getArgs().env.basicDir)?.apply {
             GitUtils.pull(this)
             close()
         }

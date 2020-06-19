@@ -17,8 +17,6 @@ interface IPlugin {
     fun linkTask(): List<Class<out Task>>
 
     fun getGradle():Gradle
-
     fun <T> getExtends(tClass: Class<T>): T
-    fun callBeforeApplyMould()
 
 }
