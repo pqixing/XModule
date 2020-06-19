@@ -46,8 +46,8 @@ apply from: '../script/bintray.gradle'
 dependencies {
 //    implementation files("../libs/Tools.jar")
     if (localBuild) {
-        compileOnly project(":Q-tools")
-        compileOnly project(":Q-annotation")
+        compileOnly project(":tools")
+        compileOnly project(":annotation")
         implementation "com.pqixing.gradle:tools:0.1"
         implementation "com.pqixing.gradle:annotation:0.1"
     } else {
