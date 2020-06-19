@@ -55,14 +55,16 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
      */
     private fun hookBuildFile(module: Module, buildFileName: String) {
         val target = File(args.env.codeRootDir, module.path + "/" + buildFileName)
-        val mergeFiles = mutableListOf(File(args.env.codeRootDir, module.path + "/build.gradle"), File(args.env.basicDir, "gradle/maven.gradle"))
-        if (module.isAndroid) {
+        val mergeFiles = mutableListOf(File(args.env.codeRootDir, module.path + "/build.gradle"))
+        if (module.type == "java") mergeFiles.add(File(args.env.basicDir, "gradle/maven.gradle"))
+        else if (module.isAndroid) {
             //尝试生成代码
             tryCreateSrc(module)
 
             mergeFiles += listOf(
                     File(args.env.basicDir, "gradle/android.gradle")
-                    , File(args.env.basicDir, "gradle/kotlin.gradle"))
+                    , File(args.env.basicDir, "gradle/kotlin.gradle")
+                    , File(args.env.basicDir, "gradle/maven.gradle"))
 
             mergeFiles.add(File(args.env.basicDir, "gradle/${if (module.isApplication) "application" else "library"}.gradle"))
 

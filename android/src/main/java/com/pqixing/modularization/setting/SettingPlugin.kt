@@ -81,9 +81,10 @@ class SettingPlugin : Plugin<Settings> {
         if (env.dpsFile.exists()) setting.apply(mapOf("from" to env.dpsFile.absolutePath.also { Tools.println("Apply Depend::$it") }))
 
         //追加未添加到文件的工程
-        val newTxt = (FileUtils.readText(env.dpsFile)
-                ?: "") + args.dpsContainer.values.filter { !it.hadConfig }.joinToString("\n") { "${it.name}{\n    version = \"${projectXml.baseVersion}\"\n    apiVersion = \"\"\n    compile(\"\"){}\n}" }
-        FileUtils.writeText(env.dpsFile, newTxt)
+        val newTxt = args.dpsContainer.values.filter { !it.hadConfig }.joinToString("\n") { "${it.name}{\n    version = \"${projectXml.baseVersion}\"\n    apiVersion = \"\"\n    compile(\"\"){}\n}" }
+        if (newTxt.isNotEmpty()) {
+            FileUtils.writeText(env.dpsFile, (FileUtils.readText(env.dpsFile) ?: "") + "\n" + newTxt)
+        }
 
         //解析include进行工程导入
         ImportScript(args, setting).startLoad()
