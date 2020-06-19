@@ -29,7 +29,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         for (module in imports) include(checks, module, buildFileName)
         Tools.println("parse include ${args.config.codeRoot} ${imports.map { it.name }}")
         //尝试下载工程,hook build.gradle文件
-        imports.forEach { tryCheckModule(it,buildFileName) }
+        imports.forEach { tryCheckModule(it, buildFileName) }
 
         //合并根目录的代码
         setting.rootProject.buildFileName = buildFileName
@@ -55,15 +55,14 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
      */
     private fun hookBuildFile(module: Module, buildFileName: String) {
         val target = File(args.env.codeRootDir, module.path + "/" + buildFileName)
-        val mergeFiles = mutableListOf(File(args.env.codeRootDir, module.path + "/build.gradle"))
+        val mergeFiles = mutableListOf(File(args.env.codeRootDir, module.path + "/build.gradle"), File(args.env.basicDir, "gradle/maven.gradle"))
         if (module.isAndroid) {
             //尝试生成代码
-            tryCreateSrc( module)
+            tryCreateSrc(module)
 
             mergeFiles += listOf(
                     File(args.env.basicDir, "gradle/android.gradle")
-                    , File(args.env.basicDir, "gradle/kotlin.gradle")
-                    , File(args.env.basicDir, "gradle/maven.gradle"))
+                    , File(args.env.basicDir, "gradle/kotlin.gradle"))
 
             mergeFiles.add(File(args.env.basicDir, "gradle/${if (module.isApplication) "application" else "library"}.gradle"))
 
@@ -72,15 +71,16 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         }
 
         FileUtils.mergeFile(target, mergeFiles.reversed()) { it.replace(Regex("apply *?plugin: *?['\"]com.android.(application|library)['\"]"), "") }
-        module.apiModule?.let { hookBuildFile(it,buildFileName) }
+        module.apiModule?.let { hookBuildFile(it, buildFileName) }
     }
 
-    private fun tryCheckModule(module: Module,buildFileName: String) {
+    private fun tryCheckModule(module: Module, buildFileName: String) {
         var mBranch = module.getBranch()
         val projectDir = File(args.env.codeRootDir, module.project.path)
 
         Tools.println("Check::${module.name}  ${args.env.codeRootDir.absolutePath}${module.path}")
-        if (mBranch.isEmpty()) (GitUtils.open(projectDir) ?: GitUtils.clone(module.project.url, projectDir))?.let { git ->
+        if (mBranch.isEmpty()) (GitUtils.open(projectDir)
+                ?: GitUtils.clone(module.project.url, projectDir))?.let { git ->
             mBranch = git.repository.branch
             module.project.branch = mBranch
             GitUtils.close(git)
@@ -89,8 +89,8 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         if (mBranch != args.env.basicBranch) {
             Tools.println("   Warming::branch diff $mBranch -> ${args.env.basicBranch}")
         }
-        hookBuildFile(module,buildFileName)
-        module.apiModule?.let { tryCheckModule(it,buildFileName) }
+        hookBuildFile(module, buildFileName)
+        module.apiModule?.let { tryCheckModule(it, buildFileName) }
     }
 
     /**
@@ -100,7 +100,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         //非Android工程不生成代码
         if (!module.isAndroid) return
         //如果build文件存在，不重新生成代码
-        val projectDir = File(args.env.codeRootDir,module.path)
+        val projectDir = File(args.env.codeRootDir, module.path)
         //代码目录
         val sourceDir = File(projectDir, if (module.attach()) "" else "src/main")
         val manifest = File(sourceDir, "AndroidManifest.xml")
