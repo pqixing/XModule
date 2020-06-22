@@ -10,7 +10,7 @@ repositories {
     jcenter()
 }
 dependencies {
-    classpath 'com.pqixing.gradle:modularization:0.3'
+    classpath 'com.pqixing.gradle:modularization:2.1.0'
 }
 
 
