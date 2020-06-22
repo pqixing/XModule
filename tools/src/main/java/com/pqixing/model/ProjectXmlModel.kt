@@ -38,6 +38,7 @@ data class Module(val name: String) {
     val isApplication
         get() = type == "application"
     var type: String = ""
+    var merge=""
     var attachModule: Module? = null
     var apiModule: Module? = null
 

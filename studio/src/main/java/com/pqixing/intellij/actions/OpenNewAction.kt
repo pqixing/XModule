@@ -17,6 +17,7 @@ import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.OpenNewProjectDialog
 import com.pqixing.intellij.utils.GitHelper
+import com.pqixing.intellij.utils.GradleUtils
 import com.pqixing.tools.FileUtils
 import java.io.File
 
@@ -44,32 +45,18 @@ open class OpenNewAction : AnAction() {
 
         showAndPack.setOnOk {
             val basicDir = File(showAndPack.tvDir.text.trim(), EnvKeys.BASIC)
-            if (basicDir.exists()) {
-                val exitCode = Messages.showOkCancelDialog(defaultProject, "Basic dir is not empty!!!", "DELETE", "DEL", "CANCEL", null)
-                if (exitCode != Messages.OK) return@setOnOk
-                FileUtils.delete(basicDir)
-            }
-            val importTask = object : Task.Backgroundable(defaultProject, "Open New Project") {
-                override fun run(indicator: ProgressIndicator) {
-                    val dir = basicDir.parentFile
-                    dir.mkdirs()
-                    val url = showAndPack.tvGitUrl.text.trim()
-                    indicator.text = "clone $url"
-                    val doClone = GitHelper.getGit().clone(defaultProject, dir, url, EnvKeys.BASIC).exitCode == 0
-                    if (doClone) {
-                        if(rootDir?.exists()==true){//复制文件
-                            FileUtils.copy(File(rootDir.path,"gradle"), File(dir,"gradle"))
-                            FileUtils.copy(File(rootDir.path,"gradlew"),File(dir,"gradlew"))
-                            FileUtils.copy(File(rootDir.path,"gradlew.bat"),File(dir,"gradlew.bat"))
-                            FileUtils.copy(File(rootDir.path,"gradle.properties"),File(dir,"gradle.properties"))
-                            FileUtils.copy(File(rootDir.path,"Config.java"),File(dir,"Config.java"))
-                        }
-                        FileUtils.writeText(File(dir, "settings.gradle"), "buildscript { apply from: 'https://raw.githubusercontent.com/pqixing/modularization/master/script/install.gradle', to: it }; apply plugin: 'com.module.setting'\n")
-                        ProjectUtil.openOrImport(dir.absolutePath, defaultProject, true)
-                    }
+            val dir = basicDir.parentFile
+            GradleUtils.downloadBasic(defaultProject, basicDir, showAndPack.tvGitUrl.text.trim()) {
+                if (rootDir?.exists() == true) {//复制文件
+                    FileUtils.copy(File(rootDir.path, "gradle"), File(dir, "gradle"))
+                    FileUtils.copy(File(rootDir.path, "gradlew"), File(dir, "gradlew"))
+                    FileUtils.copy(File(rootDir.path, "gradlew.bat"), File(dir, "gradlew.bat"))
+                    FileUtils.copy(File(rootDir.path, "gradle.properties"), File(dir, "gradle.properties"))
+                    FileUtils.copy(File(rootDir.path, "Config.java"), File(dir, "Config.java"))
                 }
+                FileUtils.writeText(File(dir, "settings.gradle"), "buildscript { apply from: 'https://raw.githubusercontent.com/pqixing/modularization/master/script/install.gradle', to: it }; apply plugin: 'com.module.setting'\n")
+                ProjectUtil.openOrImport(dir.absolutePath, defaultProject, true)
             }
-            ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
         }
         showAndPack.showAndPack()
     }

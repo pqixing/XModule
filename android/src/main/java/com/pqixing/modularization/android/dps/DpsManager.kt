@@ -76,6 +76,9 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
         if (dps.isNotEmpty()) {
             val dpsV = mutableListOf<String>()
             dps.forEach { dpc ->
+
+                if (dpc.version.isEmpty()) resolveVersion(dpc)
+
                 val compile = when (compileModel) {
                     "localOnly" -> onLocalCompile(dpc, includes, excludes)
                     "localFirst" -> onLocalCompile(dpc, includes, excludes) || onMavenCompile(dpc, includes, excludes)
@@ -128,7 +131,6 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
      * 添加一个仓库依赖
      */
     private fun onMavenCompile(dpc: DpsModel, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
-        if (dpc.version.isEmpty()) resolveVersion(dpc)
         val dpVersion = args.versions.getVersion(dpc.branch, dpc.name, dpc.version).takeIf { it.first.isNotEmpty() }
                 ?: takeIf { dpc.matchAuto }?.let { args.versions.getVersion(dpc.branch, dpc.name, "+").takeIf { it.first.isNotEmpty() } }
                 ?: return false

@@ -5,6 +5,7 @@ import com.pqixing.model.Module
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.manager.RootPlugin
 import com.pqixing.modularization.utils.GitUtils
+import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import org.gradle.api.initialization.Settings
@@ -18,7 +19,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
     val gradle = setting.gradle
     fun startLoad(): String {
         val buildTag = args.config.buildDir?.takeIf { i -> i.isNotEmpty() } ?: "default"
-        val buildFileName = "build/${buildTag}/build.gradle"
+        val buildFileName = "build/modularization_${buildTag}/build.gradle"
         //自动抓取工程导入
         val includes = parseInclude()
 
@@ -54,23 +55,24 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
      */
     private fun hookBuildFile(module: Module, buildFileName: String) {
         val target = File(args.env.codeRootDir, module.path + "/" + buildFileName)
-        val mergeFiles = mutableListOf(File(args.env.codeRootDir, module.path + "/build.gradle"))
-        if (module.type == "java") mergeFiles.add(File(args.env.basicDir, "gradle/maven.gradle"))
-        else if (module.isAndroid) {
+        val mergeFiles = mutableListOf(File(args.env.codeRootDir, module.path + "/build.gradle"), File(args.env.basicDir, "gradle/maven.gradle"))
+        if (module.isAndroid) {
             //尝试生成代码
             tryCreateSrc(module)
 
             mergeFiles += listOf(
                     File(args.env.basicDir, "gradle/android.gradle")
-                    , File(args.env.basicDir, "gradle/kotlin.gradle")
-                    , File(args.env.basicDir, "gradle/maven.gradle"))
+                    , File(args.env.basicDir, "gradle/kotlin.gradle"))
 
             mergeFiles.add(File(args.env.basicDir, "gradle/${if (module.isApplication) "application" else "library"}.gradle"))
 
             if (module.attach()) mergeFiles.add(File(args.env.basicDir, "gradle/api.gradle"))
             if (args.runAsApp(module) && !module.isApplication) mergeFiles.add(File(args.env.basicDir, "gradle/dev.gradle"))
         }
-
+        if (module.type == "document") mergeFiles.clear()
+        module.merge.split(",").map { it.trim() }.forEach { f ->
+            if (f.isNotEmpty()) mergeFiles.add(File(args.env.codeRootDir, module.path + "/" + f))
+        }
         FileUtils.mergeFile(target, mergeFiles.reversed()) { it.replace(Regex("apply *?plugin: *?['\"]com.android.(application|library)['\"]"), "") }
         module.apiModule?.let { hookBuildFile(it, buildFileName) }
     }
@@ -86,6 +88,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
             module.project.branch = mBranch
             GitUtils.close(git)
         }
+        if (mBranch.isEmpty()) ResultUtils.thow("clone fail -> ${module.project.url}")
 
         if (mBranch != args.env.basicBranch) {
             Tools.println("   Warming::branch diff $mBranch -> ${args.env.basicBranch}")

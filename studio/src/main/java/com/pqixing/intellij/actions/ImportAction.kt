@@ -61,7 +61,7 @@ class ImportAction : AnAction() {
         val dependentModel = clazz.getField("dependentModel").get(newInstance).toString()
 
         val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
-        val infos = projectXml.allModules().filter { it.attachModule == null }.map { JListInfo(it.path, "${it.introduce} - ${it.type}") }.toMutableList()
+        val infos = projectXml.allModules().filter { it.attachModule == null }.map { JListInfo(it.name, "${it.introduce} - ${it.type}") }.toMutableList()
 
         val repo = GitHelper.getRepo(File(basePath, EnvKeys.BASIC), project)
         val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()

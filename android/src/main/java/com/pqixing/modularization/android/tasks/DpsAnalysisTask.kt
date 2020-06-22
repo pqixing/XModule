@@ -30,9 +30,10 @@ import kotlin.collections.HashSet
 open class DpsAnalysisTask : BaseTask() {
     val plugin = project.pluginModule()
     val args = project.getArgs()
-    val groupName =args.projectXml.group
+    val groupName = args.projectXml.group
     val dir = File(plugin.cacheDir, "report")
     val temp = File(dir, "AndroidReport.txt")
+
     //    val temp = File(dir, "DpsReport.bak")
     val versions = TreeMap<String, String>()
 
@@ -206,7 +207,7 @@ open class DpsAnalysisTask : BaseTask() {
         val branch = removeGroup(t[0], true)
         if (branch.isEmpty()) return ""
         val module = t[1]
-        val params = UrlUtils.getParams(DpsManager.getPom(project,branch, module, version!!).name)
+        val params = UrlUtils.getParams(DpsManager.getPom(project, branch, module, version!!).name)
         val commitTime = params["commitTime"]?.toInt() ?: 0
         params["commitTime"] = Date(commitTime * 1000L).toLocaleString()
         return "    ====> log : " + getCollectionStr(params).replace("\n", " ")
@@ -272,8 +273,8 @@ open class DpsAnalysisTask : BaseTask() {
             tags["templetBranch"] = this.repository.branch
             close()
         }
-        val  extends: com.android.build.gradle.BaseExtension = plugin.project.extensions.getByName("android") as com.android.build.gradle.BaseExtension
-        PropertiesUtils.writeProperties(File(dir,"${TextUtils.numOrLetter(plugin.module.name)}_${extends.defaultConfig.versionName}_${extends.defaultConfig.versionCode}.version"),tags)
+        val extends: com.android.build.gradle.BaseExtension = plugin.project.extensions.getByName("android") as com.android.build.gradle.BaseExtension
+        PropertiesUtils.writeProperties(File(dir, "${TextUtils.numOrLetter(plugin.module.name)}_${extends.defaultConfig.versionName}_${extends.defaultConfig.versionCode}.version"), tags)
     }
 
     fun getLastRevision(git: Git, path: String?): String? {
@@ -340,30 +341,8 @@ open class DpsAnalysisTask : BaseTask() {
      * 从本地获取依赖
      */
     fun loadDpsFromLocal(module: String, dpsExt: DpsExtends, dpsContainer: HashSet<String>): Boolean {
-
-        val mcp = args.projectXml.findModule(module) ?: return false
-
-
-        //查出buildGradle
-        val buildGradle = File(args.env.codeRootDir, "${mcp.path}/build.gradle")
-        val libraryGradle = File(args.env.basicDir, "gradles/com.module.library.gradle")
-        //文件不存，则解析失败
-        if (!buildGradle.exists()) return false
-
-        //先清楚旧的依赖数据，然后重新加载
-        dpsExt.compiles.clear()
-        extHelper.setExtValue(project, "moduleName", mcp.name)
-        try {
-//            plugin.isApp = mcp.isApplication
-//            plugin.buildAsApp = plugin.isApp
-            project.apply(mapOf<String, String>("from" to buildGradle.absolutePath))
-        } catch (e: Exception) {
-        }
-        try {
-            project.apply(mapOf<String, String>("from" to libraryGradle.absolutePath))
-        } catch (e: Exception) {
-        }
-        dpsExt.compiles.forEach { dpsContainer.add(it.name) }
+        val target = args.dpsContainer[module] ?: return false
+        target.compiles.forEach { dpsContainer.add(it.name) }
         //解析build.gradle文件，加载本地配置的依赖数据
         Tools.println("loadDpsFromLocal $module dps -> $dpsContainer")
         return true
@@ -375,7 +354,7 @@ open class DpsAnalysisTask : BaseTask() {
     fun loadDpsFromMaven(module: String, branch: String, dpsContainer: HashSet<String>): Boolean {
         val version = args.versions.getVersion(branch, module, "+")
         if (version.first.isEmpty()) return false
-        DpsManager.getPom(project,version.first, module, version.second).dependency.map {
+        DpsManager.getPom(project, version.first, module, version.second).dependency.map {
             val p = XmlHelper.strToPair(it)
             if (p.second != null) dpsContainer.add(p.second!!)
         }

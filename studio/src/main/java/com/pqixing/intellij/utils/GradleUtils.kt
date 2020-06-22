@@ -1,19 +1,28 @@
 package com.pqixing.intellij.utils
 
+import com.android.tools.idea.gradle.project.sync.GradleSyncInvoker
+import com.android.tools.idea.gradle.project.sync.GradleSyncListener
+import com.google.wireless.android.sdk.stats.GradleSyncStats
 import com.intellij.execution.executors.DefaultRunExecutor
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationAction
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
-import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.ide.impl.ProjectUtil
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.externalSystem.model.ProjectSystemId
 import com.intellij.openapi.externalSystem.model.execution.ExternalSystemTaskExecutionSettings
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode
 import com.intellij.openapi.externalSystem.task.TaskCallback
 import com.intellij.openapi.externalSystem.util.ExternalSystemUtil
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
+import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.ui.Messages
+import com.pqixing.EnvKeys
+import com.pqixing.tools.FileUtils
 import com.pqixing.tools.UrlUtils
+import git4idea.util.GitUIUtil
+import java.io.File
 import java.net.ServerSocket
 import java.net.Socket
 
@@ -66,14 +75,13 @@ object GradleUtils {
         return s.localPort
     }
 
-    var showTips = true
     private fun acceptNewInput(accept: Socket) = Thread {
         val inputStream = accept.getInputStream().bufferedReader()
 
         while (accept.isConnected) {
             val r = inputStream.readLine() ?: break
             if (r.startsWith("ide://notify")) {//通知ide刷新
-//                tryNotifyIde(r)
+                tryNotifyIde(r)
             } else {
                 resultLogs.add(r)
                 if (resultLogs.size > 20) resultLogs.removeAt(0)
@@ -85,26 +93,29 @@ object GradleUtils {
 
     private fun tryNotifyIde(r: String) {
         val params = UrlUtils.getParams(r)
-        if (params["type"] == "buildFinished" && params["task"] == "prepareKotlinBuildScriptModel") {
-            val projectUrl = UiUtils.base64Decode(params["url"]!!.toString())
-            val target = ProjectManager.getInstance().openProjects.find { it.basePath == projectUrl }
-            if (showTips && target != null && !UiUtils.checkIfFormat(target)) {
-                val n = Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Sync Finish", "", NotificationType.INFORMATION)
-                n.addAction(object : NotificationAction("Don't Show") {
-                    override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-                        showTips = false
-                        n.expire()
-                    }
-                })
-                n.addAction(object : NotificationAction("Format Project") {
-                    override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-//                        UiUtils.formatModule(target)
-                        n.expire()
-                    }
-                })
-                n.notify(target)
+        val projectUrl = UiUtils.base64Decode(params["url"]!!.toString())
+        val target = ProjectManager.getInstance().openProjects.find { it.basePath == projectUrl } ?: return
+
+        if (params["type"] == "Miss_${EnvKeys.BASIC}Url") downloadBasic(target, null, null) { GradleSyncInvoker.getInstance().requestProjectSync(target, GradleSyncStats.Trigger.TRIGGER_USER_SYNC_ACTION) }
+    }
+
+    fun downloadBasic(target: Project, dir: File?, base: String?, after: () -> Unit) = ApplicationManager.getApplication().invokeLater {
+        val url = base
+                ?: Messages.showInputDialog("Input your basic git url to init project", "Download Basic", null,"https://github.com/pqixing/md_demo.git",null)?.takeIf { it.isNotEmpty() }
+                ?: return@invokeLater
+        val basicDir = dir ?: File(target.basePath, EnvKeys.BASIC)
+        if (basicDir.exists()) {
+            val exitCode = Messages.showOkCancelDialog(target, "basic dir is not empty!!!", "DELETE", "DEL", "CANCEL", null)
+            if (exitCode != Messages.OK) return@invokeLater
+            FileUtils.delete(basicDir)
+        }
+        val importTask = object : Task.Backgroundable(target, "Download Basic") {
+            override fun run(indicator: ProgressIndicator) {
+                indicator.text = "clone $url"
+                GitHelper.clone(target, basicDir, url, "master")?.run { after() }
             }
         }
+        ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
     }
 
     /**

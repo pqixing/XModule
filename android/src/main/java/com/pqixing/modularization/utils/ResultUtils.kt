@@ -41,9 +41,10 @@ object ResultUtils {
 
     fun ideProject(rootDir: File) = File(rootDir, ".idea").exists()
 
-    fun notifyIde(rootDir: File, params: Map<String, String>) {
+    fun notifyIde(rootDir: File, params: MutableMap<String, String>) {
         //非idea工程，不处理
         if (!ideProject(rootDir)) return
+        params["url"] = String(Base64.getEncoder().encode(rootDir.absolutePath.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
         val str = "${Keys.PREFIX_IDE_NOTIFY}?${params.map { "${it.key}=${it.value}" }.joinToString("&")}"
         if (lastIdePort > 0) writeToSocket(str, lastIdePort)
         else {

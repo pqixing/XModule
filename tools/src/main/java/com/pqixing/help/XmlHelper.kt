@@ -158,11 +158,16 @@ object XmlHelper {
 
     private fun addNewModule(project: ProjectModel, node: Node?, path: String) {
         node ?: return
-        val name = node.get("@name")?.toString() ?: return
+        val realName = node.get("@name")?.toString() ?: return
+
+        val name = node.get("@alias")?.toString()?.takeIf { it.trim().isNotEmpty() }?:realName
+
         val module = Module(name)
-        module.path = "$path/$name"
+
+        module.path = "$path/$realName"
         module.introduce = node.get("@introduce")?.toString() ?: ""
         module.type = node.get("@type")?.toString() ?: "library"
+        module.merge = node.get("@merge")?.toString() ?: ""
         module.project = project
         project.modules.add(module)
 

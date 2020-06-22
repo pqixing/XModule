@@ -25,9 +25,6 @@
     <depends>com.intellij.modules.lang</depends>
     -->
 
-    <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
-    </extensions>
     <depends>com.intellij.modules.platform</depends>
     <depends>Git4Idea</depends>
     <depends>org.jetbrains.android</depends>
