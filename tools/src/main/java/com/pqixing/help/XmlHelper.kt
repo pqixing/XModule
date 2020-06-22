@@ -31,7 +31,7 @@ object XmlHelper {
             val dependency = it as? Node ?: continue
             val gid = getChildNodeValue(dependency, "groupId")
             if (gid.startsWith(matchGroup)) {
-                pom.dependency.add("$gid,${getChildNodeValue(dependency, "artifactId")}")
+                pom.dependency.add("$gid:${getChildNodeValue(dependency, "artifactId")}:${getChildNodeValue(dependency, "version")}")
             }
             if (!first && pom.allExclude.isEmpty()) continue
 

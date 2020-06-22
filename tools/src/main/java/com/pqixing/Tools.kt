@@ -1,27 +1,24 @@
 package com.pqixing
 
 import com.pqixing.interfaces.ILog
+import kotlin.system.exitProcess
 
 
-object Tools : ILog {
-    override fun println(l: String?) {
-        if (logger != this) logger.println(l)
-        else {
-            System.out.println(l)
+object Tools  {
+    var log = true
+    fun println(l: String?) {
+        if(log) logger?.println(l)?:kotlin.io.println(l)
+
+    }
+    fun printError(exitCode: Int, l: String?) {
+        logger?.printError(exitCode,l)?: kotlin.run {
+            if(log) kotlin.io.println(l)
+            exitProcess(exitCode)
         }
     }
+    fun println(exitCode: Int, l: String?) = if (exitCode < 0) printError(exitCode, l) else println(l)
 
-    override fun printError(exitCode: Int, l: String?) {
-        if (logger != this) logger.printError(exitCode, l)
-        else {
-            System.out.println(l)
-            System.exit(exitCode)
-        }
-    }
-
-    fun println(exitCode: Int, l: String?) = if (exitCode < 0) printError(exitCode, l) else Tools.println(l)
-
-    var logger: ILog = this
+    var logger: ILog? = null
 }
 
 fun String.getEnvValue(): String? = try {

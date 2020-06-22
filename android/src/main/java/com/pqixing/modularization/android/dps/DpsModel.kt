@@ -18,9 +18,9 @@ class DpsModel() {
     /**
      * 当前模块是否使用了本地依赖
      */
-    var localCompile = false
+    var local = false
 
-    var moduleName: String = ""
+    var name: String = ""
 
     var dpType = ""
 
@@ -46,8 +46,10 @@ class DpsModel() {
 
     var excludes: HashSet<Pair<String?, String?>> = HashSet()
 
+    var attach:DpsModel?=null
+
     override fun toString(): String {
-        return "DpComponents(localCompile=$localCompile, moduleName='$moduleName', scope='$scope', version='$version', branch='$branch')"
+        return "DpComponents(localCompile=$local, moduleName='$name', scope='$scope', version='$version', branch='$branch')"
     }
 
 

@@ -4,7 +4,8 @@ import com.pqixing.Tools
 import com.pqixing.help.MavenPom
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.android.AndroidPlugin
-import com.pqixing.modularization.manager.*
+import com.pqixing.modularization.manager.getArgs
+import com.pqixing.modularization.manager.rootPlugin
 import com.pqixing.modularization.setting.ArgsExtends
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
@@ -81,11 +82,11 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
                     "mavenFirst" -> onMavenCompile(dpc, includes, excludes) || onLocalCompile(dpc, includes, excludes)
                     else -> onMavenCompile(dpc, includes, excludes)
                 }
-                if (!compile) loseList.add(dpc.moduleName)
+                if (!compile) loseList.add(dpc.name)
 
-                val newVersion = project.getArgs().versions.getVersion(dpc.branch, dpc.moduleName, "+")
+                val newVersion = project.getArgs().versions.getVersion(dpc.branch, dpc.name, "+")
                 if (!newVersion.second.startsWith(dpc.version) && newVersion.second.trim() != "+" && dpc.version.trim() != "+")
-                    dpsV.add("${dpc.version} -> ${newVersion.second} -> compile \"${dpc.moduleName}:${newVersion.second.substringBeforeLast(".")}\"")
+                    dpsV.add("${dpc.version} -> ${newVersion.second} -> compile \"${dpc.name}:${newVersion.second.substringBeforeLast(".")}\"")
             }
             if (dpsV.isNotEmpty())
                 Tools.println("----------------------Has New Version----------------------\n ${dpsV.joinToString("\n")}")
@@ -127,19 +128,32 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
      * 添加一个仓库依赖
      */
     private fun onMavenCompile(dpc: DpsModel, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
-        var dpVersion = args.versions.getVersion(dpc.branch, dpc.moduleName, dpc.version)
-        if (dpVersion.first.isEmpty() && dpc.matchAuto) dpVersion = args.versions.getVersion(dpc.branch, dpc.moduleName, "+")
-        if (dpVersion.first.isEmpty()) {
-            return false
-        }
-        var c = ""
-        if (dpVersion.second == dpc.version) {
-            c = " ;force = true ;"
-        }
-        includes.add("${getScope(dpc.dpType, dpc.scope)} ('${args.projectXml.group}.${dpVersion.first}:${dpc.moduleName}:${dpVersion.second}') { ${excludeStr(excludes = dpc.excludes)} $c }")
-        addBranchExclude(dpVersion.first, dpc.moduleName, excludes)
-        excludes.addAll(getPom(project, dpVersion.first, dpc.moduleName, dpVersion.second).allExclude)
+        if (dpc.version.isEmpty()) resolveVersion(dpc)
+        val dpVersion = args.versions.getVersion(dpc.branch, dpc.name, dpc.version).takeIf { it.first.isNotEmpty() }
+                ?: takeIf { dpc.matchAuto }?.let { args.versions.getVersion(dpc.branch, dpc.name, "+").takeIf { it.first.isNotEmpty() } }
+                ?: return false
+
+        val c = takeIf { dpVersion.second == dpc.version }?.let { " ;force = true ;" } ?: ""
+
+        includes.add("${getScope(dpc.dpType, dpc.scope)} ('${args.projectXml.group}.${dpVersion.first}:${dpc.name}:${dpVersion.second}') { ${excludeStr(excludes = dpc.excludes)} $c }")
+        addBranchExclude(dpVersion.first, dpc.name, excludes)
+        excludes.addAll(getPom(project, dpVersion.first, dpc.name, dpVersion.second).allExclude)
         return true
+    }
+
+    /**
+     * 自动匹配版本号
+     */
+    private fun resolveVersion(dpc: DpsModel) {
+        if (dpc.version.isNotEmpty()) return
+
+        //没有依附模块,则读取当前配置的版本
+        dpc.version = dpc.attach?.also { resolveVersion(it) }?.let { attach ->
+            kotlin.runCatching { getPom(project, attach.branch, attach.name, attach.version).dependency.find { it.contains(":${dpc.name}:") } }.getOrNull()
+        } ?: args.dpsContainer[dpc.name]?.version?.let { "*$it" } ?: "+"
+
+        dpc.matchAuto = dpc.version.contains("*")
+        dpc.version = dpc.version.replace("*", "")
     }
 
     /**
@@ -178,13 +192,13 @@ class DpsManager(val plugin: AndroidPlugin, val dpsExt: DpsExtends) {
     private fun onLocalCompile(dpc: DpsModel, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
         val branch = dpc.module.getBranch()
         if (branch != plugin.module.getBranch() && !args.config.allowDpDiff) {
-            Tools.println("    branch diff ${dpc.moduleName} -> $branch")
+            Tools.println("    branch diff ${dpc.name} -> $branch")
             return false
         }
         //如果该依赖没有本地导入，不进行本地依赖
-        dpc.localCompile = true
-        includes.add("${getScope(dpc.dpType, dpc.scope)} ( project(path : ':${dpc.moduleName}'))  { ${excludeStr(excludes = dpc.excludes)} }")
-        addBranchExclude(branch, dpc.moduleName, excludes, 0)
+        dpc.local = true
+        includes.add("${getScope(dpc.dpType, dpc.scope)} ( project(path : ':${dpc.name}'))  { ${excludeStr(excludes = dpc.excludes)} }")
+        addBranchExclude(branch, dpc.name, excludes, 0)
         return true
     }
 

@@ -225,7 +225,7 @@ open class DpsAnalysisTask : BaseTask() {
         if (findApi != null) {
             topVertex.dps.add(findApi.name)
         }
-        dpsExt.compiles.forEach { topVertex.dps.add(it.moduleName) }
+        dpsExt.compiles.forEach { topVertex.dps.add(it.name) }
         val branch = plugin.module.getBranch()
 
         //加载定点依赖的全部依赖
@@ -363,7 +363,7 @@ open class DpsAnalysisTask : BaseTask() {
             project.apply(mapOf<String, String>("from" to libraryGradle.absolutePath))
         } catch (e: Exception) {
         }
-        dpsExt.compiles.forEach { dpsContainer.add(it.moduleName) }
+        dpsExt.compiles.forEach { dpsContainer.add(it.name) }
         //解析build.gradle文件，加载本地配置的依赖数据
         Tools.println("loadDpsFromLocal $module dps -> $dpsContainer")
         return true

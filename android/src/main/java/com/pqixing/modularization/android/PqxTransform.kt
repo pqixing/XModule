@@ -4,7 +4,6 @@ import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
 import com.pqixing.annotation.*
-import com.pqixing.modularization.android.asm.AnnotationScanner
 import com.pqixing.modularization.utils.ClassModify
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.IOUtils
@@ -58,14 +57,14 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
                                     /**本地工程**/
                                     ) && jar.file.absolutePath.endsWith(".jar")) {
                         handleJar(jar, visitor)
-                    }// else System.out.println("UnHandle jar ->${jar.name}")
+                    }// else com.pqixing.Tools.println("UnHandle jar ->${jar.name}")
                     val dest = getDestFile(outputProvider, jar)
                     FileUtils.copyFile(jar.file, dest)
                 }
             }
         }
         injectCode(targetInjectJar, outputProvider,visitor, buildConfigClass)
-        System.out.println("$name transform end , count -> ${System.currentTimeMillis() - start} -> ${visitor.results}")
+        com.pqixing.Tools.println("$name transform end , count -> ${System.currentTimeMillis() - start} -> ${visitor.results}")
     }
 
     private fun getDestFile(outputProvider: TransformOutputProvider, jarInput: JarInput): File {
@@ -85,7 +84,7 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
         val jarOutputStream = JarOutputStream(FileOutputStream(dest))
         val file = JarFile(jarInput.file)
         val enumeration = file.entries()
-//        System.out.println("injectCode start ->$activitys -> $applikes")
+//        com.pqixing.Tools.println("injectCode start ->$activitys -> $applikes")
 
         while (enumeration.hasMoreElements()) {
             val jarEntry = enumeration.nextElement()
@@ -102,7 +101,7 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
         }
         jarOutputStream.close()
         file.close()
-//        System.out.println("injectCode end")
+//        com.pqixing.Tools.println("injectCode end")
 
     }
 
@@ -150,16 +149,12 @@ class PqxVisitor : ClassVisitor(Opcodes.ASM5, null) {
     val results: List<Pair<String, HashSet<String>>> = FILTERS.map { it to HashSet<String>() }
     var className = ""
     override fun visitOuterClass(owner: String, name: String?, desc: String?) {
-//        System.out.println("owner -> " + owner + " name " + name + " desc " + desc);
         className = owner
     }
 
     override fun visitAnnotation(desc: String?, visible: Boolean): AnnotationVisitor? {
         if (visible) {
-            results.find { it.first == desc }?.let {
-//                println("visitAnnotation -> desc " + desc + " " + className + " c" + hashCode());
-                it.second.add(className)
-            }
+            results.find { it.first == desc }?.second?.add(className)
         }
         return super.visitAnnotation(desc, visible)
 

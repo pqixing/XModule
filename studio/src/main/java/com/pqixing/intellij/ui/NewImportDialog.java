@@ -150,7 +150,7 @@ public class NewImportDialog extends BaseJDialog {
                     }
                     imports.clear();
                     for (String string : l.split("#")[app ? 0 : 1].split(",")) {
-                        if (!string.isEmpty()) imports.add(string);
+                        if (!string.isEmpty()) addToImport(string);
                     }
                     setVisible(true);
                     updateImports();
@@ -162,11 +162,11 @@ public class NewImportDialog extends BaseJDialog {
     }
 
 
-    private void initJList(List<String> imports, List<JListInfo> allInfos) {
+    private void initJList(List<String> imports, List<JListInfo> all) {
         //模拟选中,不然列表数据会异常
-        for (int i = 0; i < allInfos.size(); i++) imports.add(TAG);
+        for (int i = 0; i < all.size(); i++) imports.add(TAG);
         selectAdapter = new JListSelectAdapter(jlSelect, false);
-        allAdapter = new ImportSelectAdapter(JlNotSelect, allInfos);
+        allAdapter = new ImportSelectAdapter(JlNotSelect, all);
         selectAdapter.setSelectListener((jList, adapter, items) -> {
             for (JListInfo info : items) {
                 imports.remove(info.getTitle());
@@ -177,23 +177,33 @@ public class NewImportDialog extends BaseJDialog {
         allAdapter.setSelectListener((jList, adapter, items) -> {
             for (JListInfo info : items) {
                 info.setSelect(false);
-                if (!imports.contains(info.getTitle())) {
-                    imports.add(0, info.getTitle());
-                }
+                addToImport(info.getTitle());
             }
             updateImports();
             return true;
         });
-        repaintBorder(jpOthers, "Others", allInfos.size());
+        repaintBorder(jpOthers, "Others", all.size());
         updateImports();
+    }
+
+    private void addToImport(String title) {
+        addToImport(title, "");
+    }
+
+    private void addToImport(String title, String model) {
+        title = model + title.substring(title.lastIndexOf("/") + 1);
+        if (!imports.contains(title)) {
+            imports.add(0, title);
+        }
     }
 
     @Override
     public void setVisible(boolean b) {
-        if (b) {
-            while (true) if (!imports.remove(TAG)) break;
-            updateImports();
-        }
+        if (b) UiUtils.INSTANCE.addTask(100, () -> {
+            boolean remove = false;
+            while (imports.remove(TAG)) remove = true;
+            if (remove) updateImports();
+        });
         super.setVisible(b);
     }
 
@@ -287,7 +297,7 @@ public class NewImportDialog extends BaseJDialog {
                     if (!file.exists()) Messages.showMessageDialog(dpsItem + " dps import failure", "ERROR", null);
                     else if (file.lastModified() > runTime || Messages.OK == Messages.showOkCancelDialog("The local configuration is available and still imported?", "ERROR", null)) {
                         imports.remove(dpsItem);
-                        imports.add(0, "D#" + dpsItem);
+                        addToImport(dpsItem, "D#");
 
 
                         String readText = FileUtils.readText(file);
@@ -333,10 +343,8 @@ public class NewImportDialog extends BaseJDialog {
                         }
                         if (find != null) {
                             String importKey = key.replace(filterKey, "") + find.getTitle();
-                            if (!imports.contains(importKey)) {
-                                imports.add(0, importKey);
-                                updateImports();
-                            }
+                            addToImport(importKey);
+                            updateImports();
                             find.setSelect(false);
                         }
                         allAdapter.filterDatas("");

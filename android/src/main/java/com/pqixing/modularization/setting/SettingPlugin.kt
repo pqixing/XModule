@@ -53,11 +53,11 @@ class SettingPlugin : Plugin<Settings> {
         val key = setting.gradle.hashCode()
         settings[key] = WeakReference(this)
 
-        Tools.logger = Logger()
         val rootDir = setting.rootDir
 
         //检查配置文件Config,读取config和env环境变量，生成全局配置
         val config = loadConfig(rootDir)
+        Tools.log = config.log
         GitUtils.gitPsw = config.userName
         GitUtils.gitUser = GitUtils.getPsw(config.passWord)
 

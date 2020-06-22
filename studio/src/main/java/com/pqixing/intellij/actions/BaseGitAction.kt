@@ -8,6 +8,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
@@ -31,9 +32,9 @@ abstract class BaseGitAction : AnAction() {
         this.e = e
         this.project = e.project ?: return
         this.basePath = project.basePath ?: return
-        rootRepoPath = "$basePath/templet";
+        rootRepoPath = "$basePath/${EnvKeys.BASIC}";
         if (!beforeActionRun()) return
-        val projectXmlFile = File(basePath, "templet/project.xml")
+        val projectXmlFile = File(basePath, EnvKeys.XML_PROJECT)
         val configFile = File(basePath, "Config.java")
         if (!projectXmlFile.exists() || !configFile.exists()) {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)

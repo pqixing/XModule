@@ -8,30 +8,40 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.pqixing.EnvKeys
+import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
+import com.pqixing.intellij.group.QToolGroup
 import com.pqixing.intellij.ui.ToMavenDialog
 import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.GradleUtils
+import java.io.File
 
 class ToMavenAction : AnAction() {
     lateinit var project: Project
     override fun update(e: AnActionEvent) {
-        e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
+        e.presentation.isEnabledAndVisible = QToolGroup.hasBasic(e.project)
     }
+
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
-
         val module = e.getData(DataKey.create<Module>("module"))
-        val moduleName = module?.name ?: ""
-        val projectMode = /*"ProjectViewPopup".equals(place)||*/"MainMenu" == e.place || module == null || project.name == moduleName;
-        var filters = if (projectMode) null else ModuleRootManager.getInstance(module!!).dependencies.map { it.name }
+        val allModule = XmlHelper.parseProjectXml(File(project.basePath, EnvKeys.XML_PROJECT)).allModules()
+        val target = allModule.find { it.name == module?.name }?.takeIf { it.isAndroid }
+
+        val moduleName = target?.name ?: ""
+
+        val projectMode = "MainMenu" == e.place || target == null
+
+        val filters = (if (projectMode) allModule.filter { it.isAndroid }.map { it.name } else ModuleRootManager.getInstance(module!!).dependencies.map { it.name }).toMutableSet()//过滤Android工程
+        filters.remove(project.name)
+        filters.add(moduleName)
 
         //需要ToMaven的模块
         val tModules = ModuleManager.getInstance(project).sortedModules
-                .filter { it.name != project.name && (filters == null || it.name == moduleName || filters.contains(it.name)) }
+                .filter { filters.contains(it.name) }
                 .map { JListInfo(it.name, "", 0, it.name == moduleName || it.name == "${moduleName}_api") }
 
-        val dialog = ToMavenDialog(project,tModules, moduleName);
+        val dialog = ToMavenDialog(project, tModules, moduleName);
         dialog.setOnOk { toMaven(dialog, tModules) }
         dialog.pack()
         dialog.isVisible = true
@@ -42,9 +52,7 @@ class ToMavenAction : AnAction() {
         var check = false//是否需要校验结果
         var runTaskId = ""
         var excute = 0
-        var envs = GradleUtils.defEnvs.toMutableMap().apply {
-            put(EnvKeys.toMavenUnCheck, dialog.unCheckCode)
-        }
+        var envs = GradleUtils.defEnvs.toMutableMap().apply { put(EnvKeys.toMavenUnCheck, dialog.unCheckCode) }
 
         override fun onTaskEnd(success: Boolean, result: String?) {
             if (check) {//检查上传的任务是否正确
@@ -66,7 +74,7 @@ class ToMavenAction : AnAction() {
                 excute++
                 runTaskId = System.currentTimeMillis().toString()
                 info.staue = 2//正在执行
-                GradleUtils.runTask(project, listOf(":${info.title}:clean", ":${info.title}:ToMaven"), activateToolWindowBeforeRun = excute == 1, envs = envs, runTaskId = runTaskId, callback = this)
+                GradleUtils.runTask(project, listOf(":${info.title}:ToMaven"), activateToolWindowBeforeRun = excute == 1, envs = envs, runTaskId = runTaskId, callback = this)
             } else {
                 check = false
                 runTaskId = ""

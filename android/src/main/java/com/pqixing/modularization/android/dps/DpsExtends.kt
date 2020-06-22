@@ -1,7 +1,6 @@
 package com.pqixing.modularization.android.dps
 
 import com.pqixing.Tools
-import com.pqixing.modularization.setting.SettingPlugin
 import com.pqixing.modularization.setting.ArgsExtends
 import groovy.lang.Closure
 
@@ -39,17 +38,17 @@ class DpsExtends(val name: String, val args: ArgsExtends) {
         when (split.size) {
             1 -> {
                 inner.branch = subModule.getBranch()
-                inner.moduleName = split[0]
+                inner.name = split[0]
                 inner.version = ""
             }
             2 -> {
                 inner.branch = subModule.getBranch()
-                inner.moduleName = split[0]
+                inner.name = split[0]
                 inner.version = split[1]
             }
             3 -> {
                 inner.branch = split[0]
-                inner.moduleName = split[1]
+                inner.name = split[1]
                 inner.version = split[2]
             }
             else -> Tools.printError(-1, "DpsExtends compile illegal name -> $name")
@@ -60,14 +59,10 @@ class DpsExtends(val name: String, val args: ArgsExtends) {
             closure.resolveStrategy = Closure.DELEGATE_ONLY
             closure.call()
         }
-        if (inner.version.isEmpty()) {
-            //默认不配置的情况下,使用使用基础版本号
-            inner.version = args.projectXml.baseVersion
-        }
 
         inner.matchAuto = inner.version.contains("*")
         inner.version = inner.version.replace("*", "")
-        inner.module = args.projectXml.findModule(inner.moduleName) ?: return
+        inner.module = args.projectXml.findModule(inner.name) ?: return
 
         val apiModule = inner.module.findApi()
         if (apiModule == null) {
@@ -75,16 +70,17 @@ class DpsExtends(val name: String, val args: ArgsExtends) {
             return
         }
         //先尝试加载
-        val apiComponents = DpsModel().apply {
-            moduleName = apiModule.name
+        val api = DpsModel().apply {
+            this.name = apiModule.name
             branch = inner.branch
-            version = inner.version
+            version = ""
             matchAuto = true
+            attach = inner
             dpType = inner.dpType
             this.scope = scope
             module = apiModule
         }
-        container.add(apiComponents)
+        container.add(api)
 
         inner.scope = SCOP_RUNTIME
         if (args.runAsApp(subModule) && !inner.justApi) container.add(inner)

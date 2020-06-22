@@ -7,7 +7,6 @@ import com.pqixing.modularization.manager.RootPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
-import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
 import java.io.File
 import java.util.*
@@ -158,7 +157,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
     fun loadAll(includes: MutableSet<String>, target: String) {
         includes.add(target)
 
-        val requests = args.dpsContainer[target]?.compiles?.map { it.moduleName } ?: return
+        val requests = args.dpsContainer[target]?.compiles?.map { it.name } ?: return
 
         val reLoads = requests.filter { !includes.contains(it) }
 

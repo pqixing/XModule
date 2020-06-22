@@ -20,8 +20,10 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.VcsDirectoryMapping
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
 import com.intellij.openapi.vfs.VfsUtil
+import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
+import com.pqixing.intellij.group.QToolGroup
 import com.pqixing.intellij.ui.NewImportDialog
 import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.intellij.utils.UiUtils
@@ -39,13 +41,13 @@ class ImportAction : AnAction() {
     lateinit var basePath: String
 
     override fun update(e: AnActionEvent) {
-        e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
+        e.presentation.isEnabledAndVisible = QToolGroup.hasBasic(e.project)
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
-        val projectXmlFile = File(basePath, "templet/project.xml")
+        val projectXmlFile = File(basePath, EnvKeys.XML_PROJECT)
         val configFile = File(basePath, "Config.java")
         if (!projectXmlFile.exists() || !configFile.exists()) {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
@@ -59,14 +61,15 @@ class ImportAction : AnAction() {
         val dependentModel = clazz.getField("dependentModel").get(newInstance).toString()
 
         val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
-        val infoMaps = projectXml.allModules().filter { it.attachModule == null }.map { Pair(it.name, JListInfo(it.name, it.introduce.trim())) }.toMap(mutableMapOf())
-        val repo = GitHelper.getRepo(File(basePath, "templet"), project)
+        val infos = projectXml.allModules().filter { it.attachModule == null }.map { JListInfo(it.path, "${it.introduce} - ${it.type}") }.toMutableList()
+
+        val repo = GitHelper.getRepo(File(basePath, EnvKeys.BASIC), project)
         val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
         val localBranch = repo.currentBranchName ?: "master"
         branchs.remove(localBranch)
         branchs.add(0, localBranch)
 
-        val dialog = NewImportDialog(project, imports.toMutableList(), infoMaps.values.toMutableList(), branchs, dependentModel, codeRoot)
+        val dialog = NewImportDialog(project, imports.toMutableList(), infos, branchs, dependentModel, codeRoot)
         dialog.pack()
         dialog.isVisible = true
         val importTask = object : Task.Backgroundable(project, "Start Import") {
@@ -78,7 +81,7 @@ class ImportAction : AnAction() {
                 //下载代码
                 val gitPaths = projectXml.allModules().filter { allIncludes.contains(it.name) }
                         .map { it.project }.toSet().map { File(codePath, it.path) to it.url }.toMap().toMutableMap()
-                gitPaths[File(basePath, "templet")] = projectXml.basicUrl
+                gitPaths[File(basePath, EnvKeys.BASIC)] = projectXml.basicUrl
 
                 gitPaths.filter { !GitUtil.isGitRoot(it.key) }.forEach {
                     indicator.text = "Start Clone... ${it.value} "
@@ -172,12 +175,12 @@ class ImportAction : AnAction() {
         ApplicationManager.getApplication().runWriteAction {
             val dpModel = dialog.dpModel?.trim() ?: ""
             val codeRoot = dialog.codeRootStr.trim()
-            val includes = dialog.imports
+            val includes = dialog.imports.filter { it.isNotEmpty() }
 
             var result = configgFile.readText()
             result = result.replace(Regex("String *dependentModel *=.*;"), "String dependentModel = \"$dpModel\";")
             result = result.replace(Regex("String *codeRoot *=.*;"), "String codeRoot = \"$codeRoot\";")
-            result = result.replace(Regex("String *include *=.*;"), "String include = \"${includes.joinToString { "$it," }}\";")
+            result = result.replace(Regex("String *include *=.*;"), "String include = \"${includes.joinToString(",")}\";")
             FileUtils.writeText(configgFile, result, true)
         }
     }

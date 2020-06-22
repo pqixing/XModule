@@ -5,9 +5,15 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
+import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.impl.ProjectManagerImpl
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
+import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.OpenNewProjectDialog
 import com.pqixing.intellij.utils.GitHelper
@@ -31,24 +37,39 @@ open class OpenNewAction : AnAction() {
             }
         }
         if (rootDir != null) {
-            showAndPack.tvDir.text = rootDir.canonicalPath ?: ""
-            val tl = File(rootDir.path, "templet/project.xml")
+            showAndPack.tvDir.text = rootDir.parent.canonicalPath ?: ""
+            val tl = File(rootDir.path, EnvKeys.XML_PROJECT)
             if (tl.exists()) showAndPack.tvGitUrl.text = XmlHelper.parseProjectXml(tl).basicUrl
         }
 
         showAndPack.setOnOk {
-            var dir = File(showAndPack.tvDir.text.trim(), "CRoot")
-            var i = 0
-            while (dir.exists()) dir = File(showAndPack.tvDir.text.trim(), "CRoot${i++}")
-            dir.mkdirs()
-
-            val gitUrl = showAndPack.tvGitUrl.text.trim()
-            val doClone = GitHelper.getGit().clone(defaultProject, dir, gitUrl, "templet").exitCode == 0
-            FileUtils.copy(File(dir, "templet/build.gradle"), File(dir, "build.gradle"))
-            FileUtils.copy(File(dir, "templet/Config.java"), File(dir, "Config.java"))
-            if (doClone) {
-                ProjectUtil.openOrImport(File(dir, "build.gradle").absolutePath, defaultProject, true)
+            val basicDir = File(showAndPack.tvDir.text.trim(), EnvKeys.BASIC)
+            if (basicDir.exists()) {
+                val exitCode = Messages.showOkCancelDialog(defaultProject, "Basic dir is not empty!!!", "DELETE", "DEL", "CANCEL", null)
+                if (exitCode != Messages.OK) return@setOnOk
+                FileUtils.delete(basicDir)
             }
+            val importTask = object : Task.Backgroundable(defaultProject, "Open New Project") {
+                override fun run(indicator: ProgressIndicator) {
+                    val dir = basicDir.parentFile
+                    dir.mkdirs()
+                    val url = showAndPack.tvGitUrl.text.trim()
+                    indicator.text = "clone $url"
+                    val doClone = GitHelper.getGit().clone(defaultProject, dir, url, EnvKeys.BASIC).exitCode == 0
+                    if (doClone) {
+                        if(rootDir?.exists()==true){//复制文件
+                            FileUtils.copy(File(rootDir.path,"gradle"), File(dir,"gradle"))
+                            FileUtils.copy(File(rootDir.path,"gradlew"),File(dir,"gradlew"))
+                            FileUtils.copy(File(rootDir.path,"gradlew.bat"),File(dir,"gradlew.bat"))
+                            FileUtils.copy(File(rootDir.path,"gradle.properties"),File(dir,"gradle.properties"))
+                            FileUtils.copy(File(rootDir.path,"Config.java"),File(dir,"Config.java"))
+                        }
+                        FileUtils.writeText(File(dir, "settings.gradle"), "buildscript { apply from: 'https://raw.githubusercontent.com/pqixing/modularization/master/script/install.gradle', to: it }; apply plugin: 'com.module.setting'\n")
+                        ProjectUtil.openOrImport(dir.absolutePath, defaultProject, true)
+                    }
+                }
+            }
+            ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
         }
         showAndPack.showAndPack()
     }

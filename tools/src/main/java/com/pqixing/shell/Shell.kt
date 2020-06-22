@@ -59,7 +59,7 @@ object Shell {
                 try {
                     str = streamIn.readLine()
                 } catch (e: Exception) {
-                    Tools.logger.println(e.toString())
+                    Tools.println(e.toString())
                 }
                 if (str != null) resultCache.put(str)
             } while (str != null)
@@ -71,7 +71,7 @@ object Shell {
                 try {
                     str = streamErr.readLine()
                 } catch (e: Exception) {
-                    Tools.logger.println(e.toString())
+                    Tools.println(e.toString())
                 }
                 if (str != null) resultCache.put(str)
             } while (str != null)
@@ -89,12 +89,12 @@ object Shell {
                     break
                 }
                 if (System.currentTimeMillis() - lastLineTime > 1000 * 30) {
-                    Tools.logger?.println("process exit by time out")
+                    Tools.println("process exit by time out")
                 }
                 continue
             } else {
                 lastLineTime = System.currentTimeMillis()
-                Tools.logger?.println(line)
+                Tools.println(line)
                 result += line
             }
         }

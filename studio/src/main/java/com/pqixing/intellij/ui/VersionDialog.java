@@ -72,7 +72,7 @@ public class VersionDialog extends BaseJDialog {
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        GitRepository repo = GitHelper.getRepo(new File(project.getBasePath(), "templet"), project);
+        GitRepository repo = GitHelper.getRepo(new File(project.getBasePath(), EnvKeys.BASIC), project);
         if (repo == null) {
             return;
         }

@@ -47,7 +47,7 @@ public class Config {
      * 是否使用日志
      * true:打印日志
      **/
-    public boolean log = true;
+    public boolean log = false;
 
     /**
      * 模块依赖方式，默认: mavenOnly
@@ -67,12 +67,6 @@ public class Config {
      * 工程编译目录，使用不同的编译目录便于同时执行多个编译事件，例如ToMaven和构建
      */
     public String buildDir = "default";
-
-
-    /**
-     * 同步根目录的build.gradle文件(使用doc目录下的文件进行覆盖)
-     */
-    public boolean syncBuildFile = true;
 
     /**
      * toMaven时,忽略检查项目

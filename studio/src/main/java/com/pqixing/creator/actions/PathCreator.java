@@ -11,7 +11,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.pqixing.intellij.actions.QToolGroup;
+import com.pqixing.intellij.group.QToolGroup;
 
 import java.util.Objects;
 
@@ -53,6 +53,6 @@ public class PathCreator extends AnAction {
         } else {
             e.getPresentation().setEnabled(false);
         }
-        e.getPresentation().setVisible(QToolGroup.Companion.isModulariztionProject(e.getProject()));
+        e.getPresentation().setVisible(QToolGroup.Companion.hasBasic(e.getProject()));
     }
 }

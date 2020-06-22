@@ -13,16 +13,16 @@ import org.eclipse.jgit.api.Git
 
 open class ToMavenTask : BaseTask() {
     val plugin = project.pluginModule()
-
+    val vail = plugin.module.let { it.isAndroid&&!it.isApplication }
     init {
-        if (!plugin.module.isApplication) {
+        if (vail) {
             this.dependsOn("uploadArchives")
             project.getTasksByName("uploadArchives", false).forEach { it.dependsOn("ToMavenCheck") }
         }
     }
 
     override fun start() {
-        if (plugin.module.isApplication) {
+        if (!vail) {
             ResultUtils.writeResult("${plugin.module.getBranch()}:${project.name}:0.0")
             return
         }

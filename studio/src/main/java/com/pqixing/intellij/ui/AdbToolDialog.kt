@@ -9,7 +9,7 @@
 //import com.intellij.openapi.project.Project
 //import com.intellij.openapi.ui.Messages
 //import com.intellij.util.concurrency.Semaphore
-//import com.pqixing.intellij.actions.QToolGroup
+//import com.pqixing.intellij.group.QToolGroup
 //import com.pqixing.intellij.adapter.JListInfo
 //import com.pqixing.intellij.adapter.JListSelectAdapter
 //import com.pqixing.intellij.utils.DachenHelper

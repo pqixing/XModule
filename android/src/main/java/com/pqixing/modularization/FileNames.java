@@ -1,5 +1,7 @@
 package com.pqixing.modularization;
 
+import com.pqixing.EnvKeys;
+
 public class FileNames {
     /**
      * 一个tab空格度
@@ -22,7 +24,7 @@ public class FileNames {
     /**
      * 模板目录
      */
-    public static final String BASIC = "basic";
+    public static final String BASIC = EnvKeys.BASIC;
     /**
      * 配置文件
      */

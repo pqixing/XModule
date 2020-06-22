@@ -11,7 +11,9 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
+import com.pqixing.intellij.group.QToolGroup
 import com.pqixing.intellij.ui.CleanDialog
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.tools.FileUtils
@@ -24,12 +26,12 @@ class CleanAction : AnAction() {
     lateinit var project: Project
     lateinit var basePath: String
     override fun update(e: AnActionEvent) {
-        e?.presentation?.isEnabledAndVisible = QToolGroup.isModulariztionProject(e?.project)
+        e?.presentation?.isEnabledAndVisible = QToolGroup.hasBasic(e?.project)
     }
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
-        val projectXmlFile = File(basePath, "templet/project.xml")
+        val projectXmlFile = File(basePath, EnvKeys.XML_PROJECT)
         val configFile = File(basePath, "Config.java")
         if (!projectXmlFile.exists() || !configFile.exists()) {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)

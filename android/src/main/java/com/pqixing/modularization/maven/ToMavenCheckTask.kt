@@ -26,10 +26,7 @@ import java.util.*
 open class ToMavenCheckTask : BaseTask() {
     init {
         group = ""
-        val mdPlugin = project.pluginModule()
-        if (mdPlugin.module.attach()) {//如果是Api模块，则依赖主模块的clean方法，强行导入主模块
-            this.dependsOn(":${mdPlugin.module.attachModule?.name}:clean")
-        }
+        this.dependsOn("clean")
     }
 
     /**
@@ -171,7 +168,7 @@ open class ToMavenCheckTask : BaseTask() {
     }
 
     private fun checkLocalDps(compiles: HashSet<DpsModel>) {
-        val map = compiles.filter { it.localCompile }.map { it.moduleName }
+        val map = compiles.filter { it.local }.map { it.name }
         if (map.isNotEmpty()) {
             Tools.printError(-1, "${project.name} Contain local project, please remove it before upload -> $map")
         }

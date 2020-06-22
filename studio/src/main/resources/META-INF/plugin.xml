@@ -38,7 +38,7 @@
             <keyboard-shortcut keymap="$default" first-keystroke="alt F"/>
         </action>
 
-        <group id="QTools" popup="true" text="QTools" class="com.pqixing.intellij.actions.QToolGroup">
+        <group id="QTools" popup="true" text="QTools" class="com.pqixing.intellij.group.QToolGroup">
             <add-to-group group-id="BuildMenu" anchor="first"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
@@ -76,7 +76,7 @@
                     description="auto create MVP code"/>
             <separator/>
         </group>
-        <group id="QTools.GitBatch" popup="true" text="GitBatch" class="com.pqixing.intellij.actions.QToolGroup">
+        <group id="QTools.GitBatch" popup="true" text="GitBatch" class="com.pqixing.intellij.group.QToolGroup">
             <add-to-group group-id="VcsGroups" anchor="last"/>
             <add-to-group group-id="QTools" anchor="last"/>
             <action id="Modularization.GitSync" class="com.pqixing.intellij.actions.GitSyncAction" text="Clone"/>

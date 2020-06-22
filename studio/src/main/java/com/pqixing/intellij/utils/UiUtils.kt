@@ -11,6 +11,7 @@ import com.intellij.openapi.components.NamedComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.*
+import com.pqixing.EnvKeys
 import com.pqixing.creator.utils.LogWrap
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.NewImportDialog
@@ -108,7 +109,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
     }
 
     fun formatModule(target: Project, moduleXml: VirtualFile?, formatFoce: Boolean = false): Boolean {
-        val projectXmlFile = File(target.basePath, "templet/project.xml")
+        val projectXmlFile = File(target.basePath, EnvKeys.XML_PROJECT)
         if (moduleXml == null || !projectXmlFile.exists()) return false
 
         val ins = moduleXml.inputStream.reader()
