@@ -1,9 +1,6 @@
 //安装组件化模块的脚本
 repositories {
     maven {
-        url uri("/Users/pqx/.repo")
-    }
-    maven {
         url "https://dl.bintray.com/pqixing86/modularization"
     }
     google()

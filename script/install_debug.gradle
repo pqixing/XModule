@@ -1,0 +1,13 @@
+//安装组件化模块的脚本
+repositories {
+    maven {
+        url uri("/Users/pqx/.repo")
+    }
+    google()
+    jcenter()
+}
+dependencies {
+    classpath 'com.pqixing.gradle:modularization:0.3'
+}
+
+

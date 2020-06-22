@@ -6,9 +6,11 @@ dependencies {
     compileOnly localGroovy()
     testImplementation 'junit:junit:4.12'
 }
-compileJava{
-    sourceCompatibility=JavaVersion.VERSION_1_8
-    targetCompatibility=JavaVersion.VERSION_1_8
+compileKotlin.kotlinOptions.jvmTarget = "1.8"
+compileTestKotlin.kotlinOptions.jvmTarget = "1.8"
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 ext.mainDir = new File(projectDir, "src/main")
 ext.resourceDir = new File(mainDir, "resources/com/pqixing")

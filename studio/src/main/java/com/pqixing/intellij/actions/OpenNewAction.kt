@@ -26,7 +26,7 @@ open class OpenNewAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
 
-        val defaultProject = e.project ?: ProjectManagerImpl.getInstance().defaultProject
+        val defaultProject = e.project ?: ProjectManagerImpl.getInstance().openProjects.find { it!=null }?:return
         val rootDir = e.project?.let { LocalFileSystem.getInstance().findFileByPath(it.basePath!!) }
         val showAndPack = OpenNewProjectDialog(defaultProject)
         showAndPack.tvFilePick.addActionListener {
