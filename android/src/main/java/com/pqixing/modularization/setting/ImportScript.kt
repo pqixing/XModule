@@ -1,6 +1,7 @@
 package com.pqixing.modularization.setting
 
 import com.pqixing.Tools
+import com.pqixing.help.XmlHelper
 import com.pqixing.model.Module
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.manager.RootPlugin
@@ -21,7 +22,8 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         val buildTag = args.config.buildDir?.takeIf { i -> i.isNotEmpty() } ?: "default"
         val buildFileName = "build/modularization_${buildTag}/build.gradle"
         //自动抓取工程导入
-        val includes = parseInclude()
+        val includes = XmlHelper.parseInclude(args.projectXml, (args.config.include?.takeIf { it.isNotEmpty() && it != "Auto" }?.replace("+", ",")?.split(",")
+                ?: gradle.startParameter.taskNames.mapNotNull { m -> m.split(":").takeIf { it.size >= 2 }?.let { it[it.size - 2] } }).toSet().toMutableSet())
 
         val imports = args.projectXml.allModules().filter { includes.contains(it.name) }
         //添加include配置
@@ -56,7 +58,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
     private fun hookBuildFile(module: Module, buildFileName: String) {
         val target = File(args.env.codeRootDir, module.path + "/" + buildFileName)
         val mergeFiles = mutableListOf(File(args.env.codeRootDir, module.path + "/build.gradle"), File(args.env.basicDir, "gradle/maven.gradle"))
-        if (module.isAndroid) {
+        if (module.isAndroid && !module.external) {//非外部的Android工程，使用模板
             //尝试生成代码
             tryCreateSrc(module)
 
@@ -147,34 +149,4 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         module.api?.let { include(checks, it, buildFileName) }
     }
 
-
-    fun parseInclude(): MutableSet<String> {
-        val includes: MutableSet<String> = (args.config.include?.takeIf { it.isNotEmpty() && it != "Auto" }?.replace("+", ",")?.split(",")
-                ?: gradle.startParameter.taskNames.mapNotNull { m -> m.split(":").takeIf { it.size >= 2 }?.let { it[it.size - 2] } }).toSet().toMutableSet()
-
-        val temp = mutableSetOf<String>()
-        includes.filter { it.startsWith("D#") }.also { includes.removeAll(it) }.map { it.substring(2) }.forEach { loadAll(temp, it) }
-        includes.addAll(temp)
-
-        includes.filter { it.startsWith("E#") }.also { includes.removeAll(it) }.map { it.substring(2) }.forEach { includes.remove(it) }
-
-        temp.clear()
-        includes.filter { it.startsWith("ED#") }.also { includes.removeAll(it) }.map { it.substring(3) }.forEach { loadAll(temp, it) }
-        includes.removeAll(temp)
-
-        return includes
-    }
-
-    fun loadAll(includes: MutableSet<String>, target: String) {
-        includes.add(target)
-
-        val requests = args.projectXml.findModule(target)?.compiles?.map { it.name } ?: return
-
-        val reLoads = requests.filter { !includes.contains(it) }
-
-        //如果已经加载过，不重复加载
-        includes.addAll(requests)
-
-        for (request in reLoads) loadAll(includes, request)
-    }
 }

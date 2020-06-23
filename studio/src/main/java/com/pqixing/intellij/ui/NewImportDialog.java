@@ -188,7 +188,7 @@ public class NewImportDialog extends BaseJDialog {
     }
 
     private void addToImport(String title) {
-        addToImport(title, "");
+        addToImport(title, title.substring(0, title.indexOf("#") + 1));
     }
 
     private void addToImport(String title, String model) {

@@ -43,6 +43,8 @@ data class Module(val name: String, val project: ProjectModel) {
 
     var node: Any? = null
 
+    var external=false
+
     var transform = true
 
     var apiVersion = ""

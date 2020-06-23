@@ -59,7 +59,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
     init {
         AndroidDebugBridge.addDeviceChangeListener(this)
         LocalFileSystem.getInstance().addVirtualFileListener(this)
-        Thread(this,"uiThread").start()
+        Thread(this, "uiThread").start()
     }
 
     fun onLockChange(l: Boolean) = try {
@@ -116,14 +116,18 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
         val txtLines = ins.readLines()
         ins.close()
         val tag = "<!--end-->"
-        if (!formatFoce && txtLines.lastOrNull()?.endsWith(tag) == true) return false
+        if (!formatFoce && txtLines.lastOrNull()?.endsWith(tag) == true) {
+            target.save()
+            return false
+        }
 
         invokeLaterOnWriteThread(Runnable {
             target.save()
+            val defGroup = "apis"
             val iml = ".iml"
             val rex = Regex("group=\".*\"")
             val groups = XmlHelper.parseProjectXml(projectXmlFile).allModules().map {
-                var path = if (it.attach()) "others" else it.path.substringBeforeLast("/")
+                var path = if (it.attach()) defGroup else it.path.substringBeforeLast("/")
                 if (path.startsWith("/")) path = path.substring(1)
                 it.name to path
             }.toMap()
@@ -131,7 +135,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
             val newTxt = txtLines.map {
                 val i = it.indexOf(iml)
                 val moduleName = it.substring(0, i.coerceAtLeast(0)).substringAfterLast("/")
-                val newGroup = if (moduleName == target.name) "others" else groups[moduleName] ?: ""
+                val newGroup = if (moduleName == target.name) defGroup else groups[moduleName] ?: ""
                 it.replace(rex, "group=\"$newGroup\"")
             }
 

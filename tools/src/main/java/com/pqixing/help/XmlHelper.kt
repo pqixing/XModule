@@ -112,7 +112,7 @@ object XmlHelper {
                 m.compiles.add(Compile(it).apply {
                     version = m.apiVersion
                     matchAuto = true
-                    scope =Compile.SCOP_API
+                    scope = Compile.SCOP_API
                 })
             }
             m.node = null
@@ -120,7 +120,7 @@ object XmlHelper {
         //添加全局依赖
         node.getAt(QName("foreach"))?.mapNotNull { it as? Node }?.forEach { n ->
             val excludes = n.get("@exclude")?.toString()?.split(",")?.toSet() ?: emptySet()
-            xmlModel.allModules().filter { !excludes.contains(it.name) }.forEach { m ->
+            xmlModel.allModules().filter { !it.external && !excludes.contains(it.name) }.forEach { m ->
                 n.getAt(QName("compile"))?.forEach { n -> addCompile(n as? Node, xmlModel, m.compiles) }
                 n.getAt(QName("devCompile"))?.forEach { n -> addCompile(n as? Node, xmlModel, m.devCompiles) }
             }
@@ -256,6 +256,7 @@ object XmlHelper {
         module.type = node.get("@type")?.toString() ?: "library"
         module.merge = node.get("@merge")?.toString() ?: ""
         module.version = node.get("@version")?.toString() ?: ""
+        module.external = node.get("@external")?.toString() == "true"
         module.transform = (node.get("@transform")?.toString() ?: "true") == "true"
         module.node = node
         project.modules.add(module)
@@ -282,5 +283,33 @@ object XmlHelper {
         val i = s.indexOf(",")
         if (i < 0) return Pair(s, null)
         return Pair(s.substring(0, i), s.substring(i + 1))
+    }
+
+    fun parseInclude(projectXml: ProjectXmlModel, sources: Set<String>): MutableSet<String> {
+        val includes = sources.toMutableSet()
+        val temp = mutableSetOf<String>()
+        includes.filter { it.startsWith("D#") }.also { includes.removeAll(it) }.map { it.substring(2) }.forEach { loadAll(projectXml, temp, it) }
+        includes.addAll(temp)
+
+        includes.filter { it.startsWith("E#") }.also { includes.removeAll(it) }.map { it.substring(2) }.forEach { includes.remove(it) }
+
+        temp.clear()
+        includes.filter { it.startsWith("ED#") }.also { includes.removeAll(it) }.map { it.substring(3) }.forEach { loadAll(projectXml, temp, it) }
+        includes.removeAll(temp)
+
+        return includes
+    }
+
+    fun loadAll(projectXml: ProjectXmlModel, includes: MutableSet<String>, target: String) {
+        includes.add(target)
+
+        val requests = projectXml.findModule(target)?.compiles?.map { it.name } ?: return
+
+        val reLoads = requests.filter { !includes.contains(it) }
+
+        //如果已经加载过，不重复加载
+        includes.addAll(requests)
+
+        for (request in reLoads) loadAll(projectXml, includes, request)
     }
 }

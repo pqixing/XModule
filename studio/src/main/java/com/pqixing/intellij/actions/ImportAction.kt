@@ -33,7 +33,6 @@ import git4idea.GitUtil
 import groovy.lang.GroovyClassLoader
 import java.io.File
 import java.util.*
-import kotlin.Comparator
 
 
 class ImportAction : AnAction() {
@@ -47,13 +46,13 @@ class ImportAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
-        val projectXmlFile = File(basePath, EnvKeys.XML_PROJECT)
+        val xmlFIle = File(basePath, EnvKeys.XML_PROJECT)
         val configFile = File(basePath, "Config.java")
-        if (!projectXmlFile.exists() || !configFile.exists()) {
+        if (!xmlFIle.exists() || !configFile.exists()) {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
             return
         }
-        val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
+        val projectXml = XmlHelper.parseProjectXml(xmlFIle)
         val clazz = GroovyClassLoader().parseClass(configFile)
         val newInstance = clazz.newInstance()
         val includes = clazz.getField("include").get(newInstance).toString()
@@ -75,7 +74,7 @@ class ImportAction : AnAction() {
         val importTask = object : Task.Backgroundable(project, "Start Import") {
             override fun run(indicator: ProgressIndicator) {
                 saveConfig(configFile, dialog)
-                val allIncludes = loadMoreImport(dialog.imports.filter { !it.contains("#") }.toMutableSet(), dialog.imports.filter { it.contains("#") })
+                val allIncludes = XmlHelper.parseInclude(projectXml,dialog.imports.toSet())
 
                 val codePath = File(basePath, dialog.codeRootStr).canonicalPath
                 //下载代码
@@ -118,11 +117,11 @@ class ImportAction : AnAction() {
         }
         dialog.btnProjectXml.addActionListener {
             dialog.dispose()
-            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(projectXmlFile, false)!!, true)
+            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(xmlFIle, false)!!, true)
         }
         dialog.btnDepend.addActionListener {
             dialog.dispose()
-            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(File(projectXmlFile.parentFile,"depend.gradle"), false)!!, true)
+            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(File(xmlFIle.parentFile,"depend.gradle"), false)!!, true)
         }
         dialog.setOnOk {
             //切换根目录的分支
@@ -151,29 +150,8 @@ class ImportAction : AnAction() {
                 Messages.showMessageDialog("Those project had import but not in Version Control\n ${dirs.joinToString { "\n" + it }} \n Please check Setting -> Version Control After Sync!!", "Miss Vcs Control", null)
         }
     }
-
-    /**
-     * 解析需要导入的工程
-     */
-    private fun loadMoreImport(includes: MutableSet<String>, moreInclude: List<String>): MutableSet<String> {
-        if (moreInclude.isNotEmpty()) moreInclude.sortedWith(Comparator { t, t1 ->
-            (if (t.contains("#")) t.substring(0, 1) else "A").compareTo(if (t1.contains("#")) t1.substring(0, 1) else "A")
-        }).forEach { v ->
-            val l = v.trim().replace(Regex(".*#"), "")
-            if (!v.contains("#")) includes.add(l)
-            else if (v.startsWith("E#")) includes.remove(l)
-            else if (v.startsWith("D#")) includes.addAll(handleDps(File(basePath), l))
-            else if (v.startsWith("ED#")) includes.removeAll(handleDps(File(basePath), l))
-        }
-        return includes
-    }
-
     fun allIml() = PropertiesUtils.readProperties(File(project.basePath, UiUtils.IML_PROPERTIES))
     fun saveIml(pros: Properties) = UiUtils.invokeLaterOnWriteThread(Runnable { PropertiesUtils.writeProperties(File(project.basePath, UiUtils.IML_PROPERTIES), pros) })
-
-    private fun handleDps(rootDir: File, module: String) = FileUtils.readText(File(rootDir, "build/dps/$module.dp"))?.split(",")?.map { it.trim() }?.toSet()
-            ?: emptySet()
-
 
     private fun saveConfig(configgFile: File, dialog: NewImportDialog) = ApplicationManager.getApplication().invokeLater {
         ApplicationManager.getApplication().runWriteAction {
