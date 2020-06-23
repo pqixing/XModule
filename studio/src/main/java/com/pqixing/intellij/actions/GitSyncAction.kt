@@ -1,6 +1,7 @@
 package com.pqixing.intellij.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.pqixing.EnvKeys
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.group.QToolGroup
 import com.pqixing.intellij.ui.GitOperatorDialog
@@ -17,7 +18,7 @@ class GitSyncAction : BaseGitAction() {
         val allDatas = urls.map {
             JListInfo(it.key, if ( GitUtil.isGitRoot(File(it.key))) "" else "No Exists", select = true)
         }.sortedBy { it.log }.toMutableList()
-        allDatas.add(0, JListInfo("$basePath/templet", select = true))
+        allDatas.add(0, JListInfo("$basePath/${EnvKeys.BASIC}", select = true))
         return allDatas
     }
 

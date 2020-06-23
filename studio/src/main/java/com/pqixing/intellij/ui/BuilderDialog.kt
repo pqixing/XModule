@@ -286,7 +286,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
                 adapter.selectListener = localLogClick
                 cbDpModel.isVisible = true
                 cbBranch.isVisible = false
-                allModule.filter { showAllLocalModule || it.isApplication || it.apiModule != null || activityModel.contains(it.name) }
+                allModule.filter { showAllLocalModule || it.isApplication || it.api != null || activityModel.contains(it.name) }
                         .sortedBy { !it.isApplication }
                         .map { JListInfo(it.name, select = activityModel.indexOf(it.name) == 0) }
                         .sortedBy { !activityModel.contains(it.title) }
@@ -595,7 +595,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
                 //开始运行
                 runApps.forEach { app ->
                     indicator.text = "Start Build $app"
-                    safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${URLEncoder.encode(TextUtils.removeLineAndMark(allModule.find { it.name == app }?.introduce?.replace(" ", "")
+                    safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${URLEncoder.encode(TextUtils.removeLineAndMark(allModule.find { it.name == app }?.desc?.replace(" ", "")
                             ?: ""), "utf-8")}&BuildUser=${TextUtils.removeLineAndMark(configInfo.javaClass.getField("userName").get(configInfo).toString())}")
                     Thread.sleep(if (index++ == 0) 2000 else 500)//延迟500毫秒再进行请求,避免出现问题
                 }

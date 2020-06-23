@@ -45,12 +45,12 @@ abstract class BaseGitAction : AnAction() {
         val clazz = GroovyClassLoader().parseClass(configFile)
         var codeRoot = clazz.getField("codeRoot").get(clazz.newInstance()).toString()
         val codeRootDir = File(basePath, codeRoot).canonicalPath
-        val urls = projectXml.projects.map { Pair("$codeRootDir/${it.path}", it.url) }.toMap()
+        val urls = projectXml.projects.map { Pair("$codeRootDir${it.path}", it.url) }.toMap()
         if (!checkUrls(urls)) return
         val allDatas = getAdapterList(urls).apply { sortBy { it.title } }//按照标题排序
 
         val rootRepo = getRepo(rootRepoPath)!!
-        val branches = GitHelper.getRepo(File("$basePath/templet"), project).branches
+        val branches = GitHelper.getRepo(File("$basePath/${EnvKeys.BASIC}"), project).branches
 
         val branchNames = mutableListOf<String>()
         branchNames += branches.localBranches.map { it.name }

@@ -1,15 +1,14 @@
 package com.pqixing.modularization.maven
 
 import com.pqixing.Tools
+import com.pqixing.model.Compile
 import com.pqixing.model.Module
+import com.pqixing.modularization.Keys
+import com.pqixing.modularization.android.dps.DpsManager
+import com.pqixing.modularization.android.pluginModule
+import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.helper.JGroovyHelper
-import com.pqixing.modularization.Keys
-import com.pqixing.modularization.android.pluginModule
-import com.pqixing.modularization.android.dps.DpsModel
-import com.pqixing.modularization.android.dps.DpsExtends
-import com.pqixing.modularization.android.dps.DpsManager
-import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
@@ -51,35 +50,34 @@ open class ToMavenCheckTask : BaseTask() {
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
         val plugin = project.pluginModule()
-        val dpsExtends = plugin.getExtends(DpsExtends::class.java)
-        val subModule = plugin.module
+        val module = plugin.module
 //        val lastLog = plugin.subModule
-        val artifactId = subModule.name
-        if (subModule.getBranch() != extends.env.basicBranch) {
-            Tools.println(unCheck(1), "${subModule.name} branch is ${subModule.getBranch()} , Doc branch ${extends.env.basicBranch} does not match")
+        val artifactId = module.name
+        if (module.getBranch() != extends.env.basicBranch) {
+            Tools.println(unCheck(1), "${module.name} branch is ${module.getBranch()} , Doc branch ${extends.env.basicBranch} does not match")
         }
 
-        val open = GitUtils.open(File(extends.env.codeRootDir, subModule.project.path))
+        val open = GitUtils.open(File(extends.env.codeRootDir, module.project.path))
         if (open == null) {
-            Tools.printError(-1, "${subModule.project.path} Git open fail, please check")
+            Tools.printError(-1, "${module.project.path} Git open fail, please check")
             return
         }
 
-        checkLocalDps(dpsExtends.compiles)
+        checkLocalDps(plugin.module.compiles.toHashSet())
 
         checkLoseDps(plugin.dpsManager.loseList)
 
         val branch = open.repository.branch
         val groupId = "${extends.projectXml.group}.$branch"
-        val baseVersion = dpsExtends.version
+        val baseVersion = module.version
         checkBaseVersion(baseVersion)
 
-        checkGitStatus(open, subModule)
+        checkGitStatus(open, module)
 
         val v = project.getArgs().versions.getNewerVersion(branch, artifactId, baseVersion)
-        val revCommit = loadGitInfo(open, subModule)
+        val revCommit = loadGitInfo(open, module)
         if (revCommit == null) {
-            Tools.printError(-1, "${subModule.name} Can not load git info!!")
+            Tools.printError(-1, "${module.name} Can not load git info!!")
             return
         }
         checkLastLog(revCommit, artifactId, branch, baseVersion, v)
@@ -167,7 +165,7 @@ open class ToMavenCheckTask : BaseTask() {
         }
     }
 
-    private fun checkLocalDps(compiles: HashSet<DpsModel>) {
+    private fun checkLocalDps(compiles: HashSet<Compile>) {
         val map = compiles.filter { it.local }.map { it.name }
         if (map.isNotEmpty()) {
             Tools.printError(-1, "${project.name} Contain local project, please remove it before upload -> $map")

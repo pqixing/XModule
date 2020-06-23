@@ -61,7 +61,7 @@ class ImportAction : AnAction() {
         val dependentModel = clazz.getField("dependentModel").get(newInstance).toString()
 
         val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
-        val infos = projectXml.allModules().filter { it.attachModule == null }.map { JListInfo(it.name, "${it.introduce} - ${it.type}") }.toMutableList()
+        val infos = projectXml.allModules().filter { it.attach == null }.map { JListInfo(it.path.substringBeforeLast("/")+"/"+it.name, "${it.desc} - ${it.type.substring(0,3)} ") }.toMutableList()
 
         val repo = GitHelper.getRepo(File(basePath, EnvKeys.BASIC), project)
         val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
@@ -119,6 +119,10 @@ class ImportAction : AnAction() {
         dialog.btnProjectXml.addActionListener {
             dialog.dispose()
             FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(projectXmlFile, false)!!, true)
+        }
+        dialog.btnDepend.addActionListener {
+            dialog.dispose()
+            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(File(projectXmlFile.parentFile,"depend.gradle"), false)!!, true)
         }
         dialog.setOnOk {
             //切换根目录的分支

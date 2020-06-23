@@ -1,5 +1,7 @@
 package com.pqixing.help
 
+import com.pqixing.Tools
+import com.pqixing.model.Compile
 import com.pqixing.model.ProjectModel
 import com.pqixing.model.ProjectXmlModel
 import com.pqixing.model.Module
@@ -15,7 +17,7 @@ object XmlHelper {
     /**
      * 解析出pom文件的all exclude依赖
      */
-    fun parsePomEclude(pomText: String, matchGroup: String): MavenPom {
+    fun parsePomExclude(pomText: String, matchGroup: String): MavenPom {
         val pom = MavenPom()
         val node = XmlParser().parseText(pomText)
 
@@ -100,14 +102,99 @@ object XmlHelper {
                 ?: "").split(",").filter { it.isNotEmpty() })
 
         parseProjects(xmlModel, node, "")
-        xmlModel.allModules().forEach {
-            val api = it.apiModule ?: return@forEach
-            if (api.path.isEmpty()) {
-                it.apiModule = xmlModel.findModule(api.name)
+        //重新匹配api模块
+        xmlModel.allModules().filter { it.api != null && it.api!!.path.isEmpty() }.forEach { it.api = xmlModel.findModule(it.api!!.name) }
+        //加载依赖模块
+        xmlModel.allModules().filter { it.node is Node }.forEach { m ->
+            (m.node as? Node)?.getAt(QName("compile"))?.forEach { n -> addCompile(n as? Node, xmlModel, m.compiles) }
+            (m.node as? Node)?.getAt(QName("devCompile"))?.forEach { n -> addCompile(n as? Node, xmlModel, m.devCompiles) }
+            m.api?.let {
+                m.compiles.add(Compile(it).apply {
+                    version = m.apiVersion
+                    matchAuto = true
+                    scope =Compile.SCOP_API
+                })
+            }
+            m.node = null
+        }
+        //添加全局依赖
+        node.getAt(QName("foreach"))?.mapNotNull { it as? Node }?.forEach { n ->
+            val excludes = n.get("@exclude")?.toString()?.split(",")?.toSet() ?: emptySet()
+            xmlModel.allModules().filter { !excludes.contains(it.name) }.forEach { m ->
+                n.getAt(QName("compile"))?.forEach { n -> addCompile(n as? Node, xmlModel, m.compiles) }
+                n.getAt(QName("devCompile"))?.forEach { n -> addCompile(n as? Node, xmlModel, m.devCompiles) }
             }
         }
+
+        xmlModel.allModules().forEach { if (it.version.isEmpty()) it.version = xmlModel.baseVersion }
+        //
         node.localText()
         return xmlModel
+    }
+
+    /**
+     * 添加依赖信息
+     */
+    private fun addCompile(node: Node?, projectXml: ProjectXmlModel, container: MutableList<Compile>) {
+        node ?: return
+
+        val nameStr = node.get("@name")?.toString() ?: return
+        //根据 ： 号分割
+        val split = nameStr.split(":")
+        var name = ""
+        var branch = ""
+        var version = ""
+
+        when (split.size) {
+            1 -> {
+                branch = ""
+                name = split[0]
+                version = ""
+            }
+            2 -> {
+                branch = ""
+                name = split[0]
+                version = split[1]
+            }
+            3 -> {
+                branch = split[0]
+                name = split[1]
+                version = split[2]
+            }
+            else -> Tools.printError(-1, "DpsExtends compile illegal name -> $name")
+        }
+        val module = projectXml.findModule(name) ?: return
+        val compile = Compile(module)
+        compile.branch = branch
+        compile.version = version
+        compile.scope = node.get("@scope")?.toString() ?: Compile.SCOP_API
+        compile.justApi = node.get("@justApi")?.toString() == "true"
+
+        node.get("@excludes")?.toString()?.split(",")?.filter { it.isNotEmpty() }?.forEach { s ->
+            s.split(":").takeIf { it.size == 2 }?.let { compile.excludes.add(it[0] to it[1]) }
+        }
+
+        compile.version = compile.version.replace("*", "")
+        compile.matchAuto = compile.version.contains("*")
+
+        val apiModule = compile.module.findApi()
+        if (apiModule == null) {
+            if (!compile.module.isApplication) container.add(compile)
+            return
+        }
+        //先尝试加载
+        val api = Compile(apiModule).apply {
+            branch = compile.branch
+            version = ""
+            matchAuto = true
+            attach = compile
+            dpType = compile.dpType
+            this.scope = compile.scope
+        }
+        container.add(api)
+
+        compile.scope = Compile.SCOP_RUNTIME
+        if (!compile.module.isApplication && !compile.justApi) container.add(compile)
     }
 
     private fun parseProjects(xmlModel: ProjectXmlModel, node: Node?, path: String) {
@@ -122,7 +209,7 @@ object XmlHelper {
             val p: Node = it as? Node ?: return@forEach
 
             val name = p.get("@name").toString()
-            var introduce = p.get("@introduce").toString()
+            var desc = p.get("@desc")?.toString() ?: ""
 
 
             //该工程的git地址
@@ -130,7 +217,7 @@ object XmlHelper {
 
             if (CheckUtils.isEmpty(gitUrl)) gitUrl = "${xmlModel.baseUrl}/$name.git"
 
-            val project = ProjectModel(name, "$path/$name", introduce, gitUrl)
+            val project = ProjectModel(name, "$path/$name", desc, gitUrl)
 
 
             xmlModel.projects.add(project)
@@ -160,30 +247,34 @@ object XmlHelper {
         node ?: return
         val realName = node.get("@name")?.toString() ?: return
 
-        val name = node.get("@alias")?.toString()?.takeIf { it.trim().isNotEmpty() }?:realName
+        val name = node.get("@alias")?.toString()?.takeIf { it.trim().isNotEmpty() } ?: realName
 
-        val module = Module(name)
+        val module = Module(name, project)
 
         module.path = "$path/$realName"
-        module.introduce = node.get("@introduce")?.toString() ?: ""
+        module.desc = node.get("@desc")?.toString() ?: ""
         module.type = node.get("@type")?.toString() ?: "library"
         module.merge = node.get("@merge")?.toString() ?: ""
-        module.project = project
+        module.version = node.get("@version")?.toString() ?: ""
+        module.transform = (node.get("@transform")?.toString() ?: "true") == "true"
+        module.node = node
         project.modules.add(module)
 
-        val apiName = node.get("@api")?.toString() ?: return
-        if (apiName == "this") {//添加附属api模块
-            val api = Module("${name}_api")
-            api.path = "${module.path}/src/api"
-            api.introduce = "api for $name"
-            api.type = "library"
-            api.project = project
-            api.attachModule = module
 
-            module.apiModule = api
+        val apiStr = node.get("@api")?.toString()?.split(":") ?: return
+        val apiName = apiStr[0]
+
+        module.apiVersion = apiStr.takeIf { it.size >= 2 }?.get(1) ?: ""
+        if (apiName == "this") {//添加附属api模块
+            val api = Module("${name}_api", project)
+            api.path = "${module.path}/src/api"
+            api.desc = "api for $name"
+            api.type = "library"
+            api.attach = module
+            module.api = api
             project.modules.add(api)
         } else {
-            module.apiModule = Module(apiName)
+            module.api = Module(apiName, project)
         }
     }
 

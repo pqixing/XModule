@@ -74,27 +74,35 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
             if (f.isNotEmpty()) mergeFiles.add(File(args.env.codeRootDir, module.path + "/" + f))
         }
         FileUtils.mergeFile(target, mergeFiles.reversed()) { it.replace(Regex("apply *?plugin: *?['\"]com.android.(application|library)['\"]"), "") }
-        module.apiModule?.let { hookBuildFile(it, buildFileName) }
+        module.api?.let { hookBuildFile(it, buildFileName) }
     }
 
     private fun tryCheckModule(module: Module, buildFileName: String) {
         var mBranch = module.getBranch()
         val projectDir = File(args.env.codeRootDir, module.project.path)
 
-        Tools.println("Check::${module.name}  ${args.env.codeRootDir.absolutePath}${module.path}")
+//        Tools.println("Check::${module.name}  ${args.env.codeRootDir.absolutePath}${module.path}")
         if (mBranch.isEmpty()) (GitUtils.open(projectDir)
                 ?: GitUtils.clone(module.project.url, projectDir))?.let { git ->
             mBranch = git.repository.branch
             module.project.branch = mBranch
+
             GitUtils.close(git)
         }
+
+        //重新设置依赖的分支
+        module.compiles.forEach { if (it.branch.isEmpty()) it.branch = mBranch }
+        module.devCompiles.forEach { if (it.branch.isEmpty()) it.branch = mBranch }
+        //非application工程，移除对于设置了api工程的依赖
+        if (!args.runAsApp(module)) module.compiles.removeIf { it.module.api != null }
         if (mBranch.isEmpty()) ResultUtils.thow("clone fail -> ${module.project.url}")
+
 
         if (mBranch != args.env.basicBranch) {
             Tools.println("   Warming::branch diff $mBranch -> ${args.env.basicBranch}")
         }
         hookBuildFile(module, buildFileName)
-        module.apiModule?.let { tryCheckModule(it, buildFileName) }
+        module.api?.let { tryCheckModule(it, buildFileName) }
     }
 
     /**
@@ -110,16 +118,16 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         val manifest = File(sourceDir, "AndroidManifest.xml")
         if (manifest.exists()) return
 
-        val name = TextUtils.className(module.name)
+        val name = TextUtils.className(module.name.split("_").joinToString { TextUtils.firstUp(it) })
         val groupName = args.projectXml.group
         val emptyManifest = FileUtils.readText(File(args.env.basicDir, "android/Empty_AndroidManifest.xml"))!!.replace("[groupName]", groupName.toLowerCase()).replace("[projectName]", name.toLowerCase())
         //写入空清单文件
         FileUtils.writeText(manifest, emptyManifest)
 
 
-        val className = "${name}Api"
+        val className = if (module.attach()) name else "${name}App"
         val packageName = groupName.replace(".", "/") + "/" + name.toLowerCase(Locale.CHINA)
-        FileUtils.writeText(File(sourceDir, "resources/values/strings.xml").takeIf { !it.exists() }, "<resources></resources>")
+        if (!module.attach()) FileUtils.writeText(File(sourceDir, "resources/values/strings.xml").takeIf { !it.exists() }, "<resources>\n<string name=\"library_name\">${module.name}</string> \n</resources>")
         FileUtils.writeText(File(sourceDir, "java/$packageName/${className}.java").takeIf { !it.exists() }, "package ${packageName.replace("/", ".")};\nfinal class ${className}{}")
 
         //如果是application类型，写入build.gradle，并设置applicationId
@@ -136,7 +144,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         pro.projectDir = File(args.env.codeRootDir, module.path)
         pro.buildFileName = buildFileName
         checks.add(module)
-        module.apiModule?.let { include(checks, it, buildFileName) }
+        module.api?.let { include(checks, it, buildFileName) }
     }
 
 
@@ -160,7 +168,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
     fun loadAll(includes: MutableSet<String>, target: String) {
         includes.add(target)
 
-        val requests = args.dpsContainer[target]?.compiles?.map { it.name } ?: return
+        val requests = args.projectXml.findModule(target)?.compiles?.map { it.name } ?: return
 
         val reLoads = requests.filter { !includes.contains(it) }
 

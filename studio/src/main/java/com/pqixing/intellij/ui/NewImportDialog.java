@@ -50,6 +50,7 @@ public class NewImportDialog extends BaseJDialog {
     private JPanel jpSelect;
     private JScrollPane jpOthers;
     private JCheckBox cbFormat;
+    public JButton btnDepend;
 
     //已选中导入的工程
     private List<String> imports;

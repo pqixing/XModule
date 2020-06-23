@@ -5,7 +5,6 @@ import com.pqixing.Config
 import com.pqixing.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
-import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.base.IPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.Logger
@@ -21,9 +20,7 @@ import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
 import org.gradle.api.invocation.Gradle
 import java.io.File
-import java.lang.StringBuilder
 import java.lang.ref.WeakReference
-import java.util.*
 
 /**
  * 设置页面插件
@@ -75,20 +72,8 @@ class SettingPlugin : Plugin<Settings> {
         args = ArgsExtends(config, env, projectXml)
         args.runTaskNames.addAll(taskNames)
 
-        //加载依赖文件
-        for (module in projectXml.allModules()) setting.extensions.add(module.name, DpsExtends(module.name, args))
-
-        if (env.dpsFile.exists()) setting.apply(mapOf("from" to env.dpsFile.absolutePath.also { Tools.println("Apply Depend::$it") }))
-
-        //追加未添加到文件的工程
-        val newTxt = args.dpsContainer.values.filter { !it.hadConfig }.joinToString("\n") { "${it.name}{\n    version = \"${projectXml.baseVersion}\"\n    apiVersion = \"\"\n    compile(\"\"){}\n}" }
-        if (newTxt.isNotEmpty()) {
-            FileUtils.writeText(env.dpsFile, (FileUtils.readText(env.dpsFile) ?: "") + "\n" + newTxt)
-        }
-
         //解析include进行工程导入
         ImportScript(args, setting).startLoad()
-
         setting.gradle.addListener(object : BuildAdapter() {
             override fun buildStarted(gradle: Gradle) {
                 Tools.println("Sync Finish spend:${System.currentTimeMillis() - start}")

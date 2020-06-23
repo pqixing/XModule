@@ -91,6 +91,6 @@ object FileUtils {
         val txt = StringBuilder()
         mergeFiles.forEach { readText(it)?.let { t -> txt.append("\n$t") } }
         writeText(target, replace(txt.toString()))
-        Tools.println("Merge Gradle::[${mergeFiles.joinToString(",") { it.name }}] >> ${target.absolutePath}")
+//        Tools.println("Merge Gradle::[${mergeFiles.joinToString(",") { it.name }}] >> ${target.absolutePath}")
     }
 }

@@ -3,6 +3,7 @@ package com.pqixing.modularization.android
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
+import com.pqixing.Tools
 import com.pqixing.annotation.*
 import com.pqixing.modularization.utils.ClassModify
 import org.apache.commons.codec.digest.DigestUtils
@@ -35,8 +36,8 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
     }
 
     override fun transform(transformInvocation: TransformInvocation) {
-
         val start = System.currentTimeMillis()
+        Tools.println("$name transform start  ")
         val outputProvider = transformInvocation.outputProvider;
         val buildConfigClass = mutableListOf<String>();
         var targetInjectJar: JarInput? = null
@@ -64,7 +65,7 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
             }
         }
         injectCode(targetInjectJar, outputProvider,visitor, buildConfigClass)
-        com.pqixing.Tools.println("$name transform end , count -> ${System.currentTimeMillis() - start} -> ${visitor.results}")
+        Tools.println("$name transform end , count -> ${System.currentTimeMillis() - start} -> ${visitor.results}")
     }
 
     private fun getDestFile(outputProvider: TransformOutputProvider, jarInput: JarInput): File {
@@ -145,7 +146,7 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
     }
 }
 
-class PqxVisitor : ClassVisitor(Opcodes.ASM5, null) {
+open class PqxVisitor : ClassVisitor(Opcodes.ASM5, null) {
     val results: List<Pair<String, HashSet<String>>> = FILTERS.map { it to HashSet<String>() }
     var className = ""
     override fun visitOuterClass(owner: String, name: String?, desc: String?) {

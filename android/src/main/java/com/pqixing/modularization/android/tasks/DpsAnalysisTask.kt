@@ -1,14 +1,12 @@
 package com.pqixing.modularization.android.tasks
 
 import com.pqixing.Tools
-import com.pqixing.help.XmlHelper
+import com.pqixing.modularization.Keys
+import com.pqixing.modularization.android.dps.DpsManager
+import com.pqixing.modularization.android.pluginModule
+import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.helper.JGroovyHelper
-import com.pqixing.modularization.Keys
-import com.pqixing.modularization.android.pluginModule
-import com.pqixing.modularization.android.dps.DpsExtends
-import com.pqixing.modularization.android.dps.DpsManager
-import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.manager.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
@@ -216,7 +214,7 @@ open class DpsAnalysisTask : BaseTask() {
     //生成 DpsAnalysis.txt
     override fun runTask() {
         saveVersionTag()
-        val dpsExt = plugin.dpsManager.dpsExt
+        val module = plugin.module
         //依赖排序起点
         val topVertex = Vertex(project.name)
         allDps.add(topVertex)
@@ -226,11 +224,11 @@ open class DpsAnalysisTask : BaseTask() {
         if (findApi != null) {
             topVertex.dps.add(findApi.name)
         }
-        dpsExt.compiles.forEach { topVertex.dps.add(it.name) }
+        module.compiles.forEach { topVertex.dps.add(it.name) }
         val branch = plugin.module.getBranch()
 
         //加载定点依赖的全部依赖
-        topVertex.dps.forEach { loadDps(it, branch, dpsExt) }
+        topVertex.dps.forEach { }
         topoSort(allDps.first)
         val resultStr = StringBuilder("#" + Date().toLocaleString()).append("\n")
 
@@ -317,51 +315,6 @@ open class DpsAnalysisTask : BaseTask() {
         allDps.sortBy { it.degree }
     }
 
-    fun loadDps(module: String, branch: String, dpsExt: DpsExtends) {
-
-        //如果已经处理过该模块的依赖，不重复处理
-        if (allDps.any { it.name == module } || args.projectXml.findModule(module) == null) return
-
-        val tempContainer = Vertex(module).apply { allDps.add(this) }.dps
-        val compile = when (dependentModel) {
-            "localOnly" -> loadDpsFromLocal(module, dpsExt, tempContainer)
-            "localFirst" -> loadDpsFromLocal(module, dpsExt, tempContainer) || loadDpsFromMaven(module, branch, tempContainer)
-            "mavenFirst" -> loadDpsFromMaven(module, branch, tempContainer) || loadDpsFromLocal(module, dpsExt, tempContainer)
-            else -> loadDpsFromMaven(module, branch, tempContainer)
-        }
-
-        //依赖解析失败，报错
-        if (!compile) Tools.printError(-1, "DpsAnalysisTask Exception-> can not resolve dps for $module , mode :$dependentModel")
-        tempContainer.forEach { loadDps(it, branch, dpsExt) }
-    }
-
-    private fun checkModule(module: String) = module.startsWith("$groupName.")
-
-    /**
-     * 从本地获取依赖
-     */
-    fun loadDpsFromLocal(module: String, dpsExt: DpsExtends, dpsContainer: HashSet<String>): Boolean {
-        val target = args.dpsContainer[module] ?: return false
-        target.compiles.forEach { dpsContainer.add(it.name) }
-        //解析build.gradle文件，加载本地配置的依赖数据
-        Tools.println("loadDpsFromLocal $module dps -> $dpsContainer")
-        return true
-    }
-
-    /**
-     * 从本地获取依赖
-     */
-    fun loadDpsFromMaven(module: String, branch: String, dpsContainer: HashSet<String>): Boolean {
-        val version = args.versions.getVersion(branch, module, "+")
-        if (version.first.isEmpty()) return false
-        DpsManager.getPom(project, version.first, module, version.second).dependency.map {
-            val p = XmlHelper.strToPair(it)
-            if (p.second != null) dpsContainer.add(p.second!!)
-        }
-        //解析build.gradle文件，加载本地配置的依赖数据
-        Tools.println("loadDpsFromMaven $module dps -> $dpsContainer")
-        return true
-    }
 
 }
 

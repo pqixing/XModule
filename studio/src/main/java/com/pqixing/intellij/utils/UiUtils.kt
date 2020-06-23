@@ -123,7 +123,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
             val iml = ".iml"
             val rex = Regex("group=\".*\"")
             val groups = XmlHelper.parseProjectXml(projectXmlFile).allModules().map {
-                var path = if (it.attach()) "APIS" else it.path.substringBeforeLast("/")
+                var path = if (it.attach()) "others" else it.path.substringBeforeLast("/")
                 if (path.startsWith("/")) path = path.substring(1)
                 it.name to path
             }.toMap()
@@ -131,7 +131,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
             val newTxt = txtLines.map {
                 val i = it.indexOf(iml)
                 val moduleName = it.substring(0, i.coerceAtLeast(0)).substringAfterLast("/")
-                val newGroup = if (moduleName == target.name) moduleName else groups[moduleName] ?: ""
+                val newGroup = if (moduleName == target.name) "others" else groups[moduleName] ?: ""
                 it.replace(rex, "group=\"$newGroup\"")
             }
 

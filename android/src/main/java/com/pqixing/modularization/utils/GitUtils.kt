@@ -14,7 +14,7 @@ object GitUtils {
 
     fun getPsw(value: String): String {
         if (value.startsWith("sk:")) return ResultUtils.base64Decode(value.substring(3))
-        Tools.println("Warming::password suggest $value -> ${"sk:" + ResultUtils.base64Encode(value)}")
+        if (value.isNotEmpty()) Tools.println("Warming::password suggest $value -> ${"sk:" + ResultUtils.base64Encode(value)}")
         return value
     }
 

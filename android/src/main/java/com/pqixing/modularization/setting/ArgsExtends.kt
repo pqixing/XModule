@@ -2,10 +2,9 @@ package com.pqixing.modularization.setting
 
 import com.pqixing.Config
 import com.pqixing.help.MavenPom
-import com.pqixing.model.ProjectXmlModel
 import com.pqixing.model.Module
+import com.pqixing.model.ProjectXmlModel
 import com.pqixing.modularization.FileNames
-import com.pqixing.modularization.android.dps.DpsExtends
 import com.pqixing.modularization.maven.VersionManager
 import com.pqixing.modularization.utils.GitUtils
 import java.io.File
@@ -14,13 +13,9 @@ import java.util.*
 class ArgsExtends(val config: Config, val env: EnvArgs, val projectXml: ProjectXmlModel) {
 
     var versions: VersionManager = VersionManager(this)
-    val dpsContainer = mutableMapOf<String, DpsExtends>()
     var runTaskNames = mutableListOf<String>()
 
     fun runAsApp(module: Module) = module.isApplication || runTaskNames.contains(":${module.name}:BuildApk") || runTaskNames.find { it.matches(Regex(":${module.name}:assemble.*?Dev")) } != null
-    fun runAsApp(name: String): Boolean {
-        return runAsApp(projectXml.findModule(name) ?: return false)
-    }
 
     fun getPsw(value: String): String = GitUtils.getPsw(value)
 
@@ -31,7 +26,6 @@ class ArgsExtends(val config: Config, val env: EnvArgs, val projectXml: ProjectX
         versions = VersionManager(this)
         env.pomCache.clear()
         runTaskNames.clear()
-        dpsContainer.clear()
     }
 }
 
