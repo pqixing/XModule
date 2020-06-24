@@ -94,7 +94,10 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
         target.save()
 
         //格式化iml文件,//1.5秒后再次检测，防止格式化不生效
-        if (formatModule(target, moduleXml)) addTask(2000, Runnable { formatModule(target, moduleXml) })
+        if (formatModule(target, moduleXml)) addTask(2000, Runnable {
+            formatModule(target, moduleXml)
+            target.save()
+        })
     }
 
     fun checkIfFormat(target: Project?): Boolean {
@@ -116,10 +119,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
         val txtLines = ins.readLines()
         ins.close()
         val tag = "<!--end-->"
-        if (!formatFoce && txtLines.lastOrNull()?.endsWith(tag) == true) {
-            target.save()
-            return false
-        }
+        if (!formatFoce && txtLines.lastOrNull()?.endsWith(tag) == true) return false
 
         invokeLaterOnWriteThread(Runnable {
             target.save()

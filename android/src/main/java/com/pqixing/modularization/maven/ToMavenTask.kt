@@ -15,7 +15,7 @@ open class ToMavenTask : BaseTask() {
     val plugin = project.pluginModule()
     val vail = plugin.module.let { it.isAndroid&&!it.isApplication }
     init {
-        if (vail) {
+        if (vail) project.afterEvaluate{
             this.dependsOn("uploadArchives")
             project.getTasksByName("uploadArchives", false).forEach { it.dependsOn("ToMavenCheck") }
         }

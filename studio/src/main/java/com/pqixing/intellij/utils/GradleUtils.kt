@@ -32,6 +32,7 @@ object GradleUtils {
     val resultLogs = mutableListOf<String>()//读取的结果
     var serverSocket: ServerSocket? = null
     val defPort: Int = 8451
+    var debugPort = 0
 
     fun runTask(project: Project
                 , tasks: List<String>
@@ -131,6 +132,7 @@ object GradleUtils {
 
     private fun getVmOpions(env: Map<String, String>): String {
         val option = StringBuilder()
+        if(debugPort!=0) option.append("-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=$debugPort  -Dorg.gradle.debug=true  --no-daemon ")
         env.forEach {
             if (it.key.isEmpty() || it.value.isEmpty()) return@forEach
             option.append("-D${it.key}='${it.value}' ")

@@ -22,7 +22,7 @@ class PercentProgress @JvmOverloads constructor(val space: Float = 1500f) : Prog
         last = 0
         lastLogTime = 0L
         startTime = System.currentTimeMillis()
-        Tools.println("   $title -> total : $totalWork")
+        Tools.println("   $title -> $totalWork")
     }
 
     override fun update(completed: Int) {
@@ -30,12 +30,12 @@ class PercentProgress @JvmOverloads constructor(val space: Float = 1500f) : Prog
         val t = System.currentTimeMillis()
         if (last == total || t - lastLogTime >= space) {
             lastLogTime = t
-            Tools.println("          -> $last/$total : ${(last.toFloat() * 100 / total).toInt()}%")
+//            Tools.println("          -> $last/$total : ${(last.toFloat() * 100 / total).toInt()}%")
         }
     }
 
     override fun endTask() {
-        Tools.println("   $title  ->  end spend :${System.currentTimeMillis() - startTime}")
+//        Tools.println("   $title  ->  end spend :${System.currentTimeMillis() - startTime}")
     }
 
     override fun isCancelled(): Boolean {

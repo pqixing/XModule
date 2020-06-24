@@ -69,7 +69,7 @@ open class ToMavenCheckTask : BaseTask() {
 
         val branch = open.repository.branch
         val groupId = "${extends.projectXml.group}.$branch"
-        val baseVersion = module.version
+        val baseVersion = module.version.takeIf { it != "+" } ?: extends.projectXml.baseVersion
         checkBaseVersion(baseVersion)
 
         checkGitStatus(open, module)
@@ -134,7 +134,7 @@ open class ToMavenCheckTask : BaseTask() {
         if (matchBranch != branch) {
             Tools.println(unCheck(1), "$artifactId Not allow user the same base version on new branch")
         }
-        val params = UrlUtils.getParams(DpsManager.getPom(project,matchBranch, artifactId, "$baseVersion.$lastVersion").name)
+        val params = UrlUtils.getParams(DpsManager.getPom(project, matchBranch, artifactId, "$baseVersion.$lastVersion").name)
         val hash = params["hash"] ?: ""
         val commitTime = params["commitTime"]?.toInt() ?: 0
         if (hash == revCommit.name || revCommit.commitTime < commitTime) {

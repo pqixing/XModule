@@ -184,8 +184,8 @@ object XmlHelper {
         }
         //先尝试加载
         val api = Compile(apiModule).apply {
-            branch = compile.branch
-            version = ""
+            this.branch = compile.branch
+            this.version = ""
             matchAuto = true
             attach = compile
             dpType = compile.dpType

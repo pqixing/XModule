@@ -9,7 +9,7 @@ class ProjectXmlModel(val baseUrl: String) {
     var group = ""
     var createSrc = false
     var matchingFallbacks = mutableListOf<String>()
-    var baseVersion = "1.0"
+    var baseVersion = ""
 
     val projects = mutableListOf<ProjectModel>()
     fun findModule(name: String): Module? {
@@ -48,7 +48,7 @@ data class Module(val name: String, val project: ProjectModel) {
     var transform = true
 
     var apiVersion = ""
-        get() = if (field.isEmpty()) version else field
+        get() = if (field.isEmpty()||field=="*") version else field
 
     /**
      * 上传到Maven的版本

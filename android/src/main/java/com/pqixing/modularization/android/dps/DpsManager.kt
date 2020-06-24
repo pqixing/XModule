@@ -146,7 +146,9 @@ class DpsManager(val plugin: AndroidPlugin) {
 
         //没有依附模块,则读取当前配置的版本
         dpc.version = dpc.attach?.also { resolveVersion(it) }?.let { attach ->
-            kotlin.runCatching { getPom(project, attach.branch, attach.name, args.versions.getVersion(attach.branch, attach.name, attach.version).second).dependency.find { it.contains(":${dpc.name}:") } }.getOrNull()
+            kotlin.runCatching { getPom(project, attach.branch, attach.name,
+                    args.versions.getVersion(attach.branch, attach.name, attach.version).second).dependency.find { it.contains(":${dpc.name}:") } }
+                    .getOrNull()?.let { it.replace("\"","").substringAfterLast(":") }
         } ?: dpc.version?.let { "*$it" } ?: "+"
 
         dpc.matchAuto = dpc.version.contains("*")

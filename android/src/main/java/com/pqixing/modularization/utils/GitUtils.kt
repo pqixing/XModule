@@ -1,5 +1,6 @@
 package com.pqixing.modularization.utils
 
+import com.android.build.gradle.internal.dependency.dependencyUrl
 import com.pqixing.Tools
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.*
@@ -262,21 +263,20 @@ object GitUtils {
 }
 
 fun <T> GitCommand<T>.execute(safe: Boolean = true): T? {
-
+    Tools.println("${javaClass.simpleName} -> ${repository?.directory?.absolutePath?:""} ")
     val exe = {
         if (this is TransportCommand<*, *>) {
             setTransportConfigCallback(GitSSHFactory.transportConfigCallback)
             setCredentialsProvider(UsernamePasswordCredentialsProvider(GitUtils.gitUser, GitUtils.gitPsw))
         }
         if (this is CloneCommand) this.setProgressMonitor(PercentProgress())
-
-        Tools.println("Git task ->  ${javaClass.simpleName}")
         call()
     }
     return if (safe) try {
         exe()
     } catch (e: Exception) {
         Tools.println(e.toString())
+        Tools.println("try config user or password or set ssh-key use -> ssh-keygen -m PEM -t rsa -b 2048")
         null
     } else exe()
 }
