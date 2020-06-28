@@ -34,5 +34,5 @@ public class EnvKeys {
      * 模板目录
      */
     public static final String BASIC = "basic";
-    public static final String XML_PROJECT = "basic/project.xml";
+    public static final String XML_PROJECT = "basic/manifest.xml";
 }
