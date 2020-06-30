@@ -28,5 +28,5 @@ public class FileNames {
     /**
      * 配置文件
      */
-    public static final String PROJECT_XML = "project.xml";
+    public static final String PROJECT_XML = "manifest.xml";
 }
