@@ -52,7 +52,7 @@ class ImportAction : AnAction() {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
             return
         }
-        val projectXml = XmlHelper.parseProjectXml(xmlFIle)
+        val projectXml = XmlHelper.parseManifest(xmlFIle)
         val clazz = GroovyClassLoader().parseClass(configFile)
         val newInstance = clazz.newInstance()
         val includes = clazz.getField("include").get(newInstance).toString()

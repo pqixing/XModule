@@ -34,7 +34,7 @@ open class LoadAllBranchModuleTask: BaseTask() {
 
         val result = StringBuilder("")
 
-        project.getArgs().projectXml.projects.forEach { p ->
+        project.getArgs().manifest.projects.forEach { p ->
             p.modules.forEach { s ->
                 if (s.isApplication) {
                     result.append(s.name).append(",")

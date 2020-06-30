@@ -26,12 +26,12 @@ class DpsManager(val plugin: AndroidPlugin) {
             val extends = project.getArgs()
             val pomCache = extends.env.pomCache
 
-            val groupMaven = extends.projectXml.mavenUrl
-            val group = "${extends.projectXml.group}.$branch"
+            val groupMaven = extends.manifest.mavenUrl
+            val group = "${extends.manifest.group}.$branch"
             val pomUrl = "$groupMaven/${group.replace(".", "/")}/$module/$version/$module-$version.pom"
             if (!pomUrl.startsWith("http")) {//增加对本地Maven地址的支持
                 return XmlHelper.parsePomExclude(FileUtils.readText(File(pomUrl))
-                        ?: "", "${extends.projectXml.group}.")
+                        ?: "", "${extends.manifest.group}.")
             }
 
             val pomKey = TextUtils.numOrLetter(pomUrl)
@@ -40,11 +40,11 @@ class DpsManager(val plugin: AndroidPlugin) {
 
             val pomDir = File(plugin.getGradle().gradleHomeDir, "pomCache")
             val pomFile = File(pomDir, pomKey)
-            pom = if (pomFile.exists()) XmlHelper.parsePomExclude(FileUtils.readText(pomFile)!!, "${extends.projectXml.group}.")
+            pom = if (pomFile.exists()) XmlHelper.parsePomExclude(FileUtils.readText(pomFile)!!, "${extends.manifest.group}.")
             else {
                 val ponTxt = URL(pomUrl).readText()
                 FileUtils.writeText(pomFile, ponTxt)
-                XmlHelper.parsePomExclude(ponTxt, extends.projectXml.group)
+                XmlHelper.parsePomExclude(ponTxt, extends.manifest.group)
             }
             pomCache.addFirst(Pair(pomKey, pom))
             //最多保留30条记录
@@ -71,9 +71,6 @@ class DpsManager(val plugin: AndroidPlugin) {
         if (dps.isNotEmpty()) {
             val dpsV = mutableListOf<String>()
             dps.forEach { dpc ->
-
-                if (dpc.version.isEmpty()) resolveVersion(dpc)
-
                 val compile = when (compileModel) {
                     "localOnly" -> onLocalCompile(dpc, includes, excludes)
                     "localFirst" -> onLocalCompile(dpc, includes, excludes) || onMavenCompile(dpc, includes, excludes)
@@ -127,44 +124,41 @@ class DpsManager(val plugin: AndroidPlugin) {
      */
     private fun onMavenCompile(dpc: Compile, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
         val dpVersion = args.versions.getVersion(dpc.branch, dpc.name, dpc.version).takeIf { it.first.isNotEmpty() }
-                ?: takeIf { dpc.matchAuto }?.let { args.versions.getVersion(dpc.branch, dpc.name, "+").takeIf { it.first.isNotEmpty() } }
                 ?: return false
 
         val c = takeIf { dpVersion.second == dpc.version }?.let { " ;force = true ;" } ?: ""
 
-        includes.add("${getScope(dpc.dpType, dpc.scope)} ('${args.projectXml.group}.${dpVersion.first}:${dpc.name}:${dpVersion.second}') { ${excludeStr(excludes = dpc.excludes)} $c }")
+        includes.add("${getScope(dpc.dpType, dpc.scope)} ('${args.manifest.group}.${dpVersion.first}:${dpc.name}:${dpVersion.second}') { ${excludeStr(excludes = dpc.excludes)} $c }")
         addBranchExclude(dpVersion.first, dpc.name, excludes)
         excludes.addAll(getPom(project, dpVersion.first, dpc.name, dpVersion.second).allExclude)
         return true
     }
-
-    /**
-     * 自动匹配版本号
-     */
-    private fun resolveVersion(dpc: Compile) {
-        if (dpc.version.isNotEmpty()) return
-
-        //没有依附模块,则读取当前配置的版本
-        dpc.version = dpc.attach?.also { resolveVersion(it) }?.let { attach ->
-            kotlin.runCatching { getPom(project, attach.branch, attach.name,
-                    args.versions.getVersion(attach.branch, attach.name, attach.version).second).dependency.find { it.contains(":${dpc.name}:") } }
-                    .getOrNull()?.let { it.replace("\"","").substringAfterLast(":") }
-        } ?: dpc.version?.let { "*$it" } ?: "+"
-
-        dpc.matchAuto = dpc.version.contains("*")
-        dpc.version = dpc.version.replace("*", "")
-    }
+//
+//    /**
+//     * 自动匹配版本号
+//     */
+//    private fun resolveVersion(dpc: Compile) {
+//        if (dpc.version.isNotEmpty()) return
+//
+//        //没有依附模块,则读取当前配置的版本
+//        dpc.version = dpc.attach?.also { resolveVersion(it) }?.let { attach ->
+//            kotlin.runCatching {
+//                getPom(project, attach.branch, attach.name,
+//                        args.versions.getVersion(attach.branch, attach.name, attach.version).second).dependency.find { it.contains(":${dpc.name}:") }
+//            }.getOrNull()?.let { it.replace("\"", "").substringAfterLast(":") }
+//        } ?: dpc.version.let { "*$it" } ?: "+"
+//    }
 
     /**
      * 检查是否存在其他分支的版本，如果存在，添加到exclude中
      */
     private fun addBranchExclude(compileBranch: String, moduleName: String, excludes: HashSet<String>, pointer: Int = 1) {
-        with(args.projectXml.matchingFallbacks) {
+        with(args.manifest.matchingFallbacks) {
             val start = indexOf(compileBranch) + pointer
             for (i in start until size) {
                 val b = if (i < 0) compileBranch else get(i)
                 if (args.versions.checkBranchVersion(b, moduleName)) {
-                    excludes.add("${args.projectXml.group}.$b,$moduleName")
+                    excludes.add("${args.manifest.group}.$b,$moduleName")
                 }
             }
         }

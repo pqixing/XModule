@@ -20,7 +20,7 @@ open class PullProjectTask : BaseTask() {
             GitUtils.pull(this)
             close()
         }
-        project.getArgs().projectXml.projects.forEach {
+        project.getArgs().manifest.projects.forEach {
             val dir = File(project.getArgs().env.codeRootDir, it.path)
             if (!GitUtils.isGitDir(dir)) return@forEach
             Tools.println("          start pull-> ${dir.name} ${it.url}")

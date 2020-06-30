@@ -18,7 +18,7 @@ open class CreateBranchTask : BaseTask() {
         var targetBranch = EnvKeys.opBranch.getEnvValue()?:return
         val args = project.getArgs();
         val fail = ArrayList<String>()
-        args.projectXml.projects
+        args.manifest.projects
                 .map { File(args.env.codeRootDir, it.path) }
                 .toMutableList().apply {
                     add(args.env.basicDir)

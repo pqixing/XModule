@@ -47,7 +47,7 @@ open class AndroidPlugin : BasePlugin() {
         project.extensions.create("innerDps", DpsExtendsCompat::class.java)
         //查找当前项目对应的模块和依赖关系
         val args = SettingPlugin.findArgs(project)
-        module = args.projectXml.findModule(project.name)!!
+        module = args.manifest.findModule(project.name)!!
         super.apply(project)
         dpsManager = DpsManager(this)
         //如果是空同步，不做任何处理

@@ -27,7 +27,7 @@ open class SyncBranchTask : BaseTask() {
             close()
         }
         //更新相关的工程
-        extends.projectXml.allModules().filter { modules.contains(it.name) }.map { it.project }.toSet().forEach {
+        extends.manifest.allModules().filter { modules.contains(it.name) }.map { it.project }.toSet().forEach {
             val dir = File(extends.env.codeRootDir, it.path)
             if (GitUtils.isGitDir(dir)) GitUtils.open(dir)?.apply {
                 val check = GitUtils.checkoutBranch(this, targetBranch, true)&&GitUtils.pull(this)//更新

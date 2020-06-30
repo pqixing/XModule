@@ -26,7 +26,7 @@ open class CheckOutTask : BaseTask() {
             if (!check) fail.add(project.rootDir.name)
             close()
         }
-        project.getArgs().projectXml.projects.forEach {
+        project.getArgs().manifest.projects.forEach {
             val dir = File(project.getArgs().env.codeRootDir, it.path)
             if (!GitUtils.isGitDir(dir)) return@forEach
             GitUtils.open(dir)?.apply {

@@ -126,7 +126,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
             val defGroup = "apis"
             val iml = ".iml"
             val rex = Regex("group=\".*\"")
-            val groups = XmlHelper.parseProjectXml(projectXmlFile).allModules().map {
+            val groups = XmlHelper.parseManifest(projectXmlFile).allModules().map {
                 var path = if (it.attach()) defGroup else it.path.substringBeforeLast("/")
                 if (path.startsWith("/")) path = path.substring(1)
                 it.name to path

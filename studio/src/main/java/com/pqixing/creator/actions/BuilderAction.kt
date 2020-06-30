@@ -34,7 +34,7 @@ open class BuilderAction : AnAction() {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
             return
         }
-        val allSubModule = XmlHelper.parseProjectXml(projectXmlFile).allModules()
+        val allSubModule = XmlHelper.parseManifest(projectXmlFile).allModules()
         BuilderDialog(project, getConfigInfo(configFile), getActivityModules(e, allSubModule), allSubModule, getBranches()).showAndPack()
     }
 

@@ -68,7 +68,7 @@ class SettingPlugin : Plugin<Settings> {
         GitUtils.close(basicGit)
 
         //解析project.xml，解析所有应用的依赖数据
-        val projectXml = XmlHelper.parseProjectXml(env.xmlFile)
+        val projectXml = XmlHelper.parseManifest(env.xmlFile)
         args = ArgsExtends(config, env, projectXml)
         args.runTaskNames.addAll(taskNames)
 

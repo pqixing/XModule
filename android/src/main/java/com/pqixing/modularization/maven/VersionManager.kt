@@ -25,8 +25,8 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 class VersionManager(val args: ArgsExtends) {
-    val matchingFallbacks get() =args.projectXml.matchingFallbacks.toMutableList()
-    val groupName get() = args.projectXml.group
+    val matchingFallbacks get() =args.manifest.matchingFallbacks.toMutableList()
+    val groupName get() = args.manifest.group
 
 
     private var repoLastCommit = 0
@@ -184,7 +184,7 @@ class VersionManager(val args: ArgsExtends) {
     private fun prepareVersions() {
         val vBranch = "_v2"
         val git = GitUtils.open(args.env.basicDir)
-                ?: GitUtils.clone(args.projectXml.basicUrl, args.env.basicDir, vBranch)
+                ?: GitUtils.clone(args.manifest.basicUrl, args.env.basicDir, vBranch)
         if (git == null) {
             ResultUtils.thow("can not find version repo!!")
             return
@@ -286,8 +286,8 @@ class VersionManager(val args: ArgsExtends) {
     private fun indexVersionFromNet(outFile: File, versions: HashMap<String, String>) {
         if (!GitUtils.isGitDir(args.env.basicDir)) prepareVersions()
         val extends = args
-        val maven = extends.projectXml.mavenUrl
-        val groupUrl = extends.projectXml.group.replace(".", "/")
+        val maven = extends.manifest.mavenUrl
+        val groupUrl = extends.manifest.group.replace(".", "/")
         Tools.println("parseNetVersions  start -> $groupUrl")
         val start = System.currentTimeMillis()
         versions.clear()
@@ -342,7 +342,7 @@ class VersionManager(val args: ArgsExtends) {
     }
 
     fun parseNetVersionsForTarget(baseUrl: String, groupName: String, git: Git, versions: HashMap<String, String>) {
-        val allModules = args.projectXml.allModules().map { it.name }
+        val allModules = args.manifest.allModules().map { it.name }
         GitUtils.pull(git)
         val mavenUrl = getFullUrl(groupName.replace(".", "/"), baseUrl)
         val allBranchs = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call().map { it.name.replace(Regex(".*/"), "") }.toSet()

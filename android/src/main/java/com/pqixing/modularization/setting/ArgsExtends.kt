@@ -3,14 +3,14 @@ package com.pqixing.modularization.setting
 import com.pqixing.Config
 import com.pqixing.help.MavenPom
 import com.pqixing.model.Module
-import com.pqixing.model.ProjectXmlModel
+import com.pqixing.model.ManifestModel
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.maven.VersionManager
 import com.pqixing.modularization.utils.GitUtils
 import java.io.File
 import java.util.*
 
-class ArgsExtends(val config: Config, val env: EnvArgs, val projectXml: ProjectXmlModel) {
+class ArgsExtends(val config: Config, val env: EnvArgs, val manifest: ManifestModel) {
 
     var versions: VersionManager = VersionManager(this)
     var runTaskNames = mutableListOf<String>()

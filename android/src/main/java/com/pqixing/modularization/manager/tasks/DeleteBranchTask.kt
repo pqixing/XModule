@@ -26,7 +26,7 @@ open class DeleteBranchTask : BaseTask() {
         if (targetBranch == "master") Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete master !!")
 
         val fail = ArrayList<String>()
-        extends.projectXml.projects
+        extends.manifest.projects
                 .map { File(extends.env.codeRootDir, it.path) }
                 .toMutableList().apply {
                     add(extends.env.basicDir)

@@ -68,8 +68,8 @@ open class ToMavenCheckTask : BaseTask() {
         checkLoseDps(plugin.dpsManager.loseList)
 
         val branch = open.repository.branch
-        val groupId = "${extends.projectXml.group}.$branch"
-        val baseVersion = module.version.takeIf { it != "+" } ?: extends.projectXml.baseVersion
+        val groupId = "${extends.manifest.group}.$branch"
+        val baseVersion = module.version.takeIf { it != "+" } ?: extends.manifest.baseVersion
         checkBaseVersion(baseVersion)
 
         checkGitStatus(open, module)
@@ -86,9 +86,9 @@ open class ToMavenCheckTask : BaseTask() {
 
         val name = "${Keys.PREFIX_LOG}?hash=${revCommit.name}&commitTime=${revCommit.commitTime}&message=${revCommit.fullMessage}}"
         extHelper.setMavenInfo(project
-                , extends.projectXml.mavenUrl
-                , extends.projectXml.mavenUser.takeIf { it.isNotEmpty() } ?: extends.config.userName
-                , extends.getPsw(extends.projectXml.mavenPsw.takeIf { it.isNotEmpty() } ?: extends.config.passWord)
+                , extends.manifest.mavenUrl
+                , extends.manifest.mavenUser.takeIf { it.isNotEmpty() } ?: extends.config.userName
+                , extends.getPsw(extends.manifest.mavenPsw.takeIf { it.isNotEmpty() } ?: extends.config.passWord)
                 , groupId
                 , artifactId
                 , version
@@ -120,7 +120,7 @@ open class ToMavenCheckTask : BaseTask() {
         //检查Maven仓库最后的一个版本的信息
         var lastVersion = v
         var matchBranch = branch
-        val match = project.getArgs().projectXml.matchingFallbacks
+        val match = project.getArgs().manifest.matchingFallbacks
         var i = match.indexOf(matchBranch)
         while (lastVersion < 0 && i < match.size) {
             matchBranch = if (i < 0) branch else match[i]

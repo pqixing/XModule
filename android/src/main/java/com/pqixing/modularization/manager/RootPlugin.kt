@@ -34,7 +34,7 @@ open class RootPlugin : BasePlugin() {
 
     override fun apply(project: Project) {
         super.apply(project)
-        val args = SettingPlugin.findArgs(project).projectXml
+        val args = SettingPlugin.findArgs(project).manifest
 
         project.allprojects { p -> extHelper.addRepositories(p, arrayListOf(args.mavenUrl)) }
     }

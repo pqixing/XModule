@@ -3,7 +3,7 @@ package com.pqixing.help
 import com.pqixing.Tools
 import com.pqixing.model.Compile
 import com.pqixing.model.ProjectModel
-import com.pqixing.model.ProjectXmlModel
+import com.pqixing.model.ManifestModel
 import com.pqixing.model.Module
 import com.pqixing.tools.CheckUtils
 import groovy.util.Node
@@ -87,55 +87,57 @@ object XmlHelper {
     }
 
     @JvmStatic
-    fun parseProjectXml(txt: File): ProjectXmlModel {
+    fun parseManifest(txt: File): ManifestModel {
 
         val node = XmlParser().parseText(txt.readText())
-        val xmlModel = ProjectXmlModel(node.get("@baseUrl")?.toString() ?: "")
-        xmlModel.basicUrl = node.get("@basicUrl")?.toString() ?: ""
-        xmlModel.mavenUrl = node.get("@mavenUrl")?.toString() ?: ""
-        xmlModel.group = node.get("@group")?.toString() ?: ""
-        xmlModel.mavenUser = node.get("@mavenUser")?.toString() ?: ""
-        xmlModel.mavenPsw = node.get("@mavenPsw")?.toString() ?: ""
-        xmlModel.createSrc = node.get("@createSrc") == "true"
-        xmlModel.baseVersion = node.get("@baseVersion")?.toString() ?: ""
-        xmlModel.matchingFallbacks.addAll((node.get("@matchingFallbacks")?.toString()
+        val manifest = ManifestModel(node.get("@baseUrl")?.toString() ?: "")
+        manifest.basicUrl = node.get("@basicUrl")?.toString() ?: ""
+        manifest.mavenUrl = node.get("@mavenUrl")?.toString() ?: ""
+        manifest.group = node.get("@group")?.toString() ?: ""
+        manifest.mavenUser = node.get("@mavenUser")?.toString() ?: ""
+        manifest.mavenPsw = node.get("@mavenPsw")?.toString() ?: ""
+        manifest.createSrc = node.get("@createSrc") == "true"
+        manifest.baseVersion = node.get("@baseVersion")?.toString() ?: ""
+        manifest.matchingFallbacks.addAll((node.get("@matchingFallbacks")?.toString()
                 ?: "").split(",").filter { it.isNotEmpty() })
 
-        parseProjects(xmlModel, node, "")
+        parseProjects(manifest, node, "")
         //重新匹配api模块
-        xmlModel.allModules().filter { it.api != null && it.api!!.path.isEmpty() }.forEach { it.api = xmlModel.findModule(it.api!!.name) }
+        manifest.allModules().filter { it.api != null && it.api!!.path.isEmpty() }.forEach { it.api = manifest.findModule(it.api!!.name) }
+
         //加载依赖模块
-        xmlModel.allModules().filter { it.node is Node }.forEach { m ->
-            (m.node as? Node)?.getAt(QName("compile"))?.forEach { n -> addCompile(n as? Node, xmlModel, m.compiles) }
-            (m.node as? Node)?.getAt(QName("devCompile"))?.forEach { n -> addCompile(n as? Node, xmlModel, m.devCompiles) }
-            m.api?.let {
-                m.compiles.add(Compile(it).apply {
-                    version = m.apiVersion
-                    matchAuto = true
-                    scope = Compile.SCOP_API
-                })
-            }
+        manifest.allModules().filter { it.node is Node }.forEach { m ->
+            (m.node as? Node)?.getAt(QName("compile"))?.forEach { n -> addCompile(n as? Node, manifest, m.compiles) }
+            (m.node as? Node)?.getAt(QName("devCompile"))?.forEach { n -> addCompile(n as? Node, manifest, m.devCompiles) }
+
+            if (m.api != null) m.compiles.add(Compile(m.api!!).apply {
+                version = m.apiVersion
+                scope = Compile.SCOP_API
+            })
             m.node = null
         }
+
         //添加全局依赖
         node.getAt(QName("foreach"))?.mapNotNull { it as? Node }?.forEach { n ->
             val excludes = n.get("@exclude")?.toString()?.split(",")?.toSet() ?: emptySet()
-            xmlModel.allModules().filter { !it.external && !excludes.contains(it.name) }.forEach { m ->
-                n.getAt(QName("compile"))?.forEach { n -> addCompile(n as? Node, xmlModel, m.compiles) }
-                n.getAt(QName("devCompile"))?.forEach { n -> addCompile(n as? Node, xmlModel, m.devCompiles) }
+            manifest.allModules().filter { !excludes.contains(it.name) }.forEach { m ->
+                n.getAt(QName("compile"))?.forEach { n -> addCompile(n as? Node, manifest, m.compiles) }
+                n.getAt(QName("devCompile"))?.forEach { n -> addCompile(n as? Node, manifest, m.devCompiles) }
             }
         }
-
-        xmlModel.allModules().forEach { if (it.version.isEmpty()) it.version = xmlModel.baseVersion }
-        //
-        node.localText()
-        return xmlModel
+        //解析file模版
+        node.getAt(QName("files"))?.mapNotNull { it as? Node }?.forEach { n ->
+            n.getAt(QName("item"))?.mapNotNull { it as? Node }?.forEach { f ->
+                manifest.files[f.get("@name")?.toString() ?: ""] = f.get("@file")?.toString() ?: ""
+            }
+        }
+        return manifest
     }
 
     /**
      * 添加依赖信息
      */
-    private fun addCompile(node: Node?, projectXml: ProjectXmlModel, container: MutableList<Compile>) {
+    private fun addCompile(node: Node?, manifest: ManifestModel, container: MutableList<Compile>) {
         node ?: return
 
         val nameStr = node.get("@name")?.toString() ?: return
@@ -163,7 +165,7 @@ object XmlHelper {
             }
             else -> Tools.printError(-1, "DpsExtends compile illegal name -> $name")
         }
-        val module = projectXml.findModule(name) ?: return
+        val module = manifest.findModule(name) ?: return
         val compile = Compile(module)
         compile.branch = branch
         compile.version = version
@@ -174,9 +176,6 @@ object XmlHelper {
             s.split(":").takeIf { it.size == 2 }?.let { compile.excludes.add(it[0] to it[1]) }
         }
 
-        compile.version = compile.version.replace("*", "")
-        compile.matchAuto = compile.version.contains("*")
-
         val apiModule = compile.module.findApi()
         if (apiModule == null) {
             if (!compile.module.isApplication) container.add(compile)
@@ -185,8 +184,7 @@ object XmlHelper {
         //先尝试加载
         val api = Compile(apiModule).apply {
             this.branch = compile.branch
-            this.version = ""
-            matchAuto = true
+            this.version = module.apiVersion
             attach = compile
             dpType = compile.dpType
             this.scope = compile.scope
@@ -197,12 +195,12 @@ object XmlHelper {
         if (!compile.module.isApplication && !compile.justApi) container.add(compile)
     }
 
-    private fun parseProjects(xmlModel: ProjectXmlModel, node: Node?, path: String) {
+    private fun parseProjects(manifest: ManifestModel, node: Node?, path: String) {
         node ?: return
         //解析分组
         node.getAt(QName("group"))?.forEach {
             val group: Node = it as? Node ?: return@forEach
-            parseProjects(xmlModel, group, "$path/${group.get("@name")?.toString() ?: ""}")
+            parseProjects(manifest, group, "$path/${group.get("@name")?.toString() ?: ""}")
         }
 
         node.getAt(QName("project")).forEach {
@@ -215,12 +213,11 @@ object XmlHelper {
             //该工程的git地址
             var gitUrl: String = p.get("@url")?.toString() ?: ""
 
-            if (CheckUtils.isEmpty(gitUrl)) gitUrl = "${xmlModel.baseUrl}/$name.git"
+            if (CheckUtils.isEmpty(gitUrl)) gitUrl = "${manifest.baseUrl}/$name.git"
 
-            val project = ProjectModel(name, "$path/$name", desc, gitUrl)
+            val project = ProjectModel(manifest, name, "$path/$name", desc, gitUrl)
 
-
-            xmlModel.projects.add(project)
+            manifest.projects.add(project)
 
             //type不为空，本身也作为一个模块添加
             if (p.get("@type") != null) addNewModule(project, p, path)
@@ -254,9 +251,8 @@ object XmlHelper {
         module.path = "$path/$realName"
         module.desc = node.get("@desc")?.toString() ?: ""
         module.type = node.get("@type")?.toString() ?: "library"
-        module.merge = node.get("@merge")?.toString() ?: ""
+        module.file = node.get("@file")?.toString() ?: "$${module.type}"
         module.version = node.get("@version")?.toString() ?: ""
-        module.external = node.get("@external")?.toString() == "true"
         module.transform = (node.get("@transform")?.toString() ?: "true") == "true"
         module.node = node
         project.modules.add(module)
@@ -271,7 +267,9 @@ object XmlHelper {
             api.path = "${module.path}/src/api"
             api.desc = "api for $name"
             api.type = "library"
+            api.file = module.file
             api.attach = module
+            api.version = module.version
             module.api = api
             project.modules.add(api)
         } else {
@@ -285,31 +283,31 @@ object XmlHelper {
         return Pair(s.substring(0, i), s.substring(i + 1))
     }
 
-    fun parseInclude(projectXml: ProjectXmlModel, sources: Set<String>): MutableSet<String> {
+    fun parseInclude(manifest: ManifestModel, sources: Set<String>): MutableSet<String> {
         val includes = sources.toMutableSet()
         val temp = mutableSetOf<String>()
-        includes.filter { it.startsWith("D#") }.also { includes.removeAll(it) }.map { it.substring(2) }.forEach { loadAll(projectXml, temp, it) }
+        includes.filter { it.startsWith("D#") }.also { includes.removeAll(it) }.map { it.substring(2) }.forEach { loadAll(manifest, temp, it) }
         includes.addAll(temp)
 
         includes.filter { it.startsWith("E#") }.also { includes.removeAll(it) }.map { it.substring(2) }.forEach { includes.remove(it) }
 
         temp.clear()
-        includes.filter { it.startsWith("ED#") }.also { includes.removeAll(it) }.map { it.substring(3) }.forEach { loadAll(projectXml, temp, it) }
+        includes.filter { it.startsWith("ED#") }.also { includes.removeAll(it) }.map { it.substring(3) }.forEach { loadAll(manifest, temp, it) }
         includes.removeAll(temp)
 
         return includes
     }
 
-    fun loadAll(projectXml: ProjectXmlModel, includes: MutableSet<String>, target: String) {
+    fun loadAll(manifest: ManifestModel, includes: MutableSet<String>, target: String) {
         includes.add(target)
 
-        val requests = projectXml.findModule(target)?.compiles?.map { it.name } ?: return
+        val requests = manifest.findModule(target)?.compiles?.map { it.name } ?: return
 
         val reLoads = requests.filter { !includes.contains(it) }
 
         //如果已经加载过，不重复加载
         includes.addAll(requests)
 
-        for (request in reLoads) loadAll(projectXml, includes, request)
+        for (request in reLoads) loadAll(manifest, includes, request)
     }
 }

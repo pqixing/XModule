@@ -41,7 +41,7 @@ abstract class BaseGitAction : AnAction() {
             return
         }
         if (!createByMe) resetCache()
-        val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
+        val projectXml = XmlHelper.parseManifest(projectXmlFile)
         val clazz = GroovyClassLoader().parseClass(configFile)
         var codeRoot = clazz.getField("codeRoot").get(clazz.newInstance()).toString()
         val codeRootDir = File(basePath, codeRoot).canonicalPath

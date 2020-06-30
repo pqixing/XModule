@@ -28,7 +28,7 @@ import kotlin.collections.HashSet
 open class DpsAnalysisTask : BaseTask() {
     val plugin = project.pluginModule()
     val args = project.getArgs()
-    val groupName = args.projectXml.group
+    val groupName = args.manifest.group
     val dir = File(plugin.cacheDir, "report")
     val temp = File(dir, "AndroidReport.txt")
 

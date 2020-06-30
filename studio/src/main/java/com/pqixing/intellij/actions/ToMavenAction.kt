@@ -25,7 +25,7 @@ class ToMavenAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         val module = e.getData(DataKey.create<Module>("module"))
-        val allModule = XmlHelper.parseProjectXml(File(project.basePath, EnvKeys.XML_PROJECT)).allModules()
+        val allModule = XmlHelper.parseManifest(File(project.basePath, EnvKeys.XML_PROJECT)).allModules()
         val target = allModule.find { it.name == module?.name }?.takeIf { it.isAndroid }
 
         val moduleName = target?.name ?: ""

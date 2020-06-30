@@ -1,5 +1,6 @@
 package com.pqixing.modularization.setting
 
+import com.pqixing.EnvKeys
 import com.pqixing.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Module
@@ -22,10 +23,10 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         val buildTag = args.config.buildDir?.takeIf { i -> i.isNotEmpty() } ?: "default"
         val buildFileName = "build/modularization_${buildTag}/build.gradle"
         //自动抓取工程导入
-        val includes = XmlHelper.parseInclude(args.projectXml, (args.config.include?.takeIf { it.isNotEmpty() && it != "Auto" }?.replace("+", ",")?.split(",")
+        val includes = XmlHelper.parseInclude(args.manifest, (args.config.include?.takeIf { it.isNotEmpty() && it != "Auto" }?.replace("+", ",")?.split(",")
                 ?: gradle.startParameter.taskNames.mapNotNull { m -> m.split(":").takeIf { it.size >= 2 }?.let { it[it.size - 2] } }).toSet().toMutableSet())
 
-        val imports = args.projectXml.allModules().filter { includes.contains(it.name) }
+        val imports = args.manifest.allModules().filter { includes.contains(it.name) }
         //添加include配置
         val checks = mutableSetOf<Module>()
         for (module in imports) include(checks, module, buildFileName)
@@ -56,26 +57,22 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
      * hook工程的build.gradle文件
      */
     private fun hookBuildFile(module: Module, buildFileName: String) {
+
+        //替换file的模板，重新
+        var file = module.file
+        for (f in args.manifest.files) file = file.replace("$${f.key}", f.value)
+        tryCreateSrc(module)
+
+        val curDir = File(args.env.codeRootDir, module.path)
+        val basicDir = File(args.env.rootDir,EnvKeys.BASIC).absolutePath
         val target = File(args.env.codeRootDir, module.path + "/" + buildFileName)
-        val mergeFiles = mutableListOf(File(args.env.codeRootDir, module.path + "/build.gradle"), File(args.env.basicDir, "gradle/maven.gradle"))
-        if (module.isAndroid && !module.external) {//非外部的Android工程，使用模板
-            //尝试生成代码
-            tryCreateSrc(module)
 
-            mergeFiles += listOf(
-                    File(args.env.basicDir, "gradle/android.gradle")
-                    , File(args.env.basicDir, "gradle/kotlin.gradle"))
+        val mergeFiles = file.split(",").filter { it.trim().isNotEmpty() }.map { if (it.startsWith("$")) File(it.replace("\$basicDir", basicDir)) else File(curDir, it) }.toMutableList()
 
-            mergeFiles.add(File(args.env.basicDir, "gradle/${if (module.isApplication) "application" else "library"}.gradle"))
+        if (module.attach()) mergeFiles.add(File(args.env.basicDir, "gradle/api.gradle"))
+        if (args.runAsApp(module) && !module.isApplication) mergeFiles.add(File(args.env.basicDir, "gradle/dev.gradle"))
 
-            if (module.attach()) mergeFiles.add(File(args.env.basicDir, "gradle/api.gradle"))
-            if (args.runAsApp(module) && !module.isApplication) mergeFiles.add(File(args.env.basicDir, "gradle/dev.gradle"))
-        }
-        if (module.type == "document") mergeFiles.clear()
-        module.merge.split(",").map { it.trim() }.forEach { f ->
-            if (f.isNotEmpty()) mergeFiles.add(File(args.env.codeRootDir, module.path + "/" + f))
-        }
-        FileUtils.mergeFile(target, mergeFiles.reversed()) { it.replace(Regex("apply *?plugin: *?['\"]com.android.(application|library)['\"]"), "") }
+        FileUtils.mergeFile(target, mergeFiles) { it.replace(Regex("apply *?plugin: *?['\"]com.android.(application|library)['\"]"), "") }
         module.api?.let { hookBuildFile(it, buildFileName) }
     }
 
@@ -121,7 +118,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         if (manifest.exists()) return
 
         val name = TextUtils.className(module.name.split("_").joinToString { TextUtils.firstUp(it) })
-        val groupName = args.projectXml.group
+        val groupName = args.manifest.group
         val emptyManifest = FileUtils.readText(File(args.env.basicDir, "android/Empty_AndroidManifest.xml"))!!.replace("[groupName]", groupName.toLowerCase()).replace("[projectName]", name.toLowerCase())
         //写入空清单文件
         FileUtils.writeText(manifest, emptyManifest)

@@ -32,6 +32,8 @@
         <action id="Modularization.FormatAction" class="com.pqixing.intellij.actions.FormatAction"
                 text="FormatProjects">
             <add-to-group group-id="ViewMenu" anchor="last"/>
+            <add-to-group group-id="ToolbarRunGroup" relative-to-action="DeviceAndSnapshotComboBox" anchor="after"/>
+
             <keyboard-shortcut keymap="$default" first-keystroke="alt F"/>
         </action>
 

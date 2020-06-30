@@ -14,7 +14,7 @@ open class CloneProjectTask : BaseTask() {
     val fails = ArrayList<String>()
     val exists = ArrayList<String>()
 
-    override fun runTask() = project.getArgs().projectXml.projects.forEach {
+    override fun runTask() = project.getArgs().manifest.projects.forEach {
         val dir = File(project.getArgs().env.codeRootDir, it.path)
         if (GitUtils.isGitDir(dir)) {
             exists.add(dir.name)

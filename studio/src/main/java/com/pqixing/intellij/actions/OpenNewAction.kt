@@ -5,18 +5,12 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
-import com.intellij.openapi.progress.ProgressIndicator
-import com.intellij.openapi.progress.ProgressManager
-import com.intellij.openapi.progress.Task
-import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.impl.ProjectManagerImpl
-import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.OpenNewProjectDialog
-import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.intellij.utils.GradleUtils
 import com.pqixing.tools.FileUtils
 import java.io.File
@@ -40,7 +34,7 @@ open class OpenNewAction : AnAction() {
         if (rootDir != null) {
             showAndPack.tvDir.text = rootDir.parent.canonicalPath ?: ""
             val tl = File(rootDir.path, EnvKeys.XML_PROJECT)
-            if (tl.exists()) showAndPack.tvGitUrl.text = XmlHelper.parseProjectXml(tl).basicUrl
+            if (tl.exists()) showAndPack.tvGitUrl.text = XmlHelper.parseManifest(tl).basicUrl
         }
 
         showAndPack.setOnOk {

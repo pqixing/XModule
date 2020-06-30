@@ -1,6 +1,6 @@
 package com.pqixing.model
 
-class ProjectXmlModel(val baseUrl: String) {
+class ManifestModel(val baseUrl: String) {
     var basicUrl = ""
 
     var mavenUrl = ""
@@ -12,6 +12,8 @@ class ProjectXmlModel(val baseUrl: String) {
     var baseVersion = ""
 
     val projects = mutableListOf<ProjectModel>()
+
+    val files = mutableMapOf<String,String>()
     fun findModule(name: String): Module? {
         for (p in projects) for (m in p.modules) {
             if (name == m.name) return m
@@ -24,7 +26,7 @@ class ProjectXmlModel(val baseUrl: String) {
     }
 }
 
-data class ProjectModel(val name: String, var path: String, val desc: String, val url: String) {
+data class ProjectModel(val manifest: ManifestModel, val name: String, var path: String, val desc: String, val url: String) {
     var branch: String = ""
     val modules = mutableListOf<Module>()
 }
@@ -37,24 +39,20 @@ data class Module(val name: String, val project: ProjectModel) {
     val isApplication
         get() = type == "application"
     var type: String = ""
-    var merge = ""
+    var file = ""
     var attach: Module? = null
     var api: Module? = null
-
     var node: Any? = null
-
-    var external=false
-
     var transform = true
 
     var apiVersion = ""
-        get() = if (field.isEmpty()||field=="*") version else field
+        get() = if (field.isEmpty()) version else field
 
     /**
      * 上传到Maven的版本
      */
     var version = ""
-        get() = attach?.apiVersion ?: field
+        get() = attach?.apiVersion ?: field.takeIf { it.isNotEmpty() } ?: project.manifest.baseVersion
 
 
     //    var apiModel:SubModule?=null//该模块的api模块
@@ -95,13 +93,10 @@ class Compile(val module: Module) {
 
     /**
      * 版本号配置   1  匹配大版本号为1.开头的版本号，  同理 1.0    1.0.0
+     * 如果为空，则默认使用对应模块在manifest文件中配置的版本号
      */
     var version: String = ""
-
-    /**
-     * 如果配置版本号不存在，自动匹配正确的版本号
-     */
-    var matchAuto = false
+        get() = field.takeIf { it.isNotEmpty() } ?: module.version
 
     var branch: String = ""
 

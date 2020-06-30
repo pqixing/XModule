@@ -37,12 +37,14 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
 
     override fun transform(transformInvocation: TransformInvocation) {
         val start = System.currentTimeMillis()
-        Tools.println("$name transform start  ")
+//        Tools.println("$name transform start  ")
         val outputProvider = transformInvocation.outputProvider;
         val buildConfigClass = mutableListOf<String>();
         var targetInjectJar: JarInput? = null
         val visitor = PqxVisitor()
-        transformInvocation.inputs.forEach { input ->
+        transformInvocation.inputs.forEach { input -> input.jarInputs.forEach { jar -> if (jar.name.startsWith(PqxVisitor.TART_INJECT_JAR)) targetInjectJar = jar } }
+
+        if (targetInjectJar != null) transformInvocation.inputs.forEach { input ->
             input.directoryInputs.forEach { dir ->
                 handleDir(dir.file.absolutePath.length + 1, dir.file, visitor, buildConfigClass)
                 //生成输出路径
@@ -50,13 +52,12 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
                 FileUtils.copyDirectory(dir.file, dest)
             }
             input.jarInputs.forEach { jar ->
-                if (jar.name.startsWith(PqxVisitor.TART_INJECT_JAR)) {
-                    targetInjectJar = jar
-                    println("find target jar -> ${jar.name}")
-                } else {
-                    if ((filters.isEmpty() || filters.find { jar.name.contains(it) } != null || jar.name.startsWith(":")
-                                    /**本地工程**/
-                                    ) && jar.file.absolutePath.endsWith(".jar")) {
+                if (!jar.name.startsWith(PqxVisitor.TART_INJECT_JAR)) {
+                    /**本地工程**/
+                    if ((filters.isEmpty()
+                                    || filters.find { jar.name.contains(it) } != null
+                                    || jar.name.startsWith(":"))
+                            && jar.file.absolutePath.endsWith(".jar")) {
                         handleJar(jar, visitor)
                     }// else com.pqixing.Tools.println("UnHandle jar ->${jar.name}")
                     val dest = getDestFile(outputProvider, jar)
@@ -64,8 +65,8 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
                 }
             }
         }
-        injectCode(targetInjectJar, outputProvider,visitor, buildConfigClass)
-        Tools.println("$name transform end , count -> ${System.currentTimeMillis() - start} -> ${visitor.results}")
+        injectCode(targetInjectJar, outputProvider, visitor, buildConfigClass)
+        Tools.println("$name transform target ->${targetInjectJar?.name} , count -> ${System.currentTimeMillis() - start} -> ${visitor.results}")
     }
 
     private fun getDestFile(outputProvider: TransformOutputProvider, jarInput: JarInput): File {
@@ -78,7 +79,7 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
         return outputProvider.getContentLocation(jarName + md5Name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
     }
 
-    private fun injectCode(jarInput: JarInput?, outputProvider: TransformOutputProvider,visitor: PqxVisitor, buildConfigClass: MutableList<String>) {
+    private fun injectCode(jarInput: JarInput?, outputProvider: TransformOutputProvider, visitor: PqxVisitor, buildConfigClass: MutableList<String>) {
         jarInput ?: return
         //生成输出路径
         val dest = getDestFile(outputProvider, jarInput)
@@ -163,7 +164,7 @@ open class PqxVisitor : ClassVisitor(Opcodes.ASM5, null) {
 
     companion object {
         val TART_INJECT_JAR = "com.pqixing.gradle:annotation:"
-        val TART_INJECT_CLASS = AnnotationInfo::class.java.name.replace(".","/")
+        val TART_INJECT_CLASS = AnnotationInfo::class.java.name.replace(".", "/")
 
         private var FILTERS = arrayOf<String>(
                 RunActivity::class.java.name

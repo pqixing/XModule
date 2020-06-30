@@ -37,7 +37,7 @@ class CleanAction : AnAction() {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
             return
         }
-        val projectXml = XmlHelper.parseProjectXml(projectXmlFile)
+        val projectXml = XmlHelper.parseManifest(projectXmlFile)
         val clazz = GroovyClassLoader().parseClass(configFile)
         val newInstance = clazz.newInstance()
         var codeRoot = clazz.getField("codeRoot").get(newInstance).toString().trim()
