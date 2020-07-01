@@ -9,10 +9,8 @@ import com.pqixing.modularization.android.dps.DpsExtendsCompat
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.android.tasks.BuildApkTask
 import com.pqixing.modularization.android.tasks.DpsAnalysisTask
-import com.pqixing.modularization.android.tasks.PrepareDevTask
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.manager.getArgs
-import com.pqixing.modularization.maven.ToMavenCheckTask
+import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.maven.ToMavenTask
 import com.pqixing.modularization.setting.SettingPlugin
 import com.pqixing.tools.FileUtils
@@ -40,7 +38,7 @@ open class AndroidPlugin : BasePlugin() {
 
     override val ignoreFields: Set<String> = emptySet()
 
-    override fun linkTask(): List<Class<out Task>> = mutableListOf(DpsAnalysisTask::class.java, PrepareDevTask::class.java, ToMavenCheckTask::class.java, ToMavenTask::class.java, BuildApkTask::class.java)
+    override fun linkTask(): List<Class<out Task>> = mutableListOf(DpsAnalysisTask::class.java, ToMavenTask::class.java, BuildApkTask::class.java)
     var doAfterList: MutableList<Runnable> = mutableListOf()
     lateinit var dpsManager: DpsManager
     override fun apply(project: Project) {

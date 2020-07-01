@@ -77,7 +77,6 @@ object ResultUtils {
     } catch (e: Exception) {
         null
     }
-
-    fun base64Encode(source: String) = String(Base64.getEncoder().encode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
-    fun base64Decode(source: String) = String(Base64.getDecoder().decode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
+    fun indexVersion(project: Project):Boolean = project == project.rootProject
+    fun indexVersionFile(project: Project):File = project.file("build/up_version.properties")
 }

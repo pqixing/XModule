@@ -5,8 +5,8 @@ import com.pqixing.help.MavenPom
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Compile
 import com.pqixing.modularization.android.AndroidPlugin
-import com.pqixing.modularization.manager.getArgs
-import com.pqixing.modularization.manager.rootPlugin
+import com.pqixing.modularization.root.getArgs
+import com.pqixing.modularization.root.rootPlugin
 import com.pqixing.modularization.setting.ArgsExtends
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
@@ -27,11 +27,11 @@ class DpsManager(val plugin: AndroidPlugin) {
             val pomCache = extends.env.pomCache
 
             val groupMaven = extends.manifest.mavenUrl
-            val group = "${extends.manifest.group}.$branch"
+            val group = "${extends.manifest.groupId}.$branch"
             val pomUrl = "$groupMaven/${group.replace(".", "/")}/$module/$version/$module-$version.pom"
             if (!pomUrl.startsWith("http")) {//增加对本地Maven地址的支持
                 return XmlHelper.parsePomExclude(FileUtils.readText(File(pomUrl))
-                        ?: "", "${extends.manifest.group}.")
+                        ?: "", "${extends.manifest.groupId}.")
             }
 
             val pomKey = TextUtils.numOrLetter(pomUrl)
@@ -40,11 +40,11 @@ class DpsManager(val plugin: AndroidPlugin) {
 
             val pomDir = File(plugin.getGradle().gradleHomeDir, "pomCache")
             val pomFile = File(pomDir, pomKey)
-            pom = if (pomFile.exists()) XmlHelper.parsePomExclude(FileUtils.readText(pomFile)!!, "${extends.manifest.group}.")
+            pom = if (pomFile.exists()) XmlHelper.parsePomExclude(FileUtils.readText(pomFile)!!, "${extends.manifest.groupId}.")
             else {
                 val ponTxt = URL(pomUrl).readText()
                 FileUtils.writeText(pomFile, ponTxt)
-                XmlHelper.parsePomExclude(ponTxt, extends.manifest.group)
+                XmlHelper.parsePomExclude(ponTxt, extends.manifest.groupId)
             }
             pomCache.addFirst(Pair(pomKey, pom))
             //最多保留30条记录
@@ -128,7 +128,7 @@ class DpsManager(val plugin: AndroidPlugin) {
 
         val c = takeIf { dpVersion.second == dpc.version }?.let { " ;force = true ;" } ?: ""
 
-        includes.add("${getScope(dpc.dpType, dpc.scope)} ('${args.manifest.group}.${dpVersion.first}:${dpc.name}:${dpVersion.second}') { ${excludeStr(excludes = dpc.excludes)} $c }")
+        includes.add("${getScope(dpc.dpType, dpc.scope)} ('${args.manifest.groupId}.${dpVersion.first}:${dpc.name}:${dpVersion.second}') { ${excludeStr(excludes = dpc.excludes)} $c }")
         addBranchExclude(dpVersion.first, dpc.name, excludes)
         excludes.addAll(getPom(project, dpVersion.first, dpc.name, dpVersion.second).allExclude)
         return true
@@ -158,7 +158,7 @@ class DpsManager(val plugin: AndroidPlugin) {
             for (i in start until size) {
                 val b = if (i < 0) compileBranch else get(i)
                 if (args.versions.checkBranchVersion(b, moduleName)) {
-                    excludes.add("${args.manifest.group}.$b,$moduleName")
+                    excludes.add("${args.manifest.groupId}.$b,$moduleName")
                 }
             }
         }

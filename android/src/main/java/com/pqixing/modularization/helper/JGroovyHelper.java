@@ -30,7 +30,7 @@ public class JGroovyHelper implements IExtHelper {
     }
 
     @Override
-    public Object setExtValue(Project project, String key, String value) {
+    public Object setExtValue(Project project, String key, Object value) {
         return helper.setExtValue(project, key, value);
     }
 
@@ -40,7 +40,7 @@ public class JGroovyHelper implements IExtHelper {
     }
 
     @Override
-    public Object setExtValue(Gradle gradle, String key, String value) {
+    public Object setExtValue(Gradle gradle, String key, Object value) {
         return helper.setExtValue(gradle, key, value);
     }
 
@@ -65,8 +65,8 @@ public class JGroovyHelper implements IExtHelper {
     }
 
     @Override
-    public void setMavenInfo(Project project, String maven_url, String userName, String password, String groupId, String artifactId, String version, String name) {
-        helper.setMavenInfo(project, maven_url, userName, password, groupId, artifactId, version, name);
+    public void setMavenInfo(Project project, String groupId, String artifactId, String version, String name) {
+        helper.setMavenInfo(project, groupId, artifactId, version, name);
     }
 
     @Override

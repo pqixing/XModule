@@ -1,7 +1,7 @@
 package com.pqixing.modularization.maven
 
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.manager.getArgs
+import com.pqixing.modularization.root.getArgs
 
 /**
  * 从往上初始化版本号

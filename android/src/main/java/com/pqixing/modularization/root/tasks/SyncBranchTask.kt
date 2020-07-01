@@ -1,10 +1,10 @@
-package com.pqixing.modularization.manager.tasks
+package com.pqixing.modularization.root.tasks
 
 import com.pqixing.EnvKeys
 import com.pqixing.getEnvValue
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.manager.getArgs
+import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import java.io.File

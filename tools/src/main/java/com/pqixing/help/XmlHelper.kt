@@ -93,7 +93,7 @@ object XmlHelper {
         val manifest = ManifestModel(node.get("@baseUrl")?.toString() ?: "")
         manifest.basicUrl = node.get("@basicUrl")?.toString() ?: ""
         manifest.mavenUrl = node.get("@mavenUrl")?.toString() ?: ""
-        manifest.group = node.get("@group")?.toString() ?: ""
+        manifest.groupId = node.get("@groupId")?.toString() ?: ""
         manifest.mavenUser = node.get("@mavenUser")?.toString() ?: ""
         manifest.mavenPsw = node.get("@mavenPsw")?.toString() ?: ""
         manifest.createSrc = node.get("@createSrc") == "true"

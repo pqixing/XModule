@@ -1,6 +1,7 @@
 package com.pqixing
 
 import com.pqixing.interfaces.ILog
+import java.util.*
 import kotlin.system.exitProcess
 
 
@@ -19,6 +20,14 @@ object Tools  {
     fun println(exitCode: Int, l: String?) = if (exitCode < 0) printError(exitCode, l) else println(l)
 
     var logger: ILog? = null
+
+    fun getPsw(value: String): String {
+        if (value.startsWith("sk:")) return base64Decode(value.substring(3))
+        if (value.isNotEmpty()) println("Warming::password suggest $value -> ${"sk:" + base64Encode(value)}")
+        return value
+    }
+    private fun base64Encode(source: String) = String(Base64.getEncoder().encode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
+    private fun base64Decode(source: String) = String(Base64.getDecoder().decode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
 }
 
 fun String.getEnvValue(): String? = try {

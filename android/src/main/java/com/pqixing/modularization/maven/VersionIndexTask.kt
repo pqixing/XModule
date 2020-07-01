@@ -1,7 +1,7 @@
 package com.pqixing.modularization.maven
 
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.manager.getArgs
+import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.utils.ResultUtils
 import java.io.File
 
@@ -9,9 +9,6 @@ import java.io.File
  * 从往上初始化版本号
  */
 open class VersionIndexTask : BaseTask() {
-    override fun start() {
-
-    }
 
     override fun runTask() {
         project.getArgs().versions.indexVersionFromNet()

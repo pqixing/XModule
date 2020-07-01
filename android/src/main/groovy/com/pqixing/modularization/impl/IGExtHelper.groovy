@@ -10,18 +10,16 @@ import org.jetbrains.annotations.NotNull
  */
 interface IGExtHelper {
     public Object getExtValue(Project project, String key);
-    public Object setExtValue(Project project, String key,String value);
+    public Object setExtValue(Project project, String key,Object value);
     public Object getExtValue(Gradle gradle, String key);
-    public Object setExtValue(Gradle gradle, String key,String value);
+    public Object setExtValue(Gradle gradle, String key,Object value);
 
     void setExtMethod(Project project, String method, Action action);
 
     void addRepositories(Project project,@NotNull List<String> dependMaven);
     void addSourceDir(Project project,String dir);
     void setApiSourceDir(Project project, String dir,String manifestPath);
-    void setMavenInfo(Project project,String maven_url
-                      ,String userName
-                      ,String password
+    void setMavenInfo(Project project
                       ,String groupId
                       ,String artifactId
                       ,String version

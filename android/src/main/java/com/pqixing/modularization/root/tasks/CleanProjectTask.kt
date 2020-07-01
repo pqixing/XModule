@@ -1,4 +1,4 @@
-package com.pqixing.modularization.manager.tasks
+package com.pqixing.modularization.root.tasks
 
 import com.pqixing.Tools
 import com.pqixing.modularization.base.BaseTask

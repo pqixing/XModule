@@ -5,6 +5,7 @@ import com.pqixing.Config
 import com.pqixing.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
+import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.base.IPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.Logger
@@ -18,7 +19,6 @@ import org.gradle.BuildResult
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
-import org.gradle.api.invocation.Gradle
 import java.io.File
 import java.lang.ref.WeakReference
 
@@ -74,11 +74,16 @@ class SettingPlugin : Plugin<Settings> {
 
         //解析include进行工程导入
         ImportScript(args, setting).startLoad()
-        setting.gradle.addListener(object : BuildAdapter() {
-            override fun buildStarted(gradle: Gradle) {
-                Tools.println("Sync Finish spend:${System.currentTimeMillis() - start}")
-            }
+        //在task开始前，执行任务的检查
+        setting.gradle.afterProject { pro-> pro.tasks.mapNotNull { it as? BaseTask }.forEach { it.prepare() } }
+        setting.gradle.taskGraph.whenReady { g -> g.allTasks.mapNotNull { it as? BaseTask }.forEach { it.whenReady() } }
 
+        //覆盖gradle.properties
+        FileUtils.readText(File(args.env.basicDir, "gradle.properties"))?.let {
+            FileUtils.writeText(File(rootDir, "gradle.properties"), it)
+        }
+
+        setting.gradle.addListener(object : BuildAdapter() {
             override fun buildFinished(result: BuildResult) {
                 args.clear()
                 settings.remove(key)
@@ -88,7 +93,6 @@ class SettingPlugin : Plugin<Settings> {
                         , "spend" to (System.currentTimeMillis() - start).toString()))
             }
         })
-
     }
 
     private fun downloadBasic(basicDir: File, setting: Settings): Git? {

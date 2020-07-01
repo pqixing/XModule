@@ -13,11 +13,7 @@ object GitUtils {
     var gitUser: String = ""
     var gitPsw: String = ""
 
-    fun getPsw(value: String): String {
-        if (value.startsWith("sk:")) return ResultUtils.base64Decode(value.substring(3))
-        if (value.isNotEmpty()) Tools.println("Warming::password suggest $value -> ${"sk:" + ResultUtils.base64Encode(value)}")
-        return value
-    }
+    fun getPsw(value: String): String = Tools.getPsw(value)
 
     fun open(file: File?): Git? {
         if (file?.exists() == false) return null

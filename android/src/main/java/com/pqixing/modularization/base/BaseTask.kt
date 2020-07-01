@@ -14,32 +14,21 @@ import java.util.*
  */
 
 abstract class BaseTask : DefaultTask() {
-    var ideVersion: String? = null
-
-    init {
+    open fun prepare() {
         group = Keys.GROUP_TASK
     }
 
-    fun checkIdeVersion() {
-//        val ideVersion = TextUtils.getSystemEnv(Keys.ENV_RUN_TYPE)
-//        if (ideVersion == null || !ideVersion.contains("ide") || ideVersion.length > minVersion.length || ideVersion >= minVersion)
-//            return String
-//        errorMsg = "Ide Plugin Update=current plugin version is too low,please update \$ideVersion"
-//        Print.lnIde(errorMsg)
-//        throw GradleException(errorMsg)
-
+    open fun whenReady() {
     }
 
     @TaskAction
     fun run() {
-        checkIdeVersion()
         val startTime = System.currentTimeMillis()
-        Tools.println("Task Start ${project.name}:$name -> ${Date(startTime).toLocaleString()}")
         start()
         runTask()
         end()
         val endTime = System.currentTimeMillis()
-        Tools.println("Task End${project.name}:$name count :  ${endTime - startTime}")
+        Tools.println("Spend :  ${endTime - startTime}")
     }
 
 
@@ -50,7 +39,6 @@ abstract class BaseTask : DefaultTask() {
     open fun end() {}
 
     companion object {
-        val minVersion = "ide:2.1"
 
         fun <T : Task> task(project: Project, tClass: Class<T>): T {
             return taskByName(project, getTaskName(tClass), tClass)

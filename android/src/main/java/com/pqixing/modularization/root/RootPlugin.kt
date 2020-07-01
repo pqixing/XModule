@@ -1,9 +1,9 @@
-package com.pqixing.modularization.manager
+package com.pqixing.modularization.root
 
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.setting.SettingPlugin
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.manager.tasks.*
+import com.pqixing.modularization.root.tasks.*
 import com.pqixing.modularization.maven.VersionIndexTask
 import com.pqixing.modularization.maven.VersionTagTask
 import org.gradle.api.Project
@@ -30,11 +30,16 @@ open class RootPlugin : BasePlugin() {
             , VersionIndexTask::class.java
             , DeleteBranchTask::class.java
             , SyncBranchTask::class.java
+            , IndexVersionTask::class.java
     )
 
     override fun apply(project: Project) {
         super.apply(project)
         val args = SettingPlugin.findArgs(project).manifest
+//        val reIndexTask  =  project.task("ReIndex")
+//        project.afterEvaluate {
+//
+//        }
 
         project.allprojects { p -> extHelper.addRepositories(p, arrayListOf(args.mavenUrl)) }
     }

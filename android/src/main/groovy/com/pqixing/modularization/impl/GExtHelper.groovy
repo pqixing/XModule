@@ -3,6 +3,7 @@ package com.pqixing.modularization.impl
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.BaseVariant
+import com.pqixing.Tools
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle
@@ -19,7 +20,7 @@ public class GExtHelper implements IGExtHelper {
     }
 
     @Override
-    Object setExtValue(Project project, String key, String value) {
+    Object setExtValue(Project project, String key, Object value) {
         try {
             project.ext."$key" = value
         } catch (Exception e) {
@@ -35,7 +36,7 @@ public class GExtHelper implements IGExtHelper {
     }
 
     @Override
-    Object setExtValue(Gradle gradle, String key, String value) {
+    Object setExtValue(Gradle gradle, String key, Object value) {
         try {
             gradle.ext."$key" = value
         } catch (Exception e) {
@@ -70,16 +71,12 @@ public class GExtHelper implements IGExtHelper {
     }
 
     @Override
-    void setMavenInfo(Project project, String maven_url, String userName, String password, String groupId, String artifactId, String version, String name) {
+    void setMavenInfo(Project project,String groupId, String artifactId, String version, String name) {
         def deployer = project.uploadArchives.repositories.mavenDeployer
         def pom = deployer.pom
         def repository = deployer.repository
 
-        if (maven_url.startsWith("http")) repository.url = maven_url
-        else repository.url = project.uri(maven_url)
-
-        repository.authentication.userName = userName
-        repository.authentication.password = password
+        repository.authentication.password = Tools.INSTANCE.getPsw(repository.authentication.password)
         pom.groupId = groupId
         pom.artifactId = artifactId
         pom.version = version

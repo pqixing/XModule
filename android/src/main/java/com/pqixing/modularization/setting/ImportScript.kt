@@ -1,11 +1,12 @@
 package com.pqixing.modularization.setting
 
-import com.pqixing.EnvKeys
 import com.pqixing.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Module
 import com.pqixing.modularization.android.AndroidPlugin
-import com.pqixing.modularization.manager.RootPlugin
+import com.pqixing.modularization.helper.IExtHelper
+import com.pqixing.modularization.helper.JGroovyHelper
+import com.pqixing.modularization.root.RootPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
@@ -37,10 +38,23 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         //合并根目录的代码
         setting.rootProject.buildFileName = buildFileName
         FileUtils.mergeFile(File(args.env.rootDir, buildFileName)
-                , listOf(File(args.env.basicDir, "build.gradle"), File(args.env.rootDir, "build.gradle")))
+                , listOf(File(args.env.basicDir, "build.gradle")
+                , File(args.env.rootDir, "build.gradle")
+                , File(args.env.basicDir, "gradle/maven.gradle")))
 
         //hook配置的工程的build.gradle,合并原始build.gradle与预设的build.gradle文件,生成新的初始化文件，注入插件进行开发设置
+        val manifest = args.manifest
+        val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         setting.gradle.beforeProject { pro ->
+            extHelper.setExtValue(pro, "indexVersion", ResultUtils.indexVersion(pro))
+            extHelper.setExtValue(pro, "indexVersionFile", ResultUtils.indexVersionFile(pro))
+            extHelper.setExtValue(pro, "basicDir", args.env.basicDir.canonicalPath)
+            extHelper.setExtValue(pro, "basicUrl", manifest.basicUrl)
+            extHelper.setExtValue(pro, "mavenUrl", manifest.mavenUrl)
+            extHelper.setExtValue(pro, "groupId", manifest.groupId)
+            extHelper.setExtValue(pro, "mavenUser", manifest.mavenUser)
+            extHelper.setExtValue(pro, "mavenPsw", manifest.mavenPsw)
+
             if (pro == pro.rootProject) pro.pluginManager.apply(RootPlugin::class.java)
             else {
                 pro.buildDir = File(pro.buildDir, buildTag)
@@ -64,7 +78,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         tryCreateSrc(module)
 
         val curDir = File(args.env.codeRootDir, module.path)
-        val basicDir = File(args.env.rootDir,EnvKeys.BASIC).absolutePath
+        val basicDir = args.env.basicDir.absolutePath
         val target = File(args.env.codeRootDir, module.path + "/" + buildFileName)
 
         val mergeFiles = file.split(",").filter { it.trim().isNotEmpty() }.map { if (it.startsWith("$")) File(it.replace("\$basicDir", basicDir)) else File(curDir, it) }.toMutableList()
@@ -118,7 +132,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         if (manifest.exists()) return
 
         val name = TextUtils.className(module.name.split("_").joinToString { TextUtils.firstUp(it) })
-        val groupName = args.manifest.group
+        val groupName = args.manifest.groupId
         val emptyManifest = FileUtils.readText(File(args.env.basicDir, "android/Empty_AndroidManifest.xml"))!!.replace("[groupName]", groupName.toLowerCase()).replace("[projectName]", name.toLowerCase())
         //写入空清单文件
         FileUtils.writeText(manifest, emptyManifest)

@@ -6,6 +6,7 @@ import com.pqixing.EnvKeys
 import com.pqixing.getEnvValue
 import com.pqixing.modularization.android.pluginModule
 import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
@@ -14,14 +15,40 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 open class BuildApkTask : BaseTask() {
-    private var buildType: String = EnvKeys.buildApkType.getEnvValue() ?: "release"
-    private var buildApkPath: String? = EnvKeys.buildApkPath.getEnvValue()
+    val plugin = project.pluginModule()
+    private lateinit var buildType: String
+    private var buildApkPath: String? = null
 
     //解析出第一个Dev渠道的构建任务，防止有渠道包
-    init {
-        val plugin = project.pluginModule()
-        if(!plugin.isApp)  buildType = "dev"
+
+    override fun prepare() {
+        super.prepare()
+        buildType = if (!plugin.isApp) "dev" else EnvKeys.buildApkType.getEnvValue() ?: "release"
         this.dependsOn("assemble${TextUtils.firstUp(buildType)}")
+    }
+
+    override fun whenReady() {
+        super.whenReady()
+        buildApkPath = EnvKeys.buildApkPath.getEnvValue()
+        if (!plugin.isApp && !plugin.module.attach()) createSrc()
+    }
+
+    fun createSrc() {
+        val devDir = File(project.projectDir, "src/dev")
+        val from = File(project.getArgs().env.basicDir, "android")
+        val manifest = "AndroidManifest.xml"
+        File(devDir, manifest).apply {
+            if (!exists()) FileUtils.writeText(this, FileUtils.readText(File(from, manifest))
+                    ?.replace("[projectName]", TextUtils.numOrLetter(project.name)) ?: "", true)
+        }
+
+        val devJavaDir = File(project.projectDir, "src/dev/java")
+        arrayOf("DevApplication.java", "DevActivity.java").forEach {
+            File(devJavaDir, it).apply {
+                if (!exists()) FileUtils.writeText(this, FileUtils.readText(File(from, it))
+                        ?.replace("[projectName]", TextUtils.numOrLetter(project.name)) ?: "", true)
+            }
+        }
     }
 
     override fun runTask() {
@@ -42,7 +69,7 @@ open class BuildApkTask : BaseTask() {
         if (copyFile.name.endsWith(".apk")) {
             FileUtils.copy(newOutFile, copyFile)
             ResultUtils.writeResult(outPath)
-        }else if(!copyFile.exists()){
+        } else if (!copyFile.exists()) {
             copyFile.mkdirs()
         }
 

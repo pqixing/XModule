@@ -26,7 +26,7 @@ import kotlin.collections.HashSet
 
 class VersionManager(val args: ArgsExtends) {
     val matchingFallbacks get() =args.manifest.matchingFallbacks.toMutableList()
-    val groupName get() = args.manifest.group
+    val groupName get() = args.manifest.groupId
 
 
     private var repoLastCommit = 0
@@ -287,7 +287,7 @@ class VersionManager(val args: ArgsExtends) {
         if (!GitUtils.isGitDir(args.env.basicDir)) prepareVersions()
         val extends = args
         val maven = extends.manifest.mavenUrl
-        val groupUrl = extends.manifest.group.replace(".", "/")
+        val groupUrl = extends.manifest.groupId.replace(".", "/")
         Tools.println("parseNetVersions  start -> $groupUrl")
         val start = System.currentTimeMillis()
         versions.clear()

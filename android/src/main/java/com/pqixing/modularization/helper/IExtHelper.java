@@ -16,11 +16,11 @@ import java.util.Map;
 public interface IExtHelper {
     public Object getExtValue(Project project, String key);
 
-    public Object setExtValue(Project project, String key, String value);
+    public Object setExtValue(Project project, String key, Object value);
 
     public Object getExtValue(Gradle gradle, String key);
 
-    public Object setExtValue(Gradle gradle, String key, String value);
+    public Object setExtValue(Gradle gradle, String key, Object value);
 
     void setExtMethod(Project project, String method, Action action);
 
@@ -30,9 +30,7 @@ public interface IExtHelper {
 
     void setApiSourceDir(Project project, String dir, String manifestPath);
 
-    void setMavenInfo(Project project, String maven_url
-            , String userName
-            , String password
+    void setMavenInfo(Project project
             , String groupId
             , String artifactId
             , String version
