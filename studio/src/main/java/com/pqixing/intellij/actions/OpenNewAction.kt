@@ -48,7 +48,7 @@ open class OpenNewAction : AnAction() {
                     FileUtils.copy(File(rootDir.path, "gradle.properties"), File(dir, "gradle.properties"))
                     FileUtils.copy(File(rootDir.path, "Config.java"), File(dir, "Config.java"))
                 }
-                FileUtils.writeText(File(dir, "settings.gradle"), "buildscript { apply from: 'https://raw.githubusercontent.com/pqixing/modularization/master/script/install.gradle', to: it }; apply plugin: 'com.module.setting'\n")
+                FileUtils.writeText(File(dir, "settings.gradle"), "buildscript { apply from: 'https://raw.githubusercontent.com/pqixing/modularization/master/script/install_debug.gradle', to: it }; apply plugin: 'com.module.setting'\n")
                 ProjectUtil.openOrImport(dir.absolutePath, defaultProject, true)
             }
         }
