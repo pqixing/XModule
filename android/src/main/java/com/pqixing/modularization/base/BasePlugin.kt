@@ -4,7 +4,7 @@ package com.pqixing.modularization.base
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.helper.JGroovyHelper
-import com.pqixing.modularization.setting.SettingPlugin
+import com.pqixing.modularization.setting.ImportPlugin
 import com.pqixing.tools.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -40,7 +40,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
 
     override fun apply(project: Project) {
         this.p = project
-        SettingPlugin.addPlugin(project,this)
+        ImportPlugin.addPlugin(project,this)
         createIgnoreFile()
 
         linkTask().forEach { onTaskCreate(it, BaseTask.task(project, it)) }

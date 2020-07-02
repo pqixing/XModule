@@ -13,6 +13,7 @@ import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.modularization.utils.execute
+import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
 import org.eclipse.jgit.api.Git
@@ -27,9 +28,13 @@ open class ToMavenTask : BaseTask() {
 
     override fun prepare() {
         super.prepare()
-        if (!library) {
-            this.dependsOn("uploadArchives")
-            project.tasks.findByName("uploadArchives")?.dependsOn("clean")
+        if (library) {
+            val up1 = project.tasks.findByName("uploadArchives")
+            val up2 = project.rootProject.tasks.findByName("uploadArchives")
+
+            up2?.mustRunAfter(up1)
+
+            this.dependsOn(up2, up1)
         }
     }
 
@@ -52,18 +57,18 @@ open class ToMavenTask : BaseTask() {
         } catch (e: Exception) {
             Tools.println(e.toString())
         }
-        val extends = project.getArgs()
+        val args = project.getArgs()
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
         val plugin = project.pluginModule()
         val module = plugin.module
 //        val lastLog = plugin.subModule
         val artifactId = module.name
-        if (module.getBranch() != extends.env.basicBranch) {
-            Tools.println(unCheck(1), "${module.name} branch is ${module.getBranch()} , Doc branch ${extends.env.basicBranch} does not match")
+        if (module.getBranch() != args.env.basicBranch) {
+            Tools.println(unCheck(1), "${module.name} branch is ${module.getBranch()} , Doc branch ${args.env.basicBranch} does not match")
         }
 
-        val open = GitUtils.open(File(extends.env.codeRootDir, module.project.path))
+        val open = GitUtils.open(File(args.env.codeRootDir, module.project.path))
         if (open == null) {
             Tools.printError(-1, "${module.project.path} Git open fail, please check")
             return
@@ -74,13 +79,13 @@ open class ToMavenTask : BaseTask() {
         checkLoseDps(plugin.dpsManager.loseList)
 
         val branch = open.repository.branch
-        val groupId = "${extends.manifest.groupId}.$branch"
-        val baseVersion = module.version.takeIf { it != "+" } ?: extends.manifest.baseVersion
+        val groupId = "${args.manifest.groupId}.$branch"
+        val baseVersion = module.version.takeIf { it != "+" } ?: args.manifest.baseVersion
         checkBaseVersion(baseVersion)
 
         checkGitStatus(open, module)
 
-        val v = project.getArgs().versions.getNewerVersion(branch, artifactId, baseVersion)
+        val v = args.versions.getNewerVersion(branch, artifactId, baseVersion)
         val revCommit = loadGitInfo(open, module)
         if (revCommit == null) {
             Tools.printError(-1, "${module.name} Can not load git info!!")
@@ -96,6 +101,12 @@ open class ToMavenTask : BaseTask() {
         extHelper.setExtValue(project, Keys.LOG_VERSION, version)
         extHelper.setExtValue(project, Keys.LOG_BRANCH, branch)
         extHelper.setExtValue(project, Keys.LOG_MODULE, artifactId)
+
+        //提前生成生成待上传的版本号文件
+
+        //设置上传的版本号的文件
+        extHelper.setMavenInfo(project.rootProject, "${args.manifest.groupId}.${args.env.basicBranch}", "basic", System.currentTimeMillis().toString(), "")
+        FileUtils.delete(project.buildDir)
     }
 
     private fun checkGitStatus(git: Git, module: Module) {

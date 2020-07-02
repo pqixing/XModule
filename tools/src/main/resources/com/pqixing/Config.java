@@ -67,6 +67,10 @@ public class Config {
      * 工程编译目录，使用不同的编译目录便于同时执行多个编译事件，例如ToMaven和构建
      */
     public String buildDir = "default";
+    /**
+     * 其他的参数信息
+     */
+    public String opts ="";
 
     /**
      * toMaven时,忽略检查项目

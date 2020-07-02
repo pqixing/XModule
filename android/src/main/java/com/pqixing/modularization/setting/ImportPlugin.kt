@@ -25,9 +25,9 @@ import java.lang.ref.WeakReference
 /**
  * 设置页面插件
  */
-class SettingPlugin : Plugin<Settings> {
+class ImportPlugin : Plugin<Settings> {
     companion object {
-        val settings = mutableMapOf<Int, WeakReference<SettingPlugin>>()
+        val settings = mutableMapOf<Int, WeakReference<ImportPlugin>>()
         fun addPlugin(project: Project, plugin: IPlugin) {
             settings[project.gradle.hashCode()]?.get()?.plugins?.put(project, plugin)
         }
@@ -76,8 +76,7 @@ class SettingPlugin : Plugin<Settings> {
         ImportScript(args, setting).startLoad()
         //在task开始前，执行任务的检查
         setting.gradle.afterProject { pro-> pro.tasks.mapNotNull { it as? BaseTask }.forEach { it.prepare() } }
-        setting.gradle.taskGraph.whenReady { g -> g.allTasks.mapNotNull { it as? BaseTask }.forEach { it.whenReady() } }
-
+        setting.gradle.taskGraph.whenReady { g -> g.allTasks.also { Tools.println("TaskGraph -> ${it.joinToString(",") {i-> i.project.name+":"+i.name }}") }.mapNotNull { it as? BaseTask }.forEach { it.whenReady() } }
         //覆盖gradle.properties
         FileUtils.readText(File(args.env.basicDir, "gradle.properties"))?.let {
             FileUtils.writeText(File(rootDir, "gradle.properties"), it)

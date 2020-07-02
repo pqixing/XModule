@@ -5,7 +5,6 @@ import com.pqixing.Tools
 import com.pqixing.getEnvValue
 import com.pqixing.modularization.Keys
 import org.gradle.api.GradleException
-import org.gradle.api.Project
 import java.io.File
 import java.net.Socket
 import java.util.*
@@ -77,6 +76,4 @@ object ResultUtils {
     } catch (e: Exception) {
         null
     }
-    fun indexVersion(project: Project):Boolean = project == project.rootProject
-    fun indexVersionFile(project: Project):File = project.file("build/up_version.properties")
 }

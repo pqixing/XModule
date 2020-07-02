@@ -36,8 +36,8 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         imports.forEach { tryCheckModule(it, buildFileName) }
 
         //合并根目录的代码
-        setting.rootProject.buildFileName = buildFileName
-        FileUtils.mergeFile(File(args.env.rootDir, buildFileName)
+        setting.rootProject.buildFileName = "build/build.gradle"
+        FileUtils.mergeFile(File(args.env.rootDir, "build/build.gradle")
                 , listOf(File(args.env.basicDir, "build.gradle")
                 , File(args.env.rootDir, "build.gradle")
                 , File(args.env.basicDir, "gradle/maven.gradle")))
@@ -46,8 +46,8 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         val manifest = args.manifest
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         setting.gradle.beforeProject { pro ->
-            extHelper.setExtValue(pro, "indexVersion", ResultUtils.indexVersion(pro))
-            extHelper.setExtValue(pro, "indexVersionFile", ResultUtils.indexVersionFile(pro))
+            extHelper.setExtValue(pro, "indexVersion", pro==pro.rootProject)
+            extHelper.setExtValue(pro, "indexVersionFile", args.env.versionUpFile)
             extHelper.setExtValue(pro, "basicDir", args.env.basicDir.canonicalPath)
             extHelper.setExtValue(pro, "basicUrl", manifest.basicUrl)
             extHelper.setExtValue(pro, "mavenUrl", manifest.mavenUrl)

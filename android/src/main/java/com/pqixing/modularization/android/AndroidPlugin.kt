@@ -12,7 +12,7 @@ import com.pqixing.modularization.android.tasks.DpsAnalysisTask
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.maven.ToMavenTask
-import com.pqixing.modularization.setting.SettingPlugin
+import com.pqixing.modularization.setting.ImportPlugin
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import groovy.lang.Closure
@@ -32,7 +32,7 @@ open class AndroidPlugin : BasePlugin() {
      * 作为app运行  library工程也可以
      */
     val buildAsApp: Boolean
-        get() = SettingPlugin.findArgs(project).runAsApp(module)
+        get() = ImportPlugin.findArgs(project).runAsApp(module)
 
     lateinit var module: Module
 
@@ -44,7 +44,7 @@ open class AndroidPlugin : BasePlugin() {
     override fun apply(project: Project) {
         project.extensions.create("innerDps", DpsExtendsCompat::class.java)
         //查找当前项目对应的模块和依赖关系
-        val args = SettingPlugin.findArgs(project)
+        val args = ImportPlugin.findArgs(project)
         module = args.manifest.findModule(project.name)!!
         super.apply(project)
         dpsManager = DpsManager(this)
@@ -71,4 +71,4 @@ open class AndroidPlugin : BasePlugin() {
     }
 }
 
-fun Project.pluginModule() = SettingPlugin.findPlugin(this) as AndroidPlugin
+fun Project.pluginModule() = ImportPlugin.findPlugin(this) as AndroidPlugin

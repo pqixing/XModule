@@ -1,7 +1,7 @@
 package com.pqixing.modularization.root
 
 import com.pqixing.modularization.FileNames
-import com.pqixing.modularization.setting.SettingPlugin
+import com.pqixing.modularization.setting.ImportPlugin
 import com.pqixing.modularization.base.BasePlugin
 import com.pqixing.modularization.root.tasks.*
 import com.pqixing.modularization.maven.VersionIndexTask
@@ -35,15 +35,14 @@ open class RootPlugin : BasePlugin() {
 
     override fun apply(project: Project) {
         super.apply(project)
-        val args = SettingPlugin.findArgs(project).manifest
+        val args = ImportPlugin.findArgs(project).manifest
 //        val reIndexTask  =  project.task("ReIndex")
 //        project.afterEvaluate {
 //
 //        }
-
         project.allprojects { p -> extHelper.addRepositories(p, arrayListOf(args.mavenUrl)) }
     }
 }
 
-fun Project.rootPlugin() = SettingPlugin.findPlugin(this.rootProject) as RootPlugin
-fun Project.getArgs() = SettingPlugin.findArgs(this)
+fun Project.rootPlugin() = ImportPlugin.findPlugin(this.rootProject) as RootPlugin
+fun Project.getArgs() = ImportPlugin.findArgs(this)
