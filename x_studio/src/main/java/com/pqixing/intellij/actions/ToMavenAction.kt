@@ -8,13 +8,12 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.pqixing.EnvKeys
-import com.pqixing.help.XmlHelper
+import com.pqixing.help.Tools
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.ui.ToMavenDialog
 import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.GradleUtils
-import java.io.File
 
 class ToMavenAction : AnAction() {
     lateinit var project: Project
@@ -25,7 +24,7 @@ class ToMavenAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         val module = e.getData(DataKey.create<Module>("module"))
-        val allModule = XmlHelper.parseManifest(File(project.basePath, EnvKeys.XML_MANIFEST)).allModules()
+        val allModule = Tools.loadManifest(project.basePath)?.allModules()?: mutableSetOf()
         val target = allModule.find { it.name == module?.name }?.takeIf { it.isAndroid }
 
         val moduleName = target?.name ?: ""

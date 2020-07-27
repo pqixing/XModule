@@ -1,11 +1,11 @@
 package com.pqixing.modularization.root
 
-import com.pqixing.modularization.FileNames
-import com.pqixing.modularization.setting.ImportPlugin
+import com.pqixing.EnvKeys
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.root.tasks.*
 import com.pqixing.modularization.maven.VersionIndexTask
 import com.pqixing.modularization.maven.VersionTagTask
+import com.pqixing.modularization.root.tasks.*
+import com.pqixing.modularization.setting.ImportPlugin
 import org.gradle.api.Project
 
 /**
@@ -15,7 +15,7 @@ import org.gradle.api.Project
 
 open class RootPlugin : BasePlugin() {
     override val ignoreFields: Set<String>
-        get() = setOf(FileNames.USER_CONFIG)
+        get() = setOf(EnvKeys.USER_CONFIG)
 
 
     @Override

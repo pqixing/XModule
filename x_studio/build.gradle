@@ -26,5 +26,5 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     compile project(":tools")
-    compile "com.alibaba:fastjson:1.2.44"
+    compile "com.alibaba:fastjson:1.2.68"
 }

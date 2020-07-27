@@ -3,7 +3,7 @@ package com.pqixing.modularization.android
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
-import com.pqixing.Tools
+import com.pqixing.help.Tools
 import com.pqixing.annotation.*
 import com.pqixing.modularization.utils.ClassModify
 import org.apache.commons.codec.digest.DigestUtils
@@ -59,7 +59,7 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
                                     || jar.name.startsWith(":"))
                             && jar.file.absolutePath.endsWith(".jar")) {
                         handleJar(jar, visitor)
-                    }// else com.pqixing.Tools.println("UnHandle jar ->${jar.name}")
+                    }// else com.pqixing.help.Tools.println("UnHandle jar ->${jar.name}")
                     val dest = getDestFile(outputProvider, jar)
                     FileUtils.copyFile(jar.file, dest)
                 }
@@ -86,7 +86,7 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
         val jarOutputStream = JarOutputStream(FileOutputStream(dest))
         val file = JarFile(jarInput.file)
         val enumeration = file.entries()
-//        com.pqixing.Tools.println("injectCode start ->$activitys -> $applikes")
+//        com.pqixing.help.Tools.println("injectCode start ->$activitys -> $applikes")
 
         while (enumeration.hasMoreElements()) {
             val jarEntry = enumeration.nextElement()
@@ -103,7 +103,7 @@ class PqxTransform(val filters: Set<String> = emptySet()) : Transform() {
         }
         jarOutputStream.close()
         file.close()
-//        com.pqixing.Tools.println("injectCode end")
+//        com.pqixing.help.Tools.println("injectCode end")
 
     }
 

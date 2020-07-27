@@ -6,7 +6,7 @@ class ManifestModel(val baseUrl: String) {
     var mavenPsw = ""
     var groupId = ""
     var createSrc = false
-    var matchingFallbacks = mutableListOf<String>()
+    var fallbacks = mutableListOf<String>()
     var baseVersion = ""
 
     val projects = mutableListOf<ProjectModel>()

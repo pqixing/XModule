@@ -1,18 +1,13 @@
 package com.pqixing.modularization.android.dps
 
-import com.pqixing.Tools
-import com.pqixing.help.MavenPom
+import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Compile
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.root.getArgs
-import com.pqixing.modularization.root.rootPlugin
 import com.pqixing.modularization.setting.ArgsExtends
-import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import org.gradle.api.Project
-import java.io.File
-import java.net.URL
 import java.util.*
 
 class DpsManager(val plugin: AndroidPlugin) {
@@ -118,7 +113,7 @@ class DpsManager(val plugin: AndroidPlugin) {
      * 检查是否存在其他分支的版本，如果存在，添加到exclude中
      */
     private fun addBranchExclude(compileBranch: String, moduleName: String, excludes: HashSet<String>, pointer: Int = 1) {
-        with(args.manifest.matchingFallbacks) {
+        with(args.manifest.fallbacks) {
             val start = indexOf(compileBranch) + pointer
             for (i in start until size) {
                 val b = if (i < 0) compileBranch else get(i)

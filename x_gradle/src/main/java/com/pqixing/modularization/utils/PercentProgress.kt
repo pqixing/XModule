@@ -1,7 +1,6 @@
 package com.pqixing.modularization.utils
 
-import com.pqixing.Tools
-import com.pqixing.interfaces.ILog
+import com.pqixing.help.Tools
 import org.eclipse.jgit.lib.ProgressMonitor
 
 class PercentProgress @JvmOverloads constructor(val space: Float = 1500f) : ProgressMonitor {

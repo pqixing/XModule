@@ -1,8 +1,8 @@
 package com.pqixing.modularization.maven
 
 import com.pqixing.EnvKeys
-import com.pqixing.Tools
-import com.pqixing.getEnvValue
+import com.pqixing.help.Tools
+import com.pqixing.help.getEnvValue
 import com.pqixing.help.MavenPom
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
@@ -28,7 +28,7 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 class VersionManager(val args: ArgsExtends) {
-    val matchingFallbacks get() = args.manifest.matchingFallbacks.toMutableList()
+    val matchingFallbacks get() = args.manifest.fallbacks.toMutableList()
     val groupName get() = args.manifest.groupId
 
     //内存中只保留10跳

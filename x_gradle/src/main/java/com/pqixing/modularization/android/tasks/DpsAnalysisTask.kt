@@ -1,8 +1,7 @@
 package com.pqixing.modularization.android.tasks
 
-import com.pqixing.Tools
+import com.pqixing.help.Tools
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.android.pluginModule
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.helper.IExtHelper

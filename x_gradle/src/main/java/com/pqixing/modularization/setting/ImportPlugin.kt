@@ -1,9 +1,6 @@
 package com.pqixing.modularization.setting
 
-import com.alibaba.fastjson.JSON
-import com.pqixing.Config
-import com.pqixing.Tools
-import com.pqixing.help.XmlHelper
+import com.pqixing.help.Tools
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.base.IPlugin
@@ -11,15 +8,12 @@ import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.Logger
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
-import com.pqixing.tools.TextUtils
-import groovy.lang.GroovyClassLoader
 import org.eclipse.jgit.api.Git
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
-import org.gradle.api.plugins.ExtraPropertiesExtension
 import java.io.File
 import java.lang.ref.WeakReference
 
@@ -54,7 +48,7 @@ class ImportPlugin : Plugin<Settings> {
         val rootDir = setting.rootDir
 
         //检查配置文件Config,读取config和env环境变量，生成全局配置
-        val config = loadConfig(rootDir, setting.extensions.extraProperties)
+        val config = Tools.loadConfig(rootDir.absolutePath, setting.extensions.extraProperties.properties)
         Tools.log = config.log
         GitUtils.gitPsw = config.userName
         GitUtils.gitUser = GitUtils.getPsw(config.passWord)
@@ -69,7 +63,11 @@ class ImportPlugin : Plugin<Settings> {
         GitUtils.close(basicGit)
 
         //解析project.xml，解析所有应用的依赖数据
-        val projectXml = XmlHelper.parseManifest(env.xmlFile)
+        val projectXml = Tools.loadManifest(env.xmlFile.absolutePath)
+        if(projectXml==null){
+            ResultUtils.thow("Miss manifest.xml on basic dir")
+            return
+        }
         args = ArgsExtends(config, env, projectXml)
         args.runTaskNames.addAll(taskNames)
 
@@ -110,43 +108,5 @@ class ImportPlugin : Plugin<Settings> {
             ResultUtils.thow("Clone Fail : $url ,try to set user and password on Config.java")
         }
         return clone
-    }
-
-    private fun loadConfig(rootDir: File, extras: ExtraPropertiesExtension): Config {
-        val configFile = File(rootDir, FileNames.USER_CONFIG)
-        if (!configFile.exists()) FileUtils.writeText(configFile, FileUtils.fromRes(configFile.name))
-
-        val config = try {
-            val parseClass = GroovyClassLoader().parseClass(configFile)
-            JSON.parseObject(JSON.toJSONString(parseClass.newInstance()), Config::class.java)
-        } catch (e: Exception) {
-            Config()
-        }
-        /**
-         * 从系统配置中加载对应的变量
-         */
-        config.javaClass.fields.forEach {
-            val key = it.name
-            it.isAccessible = true
-
-            //从ext或者gradle.properties中读取配置信息
-            kotlin.runCatching {
-                val extValue = extras.get(key)?.toString()
-                if (extValue != null) when (it.type) {
-                    Boolean::class.java -> it.setBoolean(config, extValue.toBoolean())
-                    String::class.java -> it.set(config, extValue)
-                }
-            }
-
-            //从传入的环境中读取配置信息
-            kotlin.runCatching {
-                val envValue = TextUtils.getSystemEnv(key)
-                if (envValue != null) when (it.type) {
-                    Boolean::class.java -> it.setBoolean(config, envValue.toBoolean())
-                    String::class.java -> it.set(config, envValue)
-                }
-            }
-        }
-        return config
     }
 }

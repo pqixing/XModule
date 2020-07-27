@@ -1,10 +1,9 @@
 package com.pqixing.help
 
-import com.pqixing.Tools
 import com.pqixing.model.Compile
-import com.pqixing.model.ProjectModel
 import com.pqixing.model.ManifestModel
 import com.pqixing.model.Module
+import com.pqixing.model.ProjectModel
 import com.pqixing.tools.CheckUtils
 import groovy.util.Node
 import groovy.util.NodeList
@@ -87,8 +86,7 @@ object XmlHelper {
         return value.substring(1, value.length - 1)
     }
 
-    @JvmStatic
-    fun parseManifest(txt: File): ManifestModel {
+    internal fun parseManifest(txt: File): ManifestModel {
 
         val node = XmlParser().parseText(txt.readText())
         val manifest = ManifestModel(node.get("@baseUrl")?.toString() ?: "")
@@ -98,7 +96,7 @@ object XmlHelper {
         manifest.mavenPsw = node.get("@mavenPsw")?.toString() ?: ""
         manifest.createSrc = node.get("@createSrc") == "true"
         manifest.baseVersion = node.get("@baseVersion")?.toString() ?: ""
-        manifest.matchingFallbacks.addAll((node.get("@matchingFallbacks")?.toString()
+        manifest.fallbacks.addAll((node.get("@matchingFallbacks")?.toString()
                 ?: "").split(",").filter { it.isNotEmpty() })
 
         parseProjects(manifest, node, "")

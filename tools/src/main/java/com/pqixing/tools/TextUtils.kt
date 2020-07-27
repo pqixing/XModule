@@ -1,6 +1,6 @@
 package com.pqixing.tools
 
-import com.pqixing.getEnvValue
+import com.pqixing.help.getEnvValue
 
 
 object TextUtils {

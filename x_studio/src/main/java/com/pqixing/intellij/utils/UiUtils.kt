@@ -11,9 +11,8 @@ import com.intellij.openapi.components.NamedComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.*
-import com.pqixing.EnvKeys
+import com.pqixing.help.Tools
 import com.pqixing.creator.utils.LogWrap
-import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.NewImportDialog
 import com.pqixing.tools.PropertiesUtils.readProperties
 import org.jetbrains.android.sdk.AndroidSdkUtils
@@ -112,8 +111,8 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
     }
 
     fun formatModule(target: Project, moduleXml: VirtualFile?, formatFoce: Boolean = false): Boolean {
-        val projectXmlFile = File(target.basePath, EnvKeys.XML_MANIFEST)
-        if (moduleXml == null || !projectXmlFile.exists()) return false
+        moduleXml ?: return false
+        val manifest = Tools.loadManifest(target.basePath) ?: return false
 
         val ins = moduleXml.inputStream.reader()
         val txtLines = ins.readLines()
@@ -126,7 +125,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
             val defGroup = "apis"
             val iml = ".iml"
             val rex = Regex("group=\".*\"")
-            val groups = XmlHelper.parseManifest(projectXmlFile).allModules().map {
+            val groups = manifest.allModules().map {
                 var path = if (it.attach()) defGroup else it.path.substringBeforeLast("/")
                 if (path.startsWith("/")) path = path.substring(1)
                 it.name to path

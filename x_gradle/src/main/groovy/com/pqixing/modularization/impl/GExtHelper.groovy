@@ -3,7 +3,7 @@ package com.pqixing.modularization.impl
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.BaseVariant
-import com.pqixing.Tools
+import com.pqixing.help.Tools
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.invocation.Gradle

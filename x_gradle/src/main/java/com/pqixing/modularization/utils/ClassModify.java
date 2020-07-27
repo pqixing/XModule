@@ -36,7 +36,7 @@ public class ClassModify extends ClassVisitor {
         modify.visitor = visitor;
         modify.buildConfigClass = buildConfigClass;
         classReader.accept(modify, ClassReader.EXPAND_FRAMES);
-//        com.pqixing.Tools.println("Start transform ->  ");
+//        com.pqixing.help.Tools.println("Start transform ->  ");
         return cw.toByteArray();
     }
 

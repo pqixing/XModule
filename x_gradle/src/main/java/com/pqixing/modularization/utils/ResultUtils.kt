@@ -1,8 +1,8 @@
 package com.pqixing.modularization.utils
 
 import com.pqixing.EnvKeys
-import com.pqixing.Tools
-import com.pqixing.getEnvValue
+import com.pqixing.help.Tools
+import com.pqixing.help.getEnvValue
 import com.pqixing.modularization.Keys
 import org.gradle.api.GradleException
 import java.io.File

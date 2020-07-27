@@ -1,12 +1,11 @@
 package com.pqixing.modularization.base
 
-import com.pqixing.Tools
+import com.pqixing.help.Tools
 import com.pqixing.modularization.Keys
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskAction
-import java.util.*
 
 /**
  * Created by pqixing on 17-12-20.

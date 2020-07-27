@@ -1,5 +1,6 @@
 package com.pqixing.intellij.actions
 
+import com.alibaba.fastjson.JSON
 import com.intellij.ide.impl.ProjectUtil
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -8,11 +9,13 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.project.impl.ProjectManagerImpl
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
+import com.pqixing.Config
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.OpenNewProjectDialog
 import com.pqixing.intellij.utils.GradleUtils
 import com.pqixing.tools.FileUtils
+import groovy.lang.GroovyClassLoader
 import java.io.File
 
 
@@ -32,8 +35,10 @@ open class OpenNewAction : AnAction() {
             }
         }
         if (rootDir != null) {
+
+
             showAndPack.tvDir.text = rootDir.parent.canonicalPath ?: ""
-            val tl = File(rootDir.path, EnvKeys.XML_MANIFEST)
+
 //            if (tl.exists()) showAndPack.tvGitUrl.text = XmlHelper.parseManifest(tl).basicUrl
         }
 

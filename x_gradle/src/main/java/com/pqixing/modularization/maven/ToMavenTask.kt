@@ -1,18 +1,16 @@
 package com.pqixing.modularization.maven
 
-import com.pqixing.Tools
+import com.pqixing.help.Tools
 import com.pqixing.model.Compile
 import com.pqixing.model.Module
 import com.pqixing.modularization.helper.JGroovyHelper
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.android.pluginModule
 import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
-import com.pqixing.modularization.utils.execute
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
 import com.pqixing.tools.UrlUtils
@@ -127,7 +125,7 @@ open class ToMavenTask : BaseTask() {
         //检查Maven仓库最后的一个版本的信息
         var lastVersion = v
         var matchBranch = branch
-        val match = project.getArgs().manifest.matchingFallbacks
+        val match = project.getArgs().manifest.fallbacks
         var i = match.indexOf(matchBranch)
         while (lastVersion < 0 && i < match.size) {
             matchBranch = if (i < 0) branch else match[i]

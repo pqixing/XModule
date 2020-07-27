@@ -54,7 +54,7 @@
                     text="ToMaven"/>
             <separator/>
 
-            <action id="Modularization.OpenAction" class="com.pqixing.intellij.actions.OpenNewAction" text="OpenNew">
+            <action id="Modularization.OpenAction" class="com.pqixing.intellij.actions.OpenNewAction" text="NewXMdoule">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="AndroidToolsGroup" anchor="first"/>
             </action>

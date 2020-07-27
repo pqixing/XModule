@@ -1,6 +1,6 @@
 package com.pqixing.modularization.setting
 
-import com.pqixing.Tools
+import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Module
 import com.pqixing.modularization.android.AndroidPlugin

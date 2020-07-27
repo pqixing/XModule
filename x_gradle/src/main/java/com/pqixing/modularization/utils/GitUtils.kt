@@ -1,7 +1,6 @@
 package com.pqixing.modularization.utils
 
-import com.android.build.gradle.internal.dependency.dependencyUrl
-import com.pqixing.Tools
+import com.pqixing.help.Tools
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.*
 import org.eclipse.jgit.lib.Ref

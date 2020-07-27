@@ -36,4 +36,8 @@ public class EnvKeys {
     public static final String BASIC = "basic";
     public static final String XML_META = "maven-metadata.xml";
     public static final String XML_MANIFEST = "basic/manifest.xml";
+    /**
+     * 配置文件
+     */
+    public static final String USER_CONFIG = "Config.java";
 }
