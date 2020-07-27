@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.pqixing.intellij.group.QToolGroup
+import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.ui.VersionDialog
 import com.pqixing.intellij.utils.GradleUtils
 import java.util.*
@@ -13,7 +13,7 @@ import java.util.*
 class ReIndexVersionAction : AnAction() {
     lateinit var project: Project
     override fun update(e: AnActionEvent) {
-        e?.presentation?.isEnabledAndVisible = QToolGroup.hasBasic(e?.project)
+        e?.presentation?.isEnabledAndVisible = XModuleGroup.hasBasic(e?.project)
     }
 
     override fun actionPerformed(e: AnActionEvent) {

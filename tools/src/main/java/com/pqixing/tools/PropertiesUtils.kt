@@ -8,22 +8,6 @@ import java.util.*
  */
 object PropertiesUtils {
 
-    fun writeGlobe(key: String, value: String) {
-
-    }
-
-    fun readGlobe(key: String, value: String) {
-
-    }
-
-    fun writeProject(key: String, value: String) {
-
-    }
-
-    fun readProject(key: String, value: String) {
-
-    }
-
     fun readProperties(file: File): Properties {
         val properties = Properties()
         if (file.exists()){

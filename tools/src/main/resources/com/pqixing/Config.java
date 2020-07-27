@@ -6,6 +6,7 @@
  */
 public class Config {
 
+
     /**
      * 导入工程,多个工程之间,用 , 号分隔
      * 前缀含义 E#  exclude 当前工程
@@ -22,9 +23,19 @@ public class Config {
     public String codeRoot = "";
 
     /**
+     * 基础配置git仓库地址，用来存放通用配置模版，以及全局分支管理
+     */
+    public String basicUrl="https://github.com/pqixing/md_basic.git";
+
+    /**
      * 用户名称,可用于git和maven上传时使用
      */
     public String userName = "";
+
+    /**
+     * 每次从仓库中同步版本号
+     */
+    public boolean sync = false;
 
     /**
      * 用户密码,可用于git和maven上传时使用

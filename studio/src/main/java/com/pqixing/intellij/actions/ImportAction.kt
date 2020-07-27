@@ -23,7 +23,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.group.QToolGroup
+import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.ui.NewImportDialog
 import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.intellij.utils.UiUtils
@@ -40,13 +40,13 @@ class ImportAction : AnAction() {
     lateinit var basePath: String
 
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabledAndVisible = QToolGroup.hasBasic(e.project)
+        e.presentation.isEnabledAndVisible = XModuleGroup.hasBasic(e.project)
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
-        val xmlFIle = File(basePath, EnvKeys.XML_PROJECT)
+        val xmlFIle = File(basePath, EnvKeys.XML_MANIFEST)
         val configFile = File(basePath, "Config.java")
         if (!xmlFIle.exists() || !configFile.exists()) {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
@@ -60,7 +60,7 @@ class ImportAction : AnAction() {
         val dependentModel = clazz.getField("dependentModel").get(newInstance).toString()
 
         val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
-        val infos = projectXml.allModules().filter { it.attach == null }.map { JListInfo(it.path.substringBeforeLast("/")+"/"+it.name, "${it.desc} - ${it.type.substring(0,3)} ") }.toMutableList()
+        val infos = projectXml.allModules().filter { it.attach == null }.map { JListInfo(it.path.substringBeforeLast("/") + "/" + it.name, "${it.desc} - ${it.type.substring(0, 3)} ") }.toMutableList()
 
         val repo = GitHelper.getRepo(File(basePath, EnvKeys.BASIC), project)
         val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
@@ -74,13 +74,12 @@ class ImportAction : AnAction() {
         val importTask = object : Task.Backgroundable(project, "Start Import") {
             override fun run(indicator: ProgressIndicator) {
                 saveConfig(configFile, dialog)
-                val allIncludes = XmlHelper.parseInclude(projectXml,dialog.imports.toSet())
+                val allIncludes = XmlHelper.parseInclude(projectXml, dialog.imports.toSet())
 
                 val codePath = File(basePath, dialog.codeRootStr).canonicalPath
                 //下载代码
                 val gitPaths = projectXml.allModules().filter { allIncludes.contains(it.name) }
                         .map { it.project }.toSet().map { File(codePath, it.path) to it.url }.toMap().toMutableMap()
-                gitPaths[File(basePath, EnvKeys.BASIC)] = projectXml.basicUrl
 
                 gitPaths.filter { !GitUtil.isGitRoot(it.key) }.forEach {
                     indicator.text = "Start Clone... ${it.value} "
@@ -93,13 +92,13 @@ class ImportAction : AnAction() {
                 val pimls = allIml()
                 val importImls = projectXml.allModules().filter { allIncludes.contains(it.name) }
                         .mapNotNull { pimls[File(codePath, it.path).canonicalPath]?.toString() }
-
                 ApplicationManager.getApplication().invokeLater { importByIde(project, importImls.toMutableList()) }
                 //如果快速导入不成功,则,同步一次
 //                /*if (!import)*/ ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
                 GradleSyncInvoker.getInstance().requestProjectSync(project, GradleSyncStats.Trigger.TRIGGER_USER_SYNC_ACTION, object : GradleSyncListener {
                     override fun syncSucceeded(project: Project) {
-                        syncVcs(gitPaths, dialog.syncVcs(), project)
+                        //添加basic的地址
+                        syncVcs(gitPaths.keys.also { it.add(File(basePath, EnvKeys.BASIC)) }, dialog.syncVcs(), project)
 
                         val manager = ModuleManager.getInstance(project)
                         manager.modules.forEach {
@@ -121,7 +120,7 @@ class ImportAction : AnAction() {
         }
         dialog.btnDepend.addActionListener {
             dialog.dispose()
-            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(File(xmlFIle.parentFile,"depend.gradle"), false)!!, true)
+            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(File(xmlFIle.parentFile, "depend.gradle"), false)!!, true)
         }
         dialog.setOnOk {
             //切换根目录的分支
@@ -132,8 +131,7 @@ class ImportAction : AnAction() {
         }
     }
 
-    private fun syncVcs(gitPaths: MutableMap<File, String>, syncVcs: Boolean, project: Project) {
-        val dirs = gitPaths.keys
+    private fun syncVcs(dirs: MutableSet<File>, syncVcs: Boolean, project: Project) {
         if (syncVcs) {
             //根据导入的CodeRoot目录,自动更改AS的版本管理
             val pVcs: ProjectLevelVcsManagerImpl = ProjectLevelVcsManagerImpl.getInstance(project) as ProjectLevelVcsManagerImpl
@@ -150,6 +148,7 @@ class ImportAction : AnAction() {
                 Messages.showMessageDialog("Those project had import but not in Version Control\n ${dirs.joinToString { "\n" + it }} \n Please check Setting -> Version Control After Sync!!", "Miss Vcs Control", null)
         }
     }
+
     fun allIml() = PropertiesUtils.readProperties(File(project.basePath, UiUtils.IML_PROPERTIES))
     fun saveIml(pros: Properties) = UiUtils.invokeLaterOnWriteThread(Runnable { PropertiesUtils.writeProperties(File(project.basePath, UiUtils.IML_PROPERTIES), pros) })
 

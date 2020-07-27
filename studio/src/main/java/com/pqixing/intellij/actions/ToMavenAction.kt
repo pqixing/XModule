@@ -10,7 +10,7 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.group.QToolGroup
+import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.ui.ToMavenDialog
 import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.GradleUtils
@@ -19,13 +19,13 @@ import java.io.File
 class ToMavenAction : AnAction() {
     lateinit var project: Project
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabledAndVisible = QToolGroup.hasBasic(e.project)
+        e.presentation.isEnabledAndVisible = XModuleGroup.hasBasic(e.project)
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         val module = e.getData(DataKey.create<Module>("module"))
-        val allModule = XmlHelper.parseManifest(File(project.basePath, EnvKeys.XML_PROJECT)).allModules()
+        val allModule = XmlHelper.parseManifest(File(project.basePath, EnvKeys.XML_MANIFEST)).allModules()
         val target = allModule.find { it.name == module?.name }?.takeIf { it.isAndroid }
 
         val moduleName = target?.name ?: ""

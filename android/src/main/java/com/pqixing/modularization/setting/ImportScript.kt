@@ -47,9 +47,9 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         setting.gradle.beforeProject { pro ->
             extHelper.setExtValue(pro, "indexVersion", pro==pro.rootProject)
-            extHelper.setExtValue(pro, "indexVersionFile", args.env.versionUpFile)
+            extHelper.setExtValue(pro, "indexVersionFile", args.env.uploadFile)
             extHelper.setExtValue(pro, "basicDir", args.env.basicDir.canonicalPath)
-            extHelper.setExtValue(pro, "basicUrl", manifest.basicUrl)
+            extHelper.setExtValue(pro, "basicUrl", args.config.basicUrl)
             extHelper.setExtValue(pro, "mavenUrl", manifest.mavenUrl)
             extHelper.setExtValue(pro, "groupId", manifest.groupId)
             extHelper.setExtValue(pro, "mavenUser", manifest.mavenUser)

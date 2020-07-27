@@ -17,6 +17,7 @@ object TextUtils {
     fun numOrLetter(str: String): String {
         return str.trim().replace("[^0-9a-zA-Z]".toRegex(), "")
     }
+
     /**
      * 只保留数字和字母
      * @param str
@@ -25,13 +26,14 @@ object TextUtils {
     fun letter(str: String): String {
         return str.trim().replace("[^a-zA-Z]".toRegex(), "")
     }
+
     /**
      * 只保留数字和字母
      * @param str
      * @return
      */
-    fun letter(str: String,def:String): String {
-        return letter(str).takeIf { it.isNotEmpty() }?:def
+    fun letter(str: String, def: String): String {
+        return letter(str).takeIf { it.isNotEmpty() } ?: def
     }
 
 
@@ -82,11 +84,14 @@ object TextUtils {
         collection.forEach { sb.append(it).append("##") }
         return sb.substring(0, sb.length - 2)
     }
+
     fun isVersionCode(str: String?) = str?.matches(Regex("\\d+(\\.\\d+){2,}")) ?: false
+
     /**
      * 是不是基础版本，etc 1.0
      */
     fun isBaseVersion(version: String?): Boolean = version?.matches(Regex("\\d*\\.\\d+")) ?: false
+
     /**
      * 根据深度获取tab空格
      * @param deep
@@ -134,22 +139,21 @@ object TextUtils {
      * @param key
      * @return
      */
-    fun getSystemEnv(key: String): String? =key.getEnvValue()
+    fun getSystemEnv(key: String): String? = key.getEnvValue()
 
     /**
      * 拼接url
      * @param urls
      * @return
      */
-    fun append(s: String, urls: Array<String>): String {
+    fun append( urls: Array<String>,s: String = "/"): String {
         val newUrl = StringBuilder()
         for (url in urls) {
-            if (CheckUtils.isEmpty(url))
-                continue
-            newUrl.append(url).append(s)
+            if (url.isEmpty()) continue
+            if (newUrl.isNotEmpty() && !newUrl.endsWith(s) && !url.startsWith(s)) newUrl.append(s)
+            newUrl.append(url)
         }
-        if (newUrl.isEmpty()) return ""
-        return newUrl.substring(0, newUrl.length - s.length)
+        return newUrl.toString()
     }
 
     fun removeMark(s: String?): String {

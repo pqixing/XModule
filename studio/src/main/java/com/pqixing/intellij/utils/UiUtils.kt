@@ -112,7 +112,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
     }
 
     fun formatModule(target: Project, moduleXml: VirtualFile?, formatFoce: Boolean = false): Boolean {
-        val projectXmlFile = File(target.basePath, EnvKeys.XML_PROJECT)
+        val projectXmlFile = File(target.basePath, EnvKeys.XML_MANIFEST)
         if (moduleXml == null || !projectXmlFile.exists()) return false
 
         val ins = moduleXml.inputStream.reader()

@@ -23,7 +23,9 @@ import java.util.HashSet
 
 open class ToMavenTask : BaseTask() {
     val plugin = project.pluginModule()
+    val args = project.getArgs()
     val library = plugin.module.type == "library"
+    var resultStr = ""
 
 
     override fun prepare() {
@@ -51,21 +53,23 @@ open class ToMavenTask : BaseTask() {
      * 当准备运行该任务之前，先检测
      */
     override fun whenReady() {
-        if (!library) return
+        if (!library) {
+            resultStr = "${plugin.module.getBranch()}:${project.name}:0.0"
+            return
+        }
         try {
             unCheck = project.getArgs().config.toMavenUnCheck.toInt()
         } catch (e: Exception) {
             Tools.println(e.toString())
         }
-        val args = project.getArgs()
+
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
         val plugin = project.pluginModule()
         val module = plugin.module
-//        val lastLog = plugin.subModule
         val artifactId = module.name
         if (module.getBranch() != args.env.basicBranch) {
-            Tools.println(unCheck(1), "${module.name} branch is ${module.getBranch()} , Doc branch ${args.env.basicBranch} does not match")
+            Tools.println(unCheck(1), "${module.name} -> ${module.getBranch()} != ${args.env.basicBranch} ")
         }
 
         val open = GitUtils.open(File(args.env.codeRootDir, module.project.path))
@@ -97,22 +101,21 @@ open class ToMavenTask : BaseTask() {
 
         val name = "${Keys.PREFIX_LOG}?hash=${revCommit.name}&commitTime=${revCommit.commitTime}&message=${revCommit.fullMessage}}"
         extHelper.setMavenInfo(project, groupId, artifactId, version, name)
+        resultStr = "$branch:$artifactId:$version"
 
-        extHelper.setExtValue(project, Keys.LOG_VERSION, version)
-        extHelper.setExtValue(project, Keys.LOG_BRANCH, branch)
-        extHelper.setExtValue(project, Keys.LOG_MODULE, artifactId)
 
-        //提前生成生成待上传的版本号文件
-
+        //填入新的版本信息，提前生成生成待上传的版本号文件
+        val curVersions = args.versions.curVersions.toMutableMap()
+        curVersions["$groupId.$artifactId.$baseVersion"] = (v + 1).toString()
+        args.versions.storeToUp(curVersions)
         //设置上传的版本号的文件
-        extHelper.setMavenInfo(project.rootProject, "${args.manifest.groupId}.${args.env.basicBranch}", "basic", System.currentTimeMillis().toString(), "")
+        extHelper.setMavenInfo(project.rootProject, args.manifest.groupId, "basic", System.currentTimeMillis().toString(), "")
+
         FileUtils.delete(project.buildDir)
     }
 
     private fun checkGitStatus(git: Git, module: Module) {
-        if (!GitUtils.checkIfClean(git, getRelativePath(module.path))) {
-            Tools.println(unCheck(3), "${module.name} Code not clean")
-        }
+        if (!GitUtils.checkIfClean(git, getRelativePath(module.path))) Tools.println(unCheck(3), "${module.name} Code not clean")
     }
 
     /**
@@ -138,7 +141,7 @@ open class ToMavenTask : BaseTask() {
         if (matchBranch != branch) {
             Tools.println(unCheck(1), "$artifactId Not allow user the same base version on new branch")
         }
-        val params = UrlUtils.getParams(DpsManager.getPom(project, matchBranch, artifactId, "$baseVersion.$lastVersion").name)
+        val params = UrlUtils.getParams(args.versions.getPom(project, matchBranch, artifactId, "$baseVersion.$lastVersion").name)
         val hash = params["hash"] ?: ""
         val commitTime = params["commitTime"]?.toInt() ?: 0
         if (hash == revCommit.name || revCommit.commitTime < commitTime) {
@@ -156,7 +159,7 @@ open class ToMavenTask : BaseTask() {
         if (unCheck < 4) return unCheck - oldType
 
         val newType = 1 shl (oldType + 3)
-        return Math.min(0, (unCheck and newType) - 1)
+        return 0.coerceAtMost((unCheck and newType) - 1)
     }
 
     private fun checkBaseVersion(baseVersion: String) {
@@ -188,20 +191,6 @@ open class ToMavenTask : BaseTask() {
     }
 
     override fun runTask() {
-        if (!library) {
-            ResultUtils.writeResult("${plugin.module.getBranch()}:${project.name}:0.0")
-            return
-        }
-        val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
-        val version = extHelper.getExtValue(project, Keys.LOG_VERSION)
-        val branch = extHelper.getExtValue(project, Keys.LOG_BRANCH)
-        val artifactId = extHelper.getExtValue(project, Keys.LOG_MODULE)
-
-        val commitMsg = "${Keys.PREFIX_TO_MAVEN}?${Keys.LOG_BRANCH}=$branch&${Keys.LOG_MODULE}=$artifactId&${Keys.LOG_VERSION}=$version"
-        val git = Git.open(project.getArgs().env.basicDir)
-        GitUtils.pull(git)
-        git.commit().setAllowEmpty(true).setMessage(commitMsg).execute()
-        git.push().execute()
-        ResultUtils.writeResult("$branch:$artifactId:$version")
+        ResultUtils.writeResult(resultStr)
     }
 }

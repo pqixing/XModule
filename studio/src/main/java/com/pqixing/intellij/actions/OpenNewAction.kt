@@ -33,8 +33,8 @@ open class OpenNewAction : AnAction() {
         }
         if (rootDir != null) {
             showAndPack.tvDir.text = rootDir.parent.canonicalPath ?: ""
-            val tl = File(rootDir.path, EnvKeys.XML_PROJECT)
-            if (tl.exists()) showAndPack.tvGitUrl.text = XmlHelper.parseManifest(tl).basicUrl
+            val tl = File(rootDir.path, EnvKeys.XML_MANIFEST)
+//            if (tl.exists()) showAndPack.tvGitUrl.text = XmlHelper.parseManifest(tl).basicUrl
         }
 
         showAndPack.setOnOk {

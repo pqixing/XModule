@@ -3,18 +3,21 @@ package com.pqixing.modularization.maven
 import com.pqixing.EnvKeys
 import com.pqixing.Tools
 import com.pqixing.getEnvValue
+import com.pqixing.help.MavenPom
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
+import com.pqixing.modularization.root.getArgs
+import com.pqixing.modularization.root.rootPlugin
 import com.pqixing.modularization.setting.ArgsExtends
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.PropertiesUtils
 import com.pqixing.tools.TextUtils
-import com.pqixing.tools.UrlUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
+import org.gradle.api.Project
 import java.io.File
 import java.net.URL
 import java.text.DateFormat
@@ -25,9 +28,11 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 class VersionManager(val args: ArgsExtends) {
-    val matchingFallbacks get() =args.manifest.matchingFallbacks.toMutableList()
+    val matchingFallbacks get() = args.manifest.matchingFallbacks.toMutableList()
     val groupName get() = args.manifest.groupId
 
+    //内存中只保留10跳
+    var pomCache: LinkedList<Pair<String, MavenPom>> = LinkedList()
 
     private var repoLastCommit = 0
 
@@ -162,68 +167,43 @@ class VersionManager(val args: ArgsExtends) {
 
     private fun readCurVersions() {
         if (curVersions.isNotEmpty()) return
-        prepareVersions()
-        curVersions[FileNames.MODULARIZATION] = FileNames.MODULARIZATION
+        val versionFile = args.env.versionFile
 
-        val baseVersion = File(args.env.basicDir, "versions/version.properties")
-        val basePros = PropertiesUtils.readProperties(baseVersion)
-        if (basePros.isNotEmpty()) PropertiesUtils.readProperties(baseVersion).forEach {
-            curVersions[it.key.toString()] = it.value.toString()
-        } else {
-            //从网络处理花版本号
-            indexVersionFromNet(baseVersion, curVersions)
-        }
-        val updateTime = curVersions[Keys.UPDATE_TIME]?.toInt()
-                ?: (System.currentTimeMillis() / 1000).toInt()
-        indexCacheVersion(updateTime, curVersions)
-    }
+        val basicRepoUrl = TextUtils.append(arrayOf(args.manifest.mavenUrl, groupName.replace(".", "/"), EnvKeys.BASIC))
+        PropertiesUtils.readProperties(versionFile).forEach { curVersions[it.key.toString()] = it.value.toString() }
 
-    /**
-     * 检查version Git的状态
-     */
-    private fun prepareVersions() {
-        val vBranch = "_v2"
-        val git = GitUtils.open(args.env.basicDir)
-                ?: GitUtils.clone(args.manifest.basicUrl, args.env.basicDir, vBranch)
-        if (git == null) {
-            ResultUtils.thow("can not find version repo!!")
-            return
-        }
-        //如果是ToMaven,则更新,否则,不需要每次都更新
-        if (args.runTaskNames.toString().contains("ToMaven")) git.pull()
-//        if (!GitUtils.checkoutBranch(git, vBranch, true)) {
-//            if (!GitUtils.createBranch(git, vBranch)) {
-//                ExceptionManager.thow(ExceptionManager.EXCEPTION_SYNC, "can checkout to branch : $vBranch")
-//            }
-//        }
-        repoLastCommit = git.log().setMaxCount(1).call().firstOrNull()?.commitTime
-                ?: (System.currentTimeMillis() / 1000).toInt()
-        GitUtils.close(git)
-    }
+        //如果是打包，则从仓库更新版本
+        if (args.config.sync || !versionFile.exists() || args.runTaskNames.toString().contains("ToMaven")) {//如果当前文件不存，从新生成
+            val metaTxt = readUrlTxt(TextUtils.append(arrayOf(basicRepoUrl, EnvKeys.XML_META)))
+            val cacheDir = File(args.env.versionDir, "cache")
+            val meta = XmlHelper.parseMetadata(metaTxt)
 
-    /**
-     * 从本地加载缓存的版本号信息
-     */
-    private fun indexCacheVersion(lastUpdate: Int, curVersions: HashMap<String, String>) {
-        //cacheMap中的最后更新时间与git版本号的最后更新时间不一致，尝试更新
-//        Tools.println("indexCacheVersion $repoLastCommit -> $lastUpdate")
-        if (repoLastCommit > lastUpdate) {
-            /**从日志中读取版本号**/
-            val git = Git.open(args.env.basicDir)
-            run out@{
-                git.log().call().forEach { rev ->
-                    //如果当前记录比最后更新时间小，则无需再更新，因为已经在version里面了
-                    if (rev.commitTime < lastUpdate) return@out
-                    val message = rev.fullMessage.trim()
-                    //如果是
-                    if (!message.startsWith(Keys.PREFIX_TO_MAVEN)) return@forEach
-                    val params = UrlUtils.getParams(message)
-                    if (params == null || params.size < 3) return@forEach
-                    addVersion(curVersions, "$groupName.${params[Keys.LOG_BRANCH]}", params[Keys.LOG_MODULE]!!, listOf(params[Keys.LOG_VERSION]!!))
+            val oldUpdate = curVersions["lastUpdated"]?.toLongOrNull() ?: 0
+            val newUpdate = meta.lastUpdated.toLongOrNull() ?: 0
+            //如果仓库的最后更新时间，比当前的最后更新时间新，则从新加载文件
+            if (newUpdate > oldUpdate) {
+                val newVersion = mutableMapOf<String, Int>()
+                meta.versions.reversed().filterIndexed { index, _ -> index < 3 }.forEach { v ->
+                    val cacheFile = File(cacheDir, v)
+                    var pom = FileUtils.readText(cacheFile)
+                    if (pom?.isNotEmpty() != true) {
+                        pom = readUrlTxt(TextUtils.append(arrayOf(basicRepoUrl, v, "${EnvKeys.BASIC}-${v}.properties")))
+                        FileUtils.writeText(cacheFile, pom)
+                    }
+
+                    for (entry in PropertiesUtils.readProperties(cacheFile).toMap()) {
+                        val value = entry.value.toString().toIntOrNull() ?: continue
+
+                        val key = entry.key.toString()
+                        newVersion[key] = value.coerceAtLeast(newVersion[key] ?: 0)
+                    }
                 }
+                newVersion.forEach { curVersions[it.key] = it.value.toString() }
+                curVersions["lastUpdated"] = newUpdate.toString()
+                PropertiesUtils.writeProperties(versionFile, newVersion.map { it.key to it.value.toString() }.toMap().toProperties())
             }
-            GitUtils.close(git)
         }
+        if (curVersions.isEmpty()) curVersions["lastUpdated"] = "0"
     }
 
     /**
@@ -274,9 +254,9 @@ class VersionManager(val args: ArgsExtends) {
         val branchFile = File(args.env.basicDir, getBranchVersionName(taskBranch))
         PropertiesUtils.writeProperties(branchFile, tagVersions.toProperties())
         ResultUtils.writeResult(branchFile.absolutePath)
-        val git = Git.open(args.env.basicDir)
-        GitUtils.addAndPush(git, "versions", "createVersionTag $taskBranch ${DateFormat.getDateTimeInstance().format(Date())}", true)
-        GitUtils.close(git)
+//        val git = Git.open(args.env.basicDir)
+//        GitUtils.addAndPush(git, "versions", "createVersionTag $taskBranch ${DateFormat.getDateTimeInstance().format(Date())}", true)
+//        GitUtils.close(git)
         return true
     }
 
@@ -284,7 +264,7 @@ class VersionManager(val args: ArgsExtends) {
      * 从网络获取最新的版本号信息
      */
     private fun indexVersionFromNet(outFile: File, versions: HashMap<String, String>) {
-        if (!GitUtils.isGitDir(args.env.basicDir)) prepareVersions()
+
         val extends = args
         val maven = extends.manifest.mavenUrl
         val groupUrl = extends.manifest.groupId.replace(".", "/")
@@ -328,11 +308,9 @@ class VersionManager(val args: ArgsExtends) {
     /**
      *
      */
-    fun readNetUrl(url: String) = try {
-        URL(url).readText()
-    } catch (e: Exception) {
-        ""
-    }
+    fun readUrlTxt(url: String) = kotlin.runCatching {
+        if (url.startsWith("http")) URL(url).readText() else FileUtils.readText(File(url))
+    }.getOrNull() ?: ""
 
     fun getFullUrl(url: String, baseUrl: String): String {
         if (url == "..") return "";
@@ -351,8 +329,8 @@ class VersionManager(val args: ArgsExtends) {
             allModules.forEach { m ->
                 val url = getFullUrl("${b.replace(".", "/")}/$m/maven-metadata.xml", mavenUrl)
 
-                val metaStr = readNetUrl(url)
-                if (metaStr.isNotEmpty()) kotlin.runCatching{
+                val metaStr = readUrlTxt(url)
+                if (metaStr.isNotEmpty()) kotlin.runCatching {
                     val meta = XmlHelper.parseMetadata(metaStr)
                     Tools.println("request -> $url -> ${meta.versions}")
                     addVersion(versions, meta.groupId.trim(), meta.artifactId.trim(), meta.versions)
@@ -367,12 +345,12 @@ class VersionManager(val args: ArgsExtends) {
     fun parseNetVersions(baseUrl: String, versions: HashMap<String, String>, groupName: String, readUrls: HashSet<String> = HashSet()) {
         if (readUrls.contains(baseUrl)) return//防止重复请求处理
         readUrls.add(baseUrl)
-        val htmlText = readNetUrl(baseUrl)
+        val htmlText = readUrlTxt(baseUrl)
         var matcher = Pattern.compile("<a href=.*?>maven-metadata.xml</a>").matcher(htmlText)
         if (matcher.find()) {
             val group = matcher.group()
             val meteUrl = group.substring(group.indexOf('"') + 1, group.lastIndexOf('"'))
-            val meta = XmlHelper.parseMetadata(readNetUrl(getFullUrl(meteUrl, baseUrl)))
+            val meta = XmlHelper.parseMetadata(readUrlTxt(getFullUrl(meteUrl, baseUrl)))
             addVersion(versions, meta.groupId.trim(), meta.artifactId.trim(), meta.versions)
             return
         }
@@ -383,5 +361,43 @@ class VersionManager(val args: ArgsExtends) {
             val url = getFullUrl(group.substring(group.indexOf('"') + 1, group.lastIndexOf('"')), baseUrl)
             if (url.startsWith(baseUrl) && !url.endsWith(".xml")) parseNetVersions(url, versions, groupName, readUrls)
         }
+    }
+
+    fun storeToUp(curVersions: MutableMap<String, String>) {
+        curVersions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
+        PropertiesUtils.writeProperties(args.env.uploadFile, curVersions.toProperties())//保存当前的版本信息等待上传
+    }
+
+    /**
+     * 获取仓库aar中，exclude的传递
+     */
+    fun getPom(project: Project, branch: String, module: String, version: String): MavenPom {
+        val plugin = project.rootPlugin()
+        val extends = project.getArgs()
+
+        val groupMaven = extends.manifest.mavenUrl
+        val group = "${extends.manifest.groupId}.$branch"
+        val pomUrl = "$groupMaven/${group.replace(".", "/")}/$module/$version/$module-$version.pom"
+        if (!pomUrl.startsWith("http")) {//增加对本地Maven地址的支持
+            return XmlHelper.parsePomExclude(FileUtils.readText(File(pomUrl))
+                    ?: "", "${extends.manifest.groupId}.")
+        }
+
+        val pomKey = TextUtils.numOrLetter(pomUrl)
+        var pom = pomCache.find { it.first == pomKey }?.apply { pomCache.remove(this);pomCache.addFirst(this) }?.second
+        if (pom != null) return pom
+
+        val pomDir = File(plugin.getGradle().gradleHomeDir, "pomCache")
+        val pomFile = File(pomDir, pomKey)
+        pom = if (pomFile.exists()) XmlHelper.parsePomExclude(FileUtils.readText(pomFile)!!, "${extends.manifest.groupId}.")
+        else {
+            val ponTxt = URL(pomUrl).readText()
+            FileUtils.writeText(pomFile, ponTxt)
+            XmlHelper.parsePomExclude(ponTxt, extends.manifest.groupId)
+        }
+        pomCache.addFirst(Pair(pomKey, pom))
+        //最多保留30条记录
+        if (pomCache.size > 30) pomCache.removeLast()
+        return pom
     }
 }

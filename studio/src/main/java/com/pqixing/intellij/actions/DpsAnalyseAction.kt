@@ -10,7 +10,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
-import com.pqixing.intellij.group.QToolGroup
+import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.GradleUtils
 import java.io.File
@@ -19,7 +19,7 @@ import java.io.File
 class DpsAnalyseAction : AnAction() {
     lateinit var project: Project
     override fun update(e: AnActionEvent) {
-        e?.presentation?.isEnabledAndVisible = QToolGroup.hasBasic(e?.project) && e?.getData(LangDataKeys.MODULE) != null
+        e?.presentation?.isEnabledAndVisible = XModuleGroup.hasBasic(e?.project) && e?.getData(LangDataKeys.MODULE) != null
     }
 
     override fun actionPerformed(e: AnActionEvent) {

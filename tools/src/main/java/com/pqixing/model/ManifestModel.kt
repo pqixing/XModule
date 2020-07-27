@@ -1,8 +1,6 @@
 package com.pqixing.model
 
 class ManifestModel(val baseUrl: String) {
-    var basicUrl = ""
-
     var mavenUrl = ""
     var mavenUser = ""
     var mavenPsw = ""
@@ -13,7 +11,7 @@ class ManifestModel(val baseUrl: String) {
 
     val projects = mutableListOf<ProjectModel>()
 
-    val files = mutableMapOf<String,String>()
+    val files = mutableMapOf<String, String>()
     fun findModule(name: String): Module? {
         for (p in projects) for (m in p.modules) {
             if (name == m.name) return m

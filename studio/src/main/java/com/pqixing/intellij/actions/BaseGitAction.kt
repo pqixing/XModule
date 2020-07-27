@@ -34,7 +34,7 @@ abstract class BaseGitAction : AnAction() {
         this.basePath = project.basePath ?: return
         rootRepoPath = "$basePath/${EnvKeys.BASIC}";
         if (!beforeActionRun()) return
-        val projectXmlFile = File(basePath, EnvKeys.XML_PROJECT)
+        val projectXmlFile = File(basePath, EnvKeys.XML_MANIFEST)
         val configFile = File(basePath, "Config.java")
         if (!projectXmlFile.exists() || !configFile.exists()) {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)

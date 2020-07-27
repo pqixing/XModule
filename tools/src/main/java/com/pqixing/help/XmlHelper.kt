@@ -59,6 +59,7 @@ object XmlHelper {
 
     fun parseMetadata(txt: String): MavenMetadata {
         val mate = MavenMetadata()
+        if (txt.isEmpty()) return mate
         val node = XmlParser().parseText(txt)
 
         mate.groupId = getChildNodeValue(node, "groupId")
@@ -91,7 +92,6 @@ object XmlHelper {
 
         val node = XmlParser().parseText(txt.readText())
         val manifest = ManifestModel(node.get("@baseUrl")?.toString() ?: "")
-        manifest.basicUrl = node.get("@basicUrl")?.toString() ?: ""
         manifest.mavenUrl = node.get("@mavenUrl")?.toString() ?: ""
         manifest.groupId = node.get("@groupId")?.toString() ?: ""
         manifest.mavenUser = node.get("@mavenUser")?.toString() ?: ""

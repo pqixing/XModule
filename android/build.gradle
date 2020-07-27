@@ -31,7 +31,7 @@ repositories {
 }
 ext.mLocalVersion = "0.3"
 ext.mVersion = "2.1.0"
-ext.mArtifactId = "modularization"
+ext.mArtifactId = "xmodule"
 apply from: '../script/bintray.gradle'
 
 // 添加依赖

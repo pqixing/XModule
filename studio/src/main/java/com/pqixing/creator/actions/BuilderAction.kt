@@ -9,7 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.group.QToolGroup
+import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.ui.BuilderDialog
 import com.pqixing.intellij.utils.GitHelper
 import groovy.lang.GroovyClassLoader
@@ -20,13 +20,13 @@ open class BuilderAction : AnAction() {
     lateinit var basePath: String
     override fun update(e: AnActionEvent) {
         super.update(e)
-        e.presentation?.isVisible = QToolGroup.hasBasic(e?.project)
+        e.presentation?.isVisible = XModuleGroup.hasBasic(e?.project)
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
-        val projectXmlFile = File(basePath, EnvKeys.XML_PROJECT)
+        val projectXmlFile = File(basePath, EnvKeys.XML_MANIFEST)
         val configFile = File(basePath, "Config.java")
 
 

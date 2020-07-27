@@ -17,41 +17,6 @@ import java.util.*
 
 class DpsManager(val plugin: AndroidPlugin) {
 
-    companion object {
-        /**
-         * 获取仓库aar中，exclude的传递
-         */
-        fun getPom(project: Project, branch: String, module: String, version: String): MavenPom {
-            val plugin = project.rootPlugin()
-            val extends = project.getArgs()
-            val pomCache = extends.env.pomCache
-
-            val groupMaven = extends.manifest.mavenUrl
-            val group = "${extends.manifest.groupId}.$branch"
-            val pomUrl = "$groupMaven/${group.replace(".", "/")}/$module/$version/$module-$version.pom"
-            if (!pomUrl.startsWith("http")) {//增加对本地Maven地址的支持
-                return XmlHelper.parsePomExclude(FileUtils.readText(File(pomUrl))
-                        ?: "", "${extends.manifest.groupId}.")
-            }
-
-            val pomKey = TextUtils.numOrLetter(pomUrl)
-            var pom = pomCache.find { it.first == pomKey }?.apply { pomCache.remove(this);pomCache.addFirst(this) }?.second
-            if (pom != null) return pom
-
-            val pomDir = File(plugin.getGradle().gradleHomeDir, "pomCache")
-            val pomFile = File(pomDir, pomKey)
-            pom = if (pomFile.exists()) XmlHelper.parsePomExclude(FileUtils.readText(pomFile)!!, "${extends.manifest.groupId}.")
-            else {
-                val ponTxt = URL(pomUrl).readText()
-                FileUtils.writeText(pomFile, ponTxt)
-                XmlHelper.parsePomExclude(ponTxt, extends.manifest.groupId)
-            }
-            pomCache.addFirst(Pair(pomKey, pom))
-            //最多保留30条记录
-            if (pomCache.size > 30) pomCache.removeLast()
-            return pom
-        }
-    }
 
     //组件工程
     var project: Project = plugin.project
@@ -130,7 +95,7 @@ class DpsManager(val plugin: AndroidPlugin) {
 
         includes.add("${getScope(dpc.dpType, dpc.scope)} ('${args.manifest.groupId}.${dpVersion.first}:${dpc.name}:${dpVersion.second}') { ${excludeStr(excludes = dpc.excludes)} $c }")
         addBranchExclude(dpVersion.first, dpc.name, excludes)
-        excludes.addAll(getPom(project, dpVersion.first, dpc.name, dpVersion.second).allExclude)
+        excludes.addAll(args.versions.getPom(project, dpVersion.first, dpc.name, dpVersion.second).allExclude)
         return true
     }
 //

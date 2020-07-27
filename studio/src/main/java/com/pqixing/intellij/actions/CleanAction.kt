@@ -13,7 +13,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.group.QToolGroup
+import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.ui.CleanDialog
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.tools.FileUtils
@@ -26,12 +26,12 @@ class CleanAction : AnAction() {
     lateinit var project: Project
     lateinit var basePath: String
     override fun update(e: AnActionEvent) {
-        e?.presentation?.isEnabledAndVisible = QToolGroup.hasBasic(e?.project)
+        e?.presentation?.isEnabledAndVisible = XModuleGroup.hasBasic(e?.project)
     }
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
-        val projectXmlFile = File(basePath, EnvKeys.XML_PROJECT)
+        val projectXmlFile = File(basePath, EnvKeys.XML_MANIFEST)
         val configFile = File(basePath, "Config.java")
         if (!projectXmlFile.exists() || !configFile.exists()) {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)

@@ -205,7 +205,7 @@ open class DpsAnalysisTask : BaseTask() {
         val branch = removeGroup(t[0], true)
         if (branch.isEmpty()) return ""
         val module = t[1]
-        val params = UrlUtils.getParams(DpsManager.getPom(project, branch, module, version!!).name)
+        val params = UrlUtils.getParams(args.versions.getPom(project, branch, module, version!!).name)
         val commitTime = params["commitTime"]?.toInt() ?: 0
         params["commitTime"] = Date(commitTime * 1000L).toLocaleString()
         return "    ====> log : " + getCollectionStr(params).replace("\n", " ")

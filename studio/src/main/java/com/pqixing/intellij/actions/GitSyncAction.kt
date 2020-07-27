@@ -3,14 +3,14 @@ package com.pqixing.intellij.actions
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.pqixing.EnvKeys
 import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.group.QToolGroup
+import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.ui.GitOperatorDialog
 import git4idea.GitUtil
 import java.io.File
 
 class GitSyncAction : BaseGitAction() {
     override fun update(e: AnActionEvent) {
-        e?.presentation?.isEnabledAndVisible = QToolGroup.hasBasic(e?.project)
+        e?.presentation?.isEnabledAndVisible = XModuleGroup.hasBasic(e?.project)
     }
     override fun checkUrls(urls: Map<String, String>): Boolean=true
 
