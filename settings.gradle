@@ -1,1 +1,4 @@
-include ":tools",":x_gradle",":x_studio","annotation","androidbase"
+include ":tools", ":x_gradle", ":x_studio", "annotation", "androidbase"
+
+//导入模板工程代码
+if (!file("x_demo").exists()) "git clone https://github.com/pqixing/x_demo.git".execute(null, rootDir)
