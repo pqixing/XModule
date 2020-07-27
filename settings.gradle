@@ -1,1 +1,1 @@
-include ":tools",":android",":studio","annotation","androidbase"
+include ":tools",":x_gradle",":x_studio","annotation","androidbase"
