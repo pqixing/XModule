@@ -12,6 +12,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.pqixing.Config
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.adapter.JlistSelectListener
@@ -38,7 +39,7 @@ import javax.swing.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class BuilderDialog(val project: Project, val configInfo: Any, val activityModel: List<String>, val allModule: Set<Module>, val branchs: List<String>) : BaseJDialog(project) {
+class BuilderDialog(val project: Project, val configInfo: Config, val activityModel: List<String>, val allModule: Set<Module>, val branchs: List<String>) : BaseJDialog(project) {
     companion object {
         var buildJekins = false
         var showAllLocalModule = false
@@ -159,9 +160,8 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
         cbJekins.addActionListener { updateShowType() }
 
         btnSetting.addActionListener { settingClick() }
-        cbDpModel.selectedItem = configInfo.javaClass.getField("dependentModel").get(configInfo)?.toString()
-                ?: "localFirst"
-        configInfo.javaClass.getField("include").get(configInfo)?.toString()?.split(",")?.forEach {
+        cbDpModel.selectedItem = configInfo.dependentModel ?: "localFirst"
+        configInfo.include?.toString()?.split(",")?.forEach {
             if (it.trim().isNotEmpty()) includes.add(it)
         }
         initUpdateAction()
@@ -596,7 +596,7 @@ class BuilderDialog(val project: Project, val configInfo: Any, val activityModel
                 runApps.forEach { app ->
                     indicator.text = "Start Build $app"
                     safeNet("${jobsUrl}buildWithParameters?token=remotebyide&Apk=$app&BranchName=$branch&Type=$type&ShowName=${URLEncoder.encode(TextUtils.removeLineAndMark(allModule.find { it.name == app }?.desc?.replace(" ", "")
-                            ?: ""), "utf-8")}&BuildUser=${TextUtils.removeLineAndMark(configInfo.javaClass.getField("userName").get(configInfo).toString())}")
+                            ?: ""), "utf-8")}&BuildUser=${TextUtils.removeLineAndMark(configInfo.userName)}")
                     Thread.sleep(if (index++ == 0) 2000 else 500)//延迟500毫秒再进行请求,避免出现问题
                 }
                 indicator.text = "Querying Result,Please Wait"

@@ -1,10 +1,16 @@
 package com.pqixing.help
 
+import com.alibaba.fastjson.JSON
+import com.pqixing.Config
+import com.pqixing.EnvKeys
 import com.pqixing.model.Compile
 import com.pqixing.model.ManifestModel
 import com.pqixing.model.Module
 import com.pqixing.model.ProjectModel
 import com.pqixing.tools.CheckUtils
+import com.pqixing.tools.FileUtils
+import com.pqixing.tools.TextUtils
+import groovy.lang.GroovyClassLoader
 import groovy.util.Node
 import groovy.util.NodeList
 import groovy.util.XmlParser
@@ -296,7 +302,7 @@ object XmlHelper {
         return includes
     }
 
-    fun loadAll(manifest: ManifestModel, includes: MutableSet<String>, target: String) {
+    private fun loadAll(manifest: ManifestModel, includes: MutableSet<String>, target: String) {
         includes.add(target)
 
         val requests = manifest.findModule(target)?.compiles?.map { it.name } ?: return
@@ -308,4 +314,66 @@ object XmlHelper {
 
         for (request in reLoads) loadAll(manifest, includes, request)
     }
+
+
+    fun loadConfig(basePath: String, extras: Map<String, Any?> = emptyMap()): Config {
+        val configFile = fileConfig(basePath)
+        if (!configFile.exists()) FileUtils.writeText(configFile, FileUtils.fromRes(configFile.name))
+
+        val config = try {
+            val parseClass = GroovyClassLoader().parseClass(configFile)
+            JSON.parseObject(JSON.toJSONString(parseClass.newInstance()), Config::class.java)
+        } catch (e: Exception) {
+            Config()
+        }
+        /**
+         * 从系统配置中加载对应的变量
+         */
+        config.javaClass.fields.forEach {
+            val key = it.name
+            it.isAccessible = true
+
+            //从ext或者gradle.properties中读取配置信息
+            kotlin.runCatching {
+                val extValue = extras[key]?.toString()
+                if (extValue != null) when (it.type) {
+                    Boolean::class.java -> it.setBoolean(config, extValue.toBoolean())
+                    String::class.java -> it.set(config, extValue)
+                }
+            }
+
+            //从传入的环境中读取配置信息
+            kotlin.runCatching {
+                val envValue = TextUtils.getSystemEnv(key)
+                if (envValue != null) when (it.type) {
+                    Boolean::class.java -> it.setBoolean(config, envValue.toBoolean())
+                    String::class.java -> it.set(config, envValue)
+                }
+            }
+        }
+        return config
+    }
+
+    fun loadManifest(basePath: String?): ManifestModel? = fileManifest(basePath).takeIf { it.exists() }?.let { parseManifest(it) }
+    fun loadAllModule(basePath: String?) = loadManifest(basePath)?.allModules() ?: mutableSetOf()
+    fun saveConfig(basePath: String?, config: Config): Boolean {
+        val configFile = File(basePath, EnvKeys.USER_CONFIG)
+        if (!configFile.exists()) FileUtils.writeText(configFile, FileUtils.fromRes(configFile.name))
+
+
+        var result = FileUtils.readText(configFile) ?: return false
+        /**
+         * 从系统配置中加载对应的变量
+         */
+        Config::class.java.fields.forEach { f ->
+            f.isAccessible = true
+            val value = f.get(config)?.let { if (it is String) "\"$it\"" else "$it" }
+            result = result.replace(Regex("String *${f.name} *=.*;"), "String dependentModel = $value;")
+        }
+        return FileUtils.writeText(configFile, result, true).isNotEmpty()
+    }
+
+    fun fileBasic(basePath: String?): File = File(basePath, EnvKeys.BASIC)
+    fun fileConfig(basePath: String?): File = File(basePath, EnvKeys.USER_CONFIG)
+    fun fileManifest(basePath: String?): File = File(basePath, EnvKeys.XML_MANIFEST)
 }

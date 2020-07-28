@@ -31,16 +31,10 @@ class CleanAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
-        val projectXmlFile = File(basePath, EnvKeys.XML_MANIFEST)
-        val configFile = File(basePath, "Config.java")
-        if (!projectXmlFile.exists() || !configFile.exists()) {
-            Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
-            return
-        }
-        val projectXml = XmlHelper.parseManifest(projectXmlFile)
-        val clazz = GroovyClassLoader().parseClass(configFile)
-        val newInstance = clazz.newInstance()
-        var codeRoot = clazz.getField("codeRoot").get(newInstance).toString().trim()
+
+        val projectXml = XmlHelper.loadManifest(basePath)?:return
+        val config = XmlHelper.loadConfig(basePath)
+        val codeRoot = config.toString().trim()
         val properties = PropertiesUtils.readProperties(File(project.basePath, UiUtils.IDE_PROPERTIES))
 
         val codeRoots = properties.getProperty("codeRoots", "").split(",").filter { it.isNotEmpty() }.toMutableList()

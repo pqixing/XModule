@@ -20,6 +20,7 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.VcsDirectoryMapping
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
 import com.intellij.openapi.vfs.VfsUtil
+import com.pqixing.Config
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.adapter.JListInfo
@@ -30,7 +31,6 @@ import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.PropertiesUtils
 import git4idea.GitUtil
-import groovy.lang.GroovyClassLoader
 import java.io.File
 import java.util.*
 
@@ -46,18 +46,15 @@ class ImportAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
-        val xmlFIle = File(basePath, EnvKeys.XML_MANIFEST)
-        val configFile = File(basePath, "Config.java")
-        if (!xmlFIle.exists() || !configFile.exists()) {
+        val projectXml = XmlHelper.loadManifest(basePath)
+        if (projectXml == null) {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
             return
         }
-        val projectXml = XmlHelper.parseManifest(xmlFIle)
-        val clazz = GroovyClassLoader().parseClass(configFile)
-        val newInstance = clazz.newInstance()
-        val includes = clazz.getField("include").get(newInstance).toString()
-        var codeRoot = clazz.getField("codeRoot").get(newInstance).toString()
-        val dependentModel = clazz.getField("dependentModel").get(newInstance).toString()
+        val config = XmlHelper.loadConfig(basePath)
+        val includes = config.include
+        var codeRoot = config.codeRoot
+        val dependentModel = config.dependentModel
 
         val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
         val infos = projectXml.allModules().filter { it.attach == null }.map { JListInfo(it.path.substringBeforeLast("/") + "/" + it.name, "${it.desc} - ${it.type.substring(0, 3)} ") }.toMutableList()
@@ -73,7 +70,7 @@ class ImportAction : AnAction() {
         dialog.isVisible = true
         val importTask = object : Task.Backgroundable(project, "Start Import") {
             override fun run(indicator: ProgressIndicator) {
-                saveConfig(configFile, dialog)
+                saveConfig(config, dialog)
                 val allIncludes = XmlHelper.parseInclude(projectXml, dialog.imports.toSet())
 
                 val codePath = File(basePath, dialog.codeRootStr).canonicalPath
@@ -112,15 +109,15 @@ class ImportAction : AnAction() {
         }
         dialog.btnConfig.addActionListener {
             dialog.dispose()
-            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(configFile, false)!!, true)
+            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(XmlHelper.fileConfig(basePath), false)!!, true)
         }
         dialog.btnProjectXml.addActionListener {
             dialog.dispose()
-            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(xmlFIle, false)!!, true)
+            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(XmlHelper.fileManifest(basePath), false)!!, true)
         }
         dialog.btnDepend.addActionListener {
             dialog.dispose()
-            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(File(xmlFIle.parentFile, "depend.gradle"), false)!!, true)
+            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(File(XmlHelper.fileBasic(basePath), "depend.gradle"), false)!!, true)
         }
         dialog.setOnOk {
             //切换根目录的分支
@@ -152,17 +149,12 @@ class ImportAction : AnAction() {
     fun allIml() = PropertiesUtils.readProperties(File(project.basePath, UiUtils.IML_PROPERTIES))
     fun saveIml(pros: Properties) = UiUtils.invokeLaterOnWriteThread(Runnable { PropertiesUtils.writeProperties(File(project.basePath, UiUtils.IML_PROPERTIES), pros) })
 
-    private fun saveConfig(configgFile: File, dialog: NewImportDialog) = ApplicationManager.getApplication().invokeLater {
+    private fun saveConfig(config: Config, dialog: NewImportDialog) = ApplicationManager.getApplication().invokeLater {
         ApplicationManager.getApplication().runWriteAction {
-            val dpModel = dialog.dpModel?.trim() ?: ""
-            val codeRoot = dialog.codeRootStr.trim()
-            val includes = dialog.imports.filter { it.isNotEmpty() }
-
-            var result = configgFile.readText()
-            result = result.replace(Regex("String *dependentModel *=.*;"), "String dependentModel = \"$dpModel\";")
-            result = result.replace(Regex("String *codeRoot *=.*;"), "String codeRoot = \"$codeRoot\";")
-            result = result.replace(Regex("String *include *=.*;"), "String include = \"${includes.joinToString(",")}\";")
-            FileUtils.writeText(configgFile, result, true)
+            config.dependentModel = dialog.dpModel?.trim() ?: ""
+            config.codeRoot = dialog.codeRootStr.trim()
+            config.include = dialog.imports.filter { it.isNotEmpty() }.joinToString(",")
+            XmlHelper.saveConfig(basePath, config)
         }
     }
 

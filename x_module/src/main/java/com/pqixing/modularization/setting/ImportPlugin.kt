@@ -1,6 +1,7 @@
 package com.pqixing.modularization.setting
 
 import com.pqixing.help.Tools
+import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.base.IPlugin
@@ -48,7 +49,7 @@ class ImportPlugin : Plugin<Settings> {
         val rootDir = setting.rootDir
 
         //检查配置文件Config,读取config和env环境变量，生成全局配置
-        val config = Tools.loadConfig(rootDir.absolutePath, setting.extensions.extraProperties.properties)
+        val config = XmlHelper.loadConfig(rootDir.absolutePath, setting.extensions.extraProperties.properties)
         Tools.log = config.log
         GitUtils.gitPsw = config.userName
         GitUtils.gitUser = GitUtils.getPsw(config.passWord)
@@ -63,7 +64,7 @@ class ImportPlugin : Plugin<Settings> {
         GitUtils.close(basicGit)
 
         //解析project.xml，解析所有应用的依赖数据
-        val projectXml = Tools.loadManifest(env.xmlFile.absolutePath)
+        val projectXml = XmlHelper.loadManifest(env.xmlFile.absolutePath)
         if(projectXml==null){
             ResultUtils.thow("Miss manifest.xml on basic dir")
             return

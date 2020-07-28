@@ -6,7 +6,6 @@ import com.intellij.openapi.actionSystem.DataKey
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.Messages
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.group.XModuleGroup
@@ -26,16 +25,9 @@ open class BuilderAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         basePath = project.basePath ?: return
-        val projectXmlFile = File(basePath, EnvKeys.XML_MANIFEST)
-        val configFile = File(basePath, "Config.java")
+        val allSubModule = XmlHelper.loadAllModule(basePath)
 
-
-        if (!projectXmlFile.exists() || !configFile.exists()) {
-            Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
-            return
-        }
-        val allSubModule = XmlHelper.parseManifest(projectXmlFile).allModules()
-        BuilderDialog(project, getConfigInfo(configFile), getActivityModules(e, allSubModule), allSubModule, getBranches()).showAndPack()
+        BuilderDialog(project, XmlHelper.loadConfig(basePath), getActivityModules(e, allSubModule), allSubModule, getBranches()).showAndPack()
     }
 
     private fun getConfigInfo(configFile: File) = GroovyClassLoader().parseClass(configFile).newInstance()

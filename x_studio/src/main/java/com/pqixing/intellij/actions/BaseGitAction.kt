@@ -34,16 +34,15 @@ abstract class BaseGitAction : AnAction() {
         this.basePath = project.basePath ?: return
         rootRepoPath = "$basePath/${EnvKeys.BASIC}";
         if (!beforeActionRun()) return
-        val projectXmlFile = File(basePath, EnvKeys.XML_MANIFEST)
-        val configFile = File(basePath, "Config.java")
-        if (!projectXmlFile.exists() || !configFile.exists()) {
+
+        val config = XmlHelper.loadConfig(basePath)
+        val projectXml = XmlHelper.loadManifest(basePath)
+        if (projectXml==null) {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
             return
         }
         if (!createByMe) resetCache()
-        val projectXml = XmlHelper.parseManifest(projectXmlFile)
-        val clazz = GroovyClassLoader().parseClass(configFile)
-        var codeRoot = clazz.getField("codeRoot").get(clazz.newInstance()).toString()
+        var codeRoot = config.codeRoot
         val codeRootDir = File(basePath, codeRoot).canonicalPath
         val urls = projectXml.projects.map { Pair("$codeRootDir${it.path}", it.url) }.toMap()
         if (!checkUrls(urls)) return
