@@ -64,7 +64,7 @@ class ImportPlugin : Plugin<Settings> {
         GitUtils.close(basicGit)
 
         //解析project.xml，解析所有应用的依赖数据
-        val projectXml = XmlHelper.loadManifest(env.xmlFile.absolutePath)
+        val projectXml = XmlHelper.loadManifest(rootDir.absolutePath)
         if(projectXml==null){
             ResultUtils.thow("Miss manifest.xml on basic dir")
             return

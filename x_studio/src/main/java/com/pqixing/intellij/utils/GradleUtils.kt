@@ -1,10 +1,8 @@
 package com.pqixing.intellij.utils
 
 import com.android.tools.idea.gradle.project.sync.GradleSyncInvoker
-import com.android.tools.idea.gradle.project.sync.GradleSyncListener
 import com.google.wireless.android.sdk.stats.GradleSyncStats
 import com.intellij.execution.executors.DefaultRunExecutor
-import com.intellij.ide.impl.ProjectUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.externalSystem.model.ProjectSystemId
 import com.intellij.openapi.externalSystem.model.execution.ExternalSystemTaskExecutionSettings
@@ -21,7 +19,6 @@ import com.intellij.openapi.ui.Messages
 import com.pqixing.EnvKeys
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.UrlUtils
-import git4idea.util.GitUIUtil
 import java.io.File
 import java.net.ServerSocket
 import java.net.Socket
@@ -102,7 +99,7 @@ object GradleUtils {
 
     fun downloadBasic(target: Project, dir: File?, base: String?, after: () -> Unit) = ApplicationManager.getApplication().invokeLater {
         val url = base
-                ?: Messages.showInputDialog("Input your basic git url to init project", "Download Basic", null,"https://github.com/pqixing/md_demo.git",null)?.takeIf { it.isNotEmpty() }
+                ?: Messages.showInputDialog("Input your basic git url to init project", "Download Basic", null, "https://github.com/pqixing/md_demo.git", null)?.takeIf { it.isNotEmpty() }
                 ?: return@invokeLater
         val basicDir = dir ?: File(target.basePath, EnvKeys.BASIC)
         if (basicDir.exists()) {
@@ -113,7 +110,10 @@ object GradleUtils {
         val importTask = object : Task.Backgroundable(target, "Download Basic") {
             override fun run(indicator: ProgressIndicator) {
                 indicator.text = "clone $url"
-                GitHelper.clone(target, basicDir, url, "master")?.run { after() }
+                kotlin.runCatching {
+                    GitHelper.clone(target, basicDir, url, "master")
+                }
+                after()
             }
         }
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
@@ -132,7 +132,7 @@ object GradleUtils {
 
     private fun getVmOpions(env: Map<String, String>): String {
         val option = StringBuilder()
-        if(debugPort!=0) option.append("-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=$debugPort  -Dorg.gradle.debug=true  --no-daemon ")
+        if (debugPort != 0) option.append("-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=$debugPort  -Dorg.gradle.debug=true  --no-daemon ")
         env.forEach {
             if (it.key.isEmpty() || it.value.isEmpty()) return@forEach
             option.append("-D${it.key}='${it.value}' ")

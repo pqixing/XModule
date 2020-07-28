@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.containers.ContainerUtil;
 import com.pqixing.tools.FileUtils;
 
+import git4idea.repo.GitRepositoryManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,7 +54,7 @@ public class GitHelper {
         VirtualFile gitDir = VfsUtil.findFileByIoFile(dir, true);
         if (gitDir == null) return null;
 
-        return GitRepositoryImpl.getInstance(gitDir, project, false);
+        return GitRepositoryManager.getInstance(project).getRepositoryForFileQuick(gitDir);
     }
 
     /**

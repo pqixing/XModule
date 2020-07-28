@@ -106,6 +106,7 @@ open class ToMavenTask : BaseTask() {
         val curVersions = args.versions.curVersions.toMutableMap()
         curVersions["$groupId.$artifactId.$baseVersion"] = (v + 1).toString()
         args.versions.storeToUp(curVersions)
+
         //设置上传的版本号的文件
         extHelper.setMavenInfo(project.rootProject, args.manifest.groupId, "basic", System.currentTimeMillis().toString(), "")
 

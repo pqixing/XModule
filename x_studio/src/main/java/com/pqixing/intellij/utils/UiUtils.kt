@@ -11,7 +11,6 @@ import com.intellij.openapi.components.NamedComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.*
-import com.pqixing.help.Tools
 import com.pqixing.creator.utils.LogWrap
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.NewImportDialog
@@ -113,14 +112,18 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
 
     fun formatModule(target: Project, moduleXml: VirtualFile?, formatFoce: Boolean = false): Boolean {
         moduleXml ?: return false
-        val manifest = XmlHelper.loadManifest(target.basePath) ?: return false
-
-        val ins = moduleXml.inputStream.reader()
-        val txtLines = ins.readLines()
-        ins.close()
+        val txtLines = mutableListOf<String>()
         val tag = "<!--end-->"
-        if (!formatFoce && txtLines.lastOrNull()?.endsWith(tag) == true) return false
+        if (!formatFoce) {
+            if (checkIfFormat(target)) return false
 
+            val ins = moduleXml.inputStream.reader()
+            txtLines.addAll(ins.readLines())
+            ins.close()
+            if (txtLines.lastOrNull()?.endsWith(tag) == true) return false
+        }
+
+        val manifest = XmlHelper.loadManifest(target.basePath) ?: return false
         invokeLaterOnWriteThread(Runnable {
             target.save()
             val defGroup = "apis"

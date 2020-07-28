@@ -1,13 +1,11 @@
 package com.pqixing.tools
 
-import com.pqixing.help.Tools
+import com.pqixing.EnvKeys
 import java.io.Closeable
 import java.io.File
-import java.lang.StringBuilder
 
 object FileUtils {
-    var clazz: Class<*> = Tools::class.java
-
+    var clazz: Class<*> = EnvKeys::class.java
     @JvmStatic
     fun fromRes(name: String): String {
         val reader = clazz.getResourceAsStream(name).reader()

@@ -1,6 +1,5 @@
 package com.pqixing.intellij.actions
 
-import com.alibaba.fastjson.JSON
 import com.intellij.ide.impl.ProjectUtil
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -9,13 +8,10 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.project.impl.ProjectManagerImpl
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
-import com.pqixing.Config
 import com.pqixing.EnvKeys
-import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.OpenNewProjectDialog
 import com.pqixing.intellij.utils.GradleUtils
 import com.pqixing.tools.FileUtils
-import groovy.lang.GroovyClassLoader
 import java.io.File
 
 
@@ -23,7 +19,7 @@ open class OpenNewAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
 
-        val defaultProject = e.project ?: ProjectManagerImpl.getInstance().defaultProject?:return
+        val defaultProject = e.project ?: ProjectManagerImpl.getInstance().defaultProject ?: return
         val rootDir = e.project?.let { LocalFileSystem.getInstance().findFileByPath(it.basePath!!) }
         val showAndPack = OpenNewProjectDialog(defaultProject)
         showAndPack.tvFilePick.addActionListener {
@@ -35,16 +31,14 @@ open class OpenNewAction : AnAction() {
             }
         }
         if (rootDir != null) {
-
-
             showAndPack.tvDir.text = rootDir.parent.canonicalPath ?: ""
-
-//            if (tl.exists()) showAndPack.tvGitUrl.text = XmlHelper.parseManifest(tl).basicUrl
+            showAndPack.tvGitUrl.text = "https://github.com/pqixing/x_basic.git"
         }
 
         showAndPack.setOnOk {
             val basicDir = File(showAndPack.tvDir.text.trim(), EnvKeys.BASIC)
             val dir = basicDir.parentFile
+
             GradleUtils.downloadBasic(defaultProject, basicDir, showAndPack.tvGitUrl.text.trim()) {
                 if (rootDir?.exists() == true) {//复制文件
                     FileUtils.copy(File(rootDir.path, "gradle"), File(dir, "gradle"))

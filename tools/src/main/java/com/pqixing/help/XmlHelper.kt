@@ -102,7 +102,7 @@ object XmlHelper {
         manifest.mavenPsw = node.get("@mavenPsw")?.toString() ?: ""
         manifest.createSrc = node.get("@createSrc") == "true"
         manifest.baseVersion = node.get("@baseVersion")?.toString() ?: ""
-        manifest.fallbacks.addAll((node.get("@matchingFallbacks")?.toString()
+        manifest.fallbacks.addAll((node.get("@fallbacks")?.toString()
                 ?: "").split(",").filter { it.isNotEmpty() })
 
         parseProjects(manifest, node, "")
@@ -317,10 +317,10 @@ object XmlHelper {
 
 
     fun loadConfig(basePath: String, extras: Map<String, Any?> = emptyMap()): Config {
-        val configFile = fileConfig(basePath)
-        if (!configFile.exists()) FileUtils.writeText(configFile, FileUtils.fromRes(configFile.name))
 
         val config = try {
+            val configFile = fileConfig(basePath)
+            if (!configFile.exists()) FileUtils.writeText(configFile, FileUtils.fromRes(configFile.name))
             val parseClass = GroovyClassLoader().parseClass(configFile)
             JSON.parseObject(JSON.toJSONString(parseClass.newInstance()), Config::class.java)
         } catch (e: Exception) {
@@ -358,7 +358,7 @@ object XmlHelper {
     fun loadAllModule(basePath: String?) = loadManifest(basePath)?.allModules() ?: mutableSetOf()
     fun saveConfig(basePath: String?, config: Config): Boolean {
         val configFile = File(basePath, EnvKeys.USER_CONFIG)
-        if (!configFile.exists()) FileUtils.writeText(configFile, FileUtils.fromRes(configFile.name))
+        if (!configFile.exists()) FileUtils.writeText(configFile, FileUtils.fromRes(EnvKeys.USER_CONFIG))
 
 
         var result = FileUtils.readText(configFile) ?: return false
@@ -368,7 +368,7 @@ object XmlHelper {
         Config::class.java.fields.forEach { f ->
             f.isAccessible = true
             val value = f.get(config)?.let { if (it is String) "\"$it\"" else "$it" }
-            result = result.replace(Regex("String *${f.name} *=.*;"), "String dependentModel = $value;")
+            result = result.replace(Regex("String *${f.name} *=.*;"), "String ${f.name} = $value;")
         }
         return FileUtils.writeText(configFile, result, true).isNotEmpty()
     }
