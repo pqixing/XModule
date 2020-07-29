@@ -2,6 +2,7 @@ package com.pqixing.modularization.maven
 
 import com.pqixing.EnvKeys
 import com.pqixing.help.Tools
+import com.pqixing.help.XmlHelper
 import com.pqixing.model.Compile
 import com.pqixing.model.Module
 import com.pqixing.modularization.Keys
@@ -187,6 +188,8 @@ open class ToMavenTask : BaseTask() {
     }
 
     override fun runTask() {
+        //更新本地版本信息
+        XmlHelper.loadVersionFromNet(args.env.rootDir.absolutePath)
         ResultUtils.writeResult(resultStr)
     }
 }
