@@ -6,7 +6,7 @@ public class FileNames {
     /**
      * 一个tab空格度
      */
-    public static final String MODULARIZATION = "modularization";
+    public static final String XMODULE = "x_module";
 
 
     /**
@@ -22,8 +22,4 @@ public class FileNames {
      * 模板目录
      */
     public static final String BASIC = EnvKeys.BASIC;
-    /**
-     * 配置文件
-     */
-    public static final String PROJECT_XML = "manifest.xml";
 }

@@ -34,9 +34,9 @@ class EnvArgs(val rootDir: File, val config: Config, val gradleCache: File) {
     var basicBranch: String = "master"
 
     var basicDir: File = File(rootDir, FileNames.BASIC)
-    var versionDir: File = File(gradleCache, "${FileNames.MODULARIZATION}/version")
+    var versionDir: File = File(rootDir, "build/${FileNames.XMODULE}/version")
     var versionFile: File = File(versionDir, "download.zip")
-    var uploadFile: File = File(versionDir, "upload.txt")
+    var defArchivesFile: File = File(versionDir, "upload.txt")
 
     var codeRootDir: File = File(File(rootDir, config.codeRoot).canonicalPath)
 

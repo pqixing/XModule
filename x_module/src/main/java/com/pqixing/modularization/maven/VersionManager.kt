@@ -158,7 +158,7 @@ class VersionManager(val args: ArgsExtends) {
      * 读取指定的版本文件，优先级最高
      */
     private fun readTargetVersions() {
-        targetVersion[FileNames.MODULARIZATION] = FileNames.MODULARIZATION
+        targetVersion[FileNames.XMODULE] = FileNames.XMODULE
         val info = args.config
         PropertiesUtils.readProperties(File(info.versionFile)).forEach {
             targetVersion[it.key.toString()] = it.value.toString()
@@ -365,7 +365,7 @@ class VersionManager(val args: ArgsExtends) {
 
     fun storeToUp(curVersions: MutableMap<String, String>) {
         curVersions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
-        PropertiesUtils.writeProperties(args.env.uploadFile, curVersions.toProperties())//保存当前的版本信息等待上传
+        PropertiesUtils.writeProperties(args.env.defArchivesFile, curVersions.toProperties())//保存当前的版本信息等待上传
     }
 
     /**

@@ -35,7 +35,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     override val cacheDir: File
         get() {
             val suffix = if (project == project.rootProject) "" else "_${buildDir.name}"
-            return File(projectDir, "build/${FileNames.MODULARIZATION}$suffix")
+            return File(projectDir, "build/${FileNames.XMODULE}$suffix")
         }
 
     override fun apply(project: Project) {
