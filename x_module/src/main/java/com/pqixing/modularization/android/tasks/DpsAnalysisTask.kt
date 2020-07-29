@@ -256,8 +256,8 @@ open class DpsAnalysisTask : BaseTask() {
     private fun saveVersionTag() {
 
         val branch = plugin.module.getBranch()
-        val tags = args.versions.curVersions.toProperties()
-        tags.putAll(args.versions.findBranchVersion(branch))
+        val tags = args.versions.readCurVersions().map { it.key to it.value.toString() }.toMap().toProperties()
+        tags.putAll(args.versions.readBranchVersion(branch))
         tags["TargetName"] = plugin.module.name
         GitUtils.open(File(args.env.codeRootDir, plugin.module.project.path))?.runCatching {
             tags["TargetBranch"] = branch

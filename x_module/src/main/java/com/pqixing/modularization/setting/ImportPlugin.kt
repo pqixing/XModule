@@ -1,8 +1,8 @@
 package com.pqixing.modularization.setting
 
+import com.pqixing.EnvKeys
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
-import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.base.IPlugin
 import com.pqixing.modularization.utils.GitUtils
@@ -95,7 +95,7 @@ class ImportPlugin : Plugin<Settings> {
     }
 
     private fun downloadBasic(basicDir: File, setting: Settings): Git? {
-        val urlName = "${FileNames.BASIC}Url"
+        val urlName = "${EnvKeys.BASIC}Url"
         val url = kotlin.runCatching { setting.extensions.extraProperties.get(urlName).toString() }.getOrNull()
         if (url?.isNotEmpty() != true) {//没有配置url
             ResultUtils.notifyIde(setting.rootDir, mutableMapOf("type" to "Miss_${urlName}"))

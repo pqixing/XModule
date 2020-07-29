@@ -1,9 +1,10 @@
 package com.pqixing.modularization.setting
 
 import com.pqixing.Config
-import com.pqixing.model.Module
+import com.pqixing.EnvKeys
+import com.pqixing.help.XmlHelper
 import com.pqixing.model.ManifestModel
-import com.pqixing.modularization.FileNames
+import com.pqixing.model.Module
 import com.pqixing.modularization.maven.VersionManager
 import com.pqixing.modularization.utils.GitUtils
 import java.io.File
@@ -33,11 +34,8 @@ class EnvArgs(val rootDir: File, val config: Config, val gradleCache: File) {
      */
     var basicBranch: String = "master"
 
-    var basicDir: File = File(rootDir, FileNames.BASIC)
-    var versionDir: File = File(rootDir, "build/${FileNames.XMODULE}/version")
-    var versionFile: File = File(versionDir, "download.zip")
-    var defArchivesFile: File = File(versionDir, "upload.txt")
-
+    var basicDir: File = File(rootDir, EnvKeys.BASIC)
+    var defArchivesFile: File = File(XmlHelper.fileVersion(rootDir.absolutePath), "upload.txt")
     var codeRootDir: File = File(File(rootDir, config.codeRoot).canonicalPath)
 
 

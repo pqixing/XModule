@@ -11,7 +11,7 @@ import java.io.File
 open class VersionIndexTask : BaseTask() {
 
     override fun runTask() {
-        project.getArgs().versions.indexVersionFromNet()
+//        project.getArgs().versions.indexVersionFromNet()
     }
 
     override fun end() {

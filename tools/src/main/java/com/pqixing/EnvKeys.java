@@ -34,10 +34,26 @@ public class EnvKeys {
      * 模板目录
      */
     public static final String BASIC = "basic";
+    public static final String BASIC_LOG = "basic_log";
     public static final String XML_META = "maven-metadata.xml";
     public static final String XML_MANIFEST = "basic/manifest.xml";
     /**
      * 配置文件
      */
     public static final String USER_CONFIG = "Config.java";
+
+    /**
+     * 一个tab空格度
+     */
+    public static final String XMODULE = "x_module";
+
+
+    /**
+     * gitIgonre
+     */
+    public static final String GIT_IGNORE = ".gitignore";
+    /**
+     * 依赖输出路径
+     */
+    public static final String GRADLE_DEPENDENCIES = "depend.gradle";
 }

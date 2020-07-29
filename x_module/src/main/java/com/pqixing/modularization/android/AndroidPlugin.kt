@@ -2,8 +2,8 @@ package com.pqixing.modularization.android
 
 
 import com.android.build.gradle.BaseExtension
+import com.pqixing.EnvKeys
 import com.pqixing.model.Module
-import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.dps.DpsExtendsCompat
 import com.pqixing.modularization.android.dps.DpsManager
@@ -64,7 +64,7 @@ open class AndroidPlugin : BasePlugin() {
             //开始注解切入
             if (buildAsApp && module.transform) (project.extensions.getByName("android") as? BaseExtension)?.registerTransform(PqxTransform())
             //解析依赖
-            project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, FileNames.GRADLE_DEPENDENCIES), dpsManager.resolveDps(), true)/*.also {  Tools.println("Depend:$it") }*/))
+            project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, EnvKeys.GRADLE_DEPENDENCIES), dpsManager.resolveDps(), true)/*.also {  Tools.println("Depend:$it") }*/))
             project.tasks.find { t -> t.name == "clean" }?.doLast { FileUtils.delete(File(project.projectDir, "build")) }
         })
 

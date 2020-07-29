@@ -93,19 +93,19 @@ class ImportAction : AnAction() {
                 ApplicationManager.getApplication().invokeLater { importByIde(project, importImls.toMutableList()) }
                 //如果快速导入不成功,则,同步一次
                 ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
-//                GradleSyncInvoker.getInstance().requestProjectSync(project, GradleSyncStats.Trigger.TRIGGER_USER_SYNC_ACTION, object : GradleSyncListener {
-//                    override fun syncSucceeded(project: Project) {
-//                        //添加basic的地址
-//                        syncVcs(gitPaths.keys.also { it.add(File(basePath, EnvKeys.BASIC)) }, dialog.syncVcs(), project)
-//
-//                        val manager = ModuleManager.getInstance(project)
-//                        manager.modules.forEach {
-//                            //模块的代码目录
-//                            pimls[ModuleRootManager.getInstance(it).contentRoots[0].toIoFile().canonicalPath] = it.moduleFilePath
-//                        }
-//                        saveIml(pimls)
-//                    }
-//                })
+                GradleSyncInvoker.getInstance().requestProjectSync(project, GradleSyncStats.Trigger.TRIGGER_USER_SYNC_ACTION, object : GradleSyncListener {
+                    override fun syncSucceeded(project: Project) {
+                        //添加basic的地址
+                        syncVcs(gitPaths.keys.also { it.add(File(basePath, EnvKeys.BASIC)) }, dialog.syncVcs(), project)
+
+                        val manager = ModuleManager.getInstance(project)
+                        manager.modules.forEach {
+                            //模块的代码目录
+                            pimls[ModuleRootManager.getInstance(it).contentRoots[0].toIoFile().canonicalPath] = it.moduleFilePath
+                        }
+                        saveIml(pimls)
+                    }
+                })
             }
         }
         dialog.btnConfig.addActionListener {

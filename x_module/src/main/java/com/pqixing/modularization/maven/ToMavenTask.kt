@@ -1,13 +1,14 @@
 package com.pqixing.modularization.maven
 
+import com.pqixing.EnvKeys
 import com.pqixing.help.Tools
 import com.pqixing.model.Compile
 import com.pqixing.model.Module
-import com.pqixing.modularization.helper.JGroovyHelper
 import com.pqixing.modularization.Keys
+import com.pqixing.modularization.android.pluginModule
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.helper.IExtHelper
-import com.pqixing.modularization.android.pluginModule
+import com.pqixing.modularization.helper.JGroovyHelper
 import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
@@ -17,7 +18,7 @@ import com.pqixing.tools.UrlUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.revwalk.RevCommit
 import java.io.File
-import java.util.HashSet
+import java.util.*
 
 open class ToMavenTask : BaseTask() {
     val plugin = project.pluginModule()
@@ -102,13 +103,9 @@ open class ToMavenTask : BaseTask() {
         resultStr = "$branch:$artifactId:$version"
 
 
-        //填入新的版本信息，提前生成生成待上传的版本号文件
-        val curVersions = args.versions.curVersions.toMutableMap()
-        curVersions["$groupId.$artifactId.$baseVersion"] = (v + 1).toString()
-        args.versions.storeToUp(curVersions)
-
         //设置上传的版本号的文件
-        extHelper.setMavenInfo(project.rootProject, args.manifest.groupId, "basic", System.currentTimeMillis().toString(), "")
+        args.versions.storeToUp()
+        extHelper.setMavenInfo(project.rootProject, "${args.manifest.groupId}.${EnvKeys.BASIC_LOG}", args.versions.lastLogName.substringAfter("-"), "$groupId.$artifactId.$baseVersion.${v + 1}", "")
 
         FileUtils.delete(project.buildDir)
     }

@@ -1,26 +1,23 @@
 package com.pqixing.modularization.maven
 
 import com.pqixing.EnvKeys
-import com.pqixing.help.Tools
-import com.pqixing.help.getEnvValue
 import com.pqixing.help.MavenPom
+import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
-import com.pqixing.modularization.FileNames
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.root.rootPlugin
 import com.pqixing.modularization.setting.ArgsExtends
 import com.pqixing.modularization.utils.GitUtils
-import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.PropertiesUtils
 import com.pqixing.tools.TextUtils
+import org.apache.commons.codec.digest.DigestUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ListBranchCommand
 import org.gradle.api.Project
 import java.io.File
 import java.net.URL
-import java.text.DateFormat
 import java.util.*
 import java.util.regex.Pattern
 import kotlin.Comparator
@@ -28,45 +25,44 @@ import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 class VersionManager(val args: ArgsExtends) {
-    val matchingFallbacks get() = args.manifest.fallbacks.toMutableList()
+    //分支tag的的路径名字
+    val tagTimes = mutableMapOf<String, String>()
+    val loads = mutableSetOf<String>()
+    var lastLogName = "default"
+
+    val fallbacks get() = args.manifest.fallbacks.toMutableList()
     val groupName get() = args.manifest.groupId
 
     //内存中只保留10跳
     var pomCache: LinkedList<Pair<String, MavenPom>> = LinkedList()
 
-    private var repoLastCommit = 0
-
     /**
      * 当前最新的版本信息
      */
-    val curVersions = HashMap<String, String>()
+    private val curVersions = HashMap<String, Int>()
 
     /**
      * 分支相关版本号信息
      */
-    private val branchVersion = HashMap<String, HashMap<String, String>>()
+    private val branchVersion = HashMap<String, HashMap<String, Int>>()
 
     /**
      * 强制指定的版本号信息，分支默认会使用指定的分支信息
      */
-    private val targetVersion = HashMap<String, String>()
+    private val targetVersion = HashMap<String, Int>()
 
     /**
      * 获取指定分支指定baseVersion版本的最新版本号
      */
-    fun getNewerVersion(branch: String, module: String, version: String): Int {
-        if (curVersions.isEmpty()) readCurVersions()
-        val key = "$groupName.$branch.$module.$version"
-        return curVersions[key]?.toInt() ?: -1
-    }
+    fun getNewerVersion(branch: String, module: String, version: String): Int = readCurVersions()["$groupName.$branch.$module.$version"]
+            ?: -1
 
     /**
      * 根据分支，查找出所有模块名称
      */
     fun findAllModuleByBranch(branch: String): Set<String> {
-        if (curVersions.isEmpty()) readCurVersions()
         val preKey = "$groupName.$branch."
-        return curVersions.keys.filter { it.startsWith(preKey) }.map {
+        return readCurVersions().keys.filter { it.startsWith(preKey) }.map {
             val r = it.replace(preKey, "")
             r.substring(0, r.indexOf("."))
         }.toSet()
@@ -78,10 +74,10 @@ class VersionManager(val args: ArgsExtends) {
      * 指定版本 > 分支版本 > 当前版本
      */
     fun getVersion(branch: String, module: String, inputVersion: String): Pair<String, String> {
-        val branchVersion = findBranchVersion(branch)
-        val start = matchingFallbacks.indexOf(branch)
-        for (i in start until matchingFallbacks.size) {
-            val b = if (i < 0) branch else matchingFallbacks[i]
+        val branchVersion = readBranchVersion(branch)
+        val start = fallbacks.indexOf(branch)
+        for (i in start until fallbacks.size) {
+            val b = if (i < 0) branch else fallbacks[i]
             val preKey = "$groupName.$b.$module."
             var version = inputVersion
             if (TextUtils.isVersionCode(version)) {
@@ -89,7 +85,7 @@ class VersionManager(val args: ArgsExtends) {
                 if (i1 < 0) continue
                 val baseVersion = version.substring(0, i1)
                 val last = version.substring(i1 + 1).toInt()
-                val v = branchVersion["$preKey$baseVersion"]?.toInt() ?: continue
+                val v = branchVersion["$preKey$baseVersion"] ?: continue
                 if (v >= last) return Pair(b, version)//.apply { Tools.println("getVersion -> $branch $module $inputVersion -> $first : $second")  }
             } else {
                 version = if (TextUtils.isBaseVersion(inputVersion)) inputVersion else findBaseVersion(inputVersion, preKey, branchVersion)
@@ -107,13 +103,12 @@ class VersionManager(val args: ArgsExtends) {
      * 检查改分支是否存在版本号
      */
     fun checkBranchVersion(branch: String, module: String): Boolean {
-        val branchVersion = findBranchVersion(branch)
+        val branchVersion = readBranchVersion(branch)
         val preKey = "$groupName.$branch.$module."
         return TextUtils.isBaseVersion(findBaseVersion("+", preKey, branchVersion))
     }
 
-
-    private fun findBaseVersion(v: String, preKey: String, versions: HashMap<String, String>): String {
+    private fun findBaseVersion(v: String, preKey: String, versions: HashMap<String, Int>): String {
         var vs = versions.keys.filter { it.startsWith(preKey) }
         if (vs.isEmpty()) return "+"
         vs = vs.map { it.replace(preKey, "") }
@@ -126,84 +121,91 @@ class VersionManager(val args: ArgsExtends) {
         return "+"
     }
 
-    fun findBranchVersion(branch: String): HashMap<String, String> {
-        if (curVersions.isEmpty()) readCurVersions()
-        if (targetVersion.isEmpty()) readTargetVersions()
-        return branchVersion[branch] ?: readBranchVersion(branch)
-    }
+    @Synchronized
+    fun readBranchVersion(branch: String): HashMap<String, Int> {
+        val hash = DigestUtils.md5Hex(branch);
+        if (loads.contains(hash)) return branchVersion[branch]!!
 
-    private fun getBranchVersionName(branch: String): String {
-        val of = branch.lastIndexOf("/");
-        return "versions/version_${branch.substring(of + 1)}.properties"
-    }
+        val branchMap = HashMap<String, Int>(readCurVersions())
+        branchMap += readTargetVersions()
 
-    /**
-     * 读取某个分支指定的配置文件
-     */
-    private fun readBranchVersion(branch: String): HashMap<String, String> {
-        val branchMap = HashMap<String, String>()
+        //打过标签的文件
+        branchMap += readVersionFromFile(tagTimes[hash])
         branchVersion[branch] = branchMap
-        //将基础版本放入
-        branchMap.putAll(curVersions)
-        val branchFile = File(args.env.basicDir, getBranchVersionName(branch))
-        PropertiesUtils.readProperties(branchFile).forEach {
-            branchMap[it.key.toString()] = it.value.toString()
-        }
-        //最后放入指定版本
-        branchMap.putAll(targetVersion)
+
         return branchMap
     }
 
     /**
      * 读取指定的版本文件，优先级最高
      */
-    private fun readTargetVersions() {
-        targetVersion[FileNames.XMODULE] = FileNames.XMODULE
-        val info = args.config
-        PropertiesUtils.readProperties(File(info.versionFile)).forEach {
-            targetVersion[it.key.toString()] = it.value.toString()
-        }
-    }
-
-    private fun readCurVersions() {
-        if (curVersions.isNotEmpty()) return
-        val versionFile = args.env.versionFile
-
-        val basicRepoUrl = TextUtils.append(arrayOf(args.manifest.mavenUrl, groupName.replace(".", "/"), EnvKeys.BASIC))
-        PropertiesUtils.readProperties(versionFile).forEach { curVersions[it.key.toString()] = it.value.toString() }
-
-        //如果是打包，则从仓库更新版本
-        if (args.config.sync || !versionFile.exists() || args.runTaskNames.toString().contains("ToMaven")) {//如果当前文件不存，从新生成
-            val metaTxt = readUrlTxt(TextUtils.append(arrayOf(basicRepoUrl, EnvKeys.XML_META)))
-            val cacheDir = File(args.env.versionDir, "cache")
-            val meta = XmlHelper.parseMetadata(metaTxt)
-
-            val oldUpdate = curVersions["lastUpdated"]?.toLongOrNull() ?: 0
-            val newUpdate = meta.lastUpdated.toLongOrNull() ?: 0
-            //如果仓库的最后更新时间，比当前的最后更新时间新，则从新加载文件
-            if (newUpdate > oldUpdate) {
-                val newVersion = mutableMapOf<String, Int>()
-                meta.versions.reversed().filterIndexed { index, _ -> index < 3 }.forEach { v ->
-                    val cacheFile = File(cacheDir, v)
-                    var pom = FileUtils.readText(cacheFile)
-                    if (pom?.isNotEmpty() != true) {
-                        pom = readUrlTxt(TextUtils.append(arrayOf(basicRepoUrl, v, "${EnvKeys.BASIC}-${v}.properties")))
-                        FileUtils.writeText(cacheFile, pom)
-                    }
-
-                    for (entry in PropertiesUtils.readProperties(cacheFile).toMap()) {
-                        val value = entry.value.toString().toIntOrNull() ?: continue
-
-                        val key = entry.key.toString()
-                        newVersion[key] = value.coerceAtLeast(newVersion[key] ?: 0)
-                    }
-                }
-                newVersion.forEach { curVersions[it.key] = it.value.toString() }
-                curVersions["lastUpdated"] = newUpdate.toString()
-                PropertiesUtils.writeProperties(versionFile, newVersion.map { it.key to it.value.toString() }.toMap().toProperties())
+    @Synchronized
+    private fun readTargetVersions(): HashMap<String, Int> {
+        if (!loads.contains("targetVersion")) {
+            loads.add("targetVersion")
+            val info = args.config
+            PropertiesUtils.readProperties(File(info.versionFile)).forEach {
+                targetVersion[it.key.toString()] = it.value.toString().toIntOrNull() ?: 0
             }
         }
-        if (curVersions.isEmpty()) curVersions["lastUpdated"] = "0"
+        return targetVersion
+    }
+
+    fun readVersionFromFile(fileName: String?): Map<String, Int> {
+        fileName ?: return emptyMap()
+        val file = File(XmlHelper.fileVersion(args.env.rootDir.absolutePath), "${fileName}.txt")
+        if (!file.exists()) {
+            val netTxt = XmlHelper.readUrlTxt(TextUtils.append(arrayOf(args.manifest.mavenUrl, args.manifest.groupId.replace(".", "/"), EnvKeys.BASIC, fileName, "${EnvKeys.BASIC}-${fileName}.txt")))
+            if (netTxt.isNotEmpty()) {//写入网络的文件
+                FileUtils.writeText(file, netTxt)
+            }
+        }
+        val map = mutableMapOf<String, Int>()
+        //加载当前版本号
+        for (it in PropertiesUtils.readProperties(file)) {
+            map[it.key.toString()] = it.value.toString().toIntOrNull() ?: 0
+        }
+        return map
+    }
+
+    @Synchronized
+    fun readCurVersions(): HashMap<String, Int> {
+        if (loads.contains("curVersions")) return curVersions
+
+
+        val basePath = args.env.rootDir.absolutePath
+        val versionDir = XmlHelper.fileVersion(basePath)
+        //重新冲仓库更新一次版本信息
+        if (args.config.sync || !versionDir.exists() || args.runTaskNames.find { it.contains("ToMaven") } != null) {//如果当前文件不存，从新生成
+            XmlHelper.loadVersionFromNet(basePath)
+        }
+
+
+        //加载所有版本信息相关的文件
+        for (v in XmlHelper.parseMetadata(FileUtils.readText(File(versionDir, EnvKeys.XML_MANIFEST))).versions) {
+            if (v.startsWith("tag-")) {
+                tagTimes[v.substring(4, v.lastIndexOf("-"))] = v
+            } else if (v.startsWith("full-")) {
+                lastLogName = v
+            }
+        }
+
+        val manifest = args.manifest
+        //加载full版本记录
+        curVersions += readVersionFromFile(lastLogName.takeIf { it != "default" })
+
+        //根据full版本，加载临时提交记录进行合并
+        val logMetaFile = File(versionDir, "${EnvKeys.BASIC_LOG}/${lastLogName.substringAfter("-")}.xml")
+        for (it in XmlHelper.parseMetadata(FileUtils.readText(logMetaFile)).versions) {
+            val spilt = it.lastIndexOf(".")
+            if (spilt < 0) continue
+            val key = it.substring(0, spilt)
+            val value = it.substring(spilt + 1).toIntOrNull() ?: 0
+            //放入最大值
+            curVersions[key] = value.coerceAtLeast(curVersions[key] ?: 0)
+        }
+        loads.add("curVersions")
+        return curVersions
     }
 
     /**
@@ -227,39 +229,6 @@ class VersionManager(val args: ArgsExtends) {
         }
     }
 
-    fun indexVersionFromNet() {
-        curVersions.clear()
-        branchVersion.clear()
-        indexVersionFromNet(File(args.env.basicDir, "versions/version.properties"), curVersions)
-    }
-
-    /**
-     * 创建一个分支的版本号Tag标签
-     */
-    fun createVersionTag(): Boolean {
-        val opBranch = EnvKeys.opBranch.getEnvValue() ?: return false
-        val taskBranch = opBranch.substring(opBranch.lastIndexOf("/") + 1)//直接获取名称,不要origin
-        if (taskBranch.isEmpty() || taskBranch == "master") {
-            Tools.printError(-1, "createVersionTag taskBranch is empty, please input taskBranch!!")
-            return false
-        }
-        //拷贝一份
-        val fallbacks = matchingFallbacks.toMutableList()
-        (EnvKeys.tagBranch.getEnvValue()
-                ?: "").split(",").map { it.split("/").last().trim() }.forEach { if (it.isNotEmpty() && !fallbacks.contains(it)) fallbacks.add(it) }
-
-        val matchKeys = fallbacks.map { "$groupName.$it." }
-        val tagVersions = curVersions.filter { c -> matchKeys.any { f -> c.key.startsWith(f) } }
-
-        val branchFile = File(args.env.basicDir, getBranchVersionName(taskBranch))
-        PropertiesUtils.writeProperties(branchFile, tagVersions.toProperties())
-        ResultUtils.writeResult(branchFile.absolutePath)
-//        val git = Git.open(args.env.basicDir)
-//        GitUtils.addAndPush(git, "versions", "createVersionTag $taskBranch ${DateFormat.getDateTimeInstance().format(Date())}", true)
-//        GitUtils.close(git)
-        return true
-    }
-
     /**
      * 从网络获取最新的版本号信息
      */
@@ -281,11 +250,8 @@ class VersionManager(val args: ArgsExtends) {
         Tools.println("parseNetVersions  end -> ${System.currentTimeMillis() - start} ms")
         versions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
 
-        GitUtils.pull(git)
 
         PropertiesUtils.writeProperties(outFile, versions.toProperties())
-        GitUtils.addAndPush(git, "versions", "indexVersionFromNet ${DateFormat.getDateTimeInstance().format(Date())}", false)
-        GitUtils.close(git)
     }
 
     /**
@@ -308,9 +274,7 @@ class VersionManager(val args: ArgsExtends) {
     /**
      *
      */
-    fun readUrlTxt(url: String) = kotlin.runCatching {
-        if (url.startsWith("http")) URL(url).readText() else FileUtils.readText(File(url))
-    }.getOrNull() ?: ""
+    inline fun readUrlTxt(url: String) = XmlHelper.readUrlTxt(url)
 
     fun getFullUrl(url: String, baseUrl: String): String {
         if (url == "..") return "";
@@ -363,9 +327,8 @@ class VersionManager(val args: ArgsExtends) {
         }
     }
 
-    fun storeToUp(curVersions: MutableMap<String, String>) {
-        curVersions[Keys.UPDATE_TIME] = (System.currentTimeMillis() / 1000).toInt().toString()
-        PropertiesUtils.writeProperties(args.env.defArchivesFile, curVersions.toProperties())//保存当前的版本信息等待上传
+    fun storeToUp(map: Map<String, Any?> = emptyMap()) {
+        PropertiesUtils.writeProperties(args.env.defArchivesFile, map.map { it.key to it.value.toString() }.toMap().toProperties())//保存当前的版本信息等待上传
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.pqixing.modularization.base
 
 
-import com.pqixing.modularization.FileNames
+import com.pqixing.EnvKeys
 import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.helper.JGroovyHelper
 import com.pqixing.modularization.setting.ImportPlugin
@@ -35,7 +35,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     override val cacheDir: File
         get() {
             val suffix = if (project == project.rootProject) "" else "_${buildDir.name}"
-            return File(projectDir, "build/${FileNames.XMODULE}$suffix")
+            return File(projectDir, "build/${EnvKeys.XMODULE}$suffix")
         }
 
     override fun apply(project: Project) {
@@ -61,7 +61,7 @@ abstract class BasePlugin : Plugin<Project>, IPlugin {
     }
 
     fun createIgnoreFile() {
-        val ignoreFile = project.file(FileNames.GIT_IGNORE)
+        val ignoreFile = project.file(EnvKeys.GIT_IGNORE)
 
         val defSets = mutableSetOf("build", "*.iml", "src/dev")
         defSets += ignoreFields

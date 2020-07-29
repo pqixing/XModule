@@ -16,6 +16,7 @@ import groovy.util.NodeList
 import groovy.util.XmlParser
 import groovy.xml.QName
 import java.io.File
+import java.net.URL
 
 object XmlHelper {
 
@@ -62,9 +63,9 @@ object XmlHelper {
     }
 
 
-    fun parseMetadata(txt: String): MavenMetadata {
+    fun parseMetadata(txt: String?): MavenMetadata {
         val mate = MavenMetadata()
-        if (txt.isEmpty()) return mate
+        if (txt?.isNotEmpty()!=true) return mate
         val node = XmlParser().parseText(txt)
 
         mate.groupId = getChildNodeValue(node, "groupId")
@@ -373,7 +374,33 @@ object XmlHelper {
         return FileUtils.writeText(configFile, result, true).isNotEmpty()
     }
 
+    fun loadVersionFromNet(basePath: String?) {
+        val manifest = loadManifest(basePath) ?: return
+        val versionDir = fileVersion(basePath)
+        versionDir.mkdirs()
+        val versionMetaStr = readUrlTxt(TextUtils.append(arrayOf(manifest.mavenUrl, manifest.groupId.replace(".", "/"), EnvKeys.BASIC, EnvKeys.XML_META)))
+
+        //如果不为空
+        FileUtils.writeText(File(versionDir, EnvKeys.XML_MANIFEST), versionMetaStr)
+        val lastLog = parseMetadata(versionMetaStr).versions.findLast { it.startsWith("full-") }?.substring(5)
+                ?: "default"
+
+        //如果存在完成的记录日志
+        val logMetaStr = readUrlTxt(TextUtils.append(arrayOf(manifest.mavenUrl, manifest.groupId.replace(".", "/"), EnvKeys.BASIC_LOG, lastLog, EnvKeys.XML_META)))
+        FileUtils.writeText(File(versionDir, "${EnvKeys.BASIC_LOG}/$lastLog.xml"), logMetaStr)
+    }
+
+
+    fun fileVersion(basePath: String?): File = File(basePath, "build/${EnvKeys.XMODULE}/version")
     fun fileBasic(basePath: String?): File = File(basePath, EnvKeys.BASIC)
     fun fileConfig(basePath: String?): File = File(basePath, EnvKeys.USER_CONFIG)
     fun fileManifest(basePath: String?): File = File(basePath, EnvKeys.XML_MANIFEST)
+
+    /**
+     *
+     */
+    fun readUrlTxt(url: String) = kotlin.runCatching {
+        if (url.startsWith("http")) URL(url).readText() else FileUtils.readText(File(url))
+    }.getOrNull() ?: ""
+
 }

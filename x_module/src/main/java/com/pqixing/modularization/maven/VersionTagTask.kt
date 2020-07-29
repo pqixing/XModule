@@ -14,7 +14,7 @@ open class VersionTagTask : BaseTask() {
     }
 
     override fun runTask() {
-        project.getArgs().versions.createVersionTag()
+//        project.getArgs().versions.createVersionTag()
     }
 
 
