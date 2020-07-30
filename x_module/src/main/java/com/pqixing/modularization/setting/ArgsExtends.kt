@@ -2,7 +2,6 @@ package com.pqixing.modularization.setting
 
 import com.pqixing.Config
 import com.pqixing.EnvKeys
-import com.pqixing.help.XmlHelper
 import com.pqixing.model.ManifestModel
 import com.pqixing.model.Module
 import com.pqixing.modularization.maven.VersionManager
@@ -11,7 +10,7 @@ import java.io.File
 
 class ArgsExtends(val config: Config, val env: EnvArgs, val manifest: ManifestModel) {
 
-    var versions: VersionManager = VersionManager(this)
+    var vm: VersionManager = VersionManager(this)
     var runTaskNames = mutableListOf<String>()
 
     fun runAsApp(module: Module) = module.isApplication || runTaskNames.contains(":${module.name}:BuildApk") || runTaskNames.find { it.matches(Regex(":${module.name}:assemble.*?Dev")) } != null
@@ -22,8 +21,10 @@ class ArgsExtends(val config: Config, val env: EnvArgs, val manifest: ManifestMo
      * 释放内部饮用
      */
     fun clear() {
-        versions.pomCache.clear()
-        versions = VersionManager(this)
+        vm.pomCache.clear()
+        vm.loads.clear()
+        vm = VersionManager(this)
+
         runTaskNames.clear()
     }
 }
@@ -33,9 +34,10 @@ class EnvArgs(val rootDir: File, val config: Config, val gradleCache: File) {
      *
      */
     var basicBranch: String = "master"
+    var allBranches = mutableSetOf<String>()
 
     var basicDir: File = File(rootDir, EnvKeys.BASIC)
-    var defArchivesFile: File = File(XmlHelper.fileVersion(rootDir.absolutePath), "upload.txt")
+    var defArchivesFile: File = File(rootDir, "build/upload.txt")
     var codeRootDir: File = File(File(rootDir, config.codeRoot).canonicalPath)
 
 

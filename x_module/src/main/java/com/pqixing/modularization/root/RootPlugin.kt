@@ -2,8 +2,7 @@ package com.pqixing.modularization.root
 
 import com.pqixing.EnvKeys
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.maven.VersionIndexTask
-import com.pqixing.modularization.maven.VersionTagTask
+import com.pqixing.modularization.maven.IndexMavenTask
 import com.pqixing.modularization.root.tasks.*
 import com.pqixing.modularization.setting.ImportPlugin
 import org.gradle.api.Project
@@ -26,11 +25,9 @@ open class RootPlugin : BasePlugin() {
             , LoadAllBranchModuleTask::class.java
             , CreateBranchTask::class.java
             , PullProjectTask::class.java
-            , VersionTagTask::class.java
-            , VersionIndexTask::class.java
             , DeleteBranchTask::class.java
             , SyncBranchTask::class.java
-            , IndexVersionTask::class.java
+            , IndexMavenTask::class.java
     )
 
     override fun apply(project: Project) {

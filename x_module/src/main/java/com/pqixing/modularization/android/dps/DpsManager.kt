@@ -37,9 +37,12 @@ class DpsManager(val plugin: AndroidPlugin) {
                     "mavenFirst" -> onMavenCompile(dpc, includes, excludes) || onLocalCompile(dpc, includes, excludes)
                     else -> onMavenCompile(dpc, includes, excludes)
                 }
-                if (!compile) loseList.add(dpc.name)
+                if (!compile){
+                    Tools.println("lose -> ${dpc.name}")
+                    loseList.add(dpc.name)
+                }
 
-                val newVersion = project.getArgs().versions.getVersion(dpc.branch, dpc.name, "+")
+                val newVersion = project.getArgs().vm.getVersion(dpc.branch, dpc.name, "+")
                 if (!newVersion.second.startsWith(dpc.version) && newVersion.second.trim() != "+" && dpc.version.trim() != "+")
                     dpsV.add("${dpc.version} -> ${newVersion.second} -> compile \"${dpc.name}:${newVersion.second.substringBeforeLast(".")}\"")
             }
@@ -83,14 +86,14 @@ class DpsManager(val plugin: AndroidPlugin) {
      * 添加一个仓库依赖
      */
     private fun onMavenCompile(dpc: Compile, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
-        val dpVersion = args.versions.getVersion(dpc.branch, dpc.name, dpc.version).takeIf { it.first.isNotEmpty() }
+        val dpVersion = args.vm.getVersion(dpc.branch, dpc.name, dpc.version).takeIf { it.first.isNotEmpty() }
                 ?: return false
 
         val c = takeIf { dpVersion.second == dpc.version }?.let { " ;force = true ;" } ?: ""
 
         includes.add("${getScope(dpc.dpType, dpc.scope)} ('${args.manifest.groupId}.${dpVersion.first}:${dpc.name}:${dpVersion.second}') { ${excludeStr(excludes = dpc.excludes)} $c }")
         addBranchExclude(dpVersion.first, dpc.name, excludes)
-        excludes.addAll(args.versions.getPom(project, dpVersion.first, dpc.name, dpVersion.second).allExclude)
+        excludes.addAll(args.vm.getPom(project, dpVersion.first, dpc.name, dpVersion.second).allExclude)
         return true
     }
 //
@@ -117,7 +120,7 @@ class DpsManager(val plugin: AndroidPlugin) {
             val start = indexOf(compileBranch) + pointer
             for (i in start until size) {
                 val b = if (i < 0) compileBranch else get(i)
-                if (args.versions.checkBranchVersion(b, moduleName)) {
+                if (args.vm.checkBranchVersion(b, moduleName)) {
                     excludes.add("${args.manifest.groupId}.$b,$moduleName")
                 }
             }

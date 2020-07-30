@@ -10,6 +10,7 @@ import com.pqixing.modularization.utils.Logger
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.ListBranchCommand
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import org.gradle.api.Plugin
@@ -60,12 +61,12 @@ class ImportPlugin : Plugin<Settings> {
         //检查basic是否存在，如果不存在，尝试读取gradle.properties进行下载，否则抛出异常
         val basicGit = GitUtils.open(env.basicDir) ?: downloadBasic(env.basicDir, setting) ?: return
         env.basicBranch = basicGit.repository.branch
-        if (taskNames.find { it.contains(":ToMaven") } != null) GitUtils.pull(basicGit)
+        env.allBranches.addAll(basicGit.branchList().setListMode(ListBranchCommand.ListMode.ALL).call().map { it.name.substringAfterLast("/") })
         GitUtils.close(basicGit)
 
         //解析project.xml，解析所有应用的依赖数据
         val projectXml = XmlHelper.loadManifest(rootDir.absolutePath)
-        if(projectXml==null){
+        if (projectXml == null) {
             ResultUtils.thow("Miss manifest.xml on basic dir")
             return
         }

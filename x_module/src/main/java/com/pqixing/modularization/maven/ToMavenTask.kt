@@ -89,7 +89,7 @@ open class ToMavenTask : BaseTask() {
 
         checkGitStatus(open, module)
 
-        val v = args.versions.getNewerVersion(branch, artifactId, baseVersion)
+        val v = args.vm.getNewerVersion(branch, artifactId, baseVersion)
         val revCommit = loadGitInfo(open, module)
         if (revCommit == null) {
             Tools.printError(-1, "${module.name} Can not load git info!!")
@@ -105,8 +105,8 @@ open class ToMavenTask : BaseTask() {
 
 
         //设置上传的版本号的文件
-        args.versions.storeToUp()
-        extHelper.setMavenInfo(project.rootProject, "${args.manifest.groupId}.${EnvKeys.BASIC_LOG}", args.versions.lastLogName.substringAfter("-"), "$groupId.$artifactId.$baseVersion.${v + 1}", "")
+        args.vm.storeToUp()
+        extHelper.setMavenInfo(project.rootProject, "${args.manifest.groupId}.${EnvKeys.BASIC_LOG}", args.vm.lastVersion, "$groupId.$artifactId.$baseVersion.${v + 1}", "")
 
         FileUtils.delete(project.buildDir)
     }
@@ -128,7 +128,7 @@ open class ToMavenTask : BaseTask() {
         var i = match.indexOf(matchBranch)
         while (lastVersion < 0 && i < match.size) {
             matchBranch = if (i < 0) branch else match[i]
-            lastVersion = project.getArgs().versions.getNewerVersion(matchBranch, artifactId, baseVersion)
+            lastVersion = project.getArgs().vm.getNewerVersion(matchBranch, artifactId, baseVersion)
             i++
         }
         //一条记录都没有，新组件
@@ -138,7 +138,7 @@ open class ToMavenTask : BaseTask() {
         if (matchBranch != branch) {
             Tools.println(unCheck(1), "$artifactId Not allow user the same base version on new branch")
         }
-        val params = UrlUtils.getParams(args.versions.getPom(project, matchBranch, artifactId, "$baseVersion.$lastVersion").name)
+        val params = UrlUtils.getParams(args.vm.getPom(project, matchBranch, artifactId, "$baseVersion.$lastVersion").name)
         val hash = params["hash"] ?: ""
         val commitTime = params["commitTime"]?.toInt() ?: 0
         if (hash == revCommit.name || revCommit.commitTime < commitTime) {

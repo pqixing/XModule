@@ -1,136 +1,74 @@
-package com.pqixing.intellij.ui;
+package com.pqixing.intellij.ui
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode;
-import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VfsUtil;
-import com.pqixing.EnvKeys;
-import com.pqixing.intellij.adapter.JListInfo;
-import com.pqixing.intellij.adapter.JListSelectAdapter;
-import com.pqixing.intellij.utils.GitHelper;
-import com.pqixing.intellij.utils.GradleUtils;
-import com.pqixing.intellij.utils.UiUtils;
+import com.intellij.openapi.project.Project
+import com.pqixing.intellij.adapter.JListInfo
+import com.pqixing.intellij.adapter.JListSelectAdapter
+import com.pqixing.intellij.adapter.JlistSelectListener
+import java.awt.event.ActionEvent
+import java.awt.event.KeyEvent
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
+import javax.swing.*
 
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Objects;
+class VersionDialog(project: Project, branches: List<String>) : BaseJDialog(project) {
+    var contentPane: JPanel? = null
+    var buttonOK: JButton? = null
+    var buttonCancel: JButton? = null
+    var jlBranches: JList<JListInfo>? = null
+    var project: Project
+    var adapter: JListSelectAdapter
+    private var onOk: Runnable? = null
+    val selects = mutableListOf<JListInfo>()
+    fun setOnOk(onOk: Runnable?) {
+        this.onOk = onOk
+    }
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.KeyStroke;
+    private fun resetTag(items: List<JListInfo>): Boolean {
+        selects.addAll(items.filter { !it.select })
+        selects.forEach { it.log = "" }
+        selects.removeAll(items.filter { it.select })
+        selects.firstOrNull()?.log = "TAG"
+        return false
+    }
 
-import git4idea.GitLocalBranch;
-import git4idea.GitRemoteBranch;
-import git4idea.branch.GitBranchesCollection;
-import git4idea.repo.GitRepository;
-import kotlin.Pair;
+    private fun onOK() {
+        onOk?.run()
+        dispose()
+    }
 
-public class VersionDialog extends BaseJDialog {
-    private JPanel contentPane;
-    private JButton buttonOK;
-    private JButton buttonCancel;
-    private JComboBox cbTarget;
-    private JList jlBrans;
-    private javax.swing.JCheckBox allCheckBox;
+    private fun onCancel() {
+        // add your code here if necessary
+        dispose()
+    }
 
-    Project project;
-    JListSelectAdapter adapter;
+    val excludes: List<String>
+        get() = selects.map { it.title }
 
-    public VersionDialog(Project project) {
-        super(project);
-        setContentPane(contentPane);
-        setModal(false);
-        getRootPane().setDefaultButton(buttonOK);
-        this.project = project;
-        setTitle("Create Tag For Branch");
-        buttonOK.addActionListener(e -> onOK());
-
-        buttonCancel.addActionListener(e -> onCancel());
+    init {
+        setContentPane(contentPane)
+        isModal = false
+        getRootPane().defaultButton = buttonOK
+        this.project = project
+        title = "Index Version From Maven"
+        buttonOK!!.addActionListener { e: ActionEvent? -> onOK() }
+        buttonCancel!!.addActionListener { e: ActionEvent? -> onCancel() }
 
         // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
+        defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
+        addWindowListener(object : WindowAdapter() {
+            override fun windowClosing(e: WindowEvent) {
+                onCancel()
             }
-        });
+        })
 
         // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-        GitRepository repo = GitHelper.getRepo(new File(project.getBasePath(), EnvKeys.BASIC), project);
-        if (repo == null) {
-            return;
-        }
-        GitBranchesCollection branches = repo.getBranches();
-        HashSet<String> branchs = new HashSet<>();
-        for (GitRemoteBranch b : branches.getRemoteBranches()) {
-            branchs.add(b.getName());
-        }
-        LinkedList<JListInfo> datas = new LinkedList<>();
-        String targetBranch = "/" + repo.getCurrentBranchName();
-        for (String b : branchs) {
-            cbTarget.addItem(b);
-            datas.add(new JListInfo(b, "", 0, false));
-            if (b.endsWith(targetBranch)) cbTarget.setSelectedIndex(cbTarget.getItemCount() - 1);
-        }
-        adapter = new JListSelectAdapter(jlBrans, true);
-        adapter.setDatas(datas);
-        allCheckBox.addActionListener(e -> {
-            boolean select = allCheckBox.isSelected();
-            for (JListInfo j : datas) {
-                j.setSelect(select);
-            }
-            adapter.updateUI();
-        });
-    }
-
-    private void onOK() {
-        String targetBranch = cbTarget.getSelectedItem().toString().trim();
-        if (targetBranch.isEmpty()) return;
-        String runTaskId = System.currentTimeMillis() + "";
-        HashMap<String, String> envs = new HashMap<>(GradleUtils.INSTANCE.getDefEnvs());
-        envs.put(EnvKeys.opBranch, targetBranch);
-        StringBuilder tagBrans = new StringBuilder();
-        for (JListInfo j : adapter.getDatas()) {
-            if (j.getSelect()) {
-                String[] split = j.getTitle().trim().split("/");
-                tagBrans.append(split[split.length - 1]).append(",");
+        contentPane!!.registerKeyboardAction({ e: ActionEvent? -> onCancel() }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+        adapter = JListSelectAdapter(jlBranches!!, true)
+        adapter.setDatas(branches.map { JListInfo(it, "", 0, false) })
+        adapter.selectListener = object : JlistSelectListener {
+            override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean {
+                return resetTag(items)
             }
         }
-        envs.put("tagBranch", tagBrans.toString());
-
-        GradleUtils.INSTANCE.runTask(project, Arrays.asList(":VersionIndex", ":VersionTag"),
-                ProgressExecutionMode.IN_BACKGROUND_ASYNC, false
-                , runTaskId, envs
-                , (s, l) -> {
-                    if (!s) {
-                        new Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "VersionTag", "Gradle Task Error " + l, NotificationType.WARNING).notify(project);
-
-                    } else ApplicationManager.getApplication().invokeLater(() -> {
-                        FileEditorManager.getInstance(project).openFile(Objects.requireNonNull(VfsUtil.findFileByIoFile(new File(l), true)), true);
-                    });
-
-                });
-        dispose();
-    }
-
-    private void onCancel() {
-        // add your code here if necessary
-        dispose();
     }
 }

@@ -30,7 +30,7 @@ open class LoadAllBranchModuleTask: BaseTask() {
         val checkBranch = EnvKeys.opBranch.getEnvValue()?:return
 
         //查找出,当前分支,所有上传过的模块,在合并前先导入AS
-        val byBranch = project.getArgs().versions.findAllModuleByBranch(checkBranch)
+        val byBranch = project.getArgs().vm.findAllModuleByBranch(checkBranch)
 
         val result = StringBuilder("")
 

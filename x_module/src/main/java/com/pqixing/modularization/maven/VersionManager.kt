@@ -7,13 +7,10 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.root.rootPlugin
 import com.pqixing.modularization.setting.ArgsExtends
-import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.PropertiesUtils
 import com.pqixing.tools.TextUtils
 import org.apache.commons.codec.digest.DigestUtils
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.api.ListBranchCommand
 import org.gradle.api.Project
 import java.io.File
 import java.net.URL
@@ -23,9 +20,9 @@ import kotlin.collections.HashMap
 
 class VersionManager(val args: ArgsExtends) {
     //分支tag的的路径名字
-    val tagTimes = mutableMapOf<String, String>()
+    val tagVersions = mutableMapOf<String, String>()
+    var lastVersion = "default"
     val loads = mutableSetOf<String>()
-    var lastLogName = "default"
 
     val fallbacks get() = args.manifest.fallbacks.toMutableList()
     val groupName get() = args.manifest.groupId
@@ -126,7 +123,7 @@ class VersionManager(val args: ArgsExtends) {
         val branchMap = HashMap<String, Int>(readCurVersions())
 
         //打过标签的文件
-        branchMap += readVersionFromFile(tagTimes[hash])
+        branchMap += readVersionFromFile(EnvKeys.BASIC_TAG, tagVersions[hash])
         branchVersion[branch] = branchMap
 
         branchMap += readTargetVersions()
@@ -148,11 +145,12 @@ class VersionManager(val args: ArgsExtends) {
         return targetVersion
     }
 
-    fun readVersionFromFile(fileName: String?): Map<String, Int> {
-        fileName ?: return emptyMap()
-        val file = File(XmlHelper.fileVersion(args.env.rootDir.absolutePath), "${fileName}.txt")
+    fun readVersionFromFile(artifactId: String, version: String?): Map<String, Int> {
+        version ?: return emptyMap()
+        val versionDir = XmlHelper.fileVersion(args.env.rootDir.absolutePath)
+        val file = File(versionDir, "$artifactId/${version}.txt")
         if (!file.exists()) {
-            val netTxt = XmlHelper.readUrlTxt(TextUtils.append(arrayOf(args.manifest.mavenUrl, args.manifest.groupId.replace(".", "/"), EnvKeys.BASIC, fileName, "${EnvKeys.BASIC}-${fileName}.txt")))
+            val netTxt = XmlHelper.readUrlTxt(args.manifest.fullMavenUrl(artifactId, version, "${artifactId}-${version}.txt"))
             if (netTxt.isNotEmpty()) {//写入网络的文件
                 FileUtils.writeText(file, netTxt)
             }
@@ -167,9 +165,8 @@ class VersionManager(val args: ArgsExtends) {
 
     @Synchronized
     fun readCurVersions(): HashMap<String, Int> {
+//        println("readCurVersions---- -> $curVersions")
         if (loads.contains("curVersions")) return curVersions
-
-
         val basePath = args.env.rootDir.absolutePath
         val versionDir = XmlHelper.fileVersion(basePath)
         //重新冲仓库更新一次版本信息
@@ -177,22 +174,20 @@ class VersionManager(val args: ArgsExtends) {
             XmlHelper.loadVersionFromNet(basePath)
         }
 
+        lastVersion = XmlHelper.parseMetadata(FileUtils.readText(File(versionDir, "${EnvKeys.BASIC}.xml"))).versions.lastOrNull()
+                ?: "default"
 
         //加载所有版本信息相关的文件
-        for (v in XmlHelper.parseMetadata(FileUtils.readText(File(versionDir, EnvKeys.XML_MANIFEST))).versions) {
-            if (v.startsWith("tag-")) {
-                tagTimes[v.substring(4, v.lastIndexOf("-"))] = v
-            } else if (v.startsWith("full-")) {
-                lastLogName = v
-            }
+        for (v in XmlHelper.parseMetadata(FileUtils.readText(File(versionDir, "${EnvKeys.BASIC_TAG}.xml"))).versions) {
+            tagVersions[v.substring(0, v.lastIndexOf("-"))] = v
         }
 
         //加载full版本记录
-        curVersions += readVersionFromFile(lastLogName.takeIf { it != "default" })
+        curVersions += readVersionFromFile(EnvKeys.BASIC, lastVersion.takeIf { it != "default" })
 
         //根据full版本，加载临时提交记录进行合并
-        val logMetaFile = File(versionDir, "${EnvKeys.BASIC_LOG}/${lastLogName.substringAfter("-")}.xml")
-        for (it in XmlHelper.parseMetadata(FileUtils.readText(logMetaFile)).versions) {
+        val logMeta = XmlHelper.parseMetadata(FileUtils.readText(File(versionDir, "${EnvKeys.BASIC_LOG}/${lastVersion}.xml")))
+        for (it in logMeta.versions) {
             val spilt = it.lastIndexOf(".")
             if (spilt < 0) continue
             val key = it.substring(0, spilt)
@@ -200,98 +195,14 @@ class VersionManager(val args: ArgsExtends) {
             //放入最大值
             curVersions[key] = value.coerceAtLeast(curVersions[key] ?: 0)
         }
+        Tools.println("parse---$lastVersion -> ${logMeta.versions} -> $curVersions")
+
         loads.add("curVersions")
         return curVersions
     }
 
-    /**
-     * 把每个版本的最后版本号添加
-     */
-    private fun addVersion(curVersions: HashMap<String, Int>, groupId: String, artifactId: String, version: List<String>) {
-//        Tools.println("addVersion -> $groupId $artifactId $version")
-        val addV = StringBuffer()
-        //倒叙查询
-        for (i in version.size - 1 downTo 0) {
-            val v = version[i]
-            val l = v.lastIndexOf('.')
-            val bv = v.substring(0, l)
-            val lv = v.substring(l + 1)
-            val key = "$groupId.$artifactId.$bv"
-            val latKey = curVersions[key] ?: 0
-            val newKey = lv.toIntOrNull() ?: 0
-            if (newKey > latKey) {
-                curVersions[key] = newKey
-                addV.append(v).append(",")
-            }
-        }
-    }
-
-    /**
-     * 从网络获取最新的版本号信息
-     */
-    private fun parseVersion() {
-        val versions = HashMap<String, Int>()
-        val extends = args
-        val maven = extends.manifest.mavenUrl
-        val groupUrl = extends.manifest.groupId.replace(".", "/")
-        Tools.println("parseVersion  start -> $groupUrl")
-        val start = System.currentTimeMillis()
-        versions.clear()
-
-        if (!maven.startsWith("http")) parseLocalVersion(File(maven, groupUrl), versions) else parseNetVersion(maven, groupName, versions)
-
-        Tools.println("parseVersion  end -> ${System.currentTimeMillis() - start} ms")
-        storeToUp(versions)
-    }
-
-    /**
-     * 解析本地仓库的版本信息
-     */
-    private fun parseLocalVersion(dir: File, versions: HashMap<String, Int>) {
-        if (!dir.exists() || dir.isFile) return
-
-        for (f in dir.listFiles { f -> f.isFile }) {
-            if (f.name == "maven-metadata.xml") {//解析版本,如果已经找到了版本, 则不再需要
-                val meta = XmlHelper.parseMetadata(FileUtils.readText(f) ?: "")
-                addVersion(versions, meta.groupId.trim(), meta.artifactId.trim(), meta.versions)
-                return
-            }
-        }
-        //递归解析本地目录
-        dir.listFiles { f -> f.isDirectory }.forEach { parseLocalVersion(it, versions) }
-    }
-
-    /**
-     *
-     */
-    inline fun readUrlTxt(url: String) = XmlHelper.readUrlTxt(url)
-
-    fun getFullUrl(url: String, baseUrl: String): String {
-        if (url == "..") return "";
-        if (url.startsWith("http:")) return url
-        if (baseUrl.endsWith("/")) return "$baseUrl$url"
-        return "$baseUrl/$url"
-    }
-
-    fun parseNetVersion(baseUrl: String, groupName: String, versions: HashMap<String, Int>) {
-        val modules = args.manifest.allModules().map { it.name }
-        //上传版本好到服务端
-        val git = Git.open(args.env.basicDir)
-        GitUtils.pull(git)
-        val mavenUrl = getFullUrl(groupName.replace(".", "/"), baseUrl)
-        val branchs = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call().map { it.name.replace(Regex(".*/"), "") }.toSet()
-        for (b in branchs) for (m in modules) {
-            val url = getFullUrl("${b.replace(".", "/")}/$m/maven-metadata.xml", mavenUrl)
-            val metaStr = readUrlTxt(url)
-            if (metaStr.isNotEmpty()) kotlin.runCatching {
-                val meta = XmlHelper.parseMetadata(metaStr)
-                Tools.println("request -> $url -> ${meta.versions}")
-                addVersion(versions, meta.groupId.trim(), meta.artifactId.trim(), meta.versions)
-            }
-        }
-    }
-
     fun storeToUp(map: Map<String, Any?> = emptyMap()) {
+        Tools.println("storeToUp ->")
         PropertiesUtils.writeProperties(args.env.defArchivesFile, map.map { it.key to it.value.toString() }.toMap().toProperties())//保存当前的版本信息等待上传
     }
 

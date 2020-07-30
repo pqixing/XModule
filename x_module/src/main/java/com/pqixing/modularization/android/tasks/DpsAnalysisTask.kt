@@ -204,7 +204,7 @@ open class DpsAnalysisTask : BaseTask() {
         val branch = removeGroup(t[0], true)
         if (branch.isEmpty()) return ""
         val module = t[1]
-        val params = UrlUtils.getParams(args.versions.getPom(project, branch, module, version!!).name)
+        val params = UrlUtils.getParams(args.vm.getPom(project, branch, module, version!!).name)
         val commitTime = params["commitTime"]?.toInt() ?: 0
         params["commitTime"] = Date(commitTime * 1000L).toLocaleString()
         return "    ====> log : " + getCollectionStr(params).replace("\n", " ")
@@ -256,8 +256,8 @@ open class DpsAnalysisTask : BaseTask() {
     private fun saveVersionTag() {
 
         val branch = plugin.module.getBranch()
-        val tags = args.versions.readCurVersions().map { it.key to it.value.toString() }.toMap().toProperties()
-        tags.putAll(args.versions.readBranchVersion(branch))
+        val tags = args.vm.readCurVersions().map { it.key to it.value.toString() }.toMap().toProperties()
+        tags.putAll(args.vm.readBranchVersion(branch))
         tags["TargetName"] = plugin.module.name
         GitUtils.open(File(args.env.codeRootDir, plugin.module.project.path))?.runCatching {
             tags["TargetBranch"] = branch

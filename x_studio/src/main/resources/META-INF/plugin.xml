@@ -65,7 +65,7 @@
             <action id="Modularization.DpsAnalyse"
                     class="com.pqixing.intellij.actions.DpsAnalyseAction" text="DpsAnalyse"/>
             <action id="Modularization.ReIndexVersion"
-                    class="com.pqixing.intellij.actions.ReIndexVersionAction" text="VersionSync"/>
+                    class="com.pqixing.intellij.actions.IndexMavenAction" text="IndexMaven"/>
 
             <separator/>
             <action id="Modularization.routercreator"

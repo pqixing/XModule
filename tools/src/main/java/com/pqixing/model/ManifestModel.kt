@@ -1,5 +1,7 @@
 package com.pqixing.model
 
+import com.pqixing.tools.TextUtils
+
 class ManifestModel(val baseUrl: String) {
     var mavenUrl = ""
     var mavenUser = ""
@@ -22,6 +24,8 @@ class ManifestModel(val baseUrl: String) {
     fun allModules() = mutableSetOf<Module>().apply {
         projects.forEach { this.addAll(it.modules) }
     }
+
+    inline fun fullMavenUrl(vararg names: String) = TextUtils.append(arrayOf(mavenUrl, groupId.replace(".", "/")).plus(names))
 }
 
 data class ProjectModel(val manifest: ManifestModel, val name: String, var path: String, val desc: String, val url: String) {
@@ -44,13 +48,13 @@ data class Module(val name: String, val project: ProjectModel) {
     var transform = true
 
     var apiVersion = ""
-        get() = if (field.isEmpty()) version else field
+        get() = field.takeIf { it.isNotEmpty() } ?: api?.takeIf { !it.attach() }?.version ?: version
 
     /**
      * 上传到Maven的版本
      */
     var version = ""
-        get() = attach?.apiVersion ?: field.takeIf { it.isNotEmpty() } ?: project.manifest.baseVersion
+        get() = field.takeIf { it.isNotEmpty() } ?: attach?.apiVersion ?: project.manifest.baseVersion
 
 
     //    var apiModel:SubModule?=null//该模块的api模块

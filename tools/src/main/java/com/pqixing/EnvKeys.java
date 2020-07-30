@@ -14,7 +14,7 @@ public class EnvKeys {
      */
     public static final String opBranch = "opBranch";
     /**
-     *打标签时,需要tag的分支
+     * 打标签时,需要tag的分支
      */
     public static final String tagBranch = "tagBranch";
     /**
@@ -35,6 +35,7 @@ public class EnvKeys {
      */
     public static final String BASIC = "basic";
     public static final String BASIC_LOG = "basic_log";
+    public static final String BASIC_TAG = "basic_tag";
     public static final String XML_META = "maven-metadata.xml";
     public static final String XML_MANIFEST = "basic/manifest.xml";
     /**

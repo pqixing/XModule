@@ -65,7 +65,7 @@ object XmlHelper {
 
     fun parseMetadata(txt: String?): MavenMetadata {
         val mate = MavenMetadata()
-        if (txt?.isNotEmpty()!=true) return mate
+        if (txt?.isNotEmpty() != true) return mate
         val node = XmlParser().parseText(txt)
 
         mate.groupId = getChildNodeValue(node, "groupId")
@@ -377,17 +377,15 @@ object XmlHelper {
     fun loadVersionFromNet(basePath: String?) {
         val manifest = loadManifest(basePath) ?: return
         val versionDir = fileVersion(basePath)
-        versionDir.mkdirs()
-        val versionMetaStr = readUrlTxt(TextUtils.append(arrayOf(manifest.mavenUrl, manifest.groupId.replace(".", "/"), EnvKeys.BASIC, EnvKeys.XML_META)))
 
-        //如果不为空
-        FileUtils.writeText(File(versionDir, EnvKeys.XML_MANIFEST), versionMetaStr)
-        val lastLog = parseMetadata(versionMetaStr).versions.findLast { it.startsWith("full-") }?.substring(5)
-                ?: "default"
+        val fromUrl = { name: String -> readUrlTxt(manifest.fullMavenUrl(name, EnvKeys.XML_META)).also { FileUtils.writeText(File(versionDir, "${name}.xml"), it) } }
 
-        //如果存在完成的记录日志
-        val logMetaStr = readUrlTxt(TextUtils.append(arrayOf(manifest.mavenUrl, manifest.groupId.replace(".", "/"), EnvKeys.BASIC_LOG, lastLog, EnvKeys.XML_META)))
-        FileUtils.writeText(File(versionDir, "${EnvKeys.BASIC_LOG}/$lastLog.xml"), logMetaStr)
+        //更新基础版本记录清单文件
+        val lastLog = parseMetadata(fromUrl(EnvKeys.BASIC)).versions.lastOrNull() ?: "default"
+        //更新增加更新的版本记录文件
+        fromUrl("${EnvKeys.BASIC_LOG}/$lastLog")
+        //更新分支tag的记录文件
+        fromUrl(EnvKeys.BASIC_TAG)
     }
 
 
