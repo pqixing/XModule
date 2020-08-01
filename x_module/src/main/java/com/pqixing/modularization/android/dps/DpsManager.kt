@@ -59,7 +59,7 @@ class DpsManager(val plugin: AndroidPlugin) {
         }
 
 
-        val sb = java.lang.StringBuilder("dependencies {  // isApp : ${plugin.isApp} -> buildAsApp : ${plugin.buildAsApp}\n")
+        val sb = java.lang.StringBuilder("dependencies {  \n println('run this') \n")
         includes.forEach { sb.append(it).append("\n") }
         sb.append("}\n")
                 .append("configurations { \n")

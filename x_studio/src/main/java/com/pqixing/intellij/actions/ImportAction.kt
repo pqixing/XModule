@@ -127,6 +127,11 @@ class ImportAction : AnAction() {
                 ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
             }
         }
+        dialog.setOnUpdate {
+            Thread {
+                XmlHelper.loadVersionFromNet(basePath)
+            }.start()
+        }
     }
 
     private fun syncVcs(dirs: MutableSet<File>, syncVcs: Boolean, project: Project) {

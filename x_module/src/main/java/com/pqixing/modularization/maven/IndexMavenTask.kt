@@ -52,6 +52,8 @@ open class IndexMavenTask : BaseTask() {
     }
 
     override fun runTask() {
+        //等待两秒
+        Thread.sleep(300)
         //更新本地版本信息
         XmlHelper.loadVersionFromNet(args.env.rootDir.absolutePath)
         ResultUtils.writeResult(args.env.defArchivesFile.absolutePath)

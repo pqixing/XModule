@@ -60,7 +60,7 @@ class ToMavenAction : AnAction() {
                 jListInfo.staue = if (success) 1 else 3
                 jListInfo.log = result ?: ""
                 //失败是展示结果
-                dialog.updateUI(!success)
+                dialog.updateUI(true)
 
                 if (!success) return
             }

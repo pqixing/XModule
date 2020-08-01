@@ -1,5 +1,6 @@
 package com.pqixing.modularization.setting
 
+import com.pqixing.EnvKeys
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Module
@@ -22,7 +23,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
     val gradle = setting.gradle
     fun startLoad(): String {
         val buildTag = args.config.buildDir?.takeIf { i -> i.isNotEmpty() } ?: "default"
-        val buildFileName = "build/modularization_${buildTag}/build.gradle"
+        val buildFileName = "build/${EnvKeys.XMODULE}_${buildTag}/build.gradle"
         //自动抓取工程导入
         val includes = XmlHelper.parseInclude(args.manifest, (args.config.include?.takeIf { it.isNotEmpty() && it != "Auto" }?.replace("+", ",")?.split(",")
                 ?: gradle.startParameter.taskNames.mapNotNull { m -> m.split(":").takeIf { it.size >= 2 }?.let { it[it.size - 2] } }).toSet().toMutableSet())

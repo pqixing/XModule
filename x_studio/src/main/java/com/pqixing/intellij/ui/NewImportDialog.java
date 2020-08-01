@@ -4,6 +4,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.pqixing.help.XmlHelper;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 import com.pqixing.intellij.utils.GradleUtils;
@@ -44,17 +45,16 @@ public class NewImportDialog extends BaseJDialog {
     private JCheckBox cbVcs;
     private JCheckBox cbMore;
     private JPanel jpMore;
-    private JButton loadAppButton;
-    private JButton loadBranchButton;
-    private JButton loadDpsButton;
     private JPanel jpSelect;
     private JScrollPane jpOthers;
     private JCheckBox cbFormat;
+    private JButton btnUpdate;
     public JButton btnDepend;
 
     //已选中导入的工程
     private List<String> imports;
     private Runnable onOk;
+    private Runnable onUpdate;
     Project project;
     private boolean syncBranch;
     private ImportSelectAdapter allAdapter;
@@ -71,6 +71,7 @@ public class NewImportDialog extends BaseJDialog {
 //        getRootPane().setDefaultButton(buttonOK);
         setTitle("Import");
         buttonOK.addActionListener(e -> onOK());
+        btnUpdate.addActionListener(e -> onUpdate.run());
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -121,6 +122,10 @@ public class NewImportDialog extends BaseJDialog {
             }
         }
 
+    }
+
+    public void setOnUpdate(Runnable onUpdate) {
+        this.onUpdate = onUpdate;
     }
 
     public JButton getBtnProjectXml() {
@@ -254,20 +259,7 @@ public class NewImportDialog extends BaseJDialog {
     }
 
     private void initLoadButtons(List<String> branchs) {
-        loadAppButton.addActionListener(actionEvent -> loadBranchModules(getSelectBranch(), true));
-        loadBranchButton.addActionListener(actionEvent -> loadBranchModules(selectItems(branchs, getSelectBranch()), false));
-        loadDpsButton.addActionListener(actionEvent -> {
-            ArrayList<String> items = new ArrayList<>();
-            for (String m : getImports()) {
-                if (!m.contains("#")) items.add(m);
-            }
-            String dpsItem = selectItems(items, null);
-            //需要加载Dps依赖的项目
-            loadDpsItem(dpsItem);
-
-        });
         for (String b : branchs) cbBranchs.addItem(b);
-
         cbBranchs.addItemListener(e -> {
             if (syncBranch) {
                 tvCodeRoot.setSelectedItem("../" + getSelectBranch());

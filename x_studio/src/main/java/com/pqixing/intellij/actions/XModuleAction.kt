@@ -15,7 +15,7 @@ import com.pqixing.tools.FileUtils
 import java.io.File
 
 
-open class OpenNewAction : AnAction() {
+open class XModuleAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
 

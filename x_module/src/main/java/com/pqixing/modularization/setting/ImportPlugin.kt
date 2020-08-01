@@ -1,5 +1,6 @@
 package com.pqixing.modularization.setting
 
+import com.pqixing.Config
 import com.pqixing.EnvKeys
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
@@ -59,7 +60,7 @@ class ImportPlugin : Plugin<Settings> {
         val taskNames = setting.gradle.startParameter.taskNames
 
         //检查basic是否存在，如果不存在，尝试读取gradle.properties进行下载，否则抛出异常
-        val basicGit = GitUtils.open(env.basicDir) ?: downloadBasic(env.basicDir, setting) ?: return
+        val basicGit = GitUtils.open(env.basicDir) ?: downloadBasic(env.basicDir, setting,config) ?: return
         env.basicBranch = basicGit.repository.branch
         env.allBranches.addAll(basicGit.branchList().setListMode(ListBranchCommand.ListMode.ALL).call().map { it.name.substringAfterLast("/") })
         GitUtils.close(basicGit)
@@ -95,9 +96,9 @@ class ImportPlugin : Plugin<Settings> {
         })
     }
 
-    private fun downloadBasic(basicDir: File, setting: Settings): Git? {
-        val urlName = "${EnvKeys.BASIC}Url"
-        val url = kotlin.runCatching { setting.extensions.extraProperties.get(urlName).toString() }.getOrNull()
+    private fun downloadBasic(basicDir: File, setting: Settings,config:Config): Git? {
+        val urlName = "basicUrl"
+        val url = config.basicUrl
         if (url?.isNotEmpty() != true) {//没有配置url
             ResultUtils.notifyIde(setting.rootDir, mutableMapOf("type" to "Miss_${urlName}"))
             ResultUtils.thow("Miss $urlName on gradle.properties,use $urlName=https://github.com/pqixing/md_basic.git for default")

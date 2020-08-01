@@ -188,6 +188,7 @@ open class ToMavenTask : BaseTask() {
     }
 
     override fun runTask() {
+        Thread.sleep(300)
         //更新本地版本信息
         XmlHelper.loadVersionFromNet(args.env.rootDir.absolutePath)
         ResultUtils.writeResult(resultStr)

@@ -3,20 +3,17 @@ package com.pqixing.intellij.ui;
 import com.intellij.openapi.project.Project;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
-import com.pqixing.intellij.utils.UiUtils;
 
+import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-
-import javax.swing.*;
 
 public class ToMavenDialog extends BaseJDialog {
     private JPanel contentPane;
     private JButton buttonOK;
+    private JButton btnReDo;
     private JList jList;
     private JCheckBox all;
     private JLabel jlProgress;
@@ -24,11 +21,10 @@ public class ToMavenDialog extends BaseJDialog {
     private JCheckBox branchCheckBox;
     private JCheckBox versionCheckBox;
     private JCheckBox changeCheckBox;
-    private JButton doneButton;
     JListSelectAdapter adapter;
     private Runnable onOk;
 
-    public ToMavenDialog(Project project,List<JListInfo> datas, String moduleName) {
+    public ToMavenDialog(Project project, List<JListInfo> datas, String moduleName) {
         super(project);
         setContentPane(contentPane);
         setModal(false);
@@ -44,7 +40,6 @@ public class ToMavenDialog extends BaseJDialog {
                 onCancel();
             }
         });
-        doneButton.addActionListener(e->{onCancel();});
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         setTitle("ToMaven : " + moduleName);
@@ -57,6 +52,13 @@ public class ToMavenDialog extends BaseJDialog {
                 i.setSelect(allSelect);
             }
             updateUI(buttonOK.isVisible());
+        });
+        btnReDo.addActionListener(e -> {
+            //重置所有状态
+            for (JListInfo data : datas) {
+                data.setStaue(0);
+            }
+            onOK();
         });
     }
 
@@ -72,7 +74,7 @@ public class ToMavenDialog extends BaseJDialog {
     public void updateUI(boolean okVisible) {
         buttonOK.setVisible(okVisible);
         jlProgress.setVisible(!okVisible);
-        if(!okVisible) {
+        if (!okVisible) {
             List<JListInfo> datas = adapter.getDatas();
             int all = 0;
             int done = 0;
