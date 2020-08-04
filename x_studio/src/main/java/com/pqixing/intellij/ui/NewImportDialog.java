@@ -1,60 +1,44 @@
 package com.pqixing.intellij.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
-import com.pqixing.help.XmlHelper;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
-import com.pqixing.intellij.utils.GradleUtils;
 import com.pqixing.intellij.utils.UiUtils;
-import com.pqixing.tools.FileUtils;
 import com.pqixing.tools.PropertiesUtils;
 import com.pqixing.tools.TextUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.util.*;
 
 public class NewImportDialog extends BaseJDialog {
-    private static boolean moreVisible = false;
     public static final String BING_KEY = "syncRoot";
     public static final String IMPORT_KEY = "IMPORT";
     public static final String VCS_KEY = "vcs";
     public static final String FORMAT_KEY = "format";
-    private static final String CODEROOTS_KEY = "codeRoots";
     private JPanel contentPane;
     private JButton buttonOK;
-    private JComboBox<String> cbBranchs;
     private JCheckBox cbBind;
-    private JComboBox tvCodeRoot;
+    private JComboBox<String> tvCodeRoot;
     private JButton btnProjectXml;
     private JTextField tvImport;
-    private JComboBox cbImportModel;
     private JComboBox cbDpModel;
     private JList JlNotSelect;
     private JList jlSelect;
     private JButton btnConfig;
     private JCheckBox cbVcs;
-    private JCheckBox cbMore;
-    private JPanel jpMore;
     private JPanel jpSelect;
     private JScrollPane jpOthers;
     private JCheckBox cbFormat;
-    private JButton btnUpdate;
-    public JButton btnDepend;
 
     //已选中导入的工程
     private List<String> imports;
+    private List<String> branchs;
     private Runnable onOk;
-    private Runnable onUpdate;
     Project project;
     private boolean syncBranch;
     private ImportSelectAdapter allAdapter;
@@ -71,7 +55,6 @@ public class NewImportDialog extends BaseJDialog {
 //        getRootPane().setDefaultButton(buttonOK);
         setTitle("Import");
         buttonOK.addActionListener(e -> onOK());
-        btnUpdate.addActionListener(e -> onUpdate.run());
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -84,26 +67,18 @@ public class NewImportDialog extends BaseJDialog {
 //        UiUtils.centerDialog(this);
         this.project = project;
         this.imports = imports;
+        this.branchs = branchs;
         properties = PropertiesUtils.INSTANCE.readProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()));
-        syncBranch = properties.getProperty(BING_KEY, "Y").equals("N");
+        syncBranch = properties.getProperty(BING_KEY, "N").equals("N");
         cbVcs.setSelected("Y".equals(properties.getProperty(VCS_KEY, "Y")));
         cbFormat.setSelected("Y".equals(properties.getProperty(FORMAT_KEY, "N")));
 
         initDpModel(dpModel);
-        initCodeRoot(branchs.get(0), codeRoot);
-        initLoadButtons(branchs);
+        cbBind.setSelected(syncBranch);
+        cbBind.addActionListener(c -> initCodeRoot(branchs, codeRoot));
+        initCodeRoot(branchs, codeRoot);
         initJList(imports, allInfos);
         initImportAction();
-        initMore();
-    }
-
-    private void initMore() {
-        cbMore.setSelected(moreVisible);
-        cbMore.addActionListener(a -> {
-            moreVisible = cbMore.isSelected();
-            jpMore.setVisible(cbMore.isSelected());
-        });
-        jpMore.setVisible(cbMore.isSelected());
     }
 
     public boolean format() {
@@ -124,9 +99,6 @@ public class NewImportDialog extends BaseJDialog {
 
     }
 
-    public void setOnUpdate(Runnable onUpdate) {
-        this.onUpdate = onUpdate;
-    }
 
     public JButton getBtnProjectXml() {
         return btnProjectXml;
@@ -136,37 +108,8 @@ public class NewImportDialog extends BaseJDialog {
         return btnConfig;
     }
 
-
-    /**
-     * 加载指定分支的模块
-     *
-     * @param branch
-     * @param app    加载app
-     */
-    private void loadBranchModules(String branch, boolean app) {
-        if (branch == null) return;
-
-        setVisible(false);
-        Map<String, String> envs = new HashMap<>(GradleUtils.INSTANCE.getDefEnvs());
-        envs.put("opBranch", branch);
-        GradleUtils.INSTANCE.runTask(project, Collections.singletonList(":LoadAllBranchModule")
-                , ProgressExecutionMode.IN_BACKGROUND_ASYNC
-                , false, System.currentTimeMillis() + "", envs, (s, l) -> {
-                    if (!s) {
-                        setVisible(true);
-                        return;
-                    }
-                    imports.clear();
-                    for (String string : l.split("#")[app ? 0 : 1].split(",")) {
-                        if (!string.isEmpty()) addToImport(string);
-                    }
-                    setVisible(true);
-                    updateImports();
-                });
-    }
-
     public String getSelectBranch() {
-        return cbBranchs.getSelectedItem().toString();
+        return syncBranch ? getCodeRootStr().substring(3) : branchs.get(0);
     }
 
 
@@ -234,78 +177,28 @@ public class NewImportDialog extends BaseJDialog {
         jpSelect.repaint();
     }
 
-    private void initCodeRoot(String branch, String codeRoot) {
-        String root = syncBranch ? "../" + branch : codeRoot;
-        cbBind.setSelected(syncBranch);
-//        tvCodeRoot.setText(root);
-        for (String s : str2List(properties.getProperty(CODEROOTS_KEY, ""))) {
-            tvCodeRoot.addItem(s);
+
+    ItemListener codeRootListener = e -> syncImportByBranch();
+
+    private void initCodeRoot(List<String> branch, String codeRoot) {
+        syncBranch = cbBind.isSelected();
+        tvCodeRoot.removeItemListener(codeRootListener);
+        if (tvCodeRoot.getItemCount() > 0) tvCodeRoot.removeAllItems();
+        if (!syncBranch) tvCodeRoot.addItem(codeRoot);
+        else for (String s : branch) tvCodeRoot.addItem("../" + s);
+        tvCodeRoot.setSelectedIndex(0);
+        tvCodeRoot.addItemListener(codeRootListener);
+        tvCodeRoot.setEditable(!syncBranch);
+    }
+
+    private void syncImportByBranch() {
+        if (!syncBranch) return;
+        List<String> list = str2List(properties.getProperty(IMPORT_KEY + TextUtils.INSTANCE.numOrLetter(getCodeRootStr())));
+        if (!list.isEmpty()) {
+            imports.clear();
+            imports.addAll(list);
+            updateImports();
         }
-        tvCodeRoot.setSelectedItem(root);
-        tvCodeRoot.setEnabled(!syncBranch);
-        cbBind.addItemListener(changeEvent -> {
-            syncBranch = cbBind.isSelected();
-            tvCodeRoot.setEnabled(!syncBranch);
-            tvCodeRoot.setSelectedItem(syncBranch ? "../" + cbBranchs.getSelectedItem().toString() : codeRoot);
-        });
-    }
-
-    /**
-     * 选择分支
-     */
-    private String selectItems(List<String> items, String initValue) {
-        if (items == null || items.isEmpty()) return null;
-        return Messages.showEditableChooseDialog("", "Select Item", null, items.toArray(new String[]{}), initValue == null ? items.get(0) : initValue, null);
-    }
-
-    private void initLoadButtons(List<String> branchs) {
-        for (String b : branchs) cbBranchs.addItem(b);
-        cbBranchs.addItemListener(e -> {
-            if (syncBranch) {
-                tvCodeRoot.setSelectedItem("../" + getSelectBranch());
-            }
-            List<String> list = str2List(properties.getProperty(IMPORT_KEY + TextUtils.INSTANCE.numOrLetter(getSelectBranch())));
-            if (!list.isEmpty()) {
-                imports.clear();
-                imports.addAll(list);
-                updateImports();
-            }
-        });
-    }
-
-    /**
-     * 加载给定的模块的依赖
-     *
-     * @param dpsItem
-     */
-    private void loadDpsItem(String dpsItem) {
-        if (dpsItem == null) return;
-        long runTime = System.currentTimeMillis();
-        Map<String, String> envs = new HashMap<>();
-        envs.put("dependentModel", "");
-        setVisible(false);
-
-        GradleUtils.INSTANCE.runTask(project, Collections.singletonList(":" + dpsItem + ":DpsAnalysis")
-                , ProgressExecutionMode.IN_BACKGROUND_ASYNC, true, runTime + ""
-                , envs, (s, l) -> ApplicationManager.getApplication().invokeLater(() -> {
-                    File file = new File(project.getBasePath(), "build/dps/" + dpsItem + ".dp");
-                    if (!file.exists()) Messages.showMessageDialog(dpsItem + " dps import failure", "ERROR", null);
-                    else if (file.lastModified() > runTime || Messages.OK == Messages.showOkCancelDialog("The local configuration is available and still imported?", "ERROR", null)) {
-                        imports.remove(dpsItem);
-                        addToImport(dpsItem, "D#");
-
-
-                        String readText = FileUtils.readText(file);
-                        if (readText != null) Messages.showMessageDialog(
-                                "Import dps for " + dpsItem + "\n" + readText
-                                        .replace(" ", "")
-                                        .replace(",,", "")
-                                        .replace(",", "\n")
-                                , "All dps for " + dpsItem, null);
-                    }
-                    setVisible(true);
-                    updateImports();
-                }));
     }
 
     private void initImportAction() {
@@ -414,18 +307,10 @@ public class NewImportDialog extends BaseJDialog {
         String oldImports = properties.getProperty(importKey);
         properties.setProperty(importKey, newImport);
 
-        List<String> codeRoots = str2List(properties.getProperty(CODEROOTS_KEY, ""));
-        String rootStr = getCodeRootStr();
-        boolean exists = codeRoots.remove(rootStr);
-        codeRoots.add(0, rootStr);
-        while (codeRoots.size() > 6) {
-            codeRoots.remove(codeRoots.size() - 1);
-        }
-        properties.setProperty(CODEROOTS_KEY, list2Str(codeRoots));
         //更新监听
         UiUtils.INSTANCE.getFtModules().put(project.getBasePath(), newFormat.equals("Y"));
 
-        if (!newFormat.equals(oldFormat) || !newVcs.equals(oldVcs) || !newKey.equals(oldBind) || !newImport.equals(oldImports) || !exists)
+        if (!newFormat.equals(oldFormat) || !newVcs.equals(oldVcs) || !newKey.equals(oldBind) || !newImport.equals(oldImports))
             ApplicationManager.getApplication().runWriteAction(() -> PropertiesUtils.INSTANCE.writeProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()), properties));
     }
 
@@ -446,12 +331,9 @@ public class NewImportDialog extends BaseJDialog {
         return sb.toString();
     }
 
-    public String getImportModel() {
-        return cbImportModel.getSelectedItem().toString();
-    }
-
     public String getCodeRootStr() {
-        return tvCodeRoot.getSelectedItem().toString().trim();
+        Object item = tvCodeRoot.getSelectedItem();
+        return item == null ? "" : item.toString().trim();
     }
 
     public List<String> getImports() {

@@ -54,7 +54,7 @@ class ImportAction : AnAction() {
         }
         val config = XmlHelper.loadConfig(basePath)
         val includes = config.include
-        var codeRoot = config.codeRoot
+        val codeRoot = config.codeRoot
         val dependentModel = config.dependentModel
 
         val imports = includes.replace("+", ",").split(",").mapNotNull { if (it.trim().isEmpty()) null else it.trim() }.toList()
@@ -92,7 +92,7 @@ class ImportAction : AnAction() {
                         .mapNotNull { pimls[File(codePath, it.path).canonicalPath]?.toString() }
                 ApplicationManager.getApplication().invokeLater { importByIde(project, importImls.toMutableList()) }
                 //如果快速导入不成功,则,同步一次
-                ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
+//                ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
                 GradleSyncInvoker.getInstance().requestProjectSync(project, GradleSyncStats.Trigger.TRIGGER_USER_SYNC_ACTION, object : GradleSyncListener {
                     override fun syncSucceeded(project: Project) {
                         //添加basic的地址
@@ -116,21 +116,12 @@ class ImportAction : AnAction() {
             dialog.dispose()
             FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(XmlHelper.fileManifest(basePath), false)!!, true)
         }
-        dialog.btnDepend.addActionListener {
-            dialog.dispose()
-            FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(File(XmlHelper.fileBasic(basePath), "depend.gradle"), false)!!, true)
-        }
         dialog.setOnOk {
             //切换根目录的分支
             if (localBranch == dialog.selectBranch) ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
             else GitHelper.checkout(project, dialog.selectBranch, mutableListOf(repo)) {
                 ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
             }
-        }
-        dialog.setOnUpdate {
-            Thread {
-                XmlHelper.loadVersionFromNet(basePath)
-            }.start()
         }
     }
 
