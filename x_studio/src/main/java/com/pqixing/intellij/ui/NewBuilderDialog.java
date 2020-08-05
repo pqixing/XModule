@@ -104,7 +104,7 @@ public class NewBuilderDialog extends BaseJDialog {
             param.setInstall(tvInstall.getText());
         }
         tvLog.setText(param.getResult());
-        tvLog.setText(!param.getResult().isEmpty());
+        tvLog.setVisible(!param.getResult().isEmpty());
         btnInstall.setVisible(!param.getResult().isEmpty());
     }
 
