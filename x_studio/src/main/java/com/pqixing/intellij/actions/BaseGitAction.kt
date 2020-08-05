@@ -177,7 +177,6 @@ abstract class BaseGitAction : AnAction() {
     }
 
     protected open fun afterDoOk(dialog: GitOperatorDialog) {
-        dialog.btnRevert.isVisible = true
         cacheLog.clear()//清楚缓存记录
         allRepos.clear()//清楚git，防止内存持续占用
 //        allRepos.forEach { it.value.update() }//更新git操作

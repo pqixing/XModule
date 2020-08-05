@@ -1,6 +1,5 @@
 package com.pqixing.creator.actions;
 
-import com.pqixing.creator.core.gennerator.MVPCreatorGenerator;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
@@ -11,15 +10,17 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
+import com.pqixing.creator.core.gennerator.MVPCreatorGenerator;
 
-public class MvpCreator extends AnAction   {
+public class MvpCreator extends AnAction {
 
     private String classPrefix;
+
     @Override
     public void actionPerformed(AnActionEvent e) {
         Project project = e.getData(PlatformDataKeys.PROJECT);
         Module module = e.getData(LangDataKeys.MODULE);
-        if(module == null){
+        if (module == null) {
             Messages.showWarningDialog("请选中要生成mvp代码的组件!", "CreateMvpTemplateCode");
             return;
         }
@@ -42,9 +43,9 @@ public class MvpCreator extends AnAction   {
                 "Activity?",
                 true,
                 true,
-                Messages.getQuestionIcon(), "", validator);
+                null, "", validator);
 
-        if(classPrefix ==null || classPrefix.trim().length()<=0 || "null".equals(classPrefix)){
+        if (classPrefix == null || classPrefix.trim().length() <= 0 || "null".equals(classPrefix)) {
             return;
         }
         WriteCommandAction.runWriteCommandAction(project, new Runnable() {

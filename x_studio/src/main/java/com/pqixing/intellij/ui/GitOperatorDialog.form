@@ -124,13 +124,12 @@
               <text value="Target"/>
             </properties>
           </component>
-          <component id="d4d53" class="javax.swing.JButton" binding="btnRevert">
+          <component id="6ee71" class="javax.swing.JCheckBox" binding="cbLog">
             <constraints>
-              <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="ReOp"/>
-              <visible value="false"/>
+              <text value="log"/>
             </properties>
           </component>
         </children>
@@ -184,7 +183,7 @@
       <scrollpane id="75d87" binding="pLog">
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
-            <preferred-size width="-1" height="60"/>
+            <preferred-size width="-1" height="100"/>
           </grid>
         </constraints>
         <properties>

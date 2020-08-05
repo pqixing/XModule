@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.android.ddmlib.IDevice
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
-import com.pqixing.creator.JekinsJob
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -13,6 +12,7 @@ import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.Config
+import com.pqixing.creator.JekinsJob
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.adapter.JlistSelectListener
@@ -219,7 +219,7 @@ class BuilderDialog(val project: Project, val configInfo: Config, val activityMo
                     val url = "https://dev.downloads.mediportal.com.cn:9000/apk/$apkName.apk"
                     val exitCode = Messages.showYesNoCancelDialog(project, "${job.displayName} ${job.appName} -> $url", apkName, "INSTALL", "LOG", "CANCEL", null)
                     if (Messages.YES == exitCode) {
-                        val iDevice = UiUtils.getSelectDevice(cbDevices)
+                        val iDevice = UiUtils.getSelectDevice(project)
                         if (iDevice != null) {
                             prepareToInstall(iDevice, Collections.singletonList(Pair(url, apkName)))
                         } else Messages.showMessageDialog("", "No devices found", null)
@@ -240,7 +240,7 @@ class BuilderDialog(val project: Project, val configInfo: Config, val activityMo
 
     private fun onApkSelects(urls: List<Pair<String, String>>) {
         if (urls.isNotEmpty() && Messages.OK == Messages.showOkCancelDialog(urls.joinToString("\n") { it.second }, "Install Apk ?", null)) {
-            val iDevice = UiUtils.getSelectDevice(cbDevices)
+            val iDevice = UiUtils.getSelectDevice(project)
             if (iDevice != null) {
                 prepareToInstall(iDevice, urls)
             } else Messages.showMessageDialog("", "No devices found", null)
@@ -292,16 +292,10 @@ class BuilderDialog(val project: Project, val configInfo: Config, val activityMo
                         .sortedBy { !activityModel.contains(it.title) }
             }
         }
-        UiUtils.addDevicesComboBox(project, cbDevices)
         newData.forEach { if (oldDatas.contains(it.title)) it.select = true }
         appAdapter.setDatas(newData)
         sleepTimes = maxTime
         title = "Builder" + (if (buildJekins) " (Jekins)" else "")
-    }
-
-    override fun dispose() {
-        UiUtils.removeDevicesComboBox(cbDevices)
-        super.dispose()
     }
 
     private fun settingClick() {
@@ -438,10 +432,9 @@ class BuilderDialog(val project: Project, val configInfo: Config, val activityMo
             Messages.showMessageDialog("Please select target module to build", "Miss Item", null)
             return
         }
-        val iDevice = UiUtils.getSelectDevice(cbDevices)
+        val iDevice = UiUtils.getSelectDevice(project)
                 ?: return Messages.showMessageDialog("", "No devices found", null)
 
-        UiUtils.lastDevices = iDevice.serialNumber
         buttonOK.isVisible = false
 
         val branch = cbBranch.selectedItem.toString()

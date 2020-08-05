@@ -15,7 +15,7 @@ class GitBranchAction : BaseGitAction() {
         e?.presentation?.isEnabledAndVisible = XModuleGroup.hasBasic(e?.project)
     }
 
-    override fun beforeActionRun() = key == Messages.showPasswordDialog("Please input key!!", "Password")
+    override fun beforeActionRun() = /*key == Messages.showPasswordDialog("Please input key!!", "Password")*/true
     override fun checkUrls(urls: Map<String, String>): Boolean {
         val filter = urls.keys.filter { !GitUtil.isGitRoot(File(it)) }
         if (filter.isEmpty()) return true

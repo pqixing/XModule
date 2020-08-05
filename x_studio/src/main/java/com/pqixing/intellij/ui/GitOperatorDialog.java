@@ -48,7 +48,7 @@ public class GitOperatorDialog extends BaseJDialog {
     public JPanel pOpertator;
     public JPanel pOk;
     public JPanel pHeader;
-    public JButton btnRevert;
+    private JCheckBox cbLog;
     public Runnable onOk;
     public JRadioButton[] operators;
 
@@ -82,7 +82,7 @@ public class GitOperatorDialog extends BaseJDialog {
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         setTitle(title);
-        jlBranch.setText("Current: " + curBranch);
+        jlBranch.setText("current: " + curBranch);
         adapter = new JListSelectAdapter(jLDatas, true);
         adapter.setDatas(datas);
         allButton.addActionListener(actionEvent -> {
@@ -92,12 +92,10 @@ public class GitOperatorDialog extends BaseJDialog {
             adapter.updateUI();
         });
 
-        jlTips.setText("All " + datas.size() + " Project");
+        jlTips.setText("project: " + datas.size());
 
         initRadio();
-        btnRevert.addActionListener(e -> {
-            setLogModel(!pLog.isVisible());
-        });
+        cbLog.addChangeListener(e -> setLogModel(cbLog.isSelected()));
     }
 
     public void setOnOperatorChange(Runnable onOperatorChange) {

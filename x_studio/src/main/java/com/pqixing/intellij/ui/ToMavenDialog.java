@@ -13,7 +13,6 @@ import java.util.List;
 public class ToMavenDialog extends BaseJDialog {
     private JPanel contentPane;
     private JButton buttonOK;
-    private JButton btnReDo;
     private JList jList;
     private JCheckBox all;
     private JLabel jlProgress;
@@ -52,13 +51,6 @@ public class ToMavenDialog extends BaseJDialog {
                 i.setSelect(allSelect);
             }
             updateUI(buttonOK.isVisible());
-        });
-        btnReDo.addActionListener(e -> {
-            //重置所有状态
-            for (JListInfo data : datas) {
-                data.setStaue(0);
-            }
-            onOK();
         });
     }
 

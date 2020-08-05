@@ -69,7 +69,7 @@ public class NewImportDialog extends BaseJDialog {
         this.imports = imports;
         this.branchs = branchs;
         properties = PropertiesUtils.INSTANCE.readProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()));
-        syncBranch = properties.getProperty(BING_KEY, "N").equals("N");
+        syncBranch = "Y".equals(properties.getProperty(BING_KEY, "N"));
         cbVcs.setSelected("Y".equals(properties.getProperty(VCS_KEY, "Y")));
         cbFormat.setSelected("Y".equals(properties.getProperty(FORMAT_KEY, "N")));
 

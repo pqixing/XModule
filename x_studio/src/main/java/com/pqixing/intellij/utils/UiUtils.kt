@@ -1,62 +1,46 @@
 package com.pqixing.intellij.utils
 
-import com.android.ddmlib.AndroidDebugBridge
 import com.android.ddmlib.IDevice
 import com.android.tools.apk.analyzer.AaptInvoker
 import com.android.tools.apk.analyzer.AndroidApplicationInfo
 import com.android.tools.idea.explorer.adbimpl.AdbShellCommandsUtil
+import com.android.tools.idea.run.deployment.DeviceGet
 import com.android.tools.idea.sdk.AndroidSdks
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationAction
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.NamedComponent
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
+import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.*
 import com.pqixing.creator.utils.LogWrap
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.NewImportDialog
 import com.pqixing.tools.PropertiesUtils.readProperties
-import org.jetbrains.android.sdk.AndroidSdkUtils
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 import java.io.File
 import java.util.*
-import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.TransferHandler
 
-object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, Runnable, NamedComponent {
-    override fun deviceConnected(p0: IDevice) {
-        addTask(1000, Runnable {
-            val newList = comboxs.toList()
-            comboxs.clear()
-            newList.forEach {
-                addDevicesComboBox(ProjectManager.getInstance().openProjects.first(), it)
-            }
-        })
-    }
-
-    override fun deviceDisconnected(p0: IDevice) {
-        val item = devices.find { p0.serialNumber == it.second.serialNumber } ?: return
-        devices.remove(item)
-        comboxs.forEach { it.removeItem(item.first) }
-        ApplicationManager.getApplication().getComponent(UiUtils::class.java)
-    }
-
-    override fun deviceChanged(p0: IDevice?, p1: Int) {
-
-    }
+object UiUtils : VirtualFileListener, Runnable {
 
     val IDE_PROPERTIES = ".idea/caches/import.properties"
-    val IML_PROPERTIES = ".idea/caches/iml.properti es"
-    var lastDevices = ""
-    val devices = ArrayList<Pair<String, IDevice>>()
-    val comboxs = ArrayList<JComboBox<String>>()
+    val IML_PROPERTIES = ".idea/caches/iml.properti"
+    val BUILD_PROPERTIES = ".idea/caches/build.log"
     val ftModules = mutableMapOf<String, Boolean?>()
     val lock = Object()
     val tasks: LinkedList<Pair<Long, Runnable>> = LinkedList()
 
     init {
-        AndroidDebugBridge.addDeviceChangeListener(this)
         LocalFileSystem.getInstance().addVirtualFileListener(this)
         Thread(this, "uiThread").start()
     }
@@ -98,6 +82,7 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
             target.save()
         })
     }
+
 
     fun checkIfFormat(target: Project?): Boolean {
         target ?: return false
@@ -156,6 +141,8 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
         ApplicationManager.getApplication().runWriteAction(action)
     }
 
+    fun getSelectDevice(project: Project): IDevice?  = DeviceGet.getDevice(project)
+
     fun setTransfer(component: JComponent, block: (files: List<File>) -> Unit) {
         component.transferHandler = object : TransferHandler() {
             override fun importData(p0: JComponent?, t: Transferable): Boolean {
@@ -175,29 +162,6 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
             }
         }
     }
-
-    fun getSelectDevice(comboBox: JComboBox<*>): IDevice? {
-        val id = comboBox.selectedItem?.toString() ?: ""
-        //保存最后一次选择项
-        return devices.find { it.first == id }?.second?.apply { lastDevices = serialNumber }
-    }
-
-    fun addDevicesComboBox(project: Project, comboBox: JComboBox<String>) {
-        val ds = AndroidSdkUtils.getDebugBridge(project)?.devices?.map { Pair(it.getDevicesName(), it) }?.sortedByDescending { it.second.serialNumber == lastDevices }
-        if (ds != null) {
-            devices.clear()
-            devices.addAll(ds)
-        }
-        comboBox.removeAllItems()
-        devices.forEach { comboBox.addItem(it.first) }
-        comboxs.add(comboBox)
-    }
-
-    fun IDevice.getDevicesName() = avdName
-            ?: getProperty("ro.product.model")?.let { "${getProperty("ro.product.manufacturer")} $it" }
-            ?: serialNumber
-
-    fun removeDevicesComboBox(comboBox: JComboBox<String>) = comboxs.remove(comboBox)
 
     fun installApk(device: IDevice, path: String, params: String): String = try {
         val newPath = "/data/local/tmp/${path.hashCode()}.apk"
@@ -226,6 +190,38 @@ object UiUtils : AndroidDebugBridge.IDeviceChangeListener, VirtualFileListener, 
     } catch (e: Exception) {
         e.printStackTrace()
         null
+    }
+    fun tryInstall(project: Project, d: IDevice?, path: String, param: String) {
+        val device = d ?: DeviceGet.getDevice(project)
+        ?: return ApplicationManager.getApplication().invokeLater { Messages.showMessageDialog("No Device Connect", "Miss Device", null) }
+
+        val task = object : Task.Backgroundable(project, "Start Install") {
+            override fun run(indicator: ProgressIndicator) {
+                indicator.text = "Install : $path"
+                val install = UiUtils.installApk(device, path, param);
+                if (install.contains("success")) {
+                    val packageId = UiUtils.getAppInfoFromApk(File(path))?.packageId
+                    if (packageId != null) {
+                        indicator.text = "Open : $packageId"
+                        val lauchActivity = AdbShellCommandsUtil.executeCommand(device, "dumpsys package $packageId").output.find { it.contains(packageId) }
+                        //打开应用
+                        if (lauchActivity?.isNotEmpty() == true) {
+                            AdbShellCommandsUtil.executeCommand(device, "am start -n ${lauchActivity.substring(lauchActivity.indexOf(packageId)).split(" ").first().trim()}")
+                        }
+                    }
+                } else ApplicationManager.getApplication().invokeLater {
+                    val n = Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Install Fail", install, NotificationType.WARNING)
+                    n.addAction(object : NotificationAction("ReTry") {
+                        override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                            tryInstall(project, device, path, param)
+                            n.expire()
+                        }
+                    })
+                    n.notify(project)
+                }
+            }
+        }
+        ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, BackgroundableProcessIndicator(task))
     }
 
     fun base64Encode(source: String) = String(Base64.getEncoder().encode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)

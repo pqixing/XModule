@@ -29,14 +29,20 @@
     <depends>Git4Idea</depends>
     <depends>org.jetbrains.android</depends>
     <actions>
-        <action id="Modularization.FormatAction" class="com.pqixing.intellij.actions.FormatAction"
-                text="FormatProjects">
-            <add-to-group group-id="ViewMenu" anchor="last"/>
-            <add-to-group group-id="ToolbarRunGroup" relative-to-action="DeviceAndSnapshotComboBox" anchor="after"/>
 
+        <action id="Modularization.fastBuilder" class="com.pqixing.intellij.actions.FastBuilderAction" text="Builder"
+                icon="AllIcons.Toolwindows.ToolWindowBuild">
+            <add-to-group group-id="ToolbarRunGroup" relative-to-action="DeviceAndSnapshotComboBox" anchor="after"/>
+        </action>
+        <action id="Modularization.sync" class="com.pqixing.intellij.actions.SyncAction" text="SyncCode"
+                icon="AllIcons.Actions.BuildLoadChanges">
+            <add-to-group group-id="ToolbarRunGroup" relative-to-action="Modularization.fastBuilder" anchor="after"/>
+        </action>
+        <action id="Modularization.FormatAction" class="com.pqixing.intellij.actions.FormatAction"
+                text="FormatModule">
+            <add-to-group group-id="ViewMenu" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt F"/>
         </action>
-
         <group id="XModule" popup="true" text="XModule" class="com.pqixing.intellij.group.XModuleGroup">
             <add-to-group group-id="BuildMenu" anchor="first"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
@@ -45,25 +51,25 @@
                     text="Import">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
             </action>
-            <action id="Modularization.Jekins" class="com.pqixing.creator.actions.BuilderAction"
-                    text="Builder">
+            <action id="Modularization.newBuilder" class="com.pqixing.intellij.actions.NewBuilderAction" text="Builder">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift B"/>
             </action>
+
 
             <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
                     text="ToMaven"/>
             <separator/>
-
-            <action id="Modularization.OpenAction" class="com.pqixing.intellij.actions.XModuleAction" text="XMdoule">
+            <action id="Modularization.OpenAction" class="com.pqixing.intellij.actions.XModuleAction"
+                    text="NewXMdoule">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="AndroidToolsGroup" anchor="first"/>
             </action>
 
 
+
+
             <separator/>
 
-            <action id="Modularization.DpsAnalyse"
-                    class="com.pqixing.intellij.actions.DpsAnalyseAction" text="DpsAnalyse"/>
             <action id="Modularization.ReIndexVersion"
                     class="com.pqixing.intellij.actions.IndexMavenAction" text="IndexMaven"/>
 

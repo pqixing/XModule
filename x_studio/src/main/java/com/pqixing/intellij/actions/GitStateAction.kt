@@ -64,11 +64,6 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
         createByMe = true
     }
 
-    override fun afterDoOk(dialog: GitOperatorDialog) {
-        super.afterDoOk(dialog)
-        dialog.btnRevert.isVisible = false
-    }
-
     override fun checkUrls(urls: Map<String, String>): Boolean = true
 
     override fun initDialog(dialog: GitOperatorDialog) {
