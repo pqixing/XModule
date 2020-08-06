@@ -24,7 +24,7 @@ class FastBuilderAction : AnAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val param = fastBuilder[e.project]
-        e.presentation.isVisible = XModuleGroup.hasBasic(e.project)
+        e.presentation.isVisible = XModuleGroup.hasBasic(e.project)&&param!=null
         e.presentation.description = param?.module ?: "FastBuilder"
     }
 

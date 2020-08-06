@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.pqixing.XModule.idea</id>
     <name>XModule</name>
-    <version>2.2.0</version>
+    <version>1.0</version>
     <vendor email="pqixing86@gmail.com" url="https://github.com/pqixing/XModule">pqixing
     </vendor>
 
@@ -34,10 +34,7 @@
                 icon="AllIcons.Toolwindows.ToolWindowBuild">
             <add-to-group group-id="ToolbarRunGroup" relative-to-action="DeviceAndSnapshotComboBox" anchor="after"/>
         </action>
-        <action id="XModule.sync" class="com.pqixing.intellij.actions.SyncAction" text="SyncCode"
-                icon="AllIcons.Actions.Refresh">
-            <add-to-group group-id="ToolbarRunGroup" relative-to-action="XModule.fastBuilder" anchor="after"/>
-        </action>
+
         <action id="XModule.FormatAction" class="com.pqixing.intellij.actions.FormatAction"
                 text="FormatModule">
             <add-to-group group-id="ViewMenu" anchor="last"/>
@@ -59,6 +56,10 @@
             <action id="XModule.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
                     text="ToMaven"/>
             <separator/>
+            <action id="XModule.sync" class="com.pqixing.intellij.actions.SyncAction" text="SyncCode"
+                    icon="AllIcons.Actions.Refresh"/>
+<!--                <add-to-group group-id="ToolbarRunGroup" relative-to-action="XModule.fastBuilder" anchor="after"/>-->
+
             <action id="XModule.OpenAction" class="com.pqixing.intellij.actions.XModuleAction"
                     text="NewXMdoule">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
