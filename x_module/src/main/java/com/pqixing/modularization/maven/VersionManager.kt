@@ -195,7 +195,7 @@ class VersionManager(val args: ArgsExtends) {
             //放入最大值
             curVersions[key] = value.coerceAtLeast(curVersions[key] ?: 0)
         }
-        Tools.println("parse---$lastVersion -> ${logMeta.versions} -> $curVersions")
+//        Tools.println("parse---$lastVersion -> ${logMeta.versions} -> $curVersions")
 
         loads.add("curVersions")
         return curVersions

@@ -7,7 +7,7 @@ repositories {
     jcenter()
 }
 dependencies {
-    classpath 'com.pqixing.gradle:xmodule:1.0.1'
+    classpath 'com.pqixing.gradle:xmodule:1.0.2'
 }
 
 
