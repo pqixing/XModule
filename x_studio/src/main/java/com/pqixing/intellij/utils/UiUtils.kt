@@ -198,7 +198,7 @@ object UiUtils : VirtualFileListener, Runnable {
         val task = object : Task.Backgroundable(project, "Start Install") {
             override fun run(indicator: ProgressIndicator) {
                 indicator.text = "Install : $path"
-                val install = UiUtils.installApk(device, path, param);
+                val install = installApk(device, path, param).toLowerCase(Locale.CHINESE)
                 if (install.contains("success")) {
                     val packageId = UiUtils.getAppInfoFromApk(File(path))?.packageId
                     if (packageId != null) {

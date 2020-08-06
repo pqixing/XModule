@@ -1,12 +1,12 @@
 <idea-plugin>
-    <id>com.pqixing.modularization.idea</id>
-    <name>Modularization</name>
+    <id>com.pqixing.XModule.idea</id>
+    <name>XModule</name>
     <version>2.1.0</version>
-    <vendor email="pqixing86@gmail.com" url="https://github.com/pqixing/modularization">pqixing
+    <vendor email="pqixing86@gmail.com" url="https://github.com/pqixing/XModule">pqixing
     </vendor>
 
     <description>
-        Help to run modularization gradle plugin , provide ui operator for task!!
+        Help to run XModule gradle plugin , provide ui operator for task!!
     </description>
 
     <change-notes>
@@ -30,15 +30,15 @@
     <depends>org.jetbrains.android</depends>
     <actions>
 
-        <action id="Modularization.fastBuilder" class="com.pqixing.intellij.actions.FastBuilderAction" text="Builder"
+        <action id="XModule.fastBuilder" class="com.pqixing.intellij.actions.FastBuilderAction" text="Builder"
                 icon="AllIcons.Toolwindows.ToolWindowBuild">
             <add-to-group group-id="ToolbarRunGroup" relative-to-action="DeviceAndSnapshotComboBox" anchor="after"/>
         </action>
-        <action id="Modularization.sync" class="com.pqixing.intellij.actions.SyncAction" text="SyncCode"
-                icon="AllIcons.Actions.BuildLoadChanges">
-            <add-to-group group-id="ToolbarRunGroup" relative-to-action="Modularization.fastBuilder" anchor="after"/>
+        <action id="XModule.sync" class="com.pqixing.intellij.actions.SyncAction" text="SyncCode"
+                icon="AllIcons.Actions.Refresh">
+            <add-to-group group-id="ToolbarRunGroup" relative-to-action="XModule.fastBuilder" anchor="after"/>
         </action>
-        <action id="Modularization.FormatAction" class="com.pqixing.intellij.actions.FormatAction"
+        <action id="XModule.FormatAction" class="com.pqixing.intellij.actions.FormatAction"
                 text="FormatModule">
             <add-to-group group-id="ViewMenu" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt F"/>
@@ -47,34 +47,31 @@
             <add-to-group group-id="BuildMenu" anchor="first"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
-            <action id="Modularization.Import" class="com.pqixing.intellij.actions.ImportAction"
+            <action id="XModule.Import" class="com.pqixing.intellij.actions.ImportAction"
                     text="Import">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
             </action>
-            <action id="Modularization.newBuilder" class="com.pqixing.intellij.actions.NewBuilderAction" text="Builder">
+            <action id="XModule.newBuilder" class="com.pqixing.intellij.actions.NewBuilderAction" text="Builder">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift B"/>
             </action>
 
 
-            <action id="Modularization.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
+            <action id="XModule.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
                     text="ToMaven"/>
             <separator/>
-            <action id="Modularization.OpenAction" class="com.pqixing.intellij.actions.XModuleAction"
+            <action id="XModule.OpenAction" class="com.pqixing.intellij.actions.XModuleAction"
                     text="NewXMdoule">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
-                <add-to-group group-id="AndroidToolsGroup" anchor="first"/>
+                <add-to-group group-id="FileMenu" anchor="first"/>
             </action>
-
-
-
 
             <separator/>
 
-            <action id="Modularization.ReIndexVersion"
+            <action id="XModule.ReIndexVersion"
                     class="com.pqixing.intellij.actions.IndexMavenAction" text="IndexMaven"/>
 
             <separator/>
-            <action id="Modularization.routercreator"
+            <action id="XModule.routercreator"
                     class="com.pqixing.intellij.actions.RouteCreate" text="PathCreator"
                     description="router auto create code"/>
             <action id="com.libiao.mvpcreator" class="com.pqixing.creator.actions.MvpCreator" text="MvpCreator"
@@ -84,10 +81,10 @@
         <group id="XModule.GitBatch" popup="true" text="GitBatch" class="com.pqixing.intellij.group.XModuleGroup">
             <add-to-group group-id="VcsGroups" anchor="last"/>
             <add-to-group group-id="XModule" anchor="last"/>
-            <action id="Modularization.GitSync" class="com.pqixing.intellij.actions.GitSyncAction" text="Clone"/>
-            <action id="Modularization.GitMerge"
+            <action id="XModule.GitSync" class="com.pqixing.intellij.actions.GitSyncAction" text="Clone"/>
+            <action id="XModule.GitMerge"
                     class="com.pqixing.intellij.actions.GitBranchAction" text="Merge"/>
-            <action id="Modularization.GitCheckout" class="com.pqixing.intellij.actions.GitCheckoutAction"
+            <action id="XModule.GitCheckout" class="com.pqixing.intellij.actions.GitCheckoutAction"
                     text="Checkout"/>
         </group>
     </actions>

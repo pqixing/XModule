@@ -18,7 +18,7 @@ open class FormatAction : AnAction() {
     lateinit var project: Project
     override fun actionPerformed(e: AnActionEvent) {
         val target = e.project ?: return
-        if(Messages.OK != Messages.showOkCancelDialog("Format Module By Group?", "Format Module",Messages.getOkButton(),Messages.getCancelButton(), null)) return
+        if(Messages.OK != Messages.showOkCancelDialog("Format Module By Group?", "Format Module", null)) return
         target.save()
         val moduleFile = VfsUtil.findFileByIoFile(File(target.basePath, ".idea/modules.xml"), true)
         ApplicationManager.getApplication().executeOnPooledThread { UiUtils.formatModule(target,moduleFile,true) }

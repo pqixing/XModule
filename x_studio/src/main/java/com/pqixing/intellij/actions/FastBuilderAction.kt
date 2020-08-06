@@ -10,6 +10,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.help.XmlHelper
+import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.utils.GradleUtils
 import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils
@@ -22,13 +23,13 @@ class FastBuilderAction : AnAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val param = fastBuilder[e.project]
-        e.presentation.isVisible = param != null
+        e.presentation.isVisible = XModuleGroup.hasBasic(e.project)
         e.presentation.description = param?.module ?: "FastBuilder"
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-        val param = fastBuilder[e.project] ?: return
+        val param = fastBuilder[e.project] ?: return Messages.showMessageDialog("", "No Found Param", null)
         val device = DeviceGet.getDevice(project)
         if (device == null && Messages.OK != Messages.showOkCancelDialog("No Device Connect,Keep Build ${param.module}?", "Miss Device", null)) {
             return

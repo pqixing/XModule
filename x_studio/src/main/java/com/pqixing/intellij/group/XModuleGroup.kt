@@ -22,9 +22,10 @@ class XModuleGroup : DefaultActionGroup() {
 
     override fun update(e: AnActionEvent) {
         super.update(e)
+        e.presentation.isVisible = hasBasic(e.project)
 //        (ActionManager.getInstance().getAction("DeviceAndSnapshotComboBox") as DeviceAndSnapshotComboBoxAction).getSelectedDevice(e.project!!)
         //启动后，尝试打开socket连接，接收gradle插件的通知
-        GradleUtils.tryInitSocket(GradleUtils.defPort)
+        if (e.presentation.isVisible) GradleUtils.tryInitSocket(GradleUtils.defPort)
 //        val oldUpdate = ActionManager.getInstance().getAction("Vcs.UpdateProject")
 //        val field = (AbstractCommonUpdateAction::class.java).getDeclaredField("myScopeInfo").also { it.isAccessible = true }
 //        val myScopeInfo = field.let { it.get(oldUpdate) }

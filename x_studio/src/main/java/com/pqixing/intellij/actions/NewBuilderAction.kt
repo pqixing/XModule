@@ -21,6 +21,7 @@ import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.tools.FileUtils
 import java.io.File
+import java.util.*
 
 class NewBuilderAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
@@ -49,11 +50,11 @@ class NewBuilderAction : AnAction() {
         dialog.setOnOk {
             val param = dialog.param
             val device = DeviceGet.getDevice(project)
-            if (device == null && Messages.OK != Messages.showOkCancelDialog("No Device Connect,Keep Build ${param.module}?", "Miss Device",Messages.getOkButton(),Messages.getCancelButton(), null)) {
+            if (device == null && Messages.OK != Messages.showOkCancelDialog("No Device Connect,Keep Build ${param.module}?", "Miss Device", null)) {
                 return@setOnOk
             }
 
-            val fastBuilder = (ActionManager.getInstance().getAction("Modularization.fastBuilder") as? FastBuilderAction)?.fastBuilder
+            val fastBuilder = (ActionManager.getInstance().getAction("XModule.fastBuilder") as? FastBuilderAction)?.fastBuilder
             if ("Y" == param.keep) fastBuilder?.put(project, param) else fastBuilder?.remove(project)
 
             logs.add(0, param)
@@ -66,6 +67,7 @@ class NewBuilderAction : AnAction() {
                 }else ApplicationManager.getApplication().invokeLater {
                     Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Build Fail", "", NotificationType.WARNING).notify(project)
                 }
+                param.time = Date().toLocaleString()
                 dialog.refreshHistory()
                 while (logs.size > 50) logs.removeAt(logs.size - 1)
                 FileUtils.writeText(logFile, logs.joinToString("\n"))
