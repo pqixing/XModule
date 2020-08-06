@@ -14,6 +14,7 @@ import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.utils.GradleUtils
 import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils
+import java.text.SimpleDateFormat
 import java.util.*
 
 class FastBuilderAction : AnAction() {
@@ -57,7 +58,7 @@ class BuildParam(val str: String = "") {
     var depend: String = "localFirst"
     var keep: String = "N"
     var install: String = "-r -t"
-    var time: String = Date().toLocaleString()
+    var time: String = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss",Locale.CHINA).format(Date())
     var version: String = ""
     var result: String = ""
 

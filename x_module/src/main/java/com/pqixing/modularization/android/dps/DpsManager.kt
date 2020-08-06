@@ -18,12 +18,14 @@ class DpsManager(val plugin: AndroidPlugin) {
     var args: ArgsExtends = project.getArgs()
     var compileModel: String = args.config.dependentModel ?: "mavenOnly"
     val loseList = mutableListOf<String>()
+    var localProject = setOf<String>()
     val module = plugin.module
 
     //处理依赖
     fun resolveDps(): String {
         val excludes: HashSet<String> = HashSet()
         val includes: ArrayList<String> = ArrayList()
+        localProject = project.rootProject.allprojects.map { it.name }.toSet()
 
         val dps = module.compiles.toMutableSet()
         if (plugin.buildAsApp) module.devCompiles.forEach { dps.add(it.apply { dpType = "dev" }) }
@@ -37,7 +39,7 @@ class DpsManager(val plugin: AndroidPlugin) {
                     "mavenFirst" -> onMavenCompile(dpc, includes, excludes) || onLocalCompile(dpc, includes, excludes)
                     else -> onMavenCompile(dpc, includes, excludes)
                 }
-                if (!compile){
+                if (!compile) {
                     Tools.println("lose -> ${dpc.name}")
                     loseList.add(dpc.name)
                 }
@@ -146,11 +148,10 @@ class DpsManager(val plugin: AndroidPlugin) {
      * 本地进行工程依赖
      */
     private fun onLocalCompile(dpc: Compile, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
+        if (!localProject.contains(dpc.name) && !args.config.allowDpDiff) return false
+        
         val branch = dpc.module.getBranch()
-        if (branch != plugin.module.getBranch() && !args.config.allowDpDiff) {
-            Tools.println("    branch diff ${dpc.name} -> $branch")
-            return false
-        }
+        if (branch != plugin.module.getBranch()) Tools.println("    branch diff ${dpc.name} -> $branch")
         //如果该依赖没有本地导入，不进行本地依赖
         dpc.local = true
         includes.add("${getScope(dpc.dpType, dpc.scope)} ( project(path : ':${dpc.name}'))  { ${excludeStr(excludes = dpc.excludes)} }")

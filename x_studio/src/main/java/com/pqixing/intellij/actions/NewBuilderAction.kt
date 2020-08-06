@@ -21,6 +21,7 @@ import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.tools.FileUtils
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 
 class NewBuilderAction : AnAction() {
@@ -67,7 +68,7 @@ class NewBuilderAction : AnAction() {
                 }else ApplicationManager.getApplication().invokeLater {
                     Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Build Fail", "", NotificationType.WARNING).notify(project)
                 }
-                param.time = Date().toLocaleString()
+                param.time = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss",Locale.CHINA).format(Date())
                 dialog.refreshHistory()
                 while (logs.size > 50) logs.removeAt(logs.size - 1)
                 FileUtils.writeText(logFile, logs.joinToString("\n"))
