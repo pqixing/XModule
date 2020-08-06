@@ -3,7 +3,7 @@ compileJava {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
-ext.mVersion = "2.1.0"
+ext.mVersion = "2.2.0"
 ext.mLocalVersion = "0.1"
 ext.publishedGroupId = "com.pqixing.gradle"
 ext.mArtifactId = "annotation"

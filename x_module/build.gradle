@@ -30,7 +30,7 @@ repositories {
     }
 }
 ext.mLocalVersion = "0.1"
-ext.mVersion = "2.1.0"
+ext.mVersion = "1.0.1"
 ext.mArtifactId = "xmodule"
 apply from: '../script/bintray.gradle'
 
@@ -43,8 +43,8 @@ dependencies {
         implementation "com.pqixing.gradle:tools:0.1"
         implementation "com.pqixing.gradle:annotation:0.1"
     } else {
-        implementation "com.pqixing.gradle:tools:2.1.0"
-        implementation "com.pqixing.gradle:annotation:2.1.0"
+        implementation "com.pqixing.gradle:tools:2.2.0"
+        implementation "com.pqixing.gradle:annotation:2.2.0"
     }
     implementation gradleApi()
     implementation localGroovy()
