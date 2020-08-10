@@ -37,7 +37,7 @@ public class Config {
 > [basic工程](https://github.com/pqixing/x_basic.git) :用来存在模版和模块配置的工程，第一次改造时，需要建立该工程并配置相关属性，其余开发人员直接使用该工程地址即可快速进入开发。详细请查看demo
 
 ### 开发操作说明 
-在编辑页面点击右键即可看到XModule菜单。 ![img](imgs/xmodule.png) 
+* 在编辑页面点击右键即可看到XModule菜单。 ![img](imgs/xmodule.png) 
 ### 功能说明
 * Import : 负责模块导入管理，同时会管理模块代码的下载。![img](imgs/import.png) 
  
