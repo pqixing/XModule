@@ -6,7 +6,6 @@ import android.content.Context;
 import com.pqixing.mvp.constract.BaseContract;
 
 /**
- * @author libiao
  * model层业务基类
  */
 

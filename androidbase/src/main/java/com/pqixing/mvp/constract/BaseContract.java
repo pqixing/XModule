@@ -5,7 +5,6 @@ import android.content.Context;
 
 
 /**
- * @author libiao
  * 管理mvp 各层结构的基类
  */
 

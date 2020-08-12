@@ -11,7 +11,6 @@ import android.content.Context;
 import com.pqixing.mvp.constract.BaseContract;
 
 /**
- * @author libiao
  *
  * @param <V> view层通信接口
  * @param <M> model层业务实现类

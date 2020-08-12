@@ -8,7 +8,6 @@ import java.lang.reflect.Type;
 
 /**
  * 创建presenter工具类
- * @author LB
  *
  */
 @SuppressWarnings("unchecked")

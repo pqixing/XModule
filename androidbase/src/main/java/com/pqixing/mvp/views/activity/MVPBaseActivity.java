@@ -11,7 +11,6 @@ import com.pqixing.mvp.constract.BaseContract;
 import com.pqixing.mvp.utils.PresenterInitUtil;
 
 /**
- * @author libiao
  * @param <P> 具体presenter实现类
  */
 public abstract class MVPBaseActivity<P extends BaseContract.IPresenter> extends AppCompatActivity implements BaseContract.IView {

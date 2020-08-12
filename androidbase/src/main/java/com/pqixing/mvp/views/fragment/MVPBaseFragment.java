@@ -14,7 +14,6 @@ import com.pqixing.mvp.utils.PresenterInitUtil;
 
 
 /**
- * @author libiao
  * @param <P> 具体presenter实现类
  */
 public abstract class MVPBaseFragment<P extends BaseContract.IPresenter> extends Fragment implements BaseContract.IView {
