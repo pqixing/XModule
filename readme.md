@@ -13,7 +13,7 @@ XModule 是一个组件化管理系统,实现像开发一个独立应用一样�
   
   
 ### 快速使用集成
-* 在AndroidStudio -> Settings-> Plugins 搜索 [XModule](https://plugins.jetbrains.com/plugin/14829-xmodule) ,安装ide插件
+* 在AndroidStudio -> Settings-> Plugins 搜索 [XModule](https://plugins.jetbrains.com/plugin/12121-xmodule) ,安装ide插件
 * 在工程root目录的setting.gradle中,添加以下代码,然后同步，在弹出的对话框，输入basic工程的Git地址
 ```
 buildscript { apply from: 'https://gitee.com/pqixing/XModule/raw/master/script/install.gradle', to: it }; apply plugin: 'com.module.setting'

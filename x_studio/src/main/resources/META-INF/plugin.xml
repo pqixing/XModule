@@ -1,7 +1,7 @@
 <idea-plugin>
-    <id>com.pqixing.XModule.idea</id>
+    <id>com.pqixing.modularization.idea</id>
     <name>XModule</name>
-    <version>1.0</version>
+    <version>2.2.0</version>
     <vendor email="pqixing86@gmail.com" url="https://github.com/pqixing/XModule">pqixing
     </vendor>
 
