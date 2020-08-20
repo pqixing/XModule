@@ -1,11 +1,7 @@
-package com.pqixing.leetcode;
+package com.pqixing.leetcode.array;
 
-public class ArrayCode {
+public class ArrayBalancePoint {
     public static void main(String[] args) {
-        testGetBalancePoint();
-    }
-
-    private static void testGetBalancePoint() {
         System.out.println("--------------start : testGetBalancePoint--------------");
         System.out.println(getBalancePoint(new int[]{1, 3, 1, 4}));
         System.out.println(getBalancePoint(new int[]{1, 0, 1, 4}));
