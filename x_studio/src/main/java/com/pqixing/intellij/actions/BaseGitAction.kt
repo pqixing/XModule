@@ -16,7 +16,6 @@ import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.tools.FileUtils
 import git4idea.GitUtil
 import git4idea.repo.GitRepository
-import groovy.lang.GroovyClassLoader
 import java.io.File
 
 abstract class BaseGitAction : AnAction() {
@@ -37,7 +36,7 @@ abstract class BaseGitAction : AnAction() {
 
         val config = XmlHelper.loadConfig(basePath)
         val projectXml = XmlHelper.loadManifest(basePath)
-        if (projectXml==null) {
+        if (projectXml == null) {
             Messages.showMessageDialog("Project or Config file not exists!!", "Miss File", null)
             return
         }
@@ -242,9 +241,9 @@ abstract class BaseGitAction : AnAction() {
             r.staue = 1
             return
         }
-        val clone = GitHelper.clone(project, File(r.title).apply { FileUtils.delete(this) }, urls.getValue(r.title), rootBranch, dialog.gitListener)
-        r.log = if (clone == null) "Clone Fail" else "Clone Success"
-        r.staue = if (clone == null) 3 else 1
+        val clone = GitHelper.clone(project, File(r.title).apply { FileUtils.delete(this) }, urls.getValue(r.title), dialog.gitListener)
+        r.log = if (!clone) "Clone Fail" else "Clone Success"
+        r.staue = if (!clone) 3 else 1
         dialog.updateUI()
     }
 
@@ -256,7 +255,7 @@ abstract class BaseGitAction : AnAction() {
         if (!GitUtil.isGitRoot(File(path))) return null;
         if (repository == null) {
             repository = GitHelper.getRepo(File(path), project)
-           if(repository!=null) allRepos[path] = repository
+            if (repository != null) allRepos[path] = repository
         }
         return repository
     }

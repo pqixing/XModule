@@ -3,7 +3,6 @@ package com.pqixing.modularization.android.dps
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Compile
-import com.pqixing.model.Module
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.setting.ArgsExtends
@@ -167,7 +166,7 @@ class DpsManager(val plugin: AndroidPlugin) {
             Tools.println("    branch diff ${dpc.name} -> $branch")
 
             //如果本地依赖分支不同，则查处所有共同的依赖，然后只保留一个分支上。 保留优先顺序 ：  dpc模块所在分支，  当前project所在分支。 fallback分支
-            val sameDps = findSameDps(module, dpc.module)
+            val sameDps = dpc.module.allCompiles()
             val branches = args.manifest.fallbacks.toMutableList()
             branches.add(0, module.getBranch())
             branches.add(0, dpc.module.getBranch())
@@ -179,14 +178,4 @@ class DpsManager(val plugin: AndroidPlugin) {
         addBranchExclude(branch, dpc.name, excludes, 0)
         return true
     }
-
-    /**
-     * child 模块是source模块的依赖之一
-     * 查找出  source模块中不包含child模块之外的所有依赖
-     */
-    private fun findSameDps(source: Module, child: Module): Set<String> {
-        return emptySet()
-    }
-
-
 }

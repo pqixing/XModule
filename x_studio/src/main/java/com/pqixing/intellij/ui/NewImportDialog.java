@@ -16,14 +16,12 @@ import java.io.File;
 import java.util.*;
 
 public class NewImportDialog extends BaseJDialog {
-    public static final String BING_KEY = "syncRoot";
     public static final String IMPORT_KEY = "IMPORT";
     public static final String VCS_KEY = "vcs";
     public static final String FORMAT_KEY = "format";
     private JPanel contentPane;
     private JButton buttonOK;
-    private JCheckBox cbBind;
-    private JComboBox<String> tvCodeRoot;
+    private JTextField tvCodeRoot;
     private JButton btnProjectXml;
     private JTextField tvImport;
     private JComboBox cbDpModel;
@@ -36,16 +34,14 @@ public class NewImportDialog extends BaseJDialog {
 
     //已选中导入的工程
     private List<String> imports;
-    private List<String> branchs;
     private Runnable onOk;
     Project project;
-    private boolean syncBranch;
     private ImportSelectAdapter allAdapter;
     private JListSelectAdapter selectAdapter;
     private Properties properties;
     private final String TAG = "-------------------";
 
-    public NewImportDialog(@NotNull Project project, @NotNull List<String> imports, @NotNull List<JListInfo> allInfos, @NotNull List<String> branchs, String dpModel, String codeRoot) {
+    public NewImportDialog(@NotNull Project project, @NotNull List<String> imports, @NotNull List<JListInfo> allInfos, String dpModel, String codeRoot) {
         super(project);
         setContentPane(contentPane);
         setModal(false);
@@ -66,15 +62,11 @@ public class NewImportDialog extends BaseJDialog {
 //        UiUtils.centerDialog(this);
         this.project = project;
         this.imports = imports;
-        this.branchs = branchs;
         properties = PropertiesUtils.INSTANCE.readProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()));
-        syncBranch = "Y".equals(properties.getProperty(BING_KEY, "N"));
         cbVcs.setSelected("Y".equals(properties.getProperty(VCS_KEY, "Y")));
 
         initDpModel(dpModel);
-        cbBind.setSelected(syncBranch);
-        cbBind.addActionListener(c -> initCodeRoot(branchs, codeRoot));
-        initCodeRoot(branchs, codeRoot);
+        tvCodeRoot.setText(codeRoot);
         initJList(imports, allInfos);
         initImportAction();
     }
@@ -101,10 +93,6 @@ public class NewImportDialog extends BaseJDialog {
 
     public JButton getBtnConfig() {
         return btnConfig;
-    }
-
-    public String getSelectBranch() {
-        return syncBranch ? getCodeRootStr().substring(3) : branchs.get(0);
     }
 
 
@@ -170,30 +158,6 @@ public class NewImportDialog extends BaseJDialog {
         ((TitledBorder) jpSelect.getBorder()).setTitle(key + " (" + size + ")");
         jpSelect.revalidate();
         jpSelect.repaint();
-    }
-
-
-    ItemListener codeRootListener = e -> syncImportByBranch();
-
-    private void initCodeRoot(List<String> branch, String codeRoot) {
-        syncBranch = cbBind.isSelected();
-        tvCodeRoot.removeItemListener(codeRootListener);
-        if (tvCodeRoot.getItemCount() > 0) tvCodeRoot.removeAllItems();
-        if (!syncBranch) tvCodeRoot.addItem(codeRoot);
-        else for (String s : branch) tvCodeRoot.addItem("../" + s);
-        tvCodeRoot.setSelectedIndex(0);
-        tvCodeRoot.addItemListener(codeRootListener);
-        tvCodeRoot.setEditable(!syncBranch);
-    }
-
-    private void syncImportByBranch() {
-        if (!syncBranch) return;
-        List<String> list = str2List(properties.getProperty(IMPORT_KEY + TextUtils.INSTANCE.numOrLetter(getCodeRootStr())));
-        if (!list.isEmpty()) {
-            imports.clear();
-            imports.addAll(list);
-            updateImports();
-        }
     }
 
     private void initImportAction() {
@@ -285,22 +249,19 @@ public class NewImportDialog extends BaseJDialog {
      * 保存切换框的值
      */
     private void saveBindKey() {
-        String newKey = syncBranch ? "Y" : "N";
-        String oldBind = properties.getProperty(BING_KEY);
-        properties.setProperty(BING_KEY, newKey);
 
         String newVcs = syncVcs() ? "Y" : "N";
         String oldVcs = properties.getProperty(VCS_KEY);
         properties.setProperty(VCS_KEY, newVcs);
 
 
-        String importKey = IMPORT_KEY + TextUtils.INSTANCE.numOrLetter(getSelectBranch());
+        String importKey = IMPORT_KEY + TextUtils.INSTANCE.numOrLetter(getCodeRootStr());
         String newImport = list2Str(getImports());
         String oldImports = properties.getProperty(importKey);
         properties.setProperty(importKey, newImport);
 
 
-        if (!newVcs.equals(oldVcs) || !newKey.equals(oldBind) || !newImport.equals(oldImports))
+        if (!newVcs.equals(oldVcs) || !newImport.equals(oldImports))
             ApplicationManager.getApplication().runWriteAction(() -> PropertiesUtils.INSTANCE.writeProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()), properties));
     }
 
@@ -322,7 +283,7 @@ public class NewImportDialog extends BaseJDialog {
     }
 
     public String getCodeRootStr() {
-        Object item = tvCodeRoot.getSelectedItem();
+        Object item = tvCodeRoot.getText();
         return item == null ? "" : item.toString().trim();
     }
 

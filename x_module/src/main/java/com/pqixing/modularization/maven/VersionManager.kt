@@ -150,7 +150,7 @@ class VersionManager(val args: ArgsExtends) {
         val versionDir = XmlHelper.fileVersion(args.env.rootDir.absolutePath)
         val file = File(versionDir, "$artifactId/${version}.txt")
         if (!file.exists()) {
-            val netTxt = XmlHelper.readUrlTxt(args.manifest.fullMavenUrl(artifactId, version, "${artifactId}-${version}.txt"))
+            val netTxt = XmlHelper.readUrlTxt(args.manifest.fullUrl(artifactId, version, "${artifactId}-${version}.txt"))
             if (netTxt.isNotEmpty()) {//写入网络的文件
                 FileUtils.writeText(file, netTxt)
             }

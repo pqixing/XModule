@@ -25,7 +25,7 @@ class ManifestModel(val baseUrl: String) {
         projects.forEach { this.addAll(it.modules) }
     }
 
-    fun fullMavenUrl(vararg names: String) = TextUtils.append(arrayOf(mavenUrl, groupId.replace(".", "/")).plus(names))
+    fun fullUrl(vararg names: String) = TextUtils.append(arrayOf(mavenUrl, groupId.replace(".", "/")).plus(names))
 }
 
 data class ProjectModel(val manifest: ManifestModel, val name: String, var path: String, val desc: String, val url: String) {
@@ -65,6 +65,14 @@ data class Module(val name: String, val project: ProjectModel) {
 
     val compiles = mutableListOf<Compile>()
     val devCompiles = mutableListOf<Compile>()
+
+    fun allCompiles(): Set<String> = mutableSetOf<String>().also { loadCompiles(it, this) }
+    private fun loadCompiles(all: MutableSet<String>, module: Module) {
+        if (!all.add(module.name)) return
+        for (c in module.compiles) {
+            loadCompiles(all, c.module)
+        }
+    }
 }
 
 /**

@@ -378,7 +378,7 @@ object XmlHelper {
         val manifest = loadManifest(basePath) ?: return
         val versionDir = fileVersion(basePath)
 
-        val fromUrl = { name: String -> readUrlTxt(manifest.fullMavenUrl(name, EnvKeys.XML_META)).also { FileUtils.writeText(File(versionDir, "${name}.xml"), it) } }
+        val fromUrl = { name: String -> readUrlTxt(manifest.fullUrl(name, EnvKeys.XML_META)).also { FileUtils.writeText(File(versionDir, "${name}.xml"), it) } }
 
         //更新基础版本记录清单文件
         val lastLog = parseMetadata(fromUrl(EnvKeys.BASIC)).versions.lastOrNull() ?: "default"

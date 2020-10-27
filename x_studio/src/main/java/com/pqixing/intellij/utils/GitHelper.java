@@ -12,34 +12,21 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.containers.ContainerUtil;
 import com.pqixing.tools.FileUtils;
-
+import git4idea.GitLocalBranch;
+import git4idea.GitUtil;
+import git4idea.GitVcs;
+import git4idea.branch.GitBrancher;
+import git4idea.commands.*;
+import git4idea.repo.GitRemote;
+import git4idea.repo.GitRepository;
 import git4idea.repo.GitRepositoryManager;
+import git4idea.util.StringScanner;
+import kotlin.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-
-import git4idea.GitLocalBranch;
-import git4idea.GitRemoteBranch;
-import git4idea.GitUtil;
-import git4idea.GitVcs;
-import git4idea.branch.GitBrancher;
-import git4idea.commands.Git;
-import git4idea.commands.GitCommand;
-import git4idea.commands.GitCommandResult;
-import git4idea.commands.GitLineHandler;
-import git4idea.commands.GitLineHandlerListener;
-import git4idea.commands.GitSimpleEventDetector;
-import git4idea.repo.GitRemote;
-import git4idea.repo.GitRepository;
-import git4idea.repo.GitRepositoryImpl;
-import git4idea.util.StringScanner;
-import kotlin.Triple;
+import java.util.*;
 
 public class GitHelper {
     public static final String LOCAL = "local";
@@ -63,25 +50,13 @@ public class GitHelper {
      * @param project
      * @param directory
      * @param url
-     * @param cloneBranch
      * @return
      */
-    public static GitRepository clone(@NotNull final Project project, @NotNull final File directory, @NotNull final String url, String cloneBranch, GitLineHandlerListener... listeners) {
+    public static boolean clone(@NotNull final Project project, @NotNull final File directory, @NotNull final String url, GitLineHandlerListener... listeners) {
         File dir = directory.getParentFile();
         if (!dir.exists()) dir.mkdirs();
         FileUtils.delete(directory);
-        boolean doClone = getGit().clone(project, dir, url, directory.getName(), listeners).getExitCode() == 0;
-        if (!doClone) return null;
-        GitRepository repo = getRepo(directory, project);
-        if (repo == null) return null;
-        if (cloneBranch == null || cloneBranch.equals(repo.getCurrentBranchName())) return repo;
-        for (GitRemoteBranch remoteBranch : repo.getBranches().getRemoteBranches()) {
-            if (remoteBranch.getName().endsWith("/" + cloneBranch)) {
-                GitHelper.getGit().checkout(repo, remoteBranch.getName(), cloneBranch, true, true, listeners);
-                break;
-            }
-        }
-        return repo;
+        return getGit().clone(project, dir, url, directory.getName(), listeners).getExitCode() == 0;
     }
 
     /**
@@ -275,7 +250,7 @@ public class GitHelper {
         return b;
     }
 
-    public static GitRemote findRemoteByName(GitRepository repo,String name){
+    public static GitRemote findRemoteByName(GitRepository repo, String name) {
         return ContainerUtil.find(repo.getRemotes(), remote -> remote.getName().equals(name));
     }
 

@@ -54,12 +54,8 @@ class ImportAction : AnAction() {
         val infos = projectXml.allModules().filter { it.attach == null }.map { JListInfo(it.path.substringBeforeLast("/") + "/" + it.name, "${it.desc} - ${it.type.substring(0, 3)} ") }.toMutableList()
 
         val repo = GitHelper.getRepo(File(basePath, EnvKeys.BASIC), project)
-        val branchs = repo.branches.remoteBranches.map { it.name.substring(it.name.lastIndexOf("/") + 1) }.toMutableList()
-        val localBranch = repo.currentBranchName ?: "master"
-        branchs.remove(localBranch)
-        branchs.add(0, localBranch)
 
-        val dialog = NewImportDialog(project, imports.toMutableList(), infos, branchs, dependentModel, codeRoot)
+        val dialog = NewImportDialog(project, imports.toMutableList(), infos, dependentModel, codeRoot)
         dialog.pack()
         dialog.isVisible = true
         val importTask = object : Task.Backgroundable(project, "Start Import") {
@@ -77,7 +73,7 @@ class ImportAction : AnAction() {
 
                     FileUtils.delete(it.key)
                     //下载master分支
-                    GitHelper.clone(project, it.key, it.value, dialog.selectBranch)
+                    GitHelper.clone(project, it.key, it.value)
                 }
 //                    如果快速导入不成功,则,同步一次
                 ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
@@ -99,11 +95,7 @@ class ImportAction : AnAction() {
             FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(XmlHelper.fileManifest(basePath), false)!!, true)
         }
         dialog.setOnOk {
-            //切换根目录的分支
-            if (localBranch == dialog.selectBranch) ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
-            else GitHelper.checkout(project, dialog.selectBranch, mutableListOf(repo)) {
-                ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
-            }
+            ProgressManager.getInstance().runProcessWithProgressAsynchronously(importTask, BackgroundableProcessIndicator(importTask))
         }
     }
 

@@ -31,13 +31,7 @@ object GradleUtils {
     val defPort: Int = 8451
     var debugPort = 0
 
-    fun runTask(project: Project
-                , tasks: List<String>
-                , progressExecutionMode: ProgressExecutionMode = ProgressExecutionMode.IN_BACKGROUND_ASYNC
-                , activateToolWindowBeforeRun: Boolean = true
-                , runTaskId: String = System.currentTimeMillis().toString()
-                , envs: Map<String, String> = defEnvs
-                , callback: TaskCallBack? = null) {
+    fun runTask(project: Project, tasks: List<String>, progressExecutionMode: ProgressExecutionMode = ProgressExecutionMode.IN_BACKGROUND_ASYNC, activateToolWindowBeforeRun: Boolean = true, runTaskId: String = System.currentTimeMillis().toString(), envs: Map<String, String> = defEnvs, callback: TaskCallBack? = null) {
         val settings = ExternalSystemTaskExecutionSettings()
         settings.executionName = "Running Task:$tasks"
         settings.taskNames = tasks
@@ -110,9 +104,7 @@ object GradleUtils {
         val importTask = object : Task.Backgroundable(target, "Download Basic") {
             override fun run(indicator: ProgressIndicator) {
                 indicator.text = "clone $url"
-                kotlin.runCatching {
-                    GitHelper.clone(target, basicDir, url, "master")
-                }
+                kotlin.runCatching { GitHelper.clone(target, basicDir, url) }
                 after()
             }
         }

@@ -1,8 +1,6 @@
 package com.pqixing.intellij.ui;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.pqixing.help.XmlHelper;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
 
@@ -22,7 +20,6 @@ public class ToMavenDialog extends BaseJDialog {
     private JCheckBox branchCheckBox;
     private JCheckBox versionCheckBox;
     private JCheckBox changeCheckBox;
-    private JButton btnSync;
     JListSelectAdapter adapter;
     private Runnable onOk;
 
@@ -54,10 +51,6 @@ public class ToMavenDialog extends BaseJDialog {
                 i.setSelect(allSelect);
             }
             updateUI(buttonOK.isVisible());
-        });
-        btnSync.addActionListener(e-> {
-            ApplicationManager.getApplication().executeOnPooledThread(() -> XmlHelper.INSTANCE.loadVersionFromNet(project.getBasePath()));
-            btnSync.setVisible(false);
         });
     }
 
