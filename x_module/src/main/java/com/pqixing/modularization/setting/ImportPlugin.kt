@@ -1,7 +1,6 @@
 package com.pqixing.modularization.setting
 
 import com.pqixing.Config
-import com.pqixing.EnvKeys
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.modularization.base.BaseTask
@@ -11,7 +10,6 @@ import com.pqixing.modularization.utils.Logger
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.api.ListBranchCommand
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import org.gradle.api.Plugin
@@ -60,10 +58,10 @@ class ImportPlugin : Plugin<Settings> {
         val taskNames = setting.gradle.startParameter.taskNames
 
         //检查basic是否存在，如果不存在，尝试读取gradle.properties进行下载，否则抛出异常
-        val basicGit = GitUtils.open(env.basicDir) ?: downloadBasic(env.basicDir, setting,config) ?: return
-        env.basicBranch = basicGit.repository.branch
-        env.allBranches.addAll(basicGit.branchList().setListMode(ListBranchCommand.ListMode.ALL).call().map { it.name.substringAfterLast("/") })
-        GitUtils.close(basicGit)
+        if (!GitUtils.isGitDir(env.basicDir)) {
+            val clone = downloadBasic(env.basicDir, setting, config) ?: return
+            GitUtils.close(clone)
+        }
 
         //解析project.xml，解析所有应用的依赖数据
         val projectXml = XmlHelper.loadManifest(rootDir.absolutePath)
@@ -89,14 +87,12 @@ class ImportPlugin : Plugin<Settings> {
                 args.clear()
                 settings.remove(key)
                 plugins.clear()
-                ResultUtils.notifyIde(rootDir, mutableMapOf("task" to taskNames.joinToString(",")
-                        , "type" to "buildFinished"
-                        , "spend" to (System.currentTimeMillis() - start).toString()))
+                ResultUtils.notifyIde(rootDir, mutableMapOf("task" to taskNames.joinToString(","), "type" to "buildFinished", "spend" to (System.currentTimeMillis() - start).toString()))
             }
         })
     }
 
-    private fun downloadBasic(basicDir: File, setting: Settings,config:Config): Git? {
+    private fun downloadBasic(basicDir: File, setting: Settings, config: Config): Git? {
         val urlName = "basicUrl"
         val url = config.basicUrl
         if (url?.isNotEmpty() != true) {//没有配置url

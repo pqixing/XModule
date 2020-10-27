@@ -24,7 +24,7 @@ open class CloneProjectTask : BaseTask() {
             FileUtils.delete(dir)
         }
         Tools.println("          start clone-> ${dir.name} ${it.url}")
-        GitUtils.clone(it.url, dir, project.getArgs().env.basicBranch)?.close()
+        GitUtils.clone(it.url, dir)?.close()
         (if (GitUtils.isGitDir(dir)) clones else fails).add("\n${dir.name}:${it.url}")
     }
 

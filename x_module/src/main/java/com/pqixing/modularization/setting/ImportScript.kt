@@ -112,10 +112,6 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         if (!args.runAsApp(module)) module.compiles.removeIf { it.module.api != null }
         if (mBranch.isEmpty()) ResultUtils.thow("clone fail -> ${module.project.url}")
 
-
-        if (mBranch != args.env.basicBranch) {
-            Tools.println("   Warming::branch diff $mBranch -> ${args.env.basicBranch}")
-        }
         hookBuildFile(module, buildFileName)
         module.api?.let { tryCheckModule(it, buildFileName) }
     }

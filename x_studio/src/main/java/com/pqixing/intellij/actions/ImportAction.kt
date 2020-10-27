@@ -1,9 +1,5 @@
 package com.pqixing.intellij.actions
 
-import com.android.tools.idea.gradle.project.sync.GradleSyncInvoker
-import com.android.tools.idea.gradle.project.sync.GradleSyncListener
-import com.android.tools.idea.util.toIoFile
-import com.google.wireless.android.sdk.stats.GradleSyncStats
 import com.intellij.dvcs.repo.VcsRepositoryManager
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
@@ -16,7 +12,6 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.VcsDirectoryMapping
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
@@ -28,12 +23,10 @@ import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.ui.NewImportDialog
 import com.pqixing.intellij.utils.GitHelper
-import com.pqixing.intellij.utils.UiUtils
+import com.pqixing.intellij.utils.UiUtils.realName
 import com.pqixing.tools.FileUtils
-import com.pqixing.tools.PropertiesUtils
 import git4idea.GitUtil
 import java.io.File
-import java.util.*
 
 
 class ImportAction : AnAction() {
@@ -86,26 +79,15 @@ class ImportAction : AnAction() {
                     //下载master分支
                     GitHelper.clone(project, it.key, it.value, dialog.selectBranch)
                 }
+//                    如果快速导入不成功,则,同步一次
+                ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
 
-                val pimls = allIml()
-                val importImls = projectXml.allModules().filter { allIncludes.contains(it.name) }
-                        .mapNotNull { pimls[File(codePath, it.path).canonicalPath]?.toString() }
-                ApplicationManager.getApplication().invokeLater { importByIde(project, importImls.toMutableList()) }
-                //如果快速导入不成功,则,同步一次
-//                ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
-                GradleSyncInvoker.getInstance().requestProjectSync(project, GradleSyncStats.Trigger.TRIGGER_USER_SYNC_ACTION, object : GradleSyncListener {
-                    override fun syncSucceeded(project: Project) {
-                        //添加basic的地址
-                        syncVcs(gitPaths.keys.also { it.add(File(basePath, EnvKeys.BASIC)) }, dialog.syncVcs(), project)
-
-                        val manager = ModuleManager.getInstance(project)
-                        manager.modules.forEach {
-                            //模块的代码目录
-                            pimls[ModuleRootManager.getInstance(it).contentRoots[0].toIoFile().canonicalPath] = it.moduleFilePath
-                        }
-                        saveIml(pimls)
-                    }
-                })
+                disposeModule(project, allIncludes, dialog.codeRootStr == codeRoot)
+                //添加basic的地址
+                Thread.sleep(2000)//先睡眠2秒,然后检查git管理是否有缺少
+                ApplicationManager.getApplication().invokeLater {
+                    syncVcs(gitPaths.keys.toMutableSet().also { it.add(File(basePath, EnvKeys.BASIC)) }, dialog.syncVcs(), project)
+                }
             }
         }
         dialog.btnConfig.addActionListener {
@@ -143,8 +125,21 @@ class ImportAction : AnAction() {
         }
     }
 
-    fun allIml() = PropertiesUtils.readProperties(File(project.basePath, UiUtils.IML_PROPERTIES))
-    fun saveIml(pros: Properties) = UiUtils.invokeLaterOnWriteThread(Runnable { PropertiesUtils.writeProperties(File(project.basePath, UiUtils.IML_PROPERTIES), pros) })
+
+    /**
+     * 直接通过ide进行导入
+     */
+    private fun disposeModule(project: Project, allIncludes: MutableSet<String>, codeRootChange: Boolean) = ApplicationManager.getApplication().invokeLater {
+
+        val projectName = project.name.trim().replace(" ", "")
+        val manager = ModuleManager.getInstance(project)
+
+        manager.modules.forEach { m ->
+            if (projectName == m.name) return@forEach
+            if (codeRootChange || !allIncludes.contains(m.realName())) kotlin.runCatching { manager.disposeModule(m) }
+        }
+
+    }
 
     private fun saveConfig(config: Config, dialog: NewImportDialog) = ApplicationManager.getApplication().invokeLater {
         ApplicationManager.getApplication().runWriteAction {
@@ -152,34 +147,6 @@ class ImportAction : AnAction() {
             config.codeRoot = dialog.codeRootStr.trim()
             config.include = dialog.imports.filter { it.isNotEmpty() }.joinToString(",")
             XmlHelper.saveConfig(basePath, config)
-        }
-    }
-
-    /**
-     * 直接通过ide进行导入
-     */
-    private fun importByIde(project: Project, importImls: MutableList<String>) = ApplicationManager.getApplication().invokeLater {
-
-        val projectName = project.name.trim().replace(" ", "")
-        val manager = ModuleManager.getInstance(project)
-
-
-        manager.modules.forEach { m ->
-            if (importImls.remove(m.moduleFilePath) || projectName == m.name) return@forEach
-            manager.disposeModule(m)
-        }
-        ApplicationManager.getApplication().runWriteAction {
-            importImls.forEach { i -> loadModule(manager, i) }
-        }
-    }
-
-    /**
-     * 加载模块
-     */
-    fun loadModule(manager: ModuleManager, filePath: String) {
-        if (File(filePath).exists()) try {
-            manager.loadModule(filePath)
-        } finally {
         }
     }
 }

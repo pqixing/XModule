@@ -12,6 +12,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -41,7 +42,7 @@ object UiUtils : VirtualFileListener, Runnable {
     val tasks: LinkedList<Pair<Long, Runnable>> = LinkedList()
 
     init {
-        LocalFileSystem.getInstance().addVirtualFileListener(this)
+//        LocalFileSystem.getInstance().addVirtualFileListener(this)
         Thread(this, "uiThread").start()
     }
 
@@ -67,74 +68,6 @@ object UiUtils : VirtualFileListener, Runnable {
                 t.second.run()
             }
         }
-    }
-
-    override fun contentsChanged(event: VirtualFileEvent) {
-        if (event.fileName != "modules.xml" || !event.file.path.endsWith(".idea/modules.xml")) return
-        val moduleXml = event.file
-        val target = ProjectManager.getInstance().openProjects.find { moduleXml.path.startsWith(it.basePath ?: "") }
-                ?: return
-        target.save()
-
-        //格式化iml文件,//1.5秒后再次检测，防止格式化不生效
-        if (formatModule(target, moduleXml)) addTask(2000, Runnable {
-            formatModule(target, moduleXml)
-            target.save()
-        })
-    }
-
-
-    fun checkIfFormat(target: Project?): Boolean {
-        target ?: return false
-        var format = ftModules[target.basePath]
-        if (format == null) {
-            val properties = readProperties(File(target.basePath, IDE_PROPERTIES))
-            format = "Y" == properties.getProperty(NewImportDialog.FORMAT_KEY, "Y")
-            ftModules[target.basePath!!] = format
-        }
-        return format
-    }
-
-    fun formatModule(target: Project, moduleXml: VirtualFile?, formatFoce: Boolean = false): Boolean {
-        moduleXml ?: return false
-        val txtLines = mutableListOf<String>()
-        val tag = "<!--end-->"
-        if (!formatFoce) {
-            if (checkIfFormat(target)) return false
-
-            val ins = moduleXml.inputStream.reader()
-            txtLines.addAll(ins.readLines())
-            ins.close()
-            if (txtLines.lastOrNull()?.endsWith(tag) == true) return false
-        }
-
-        val manifest = XmlHelper.loadManifest(target.basePath) ?: return false
-        invokeLaterOnWriteThread(Runnable {
-            target.save()
-            val defGroup = "apis"
-            val iml = ".iml"
-            val rex = Regex("group=\".*\"")
-            val groups = manifest.allModules().map {
-                var path = if (it.attach()) defGroup else it.path.substringBeforeLast("/")
-                if (path.startsWith("/")) path = path.substring(1)
-                it.name to path
-            }.toMap()
-
-            val newTxt = txtLines.map {
-                val i = it.indexOf(iml)
-                val moduleName = it.substring(0, i.coerceAtLeast(0)).substringAfterLast("/")
-                val newGroup = if (moduleName == target.name) defGroup else groups[moduleName] ?: ""
-                it.replace(rex, "group=\"$newGroup\"")
-            }
-
-            val txt = newTxt.joinToString("\n") + "\n<!--${Date().toLocaleString()}--> $tag"
-            val w = moduleXml.getOutputStream(object : SafeWriteRequestor {}).writer()
-            w.write(txt)
-            w.close()
-            moduleXml.refresh(false, true)
-            target.save()
-        })
-        return true
     }
 
     fun invokeLaterOnWriteThread(action: Runnable) = ApplicationManager.getApplication().invokeLater {
@@ -226,4 +159,6 @@ object UiUtils : VirtualFileListener, Runnable {
 
     fun base64Encode(source: String) = String(Base64.getEncoder().encode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
     fun base64Decode(source: String) = String(Base64.getDecoder().decode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
+
+    fun Module?.realName():String = this?.name?.split(":")?.lastOrNull()?:""
 }

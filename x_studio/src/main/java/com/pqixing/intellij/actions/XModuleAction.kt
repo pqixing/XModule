@@ -30,10 +30,10 @@ open class XModuleAction : AnAction() {
                 }
             }
         }
-        if (rootDir != null) {
-            showAndPack.tvDir.text = rootDir.parent.canonicalPath ?: ""
+//        if (rootDir != null) {
+            showAndPack.tvDir.text = rootDir?.parent?.canonicalPath ?: ""
             showAndPack.tvGitUrl.text = "https://github.com/pqixing/x_basic.git"
-        }
+//        }
 
         showAndPack.setOnOk {
             val basicDir = File(showAndPack.tvDir.text.trim(), EnvKeys.BASIC)

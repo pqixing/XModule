@@ -11,6 +11,7 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.ui.BuilderDialog
 import com.pqixing.intellij.utils.GitHelper
+import com.pqixing.intellij.utils.UiUtils.realName
 import groovy.lang.GroovyClassLoader
 import java.io.File
 
@@ -33,7 +34,7 @@ open class BuilderAction : AnAction() {
     private fun getConfigInfo(configFile: File) = GroovyClassLoader().parseClass(configFile).newInstance()
 
     private fun getActivityModules(e: AnActionEvent, allModule: MutableSet<com.pqixing.model.Module>): MutableList<String> {
-        val curModule = e.getData(DataKey.create<Module>("module"))?.name
+        val curModule = e.getData(DataKey.create<Module>("module"))?.realName()
         val moduleNames = allModule.filter { it.isAndroid }.map { it.name }
         val activityModules = ModuleManager.getInstance(project).sortedModules.filter { moduleNames.contains(it.name) }.mapNotNull { it.name }.toMutableList()
         if (curModule != null) {

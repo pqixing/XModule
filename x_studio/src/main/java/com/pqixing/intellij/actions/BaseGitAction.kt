@@ -256,7 +256,7 @@ abstract class BaseGitAction : AnAction() {
         if (!GitUtil.isGitRoot(File(path))) return null;
         if (repository == null) {
             repository = GitHelper.getRepo(File(path), project)
-            allRepos[path] = repository
+           if(repository!=null) allRepos[path] = repository
         }
         return repository
     }

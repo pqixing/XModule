@@ -33,7 +33,6 @@ public class NewImportDialog extends BaseJDialog {
     private JCheckBox cbVcs;
     private JPanel jpSelect;
     private JScrollPane jpOthers;
-    private JCheckBox cbFormat;
 
     //已选中导入的工程
     private List<String> imports;
@@ -71,7 +70,6 @@ public class NewImportDialog extends BaseJDialog {
         properties = PropertiesUtils.INSTANCE.readProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()));
         syncBranch = "Y".equals(properties.getProperty(BING_KEY, "N"));
         cbVcs.setSelected("Y".equals(properties.getProperty(VCS_KEY, "Y")));
-        cbFormat.setSelected("Y".equals(properties.getProperty(FORMAT_KEY, "N")));
 
         initDpModel(dpModel);
         cbBind.setSelected(syncBranch);
@@ -81,9 +79,6 @@ public class NewImportDialog extends BaseJDialog {
         initImportAction();
     }
 
-    public boolean format() {
-        return cbFormat.isSelected();
-    }
 
     public boolean syncVcs() {
         return cbVcs.isSelected();
@@ -298,19 +293,14 @@ public class NewImportDialog extends BaseJDialog {
         String oldVcs = properties.getProperty(VCS_KEY);
         properties.setProperty(VCS_KEY, newVcs);
 
-        String newFormat = format() ? "Y" : "N";
-        String oldFormat = properties.getProperty(FORMAT_KEY);
-        properties.setProperty(FORMAT_KEY, newFormat);
 
         String importKey = IMPORT_KEY + TextUtils.INSTANCE.numOrLetter(getSelectBranch());
         String newImport = list2Str(getImports());
         String oldImports = properties.getProperty(importKey);
         properties.setProperty(importKey, newImport);
 
-        //更新监听
-        UiUtils.INSTANCE.getFtModules().put(project.getBasePath(), newFormat.equals("Y"));
 
-        if (!newFormat.equals(oldFormat) || !newVcs.equals(oldVcs) || !newKey.equals(oldBind) || !newImport.equals(oldImports))
+        if (!newVcs.equals(oldVcs) || !newKey.equals(oldBind) || !newImport.equals(oldImports))
             ApplicationManager.getApplication().runWriteAction(() -> PropertiesUtils.INSTANCE.writeProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()), properties));
     }
 

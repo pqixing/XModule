@@ -68,9 +68,9 @@ open class ToMavenTask : BaseTask() {
         val plugin = project.pluginModule()
         val module = plugin.module
         val artifactId = module.name
-        if (module.getBranch() != args.env.basicBranch) {
-            Tools.println(unCheck(1), "${module.name} -> ${module.getBranch()} != ${args.env.basicBranch} ")
-        }
+//        if (module.getBranch() != args.env.basicBranch) {
+//            Tools.println(unCheck(1), "${module.name} -> ${module.getBranch()} != ${args.env.basicBranch} ")
+//        }
 
         val open = GitUtils.open(File(args.env.codeRootDir, module.project.path))
         if (open == null) {

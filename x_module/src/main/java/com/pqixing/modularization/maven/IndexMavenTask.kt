@@ -37,6 +37,13 @@ open class IndexMavenTask : BaseTask() {
         }
     }
 
+
+    private fun allBranches(): Set<String> {
+        //当前所有的版本号的key
+        args.config.sync = true
+        return args.vm.readCurVersions().keys.map { it.replace(args.manifest.groupId + ".", "").substringBefore(".") }.toSet()
+    }
+
     /**
      * 从网络获取最新的版本号信息
      */
@@ -45,7 +52,7 @@ open class IndexMavenTask : BaseTask() {
         Tools.println("parseVersion  start ->")
         val start = System.currentTimeMillis()
         //上传版本号到服务端
-        reloadVersion(args.manifest.fullMavenUrl(), args.env.allBranches.toMutableSet().minus(excludes), versions)
+        reloadVersion(args.manifest.fullMavenUrl(), allBranches().minus(excludes), versions)
 
         Tools.println("parseVersion  end -> ${System.currentTimeMillis() - start} ms -> $excludes")
         args.vm.storeToUp(versions)

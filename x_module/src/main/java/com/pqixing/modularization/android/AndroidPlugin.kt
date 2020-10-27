@@ -57,7 +57,7 @@ open class AndroidPlugin : BasePlugin() {
 
         //如果是Library模块运行，设置ApplicationId
         if (buildAsApp && !isApp) {
-            extHelper.setApplicationId(project, "com.${TextUtils.letter(project.getArgs().env.basicBranch, "libraryrun")}.${TextUtils.letter(project.name, "app")}".toLowerCase())
+            extHelper.setApplicationId(project, "com.${TextUtils.letter(module.getBranch(), "libraryrun")}.${TextUtils.letter(project.name, "app")}".toLowerCase())
         }
 
         doAfterList.add(Runnable {

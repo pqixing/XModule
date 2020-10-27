@@ -3,6 +3,7 @@ package com.pqixing.modularization.android.dps
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Compile
+import com.pqixing.model.Module
 import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.setting.ArgsExtends
@@ -129,6 +130,17 @@ class DpsManager(val plugin: AndroidPlugin) {
         }
     }
 
+    fun addBranchExcludeIfHas(fallbacks: List<String>, moduleName: String, excludes: HashSet<String>) {
+        var exit = false
+        for (branch in fallbacks) {
+            //如果当前分支存在依赖
+            if (args.vm.checkBranchVersion(branch, moduleName)) {
+                if (exit) excludes.add("${args.manifest.groupId}.$branch,$moduleName")
+                exit = true
+            }
+        }
+    }
+
     /**
      * 生成exlude字符串
      */
@@ -149,14 +161,31 @@ class DpsManager(val plugin: AndroidPlugin) {
      */
     private fun onLocalCompile(dpc: Compile, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
         if (!localProject.contains(dpc.name) && !args.config.allowDpDiff) return false
-        
+
         val branch = dpc.module.getBranch()
-        if (branch != plugin.module.getBranch()) Tools.println("    branch diff ${dpc.name} -> $branch")
+        if (branch != plugin.module.getBranch()) {
+            Tools.println("    branch diff ${dpc.name} -> $branch")
+
+            //如果本地依赖分支不同，则查处所有共同的依赖，然后只保留一个分支上。 保留优先顺序 ：  dpc模块所在分支，  当前project所在分支。 fallback分支
+            val sameDps = findSameDps(module, dpc.module)
+            val branches = args.manifest.fallbacks.toMutableList()
+            branches.add(0, module.getBranch())
+            branches.add(0, dpc.module.getBranch())
+            sameDps.forEach { addBranchExcludeIfHas(branches, it, excludes) }
+        }
         //如果该依赖没有本地导入，不进行本地依赖
         dpc.local = true
         includes.add("${getScope(dpc.dpType, dpc.scope)} ( project(path : ':${dpc.name}'))  { ${excludeStr(excludes = dpc.excludes)} }")
         addBranchExclude(branch, dpc.name, excludes, 0)
         return true
+    }
+
+    /**
+     * child 模块是source模块的依赖之一
+     * 查找出  source模块中不包含child模块之外的所有依赖
+     */
+    private fun findSameDps(source: Module, child: Module): Set<String> {
+        return emptySet()
     }
 
 

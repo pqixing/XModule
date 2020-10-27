@@ -14,7 +14,6 @@ class XModuleGroup : DefaultActionGroup() {
         init {
             //启动后，尝试打开socket连接，接收gradle插件的通知
             GradleUtils.tryInitSocket(GradleUtils.defPort)
-            UiUtils.checkIfFormat(null)
         }
 
         fun hasBasic(project: Project?): Boolean = File(project?.basePath, EnvKeys.XML_MANIFEST).exists()

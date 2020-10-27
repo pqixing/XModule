@@ -22,7 +22,7 @@ open class DeleteBranchTask : BaseTask() {
             Tools.printError(-1,"DeleteBranch Exception -> check password error!!!")
         }
         var targetBranch = EnvKeys.opBranch.getEnvValue()?:return
-        if (targetBranch == extends.env.basicBranch) Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete current branch $targetBranch , please change branch before delete!!")
+//        if (targetBranch == extends.env.basicBranch) Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete current branch $targetBranch , please change branch before delete!!")
         if (targetBranch == "master") Tools.printError(-1,"DeleteBranchTask Exception -> Can not delete master !!")
 
         val fail = ArrayList<String>()

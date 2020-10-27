@@ -15,6 +15,7 @@ import com.pqixing.intellij.group.XModuleGroup
 import com.pqixing.intellij.ui.ToMavenDialog
 import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.GradleUtils
+import com.pqixing.intellij.utils.UiUtils.realName
 
 class ToMavenAction : AnAction() {
     lateinit var project: Project
@@ -26,13 +27,13 @@ class ToMavenAction : AnAction() {
         project = e.project ?: return
         val module = e.getData(DataKey.create<Module>("module"))
         val allModule = XmlHelper.loadManifest(project.basePath)?.allModules()?: mutableSetOf()
-        val target = allModule.find { it.name == module?.name }?.takeIf { it.isAndroid }
+        val target = allModule.find { it.name == module?.realName() }?.takeIf { it.isAndroid }
 
         val moduleName = target?.name ?: ""
 
         val projectMode = "MainMenu" == e.place || target == null
 
-        val filters = (if (projectMode) allModule.filter { it.isAndroid }.map { it.name } else ModuleRootManager.getInstance(module!!).dependencies.map { it.name }).toMutableSet()//过滤Android工程
+        val filters = (if (projectMode) allModule.filter { it.isAndroid }.map { it.name } else ModuleRootManager.getInstance(module!!).dependencies.map { it.realName() }).toMutableSet()//过滤Android工程
         filters.remove(project.name)
         filters.add(moduleName)
 

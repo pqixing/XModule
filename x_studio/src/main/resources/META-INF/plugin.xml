@@ -35,12 +35,7 @@
             <add-to-group group-id="ToolbarRunGroup" relative-to-action="DeviceAndSnapshotComboBox" anchor="after"/>
         </action>
 
-        <action id="XModule.FormatAction" class="com.pqixing.intellij.actions.FormatAction"
-                text="FormatModule">
-            <add-to-group group-id="ViewMenu" anchor="last"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="alt F"/>
-        </action>
-        <group id="XModule" popup="true" text="XModule" class="com.pqixing.intellij.group.XModuleGroup">
+        <group id="XModule" popup="true" text="XTools" class="com.pqixing.intellij.group.XModuleGroup">
             <add-to-group group-id="BuildMenu" anchor="first"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
@@ -48,36 +43,30 @@
                     text="Import">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
             </action>
+            <action id="XModule.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
+                    text="Maven"/>
+
             <action id="XModule.newBuilder" class="com.pqixing.intellij.actions.NewBuilderAction" text="Builder">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift B"/>
-            </action>
-
-
-            <action id="XModule.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
-                    text="ToMaven"/>
-            <separator/>
-            <action id="XModule.sync" class="com.pqixing.intellij.actions.SyncAction" text="SyncCode"
-                    icon="AllIcons.Actions.Refresh"/>
-<!--                <add-to-group group-id="ToolbarRunGroup" relative-to-action="XModule.fastBuilder" anchor="after"/>-->
-
-            <action id="XModule.OpenAction" class="com.pqixing.intellij.actions.XModuleAction"
-                    text="NewXMdoule">
-                <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
-                <add-to-group group-id="FileMenu" anchor="first"/>
             </action>
 
             <separator/>
 
             <action id="XModule.ReIndexVersion"
-                    class="com.pqixing.intellij.actions.IndexMavenAction" text="IndexMaven"/>
+                    class="com.pqixing.intellij.actions.IndexMavenAction" text="SyncIndex"/>
 
             <separator/>
             <action id="XModule.routercreator"
-                    class="com.pqixing.intellij.actions.RouteCreate" text="PathCreator"
+                    class="com.pqixing.intellij.actions.RouteCreate" text="PathMaker"
                     description="router auto create code"/>
-            <action id="com.libiao.mvpcreator" class="com.pqixing.creator.actions.MvpCreator" text="MvpCreator"
+            <action id="com.libiao.mvpcreator" class="com.pqixing.creator.actions.MvpCreator" text="MvpMaker"
                     description="auto create MVP code"/>
             <separator/>
+            <action id="XModule.OpenAction" class="com.pqixing.intellij.actions.XModuleAction"
+                    text="XMdoule">
+                <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
+                <add-to-group group-id="FileMenu" anchor="first"/>
+            </action>
         </group>
         <group id="XModule.GitBatch" popup="true" text="GitBatch" class="com.pqixing.intellij.group.XModuleGroup">
             <add-to-group group-id="VcsGroups" anchor="last"/>

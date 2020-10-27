@@ -30,16 +30,8 @@ class ArgsExtends(val config: Config, val env: EnvArgs, val manifest: ManifestMo
 }
 
 class EnvArgs(val rootDir: File, val config: Config, val gradleCache: File) {
-    /**
-     *
-     */
-    var basicBranch: String = "master"
-    var allBranches = mutableSetOf<String>()
-
     var basicDir: File = File(rootDir, EnvKeys.BASIC)
     var defArchivesFile: File = File(rootDir, "build/upload.txt")
     var codeRootDir: File = File(File(rootDir, config.codeRoot).canonicalPath)
-
-
 }
 
