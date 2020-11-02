@@ -53,7 +53,7 @@ class ToMavenAction : AnAction() {
         var check = false//是否需要校验结果
         var runTaskId = ""
         var excute = 0
-        var envs = GradleUtils.defEnvs.toMutableMap().apply { put(EnvKeys.toMavenUnCheck, dialog.unCheckCode) }
+        var envs = mapOf(EnvKeys.toMavenUnCheck to dialog.unCheckCode)
 
         override fun onTaskEnd(success: Boolean, result: String?) {
             if (check) {//检查上传的任务是否正确
@@ -75,7 +75,7 @@ class ToMavenAction : AnAction() {
                 excute++
                 runTaskId = System.currentTimeMillis().toString()
                 info.staue = 2//正在执行
-                GradleUtils.runTask(project, listOf(":${info.title}:ToMaven"), activateToolWindowBeforeRun = excute == 1, envs = envs, runTaskId = runTaskId, callback = this)
+                GradleUtils.runTask(project, listOf(":${info.title}:ToMaven"),  envs = envs, runTaskId = runTaskId, callback = this)
             } else {
                 check = false
                 runTaskId = ""

@@ -18,13 +18,9 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.Messages
-import com.intellij.openapi.vfs.*
+import com.intellij.openapi.vfs.VirtualFileListener
 import com.pqixing.creator.utils.LogWrap
-import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.ui.NewImportDialog
-import com.pqixing.tools.PropertiesUtils.readProperties
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 import java.io.File
@@ -32,49 +28,12 @@ import java.util.*
 import javax.swing.JComponent
 import javax.swing.TransferHandler
 
-object UiUtils : VirtualFileListener, Runnable {
+object UiUtils : VirtualFileListener {
 
     val IDE_PROPERTIES = ".idea/caches/import.properties"
-    val IML_PROPERTIES = ".idea/caches/iml.properti"
     val BUILD_PROPERTIES = ".idea/caches/build.log"
-    val ftModules = mutableMapOf<String, Boolean?>()
-    val lock = Object()
-    val tasks: LinkedList<Pair<Long, Runnable>> = LinkedList()
 
-    init {
-//        LocalFileSystem.getInstance().addVirtualFileListener(this)
-        Thread(this, "uiThread").start()
-    }
-
-    fun onLockChange(l: Boolean) = try {
-        synchronized(lock) {
-            if (l) lock.wait() else lock.notifyAll()
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-
-    fun addTask(sleep: Long = 0, task: Runnable) {
-        tasks.add(sleep to task)
-        onLockChange(false)
-    }
-
-    override fun run() {
-        while (true) {
-            if (tasks.isEmpty()) onLockChange(true)
-            val t = tasks.pollFirst()
-            if (t != null) {
-                if (t.first > 0) Thread.sleep(t.first)
-                t.second.run()
-            }
-        }
-    }
-
-    fun invokeLaterOnWriteThread(action: Runnable) = ApplicationManager.getApplication().invokeLater {
-        ApplicationManager.getApplication().runWriteAction(action)
-    }
-
-    fun getSelectDevice(project: Project): IDevice?  = DeviceGet.getDevice(project)
+    fun getSelectDevice(project: Project): IDevice? = DeviceGet.getDevice(project)
 
     fun setTransfer(component: JComponent, block: (files: List<File>) -> Unit) {
         component.transferHandler = object : TransferHandler() {
@@ -124,6 +83,7 @@ object UiUtils : VirtualFileListener, Runnable {
         e.printStackTrace()
         null
     }
+
     fun tryInstall(project: Project, d: IDevice?, path: String, param: String) {
         val device = d ?: DeviceGet.getDevice(project)
         ?: return ApplicationManager.getApplication().invokeLater { Messages.showMessageDialog("No Device Connect", "Miss Device", null) }
@@ -160,5 +120,5 @@ object UiUtils : VirtualFileListener, Runnable {
     fun base64Encode(source: String) = String(Base64.getEncoder().encode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
     fun base64Decode(source: String) = String(Base64.getDecoder().decode(source.toByteArray(Charsets.UTF_8)), Charsets.UTF_8)
 
-    fun Module?.realName():String = this?.name?.split(":")?.lastOrNull()?:""
+    fun Module?.realName(): String = this?.name?.split(":")?.lastOrNull() ?: ""
 }

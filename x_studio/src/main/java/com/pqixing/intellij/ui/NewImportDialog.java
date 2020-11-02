@@ -1,24 +1,21 @@
 package com.pqixing.intellij.ui;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import com.pqixing.intellij.XApp;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
-import com.pqixing.intellij.utils.UiUtils;
-import com.pqixing.tools.PropertiesUtils;
-import com.pqixing.tools.TextUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import java.awt.event.*;
-import java.io.File;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.*;
 
 public class NewImportDialog extends BaseJDialog {
-    public static final String IMPORT_KEY = "IMPORT";
     public static final String VCS_KEY = "vcs";
-    public static final String FORMAT_KEY = "format";
     private JPanel contentPane;
     private JButton buttonOK;
     private JTextField tvCodeRoot;
@@ -38,7 +35,6 @@ public class NewImportDialog extends BaseJDialog {
     Project project;
     private ImportSelectAdapter allAdapter;
     private JListSelectAdapter selectAdapter;
-    private Properties properties;
     private final String TAG = "-------------------";
 
     public NewImportDialog(@NotNull Project project, @NotNull List<String> imports, @NotNull List<JListInfo> allInfos, String dpModel, String codeRoot) {
@@ -62,8 +58,9 @@ public class NewImportDialog extends BaseJDialog {
 //        UiUtils.centerDialog(this);
         this.project = project;
         this.imports = imports;
-        properties = PropertiesUtils.INSTANCE.readProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()));
-        cbVcs.setSelected("Y".equals(properties.getProperty(VCS_KEY, "Y")));
+
+        cbVcs.setSelected("Y".equals(XApp.get(VCS_KEY, "Y")));
+        cbVcs.addActionListener(e -> XApp.put(VCS_KEY, cbVcs.isSelected() ? "Y" : "N"));
 
         initDpModel(dpModel);
         tvCodeRoot.setText(codeRoot);
@@ -133,7 +130,7 @@ public class NewImportDialog extends BaseJDialog {
 
     @Override
     public void setVisible(boolean b) {
-        if (b) UiUtils.INSTANCE.addTask(100, () -> {
+        if (b) XApp.post(100, () -> {
             boolean remove = false;
             while (imports.remove(TAG)) remove = true;
             if (remove) updateImports();
@@ -238,31 +235,9 @@ public class NewImportDialog extends BaseJDialog {
     }
 
     private void onOK() {
-        saveBindKey();
         // add your code here
         dispose();
-
         if (onOk != null) onOk.run();
-    }
-
-    /**
-     * 保存切换框的值
-     */
-    private void saveBindKey() {
-
-        String newVcs = syncVcs() ? "Y" : "N";
-        String oldVcs = properties.getProperty(VCS_KEY);
-        properties.setProperty(VCS_KEY, newVcs);
-
-
-        String importKey = IMPORT_KEY + TextUtils.INSTANCE.numOrLetter(getCodeRootStr());
-        String newImport = list2Str(getImports());
-        String oldImports = properties.getProperty(importKey);
-        properties.setProperty(importKey, newImport);
-
-
-        if (!newVcs.equals(oldVcs) || !newImport.equals(oldImports))
-            ApplicationManager.getApplication().runWriteAction(() -> PropertiesUtils.INSTANCE.writeProperties(new File(project.getBasePath(), UiUtils.INSTANCE.getIDE_PROPERTIES()), properties));
     }
 
     private List<String> str2List(String str) {

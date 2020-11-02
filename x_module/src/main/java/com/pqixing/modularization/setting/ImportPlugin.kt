@@ -87,7 +87,6 @@ class ImportPlugin : Plugin<Settings> {
                 args.clear()
                 settings.remove(key)
                 plugins.clear()
-                ResultUtils.notifyIde(rootDir, mutableMapOf("task" to taskNames.joinToString(","), "type" to "buildFinished", "spend" to (System.currentTimeMillis() - start).toString()))
             }
         })
     }
@@ -96,14 +95,12 @@ class ImportPlugin : Plugin<Settings> {
         val urlName = "basicUrl"
         val url = config.basicUrl
         if (url?.isNotEmpty() != true) {//没有配置url
-            ResultUtils.notifyIde(setting.rootDir, mutableMapOf("type" to "Miss_${urlName}"))
             ResultUtils.thow("Miss $urlName on gradle.properties,use $urlName=https://github.com/pqixing/md_basic.git for default")
             return null
         }
         //clone the dir
         val clone = GitUtils.clone(url, basicDir)
         if (clone == null) {
-            ResultUtils.notifyIde(setting.rootDir, mutableMapOf("type" to "Miss_${urlName}"))
             ResultUtils.thow("Clone Fail : $url ,try to set user and password on Config.java")
         }
         return clone

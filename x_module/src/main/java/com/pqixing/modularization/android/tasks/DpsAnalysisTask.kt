@@ -166,7 +166,7 @@ open class DpsAnalysisTask : BaseTask() {
         result.append("\nThird -> \n")
         thirdList.sortedBy { it }.forEach { result.append(it) }
         val rl = result.toString()
-        if (!ResultUtils.ide) Tools.println(rl)
+        Tools.println(rl)
         FileUtils.writeText(compareFile, rl)
 
         clear()

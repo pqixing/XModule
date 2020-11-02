@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.pqixing.intellij.ui.form.XItemForm">
+  <grid id="27dc6" binding="rootPanal" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="500" height="39"/>
+    </constraints>
+    <properties>
+      <minimumSize width="-1" height="30"/>
+      <opaque value="false"/>
+      <preferredSize width="-1" height="30"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <scrollpane id="3f300">
+        <constraints border-constraint="Center"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="26cc6" class="javax.swing.JTextField" binding="dTextField" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="d"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
+      <scrollpane id="c1340">
+        <constraints border-constraint="East"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="e6f76" class="javax.swing.JTextField" binding="a123TextField" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="123"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
+      <scrollpane id="9a133">
+        <constraints border-constraint="West"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="13169" class="javax.swing.JTextField" binding="ffffffffffffffTextField" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="ffffffffffffff"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
+    </children>
+  </grid>
+</form>

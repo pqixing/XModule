@@ -23,16 +23,17 @@ open class XModuleAction : AnAction() {
         val rootDir = e.project?.let { LocalFileSystem.getInstance().findFileByPath(it.basePath!!) }
         val showAndPack = OpenNewProjectDialog(defaultProject)
         showAndPack.tvFilePick.addActionListener {
-            FileChooser.chooseFiles(FileChooserDescriptor(false, true, false, false, false, false)
-                    , defaultProject, rootDir?.parent) { files: List<VirtualFile> ->
+            showAndPack.isVisible = false
+            FileChooser.chooseFiles(FileChooserDescriptor(false, true, false, false, false, false), defaultProject, rootDir?.parent) { files: List<VirtualFile> ->
                 files.firstOrNull()?.let {
                     showAndPack.tvDir.text = it.canonicalPath
                 }
+                showAndPack.isVisible = true
             }
         }
 //        if (rootDir != null) {
-            showAndPack.tvDir.text = rootDir?.parent?.canonicalPath ?: ""
-            showAndPack.tvGitUrl.text = "https://github.com/pqixing/x_basic.git"
+        showAndPack.tvDir.text = rootDir?.parent?.canonicalPath ?: ""
+        showAndPack.tvGitUrl.text = "https://github.com/pqixing/x_basic.git"
 //        }
 
         showAndPack.setOnOk {

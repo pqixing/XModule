@@ -10,9 +10,8 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
+import com.pqixing.intellij.gradle.GradleRequest
 import com.pqixing.intellij.group.XModuleGroup
-import com.pqixing.intellij.utils.TaskCallBack
-import com.pqixing.intellij.utils.GradleUtils
 import java.io.File
 
 
@@ -30,15 +29,12 @@ class DpsAnalyseAction : AnAction() {
 
         val projectMode = module == null || project.name.replace(" ", "") == moduleName;
         if (projectMode) return
-        val runTaskId = System.currentTimeMillis().toString()
-        val callBack = TaskCallBack { result, log ->
-            if (!result) {
-                Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "DpsAnalyse", "Gradle Task Error ${log}", NotificationType.WARNING).notify(project)
+        GradleRequest(listOf(":$moduleName:DpsAnalysis")).runGradle(project) {
+            if (!it.success) {
+                Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "DpsAnalyse", "Gradle Task Error ${it.error?.message}", NotificationType.WARNING).notify(project)
             } else ApplicationManager.getApplication().invokeLater {
-                FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(File(log), true)!!, true)
+                FileEditorManager.getInstance(project).openFile(VfsUtil.findFileByIoFile(File(it.getDefaultOrNull()?:""), true)!!, true)
             }
         }
-        GradleUtils.runTask(project, listOf(":$moduleName:DpsAnalysis"), activateToolWindowBeforeRun = true, runTaskId = runTaskId, callback = callBack
-                , envs = mapOf(Pair("include", ""), Pair("dependentModel", "")))
     }
 }

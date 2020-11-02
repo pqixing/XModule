@@ -45,7 +45,6 @@ class FastBuilderAction : AnAction() {
         }
 
         GradleUtils.runTask(project, listOf(":${param.module}:BuildApk")
-                , activateToolWindowBeforeRun = true
                 , envs = mapOf("include" to if (param.module == "mavenOnly") param.module else "${param.module},${XmlHelper.loadConfig(project.basePath!!).include}"
                 , "dependentModel" to param.depend, "versionFile" to param.version)
                 , callback = buildCallBack)

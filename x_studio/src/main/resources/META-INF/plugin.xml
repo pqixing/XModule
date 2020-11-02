@@ -39,6 +39,7 @@
             <add-to-group group-id="BuildMenu" anchor="first"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+
             <action id="XModule.Import" class="com.pqixing.intellij.actions.ImportAction"
                     text="Import">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
@@ -63,11 +64,14 @@
                     description="auto create MVP code"/>
             <separator/>
             <action id="XModule.OpenAction" class="com.pqixing.intellij.actions.XModuleAction"
-                    text="XMdoule">
+                    text="NewProject">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="FileMenu" anchor="first"/>
             </action>
-        </group>
+            <action id="XModule.test" class="com.pqixing.intellij.actions.TestAction" text="Test">
+                <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
+                <add-to-group group-id="FileMenu" anchor="first"/>
+            </action>        </group>
         <group id="XModule.GitBatch" popup="true" text="GitBatch" class="com.pqixing.intellij.group.XModuleGroup">
             <add-to-group group-id="VcsGroups" anchor="last"/>
             <add-to-group group-id="XModule" anchor="last"/>

@@ -5,7 +5,7 @@ apply plugin: 'kotlin'
 intellij {
     pluginName 'XModule'
     version 'IC-2020.1.1'
-    plugins = ['android','git4idea',"java"]
+    plugins = ['android','git4idea',"java","gradle"]
     updateSinceUntilBuild false
 }
 compileKotlin.kotlinOptions.jvmTarget = "1.8"

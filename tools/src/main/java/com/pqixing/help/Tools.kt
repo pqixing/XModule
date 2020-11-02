@@ -1,14 +1,6 @@
 package com.pqixing.help
 
-import com.alibaba.fastjson.JSON
-import com.pqixing.Config
-import com.pqixing.EnvKeys
 import com.pqixing.interfaces.ILog
-import com.pqixing.model.ManifestModel
-import com.pqixing.tools.FileUtils
-import com.pqixing.tools.TextUtils
-import groovy.lang.GroovyClassLoader
-import java.io.File
 import java.util.*
 import kotlin.system.exitProcess
 

@@ -1,10 +1,10 @@
 package com.pqixing.intellij.ui;
 
 import com.intellij.openapi.project.Project;
+import com.pqixing.intellij.XApp;
 import com.pqixing.intellij.actions.BuildParam;
 import com.pqixing.intellij.adapter.JListInfo;
 import com.pqixing.intellij.adapter.JListSelectAdapter;
-import com.pqixing.intellij.utils.UiUtils;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -74,7 +74,7 @@ public class NewBuilderDialog extends BaseJDialog {
     @Override
     public void setVisible(boolean b) {
         super.setVisible(b);
-        if (b) UiUtils.INSTANCE.addTask(100, this::refreshHistory);
+        if (b) XApp.post(100, this::refreshHistory);
     }
 
     public void resetBtn(boolean init) {

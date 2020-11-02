@@ -59,6 +59,7 @@ abstract class BaseGitAction : AnAction() {
             dialog.adapter.setDatas(filterDatas(allDatas, dialog.operatorCmd))
             updateLog(dialog)
         }
+        val allProject = XmlHelper.loadManifest(basePath)?.projects
         initDialog(dialog)
         dialog.pack()
         dialog.adapter.setDatas(filterDatas(allDatas, dialog.operatorCmd))

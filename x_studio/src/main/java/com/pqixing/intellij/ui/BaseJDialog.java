@@ -48,7 +48,6 @@ public class BaseJDialog extends JDialog {
         }
         if (clickTime == 5) {
             String s = Messages.showInputDialog("输入debug调试端口", "Gradle调试", null, "5005", null);
-            if (s != null) GradleUtils.INSTANCE.setDebugPort(s.isEmpty() ? 0 : Integer.parseInt(s));
         }
 
     }

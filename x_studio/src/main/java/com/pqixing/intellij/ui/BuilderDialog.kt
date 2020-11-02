@@ -515,7 +515,6 @@ class BuilderDialog(val project: Project, val configInfo: Config, val activityMo
 
 //        val cleanCallBack = TaskCallBack { _, _ ->
         GradleUtils.runTask(project, listOf(":$title:PrepareDev", ":$title:BuildApk")
-                , activateToolWindowBeforeRun = true
                 , envs = mapOf("include" to if (dpModel == "mavenOnly") title else "${includes.joinToString(",")},$title", "dependentModel" to dpModel, "versionFile" to versionPath)
                 , callback = buildCallBack)
 //        }
