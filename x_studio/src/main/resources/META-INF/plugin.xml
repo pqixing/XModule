@@ -35,10 +35,16 @@
             <add-to-group group-id="ToolbarRunGroup" relative-to-action="DeviceAndSnapshotComboBox" anchor="after"/>
         </action>
 
-        <group id="XModule" popup="true" text="XTools" class="com.pqixing.intellij.group.XModuleGroup">
+        <group id="XModule" popup="true" text="XTools" class="com.pqixing.intellij.group.XGroup">
             <add-to-group group-id="BuildMenu" anchor="first"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
+
+            <action id="XModule.test" class="com.pqixing.intellij.actions.DebugAction" text="Debug">
+                <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
+                <add-to-group group-id="FileMenu" anchor="first"/>
+            </action>
+
 
             <action id="XModule.Import" class="com.pqixing.intellij.actions.ImportAction"
                     text="Import">
@@ -68,11 +74,8 @@
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="FileMenu" anchor="first"/>
             </action>
-            <action id="XModule.test" class="com.pqixing.intellij.actions.TestAction" text="Test">
-                <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
-                <add-to-group group-id="FileMenu" anchor="first"/>
-            </action>        </group>
-        <group id="XModule.GitBatch" popup="true" text="GitBatch" class="com.pqixing.intellij.group.XModuleGroup">
+        </group>
+        <group id="XModule.GitBatch" popup="true" text="GitBatch" class="com.pqixing.intellij.group.XGroup">
             <add-to-group group-id="VcsGroups" anchor="last"/>
             <add-to-group group-id="XModule" anchor="last"/>
             <action id="XModule.GitSync" class="com.pqixing.intellij.actions.GitSyncAction" text="Clone"/>

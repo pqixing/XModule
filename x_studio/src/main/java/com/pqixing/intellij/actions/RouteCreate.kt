@@ -1,6 +1,5 @@
 package com.pqixing.intellij.actions
 
-import com.pqixing.creator.utils.AndroidUtils
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -9,6 +8,8 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.psi.*
+import com.pqixing.creator.utils.AndroidUtils
+import com.pqixing.intellij.group.XGroup.Companion.isCreator
 import com.pqixing.tools.TextUtils
 import java.io.IOException
 
@@ -39,6 +40,7 @@ open class RouteCreate : AnAction() {
 
     override fun update(e: AnActionEvent) {
         e.presentation.isEnabled = e.getData(PlatformDataKeys.EDITOR) != null
+        e.presentation.isVisible = isCreator(e.project)
     }
 
 
@@ -123,4 +125,5 @@ open class RouteCreate : AnAction() {
 
 
     }
+
 }

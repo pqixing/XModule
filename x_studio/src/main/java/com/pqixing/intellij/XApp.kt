@@ -21,17 +21,11 @@ import java.util.concurrent.TimeUnit
 
 object XApp {
 
-    val maps = Properties()
+    val maps: Properties by lazy { PropertiesUtils.readProperties(File(cacheDir(), "share.xml")) }
     val executors: ScheduledExecutorService by lazy { Executors.newScheduledThreadPool(1) }
-    private val LOG_EVENT = NotificationGroup.logOnlyGroup("XApp")
-    private val LOG = Logger.getInstance(XApp::class.java)
-
-    init {
-        println("start init -> XModuleGroup ${hashCode()}")
-        maps.putAll(PropertiesUtils.readProperties(File(cacheDir(), "share.xml")))
-        //启动后，尝试打开socket连接，接收gradle插件的通知
-//        GradleUtils.tryInitSocket(GradleUtils.defPort)
-    }
+    private val LOG_EVENT: NotificationGroup by lazy { NotificationGroup.logOnlyGroup("XApp") }
+    private val LOG: Logger by lazy { Logger.getInstance(XApp::class.java) }
+    private val basicProject = mutableMapOf<String, Boolean>()
 
     var hasWrite = false
     val writeSp = Runnable {
@@ -44,7 +38,15 @@ object XApp {
     fun key(project: Project?) = project?.basePath?.hashCode()?.toString() ?: "null"
     fun String.toKey(project: Project?) = "${key(project)}_$this"
 
-    fun hasBasic(project: Project?): Boolean = File(project?.basePath, EnvKeys.XML_MANIFEST).exists()
+    fun isBasic(project: Project?, update: Boolean = false): Boolean {
+        val basePath = project?.basePath ?: return false
+        var exist = basicProject[basePath]
+        if (update || exist == null) {
+            exist = File(project?.basePath, EnvKeys.XML_MANIFEST).exists()
+            basicProject[basePath] = exist
+        }
+        return exist
+    }
 
     fun post(delay: Long = 0L, cmd: () -> Unit) = executors.schedule(cmd, delay, TimeUnit.MILLISECONDS)
 

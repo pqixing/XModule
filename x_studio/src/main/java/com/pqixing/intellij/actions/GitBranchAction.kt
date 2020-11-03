@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.Messages
 import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.group.XModuleGroup
+import com.pqixing.intellij.group.XGroup
 import com.pqixing.intellij.ui.GitOperatorDialog
 import com.pqixing.intellij.utils.GitHelper
 import git4idea.GitUtil
@@ -12,7 +12,7 @@ import java.io.File
 
 class GitBranchAction : BaseGitAction() {
     override fun update(e: AnActionEvent) {
-        e?.presentation?.isEnabledAndVisible = XModuleGroup.hasBasic(e?.project)
+        e?.presentation?.isEnabledAndVisible = XGroup.isBasic(e?.project)
     }
 
     override fun beforeActionRun() = /*key == Messages.showPasswordDialog("Please input key!!", "Password")*/true

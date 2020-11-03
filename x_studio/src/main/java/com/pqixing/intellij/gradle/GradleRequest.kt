@@ -17,6 +17,8 @@ import com.intellij.openapi.externalSystem.service.execution.ExternalSystemEvent
 import com.intellij.openapi.externalSystem.util.ExternalSystemUtil
 import com.intellij.openapi.project.Project
 import com.pqixing.tools.UrlUtils
+import org.jetbrains.plugins.gradle.settings.DistributionType
+import org.jetbrains.plugins.gradle.settings.GradleExecutionSettings
 import org.jetbrains.plugins.gradle.util.GradleConstants
 
 data class GradleRequest(val tasks: List<String>, val env: Map<String, String> = emptyMap(), var visible: Boolean = true) {
@@ -29,25 +31,27 @@ data class GradleRequest(val tasks: List<String>, val env: Map<String, String> =
 //        if (GradleUtils.debugPort != 0) option.append("-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=${GradleUtils.debugPort}  -Dorg.gradle.debug=true  --no-daemon ")
 
         for (it in env.filter { it.key.isNotEmpty() && it.value.isNotEmpty() }) {
-            option.append("-D${it.key}='${it.value}' ")
+            option.append("-D${it.key}=\"${it.value}\" ")
         }
         return option.toString()
     }
 
     fun runGradle(project: Project, callBack: (r: GradleResult) -> Unit) {
         val taskId = ExternalSystemTaskId.create(GradleConstants.SYSTEM_ID, ExternalSystemTaskType.EXECUTE_TASK, project)
-        val parse = GradleParse(project, taskId, visible, callBack)
-        AndroidGradleTaskManager().executeTasks(taskId, tasks, project.basePath!!, null, getVmOptions(), parse)
+        val parse = GradleParse(project, tasks.firstOrNull()?:"Build",taskId, visible, callBack)
+        val setting = GradleExecutionSettings(null, null, DistributionType.BUNDLED, getVmOptions(), false)
+
+        AndroidGradleTaskManager().executeTasks(taskId, tasks, project.basePath!!, setting, null, parse)
     }
 }
 
 
-class GradleParse(val project: Project, taskId: ExternalSystemTaskId, val visible: Boolean, val callBack: (r: GradleResult) -> Unit) : ExternalSystemTaskNotificationListenerAdapter() {
+class GradleParse(val project: Project, val title: String, taskId: ExternalSystemTaskId, val visible: Boolean, val callBack: (r: GradleResult) -> Unit) : ExternalSystemTaskNotificationListenerAdapter() {
     val vm = ServiceManager.getService(project, BuildViewManager::class.java)
     val out: ExternalSystemEventDispatcher? = if (!visible) null else ExternalSystemEventDispatcher(taskId, vm)
     val result: GradleResult = GradleResult()
     override fun onStart(id: ExternalSystemTaskId, workingDir: String?) {
-        out?.onEvent(id, StartBuildEventImpl(DefaultBuildDescriptor(id, "Build", workingDir!!, System.currentTimeMillis()), "running..."))
+        out?.onEvent(id, StartBuildEventImpl(DefaultBuildDescriptor(id, title, workingDir!!, System.currentTimeMillis()), "running..."))
     }
 
     override fun onStatusChange(event: ExternalSystemTaskNotificationEvent) {

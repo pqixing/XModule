@@ -10,7 +10,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.group.XModuleGroup
+import com.pqixing.intellij.group.XGroup
 import com.pqixing.intellij.ui.VersionDialog
 import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.intellij.utils.GradleUtils.runTask
@@ -21,7 +21,7 @@ import java.io.File
 class IndexMavenAction : AnAction() {
     lateinit var project: Project
     override fun update(e: AnActionEvent) {
-        e.presentation?.isEnabledAndVisible = XModuleGroup.hasBasic(e?.project)
+        e.presentation?.isEnabledAndVisible = XGroup.isBasic(e?.project)
     }
 
     override fun actionPerformed(e: AnActionEvent) {

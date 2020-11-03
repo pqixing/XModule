@@ -23,25 +23,22 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
     val gradle = setting.gradle
     fun startLoad(): String {
         val buildTag = args.config.buildDir?.takeIf { i -> i.isNotEmpty() } ?: "default"
-        val buildFileName = "build/${EnvKeys.XMODULE}_${buildTag}/build.gradle"
+        val buildFileName = "build/$buildTag/build.gradle"
+
         //自动抓取工程导入
-        val includes = XmlHelper.parseInclude(args.manifest, (args.config.include?.takeIf { it.isNotEmpty() && it != "Auto" }?.replace("+", ",")?.split(",")
-                ?: gradle.startParameter.taskNames.mapNotNull { m -> m.split(":").takeIf { it.size >= 2 }?.let { it[it.size - 2] } }).toSet().toMutableSet())
+        val includes = XmlHelper.parseInclude(args.manifest, formatIncludeTxt(args.config.include.trim()))
 
         val imports = args.manifest.allModules().filter { includes.contains(it.name) }
         //添加include配置
         val checks = mutableSetOf<Module>()
         for (module in imports) include(checks, module, buildFileName)
-        Tools.println("parse include ${args.config.codeRoot} ${imports.map { it.name }}")
+        Tools.println("parse include ${args.config.include} ${args.config.codeRoot} ${imports.map { it.name }}")
         //尝试下载工程,hook build.gradle文件
         imports.forEach { tryCheckModule(it, buildFileName) }
 
         //合并根目录的代码
         setting.rootProject.buildFileName = "build/build.gradle"
-        FileUtils.mergeFile(File(args.env.rootDir, "build/build.gradle")
-                , listOf(File(args.env.basicDir, "build.gradle")
-                , File(args.env.rootDir, "build.gradle")
-                , File(args.env.basicDir, "gradle/maven.gradle")))
+        FileUtils.mergeFile(File(args.env.rootDir, "build/build.gradle"), listOf(File(args.env.basicDir, "build.gradle"), File(args.env.rootDir, "build.gradle"), File(args.env.basicDir, "gradle/maven.gradle")))
 
         //hook配置的工程的build.gradle,合并原始build.gradle与预设的build.gradle文件,生成新的初始化文件，注入插件进行开发设置
         val manifest = args.manifest
@@ -67,6 +64,18 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
             }
         }
         return buildFileName
+    }
+
+
+    fun formatIncludeTxt(source: String): Set<String> {
+        if (source.isNotEmpty() && source != "Auto") {
+            Tools.println("formatIncludeTxt :$source")
+            return source.replace("+", ",")?.split(",").toSet()
+        }
+        val result = gradle.startParameter.taskNames.map { it.split(":") }.flatten().filter { it.isNotEmpty() }.toSet()
+
+        Tools.println("formatIncludeTxt : ${gradle.startParameter.taskNames}  -> $result")
+        return result
     }
 
     /**

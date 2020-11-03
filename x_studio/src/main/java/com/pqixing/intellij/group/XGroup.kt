@@ -4,21 +4,21 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.project.Project
 import com.pqixing.intellij.XApp
-import com.pqixing.intellij.utils.GradleUtils
+import java.io.File
 
-class XModuleGroup : DefaultActionGroup() {
-
-    init {
-       XApp
-    }
+class XGroup : DefaultActionGroup() {
 
     companion object {
-        inline fun hasBasic(project: Project?): Boolean = XApp.hasBasic(project)
+        fun isBasic(project: Project?): Boolean = XApp.isBasic(project)
+
+        fun isDebug(project: Project?) = isBasic(project) && File(project?.basePath!!, "basic/.action/debug").exists()
+
+        fun isCreator(project: Project?) = isBasic(project) && File(project?.basePath!!, "basic/.action/creator").exists()
     }
 
     override fun update(e: AnActionEvent) {
         super.update(e)
-        e.presentation.isVisible = hasBasic(e.project)
+        e.presentation.isVisible = XApp.isBasic(e.project, true)
 //        (ActionManager.getInstance().getAction("DeviceAndSnapshotComboBox") as DeviceAndSnapshotComboBoxAction).getSelectedDevice(e.project!!)
         //启动后，尝试打开socket连接，接收gradle插件的通知
 //        val oldUpdate = ActionManager.getInstance().getAction("Vcs.UpdateProject")

@@ -10,7 +10,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.pqixing.intellij.adapter.JListInfo
 import com.pqixing.intellij.adapter.JListSelectAdapter
 import com.pqixing.intellij.adapter.JlistSelectListener
-import com.pqixing.intellij.group.XModuleGroup
+import com.pqixing.intellij.group.XGroup
 import com.pqixing.intellij.ui.FileListDialog
 import com.pqixing.intellij.ui.GitOperatorDialog
 import com.pqixing.intellij.utils.GitHelper
@@ -24,7 +24,7 @@ class GitStateAction : BaseGitAction, JlistSelectListener {
     //    val TIP = "A:All;  C:Conflict;  P:Push";
     var commitMsg = ""//提交的文本
     override fun update(e: AnActionEvent) {
-        e?.presentation?.isEnabledAndVisible = XModuleGroup.hasBasic(e?.project)
+        e?.presentation?.isEnabledAndVisible = XGroup.isBasic(e?.project)
     }
     override fun onItemSelect(jList: JList<*>, adapter: JListSelectAdapter, items: List<JListInfo>): Boolean {
         val info = items.last()

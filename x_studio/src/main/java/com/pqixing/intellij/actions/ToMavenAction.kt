@@ -8,25 +8,25 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.pqixing.EnvKeys
-import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
+import com.pqixing.intellij.XApp
 import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.group.XModuleGroup
+import com.pqixing.intellij.group.XGroup
 import com.pqixing.intellij.ui.ToMavenDialog
-import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.GradleUtils
+import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils.realName
 
 class ToMavenAction : AnAction() {
     lateinit var project: Project
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabledAndVisible = XModuleGroup.hasBasic(e.project)
+        e.presentation.isEnabledAndVisible = XGroup.isBasic(e.project)
     }
 
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return
         val module = e.getData(DataKey.create<Module>("module"))
-        val allModule = XmlHelper.loadManifest(project.basePath)?.allModules()?: mutableSetOf()
+        val allModule = XmlHelper.loadManifest(project.basePath)?.allModules() ?: mutableSetOf()
         val target = allModule.find { it.name == module?.realName() }?.takeIf { it.isAndroid }
 
         val moduleName = target?.name ?: ""
@@ -75,7 +75,9 @@ class ToMavenAction : AnAction() {
                 excute++
                 runTaskId = System.currentTimeMillis().toString()
                 info.staue = 2//正在执行
-                GradleUtils.runTask(project, listOf(":${info.title}:ToMaven"),  envs = envs, runTaskId = runTaskId, callback = this)
+                XApp.invoke {
+                    GradleUtils.runTask(project, listOf(":${info.title}:ToMaven"), envs = envs, runTaskId = runTaskId, callback = this)
+                }
             } else {
                 check = false
                 runTaskId = ""

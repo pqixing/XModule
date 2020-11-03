@@ -1,17 +1,16 @@
 package com.pqixing.creator.actions;
 
-import com.pqixing.creator.core.gennerator.RouterCreatorGenerator;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.pqixing.intellij.group.XModuleGroup;
+import com.pqixing.creator.core.gennerator.RouterCreatorGenerator;
+import com.pqixing.intellij.group.XGroup;
 
 import java.util.Objects;
 
@@ -22,7 +21,7 @@ public class PathCreator extends AnAction {
         Project project = e.getData(PlatformDataKeys.PROJECT);
         PsiFile file = e.getData(PlatformDataKeys.PSI_FILE);
         for (PsiElement psiElement : Objects.requireNonNull(file).getChildren()) {
-            if(psiElement instanceof PsiClass) {
+            if (psiElement instanceof PsiClass) {
                 PsiClass clazz = (PsiClass) psiElement;
                 if (classFilter(clazz)) {
                     return;
@@ -33,12 +32,12 @@ public class PathCreator extends AnAction {
     }
 
     private boolean classFilter(PsiClass clazz) {
-        if(clazz.hasModifierProperty("public")){
+        if (clazz.hasModifierProperty("public")) {
             Messages.showWarningDialog("Class can not be public", "Warning");
             return true;
         }
 
-        if(!clazz.hasModifierProperty("final")){
+        if (!clazz.hasModifierProperty("final")) {
             Messages.showWarningDialog("Class must be final", "Warning");
             return true;
         }
@@ -47,12 +46,7 @@ public class PathCreator extends AnAction {
 
     @Override
     public void update(AnActionEvent e) {
-        Editor editor = e.getData(PlatformDataKeys.EDITOR);
-        if (editor != null) {
-            e.getPresentation().setEnabled(true);
-        } else {
-            e.getPresentation().setEnabled(false);
-        }
-        e.getPresentation().setVisible(XModuleGroup.Companion.hasBasic(e.getProject()));
+        e.getPresentation().setEnabled(e.getData(PlatformDataKeys.EDITOR) != null);
+        e.getPresentation().setVisible(XGroup.Companion.isCreator(e.getProject()));
     }
 }

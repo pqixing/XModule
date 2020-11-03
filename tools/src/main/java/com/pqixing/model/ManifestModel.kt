@@ -25,7 +25,7 @@ class ManifestModel(val baseUrl: String) {
         projects.forEach { this.addAll(it.modules) }
     }
 
-    fun fullUrl(vararg names: String) = TextUtils.append(arrayOf(mavenUrl, groupId.replace(".", "/")).plus(names))
+    fun fullUrl(vararg names: String = emptyArray()) = TextUtils.append(arrayOf(mavenUrl, groupId.replace(".", "/")).plus(names))
 }
 
 data class ProjectModel(val manifest: ManifestModel, val name: String, var path: String, val desc: String, val url: String) {

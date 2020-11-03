@@ -16,7 +16,7 @@ import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.XApp
 import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.group.XModuleGroup
+import com.pqixing.intellij.group.XGroup
 import com.pqixing.intellij.ui.NewImportDialog
 import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.intellij.utils.UiUtils.realName
@@ -30,7 +30,7 @@ class ImportAction : AnAction() {
     lateinit var basePath: String
 
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabledAndVisible = XModuleGroup.hasBasic(e.project)
+        e.presentation.isEnabledAndVisible = XGroup.isBasic(e.project)
     }
 
     override fun actionPerformed(e: AnActionEvent) {

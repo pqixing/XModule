@@ -8,7 +8,7 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.group.XModuleGroup
+import com.pqixing.intellij.group.XGroup
 import com.pqixing.intellij.ui.BuilderDialog
 import com.pqixing.intellij.utils.GitHelper
 import com.pqixing.intellij.utils.UiUtils.realName
@@ -20,7 +20,7 @@ open class BuilderAction : AnAction() {
     lateinit var basePath: String
     override fun update(e: AnActionEvent) {
         super.update(e)
-        e.presentation?.isVisible = XModuleGroup.hasBasic(e?.project)
+        e.presentation?.isVisible = XGroup.isBasic(e?.project)
     }
 
     override fun actionPerformed(e: AnActionEvent) {

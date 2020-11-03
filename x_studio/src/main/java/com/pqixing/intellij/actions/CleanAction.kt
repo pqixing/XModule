@@ -11,14 +11,12 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.group.XModuleGroup
+import com.pqixing.intellij.group.XGroup
 import com.pqixing.intellij.ui.CleanDialog
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.PropertiesUtils
-import groovy.lang.GroovyClassLoader
 import java.io.File
 
 
@@ -26,7 +24,7 @@ class CleanAction : AnAction() {
     lateinit var project: Project
     lateinit var basePath: String
     override fun update(e: AnActionEvent) {
-        e?.presentation?.isEnabledAndVisible = XModuleGroup.hasBasic(e?.project)
+        e?.presentation?.isEnabledAndVisible = XGroup.isBasic(e?.project)
     }
     override fun actionPerformed(e: AnActionEvent) {
         project = e.project ?: return

@@ -11,6 +11,7 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.pqixing.creator.core.gennerator.MVPCreatorGenerator;
+import com.pqixing.intellij.group.XGroup;
 
 public class MvpCreator extends AnAction {
 
@@ -56,5 +57,11 @@ public class MvpCreator extends AnAction {
             }
         });
 
+    }
+
+    @Override
+    public void update(AnActionEvent e) {
+        e.getPresentation().setEnabled(e.getData(PlatformDataKeys.EDITOR) != null);
+        e.getPresentation().setVisible(XGroup.Companion.isCreator(e.getProject()));
     }
 }

@@ -2,8 +2,9 @@ package com.pqixing.intellij.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.pqixing.intellij.gradle.GradleRequest
+import com.pqixing.intellij.group.XGroup
 
-class TestAction : XAnAction() {
+class DebugAction : XAnAction() {
 
 
     override fun actionPerformed(e: AnActionEvent) {
@@ -13,6 +14,12 @@ class TestAction : XAnAction() {
         GradleRequest(listOf(":clean")).runGradle(project) {
 
         }
+    }
+
+
+    override fun update(e: AnActionEvent) {
+        super.update(e)
+        e.presentation.isVisible = XGroup.isDebug(e.project)
     }
 
 }

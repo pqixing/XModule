@@ -10,7 +10,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.group.XModuleGroup
+import com.pqixing.intellij.group.XGroup
 import com.pqixing.intellij.utils.GradleUtils
 import com.pqixing.intellij.utils.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils
@@ -24,7 +24,7 @@ class FastBuilderAction : AnAction() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         val param = fastBuilder[e.project]
-        e.presentation.isVisible = XModuleGroup.hasBasic(e.project)&&param!=null
+        e.presentation.isVisible = XGroup.isBasic(e.project)&&param!=null
         e.presentation.description = param?.module ?: "FastBuilder"
     }
 
