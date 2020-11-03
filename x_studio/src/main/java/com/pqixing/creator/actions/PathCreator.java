@@ -10,7 +10,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.pqixing.creator.core.gennerator.RouterCreatorGenerator;
-import com.pqixing.intellij.group.XGroup;
+import com.pqixing.intellij.XGroup;
 
 import java.util.Objects;
 

@@ -10,9 +10,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.adapter.JListInfo
+import com.pqixing.intellij.ui.adapter.JListInfo
 import com.pqixing.intellij.ui.GitOperatorDialog
-import com.pqixing.intellij.utils.GitHelper
+import com.pqixing.intellij.git.uitils.GitHelper
 import com.pqixing.tools.FileUtils
 import git4idea.GitUtil
 import git4idea.repo.GitRepository

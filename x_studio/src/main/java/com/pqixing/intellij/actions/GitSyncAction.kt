@@ -2,8 +2,8 @@ package com.pqixing.intellij.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.pqixing.EnvKeys
-import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.group.XGroup
+import com.pqixing.intellij.ui.adapter.JListInfo
+import com.pqixing.intellij.XGroup
 import com.pqixing.intellij.ui.GitOperatorDialog
 import git4idea.GitUtil
 import java.io.File

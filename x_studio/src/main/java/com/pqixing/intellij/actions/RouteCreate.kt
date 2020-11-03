@@ -9,7 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.psi.*
 import com.pqixing.creator.utils.AndroidUtils
-import com.pqixing.intellij.group.XGroup.Companion.isCreator
+import com.pqixing.intellij.XGroup.Companion.isCreator
 import com.pqixing.tools.TextUtils
 import java.io.IOException
 

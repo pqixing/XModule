@@ -1,4 +1,4 @@
-package com.pqixing.intellij.actions
+package com.pqixing.intellij.code
 
 import com.intellij.dvcs.repo.VcsRepositoryManager
 import com.intellij.openapi.actionSystem.ActionManager
@@ -15,10 +15,10 @@ import com.pqixing.Config
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.XApp
-import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.group.XGroup
+import com.pqixing.intellij.ui.adapter.JListInfo
+import com.pqixing.intellij.XGroup
 import com.pqixing.intellij.ui.NewImportDialog
-import com.pqixing.intellij.utils.GitHelper
+import com.pqixing.intellij.git.uitils.GitHelper
 import com.pqixing.intellij.utils.UiUtils.realName
 import com.pqixing.tools.FileUtils
 import git4idea.GitUtil

@@ -1,4 +1,4 @@
-package com.pqixing.intellij.utils;
+package com.pqixing.intellij.git.uitils;
 
 import com.intellij.dvcs.DvcsUtil;
 import com.intellij.execution.process.ProcessOutputTypes;
@@ -38,6 +38,7 @@ public class GitHelper {
     }
 
     public static final GitRepository getRepo(File dir, Project project) {
+        if (!GitUtil.isGitRoot(dir)) return null;
         VirtualFile gitDir = VfsUtil.findFileByIoFile(dir, true);
         if (gitDir == null) return null;
 
@@ -108,7 +109,7 @@ public class GitHelper {
      * @param repos
      * @return
      */
-    public static List<GitRepository> checkout(@NotNull final Project myProject, final String targetBranch, List<GitRepository> repos, Runnable allInAwtLater) {
+    public static void checkout(@NotNull final Project myProject, final String targetBranch, List<GitRepository> repos, Runnable allInAwtLater) {
         Triple triple = sortGitRepoByBranch(targetBranch, repos);
         //开始切换分支
         GitBrancher brancher = GitBrancher.getInstance(myProject);
@@ -123,7 +124,6 @@ public class GitHelper {
         else brancher.checkout(targetBranch, false, locals, () -> {
             runRemote.run();
         });
-        return (List<GitRepository>) triple.getThird();
     }
 
     /**
@@ -171,11 +171,11 @@ public class GitHelper {
                 unMergeSize = unMergeFiles.size();
             }
             //有冲突未解决
-            if (unMergeSize > 0) return "Merge Conflict";
+            if (unMergeSize > 0) return "Conflict";
             //没有冲突，并且更新到了最新
-            if (!hadConflict && updateToDate.hasHappened()) return "Already up to date";
+            if (!hadConflict && updateToDate.hasHappened()) return "up to date";
             //有冲突，已解决，或者，直接合并成功返回合并成功
-            if (hadConflict || merge.success()) return "Merge Success";
+            if (hadConflict || merge.success()) return "Success";
             //其他情况，返回错误情况
             return merge.getErrorOutputAsJoinedString();//返回第一条错误数据
         } catch (Exception e) {

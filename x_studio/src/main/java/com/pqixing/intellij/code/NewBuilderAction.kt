@@ -1,4 +1,4 @@
-package com.pqixing.intellij.actions
+package com.pqixing.intellij.code
 
 import com.android.tools.idea.run.deployment.DeviceGet
 import com.intellij.notification.Notification
@@ -16,8 +16,8 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VirtualFile
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.NewBuilderDialog
-import com.pqixing.intellij.utils.GradleUtils
-import com.pqixing.intellij.utils.TaskCallBack
+import com.pqixing.intellij.gradle.GradleUtils
+import com.pqixing.intellij.gradle.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.tools.FileUtils
 import java.io.File
@@ -65,10 +65,10 @@ class NewBuilderAction : AnAction() {
                 if (success) {
                     param.result = result
                     UiUtils.tryInstall(project, device, result, param.install)
-                }else ApplicationManager.getApplication().invokeLater {
+                } else ApplicationManager.getApplication().invokeLater {
                     Notification(Notifications.SYSTEM_MESSAGES_GROUP_ID, "Build Fail", "", NotificationType.WARNING).notify(project)
                 }
-                param.time = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss",Locale.CHINA).format(Date())
+                param.time = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss", Locale.CHINA).format(Date())
                 dialog.refreshHistory()
                 while (logs.size > 50) logs.removeAt(logs.size - 1)
                 FileUtils.writeText(logFile, logs.joinToString("\n"))

@@ -2,9 +2,9 @@ package com.pqixing.intellij.ui;
 
 import com.intellij.openapi.project.Project;
 import com.pqixing.intellij.XApp;
-import com.pqixing.intellij.actions.BuildParam;
-import com.pqixing.intellij.adapter.JListInfo;
-import com.pqixing.intellij.adapter.JListSelectAdapter;
+import com.pqixing.intellij.code.BuildParam;
+import com.pqixing.intellij.ui.adapter.JListInfo;
+import com.pqixing.intellij.ui.adapter.JListSelectAdapter;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;

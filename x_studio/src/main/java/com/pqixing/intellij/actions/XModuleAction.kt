@@ -10,7 +10,7 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.pqixing.EnvKeys
 import com.pqixing.intellij.ui.OpenNewProjectDialog
-import com.pqixing.intellij.utils.GradleUtils
+import com.pqixing.intellij.gradle.GradleUtils
 import com.pqixing.tools.FileUtils
 import java.io.File
 

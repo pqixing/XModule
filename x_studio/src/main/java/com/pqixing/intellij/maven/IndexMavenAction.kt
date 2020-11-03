@@ -1,4 +1,4 @@
-package com.pqixing.intellij.actions
+package com.pqixing.intellij.maven
 
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -10,11 +10,11 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.group.XGroup
+import com.pqixing.intellij.XGroup
 import com.pqixing.intellij.ui.VersionDialog
-import com.pqixing.intellij.utils.GitHelper
-import com.pqixing.intellij.utils.GradleUtils.runTask
-import com.pqixing.intellij.utils.TaskCallBack
+import com.pqixing.intellij.git.uitils.GitHelper
+import com.pqixing.intellij.gradle.GradleUtils.runTask
+import com.pqixing.intellij.gradle.TaskCallBack
 import java.io.File
 
 

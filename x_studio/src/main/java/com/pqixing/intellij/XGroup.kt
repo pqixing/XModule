@@ -1,9 +1,8 @@
-package com.pqixing.intellij.group
+package com.pqixing.intellij
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.project.Project
-import com.pqixing.intellij.XApp
 import java.io.File
 
 class XGroup : DefaultActionGroup() {

@@ -3,10 +3,10 @@ package com.pqixing.intellij.actions
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.Messages
-import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.group.XGroup
+import com.pqixing.intellij.ui.adapter.JListInfo
+import com.pqixing.intellij.XGroup
 import com.pqixing.intellij.ui.GitOperatorDialog
-import com.pqixing.intellij.utils.GitHelper
+import com.pqixing.intellij.git.uitils.GitHelper
 import git4idea.GitUtil
 import java.io.File
 

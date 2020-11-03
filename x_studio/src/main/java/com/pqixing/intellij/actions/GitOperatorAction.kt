@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.adapter.JListInfo
+import com.pqixing.intellij.ui.adapter.JListInfo
 import com.pqixing.model.ProjectModel
 import java.io.File
 

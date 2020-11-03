@@ -2,8 +2,8 @@ package com.pqixing.intellij.ui;
 
 import com.intellij.openapi.project.Project;
 import com.pqixing.intellij.XApp;
-import com.pqixing.intellij.adapter.JListInfo;
-import com.pqixing.intellij.adapter.JListSelectAdapter;
+import com.pqixing.intellij.ui.adapter.JListInfo;
+import com.pqixing.intellij.ui.adapter.JListSelectAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

@@ -1,4 +1,4 @@
-package com.pqixing.intellij.utils;
+package com.pqixing.intellij.gradle;
 
 public interface TaskCallBack {
 

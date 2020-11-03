@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.group.XGroup
+import com.pqixing.intellij.XGroup
 
 class SyncAction : AnAction() {
     override fun update(e: AnActionEvent) {

@@ -1,4 +1,4 @@
-package com.pqixing.intellij.actions
+package com.pqixing.intellij.maven
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -10,11 +10,11 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.XApp
-import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.group.XGroup
+import com.pqixing.intellij.ui.adapter.JListInfo
+import com.pqixing.intellij.XGroup
 import com.pqixing.intellij.ui.ToMavenDialog
-import com.pqixing.intellij.utils.GradleUtils
-import com.pqixing.intellij.utils.TaskCallBack
+import com.pqixing.intellij.gradle.GradleUtils
+import com.pqixing.intellij.gradle.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils.realName
 
 class ToMavenAction : AnAction() {

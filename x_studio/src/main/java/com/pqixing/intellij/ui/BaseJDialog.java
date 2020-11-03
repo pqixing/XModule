@@ -2,7 +2,6 @@ package com.pqixing.intellij.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.pqixing.intellij.utils.GradleUtils;
 
 import javax.swing.*;
 import java.awt.*;

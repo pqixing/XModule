@@ -1,4 +1,4 @@
-package com.pqixing.intellij.actions
+package com.pqixing.intellij.code
 
 import com.android.tools.idea.run.deployment.DeviceGet
 import com.intellij.notification.Notification
@@ -10,9 +10,9 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.group.XGroup
-import com.pqixing.intellij.utils.GradleUtils
-import com.pqixing.intellij.utils.TaskCallBack
+import com.pqixing.intellij.XGroup
+import com.pqixing.intellij.gradle.GradleUtils
+import com.pqixing.intellij.gradle.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils
 import java.text.SimpleDateFormat
 import java.util.*

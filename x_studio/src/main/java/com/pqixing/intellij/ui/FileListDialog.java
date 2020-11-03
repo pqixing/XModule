@@ -3,8 +3,8 @@ package com.pqixing.intellij.ui;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
-import com.pqixing.intellij.adapter.JListInfo;
-import com.pqixing.intellij.adapter.JListSelectAdapter;
+import com.pqixing.intellij.ui.adapter.JListInfo;
+import com.pqixing.intellij.ui.adapter.JListSelectAdapter;
 import com.pqixing.intellij.utils.UiUtils;
 
 import java.awt.event.ActionEvent;

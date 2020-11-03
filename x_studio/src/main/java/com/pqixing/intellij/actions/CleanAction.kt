@@ -12,7 +12,7 @@ import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.group.XGroup
+import com.pqixing.intellij.XGroup
 import com.pqixing.intellij.ui.CleanDialog
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.tools.FileUtils

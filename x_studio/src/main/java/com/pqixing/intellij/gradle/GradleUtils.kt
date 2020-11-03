@@ -1,4 +1,4 @@
-package com.pqixing.intellij.utils
+package com.pqixing.intellij.gradle
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressIndicator
@@ -8,7 +8,7 @@ import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.EnvKeys
-import com.pqixing.intellij.gradle.GradleRequest
+import com.pqixing.intellij.git.uitils.GitHelper
 import com.pqixing.tools.FileUtils
 import java.io.File
 

@@ -1,9 +1,9 @@
 package com.pqixing.intellij.ui
 
 import com.intellij.openapi.project.Project
-import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.adapter.JListSelectAdapter
-import com.pqixing.intellij.adapter.JlistSelectListener
+import com.pqixing.intellij.ui.adapter.JListInfo
+import com.pqixing.intellij.ui.adapter.JListSelectAdapter
+import com.pqixing.intellij.ui.adapter.JlistSelectListener
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.WindowAdapter

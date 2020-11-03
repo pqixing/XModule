@@ -8,9 +8,9 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.group.XGroup
+import com.pqixing.intellij.XGroup
 import com.pqixing.intellij.ui.BuilderDialog
-import com.pqixing.intellij.utils.GitHelper
+import com.pqixing.intellij.git.uitils.GitHelper
 import com.pqixing.intellij.utils.UiUtils.realName
 import groovy.lang.GroovyClassLoader
 import java.io.File

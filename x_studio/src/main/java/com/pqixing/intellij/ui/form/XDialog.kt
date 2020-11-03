@@ -2,53 +2,65 @@ package com.pqixing.intellij.ui.form
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
-import com.intellij.openapi.ui.VerticalFlowLayout
-import com.pqixing.help.Tools
-import com.pqixing.intellij.XApp
-import java.awt.MenuItem
-import java.awt.PopupMenu
+import com.pqixing.intellij.ui.adapter.XBaseAdapter
 import java.awt.Rectangle
-import java.util.logging.Level
-import java.util.logging.Logger
-import javax.swing.*
+import java.awt.event.ActionListener
+import javax.swing.JComponent
+import javax.swing.JPanel
+import javax.swing.JScrollPane
 
-class XDialog(project: Project?) : DialogWrapper(project, true, false) {
-    private lateinit var jpRoot: JPanel
-    private lateinit var jsContent: JScrollPane
-    private lateinit var jpTop: JPanel
-    private lateinit var jpBottom: JPanel
-    private lateinit var jpRight: JPanel
-    private lateinit var jpLeft: JPanel
-    private lateinit var jpCenter: JPanel
-    private lateinit var btnOK: JButton
-    val pop = PopupMenu()
+open class XDialog(project: Project?) : DialogWrapper(project, true, false) {
+     var adapter: XBaseAdapter
+    private lateinit var scroll: JScrollPane
+    private lateinit var center: JPanel
+
+    protected var myAll: ActionListener? = null
 
     init {
-        val lg = Logger.getLogger("")
-        jpCenter.layout = VerticalFlowLayout()
+        adapter = XBaseAdapter(center)
         isModal = false
-        peer.setContentPane(jpRoot)
-        title = "Title"
-        jpCenter.add(pop)
-        btnOK.addActionListener {
-            val button =JButton("${jpCenter.componentCount}-----------------").apply {
-                addActionListener {
-                    XApp.log("add to e-------")
-                    Tools.printError(0,"add event ->>>>")
-                    lg.log(Level.WARNING, "add action --------test")
-                    pop.removeAll()
-                    arrayOf("pop1", "pop2").map { MenuItem(it) }.forEachIndexed { index, menuItem ->
-                        menuItem.addActionListener { lg.log(Level.WARNING, "pop click --------") }
-                        pop.add(menuItem)
-                    }
-                    pop.show(this, 0, 0)
-                }
-            }
-            jpCenter.add(button)
-           repaint(button)
+    }
 
+    override fun show() {
+        if (myAll != null) {
+            setDoNotAskOption(object : DoNotAskOption.Adapter() {
+                override fun getDoNotShowMessage(): String = "All"
+                override fun rememberChoice(isSelected: Boolean, exitCode: Int) {
+                }
+            })
         }
-        setResizable(true)
+        init()
+        myCheckBoxDoNotShowDialog?.addActionListener(myAll)
+        super.show()
+    }
+
+    override fun doOKAction() {
+//        super.doOKAction()
+        val item = XItem()
+        item.tvTitle.text = "${adapter.getSize()}----"
+        item.tvContent.text = "this  is  content "
+        item.tvTag.text = "Y"
+        item.tvTag.addActionListener {
+            item.tvContent.text = item.tvContent.text + item.tvContent.text
+            item.tvTag.text = item.tvTag.text + item.tvTag.text
+        }
+        item.tvContent.addActionListener {
+//                XApp.log("add to e-------")
+//                Tools.printError(0, "add event ->>>>")
+//                lg.log(Level.WARNING, "add action --------test")
+//                pop.removeAll()
+//                arrayOf("pop1", "pop2").map { MenuItem(it) }.forEachIndexed { index, menuItem ->
+//                    menuItem.addActionListener { lg.log(Level.WARNING, "pop click --------") }
+//                    pop.add(menuItem)
+//                }
+//                pop.show(item.tvContent, 0, 0)
+        }
+        adapter.add(listOf(item))
+    }
+
+    override fun doCancelAction() {
+        super.doCancelAction()
+
     }
 
     fun repaint(component: JComponent) {
@@ -59,11 +71,7 @@ class XDialog(project: Project?) : DialogWrapper(project, true, false) {
         component.revalidate()
     }
 
-    override fun createActions(): Array<Action> {
-        return emptyArray()
-    }
-
-    override fun createCenterPanel(): JComponent = jpRoot
+    override fun createCenterPanel(): JComponent = scroll
 
 //    override fun createCenterPanel(): JComponent? {
 //        val frame = JFrame("XDialog")

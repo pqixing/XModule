@@ -30,12 +30,12 @@
     <depends>org.jetbrains.android</depends>
     <actions>
 
-        <action id="XModule.fastBuilder" class="com.pqixing.intellij.actions.FastBuilderAction" text="Builder"
+        <action id="XModule.fastBuilder" class="com.pqixing.intellij.code.FastBuilderAction" text="Builder"
                 icon="AllIcons.Toolwindows.ToolWindowBuild">
             <add-to-group group-id="ToolbarRunGroup" relative-to-action="DeviceAndSnapshotComboBox" anchor="after"/>
         </action>
 
-        <group id="XModule" popup="true" text="XTools" class="com.pqixing.intellij.group.XGroup">
+        <group id="XModule" popup="true" text="XTools" class="com.pqixing.intellij.XGroup">
             <add-to-group group-id="BuildMenu" anchor="first"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
@@ -46,21 +46,21 @@
             </action>
 
 
-            <action id="XModule.Import" class="com.pqixing.intellij.actions.ImportAction"
+            <action id="XModule.Import" class="com.pqixing.intellij.code.ImportAction"
                     text="Import">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
             </action>
-            <action id="XModule.ToMaven" class="com.pqixing.intellij.actions.ToMavenAction"
+            <action id="XModule.ToMaven" class="com.pqixing.intellij.maven.ToMavenAction"
                     text="Maven"/>
 
-            <action id="XModule.newBuilder" class="com.pqixing.intellij.actions.NewBuilderAction" text="Builder">
+            <action id="XModule.newBuilder" class="com.pqixing.intellij.code.NewBuilderAction" text="Builder">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift B"/>
             </action>
 
             <separator/>
 
             <action id="XModule.ReIndexVersion"
-                    class="com.pqixing.intellij.actions.IndexMavenAction" text="SyncIndex"/>
+                    class="com.pqixing.intellij.maven.IndexMavenAction" text="SyncIndex"/>
 
             <separator/>
             <action id="XModule.routercreator"
@@ -69,20 +69,11 @@
             <action id="com.libiao.mvpcreator" class="com.pqixing.creator.actions.MvpCreator" text="MvpMaker"
                     description="auto create MVP code"/>
             <separator/>
-            <action id="XModule.OpenAction" class="com.pqixing.intellij.actions.XModuleAction"
-                    text="NewProject">
+            <action id="XModule.OpenAction" class="com.pqixing.intellij.actions.XModuleAction" text="NewProject">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="FileMenu" anchor="first"/>
             </action>
-        </group>
-        <group id="XModule.GitBatch" popup="true" text="GitBatch" class="com.pqixing.intellij.group.XGroup">
-            <add-to-group group-id="VcsGroups" anchor="last"/>
-            <add-to-group group-id="XModule" anchor="last"/>
-            <action id="XModule.GitSync" class="com.pqixing.intellij.actions.GitSyncAction" text="Clone"/>
-            <action id="XModule.GitMerge"
-                    class="com.pqixing.intellij.actions.GitBranchAction" text="Merge"/>
-            <action id="XModule.GitCheckout" class="com.pqixing.intellij.actions.GitCheckoutAction"
-                    text="Checkout"/>
+            <action id="XModule.GitAction" class="com.pqixing.intellij.git.XGitAction" text="GitBatch"/>
         </group>
     </actions>
 </idea-plugin>

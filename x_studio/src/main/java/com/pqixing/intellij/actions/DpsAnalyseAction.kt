@@ -11,7 +11,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.pqixing.intellij.gradle.GradleRequest
-import com.pqixing.intellij.group.XGroup
+import com.pqixing.intellij.XGroup
 import java.io.File
 
 

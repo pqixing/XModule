@@ -11,7 +11,7 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.pqixing.creator.core.gennerator.MVPCreatorGenerator;
-import com.pqixing.intellij.group.XGroup;
+import com.pqixing.intellij.XGroup;
 
 public class MvpCreator extends AnAction {
 

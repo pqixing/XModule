@@ -13,12 +13,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.Config
 import com.pqixing.creator.JekinsJob
-import com.pqixing.intellij.adapter.JListInfo
-import com.pqixing.intellij.adapter.JListSelectAdapter
-import com.pqixing.intellij.adapter.JlistSelectListener
+import com.pqixing.intellij.ui.adapter.JListInfo
+import com.pqixing.intellij.ui.adapter.JListSelectAdapter
+import com.pqixing.intellij.ui.adapter.JlistSelectListener
 import com.pqixing.intellij.utils.DachenHelper
-import com.pqixing.intellij.utils.GradleUtils
-import com.pqixing.intellij.utils.TaskCallBack
+import com.pqixing.intellij.gradle.GradleUtils
+import com.pqixing.intellij.gradle.TaskCallBack
 import com.pqixing.intellij.utils.UiUtils
 import com.pqixing.model.Module
 import com.pqixing.tools.FileUtils
