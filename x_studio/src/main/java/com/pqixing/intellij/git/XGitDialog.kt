@@ -7,9 +7,9 @@ import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.XApp
 import com.pqixing.intellij.actions.XAnAction
+import com.pqixing.intellij.git.uitils.GitHelper
 import com.pqixing.intellij.ui.form.XDialog
 import com.pqixing.intellij.ui.form.XItem
-import com.pqixing.intellij.git.uitils.GitHelper
 import git4idea.GitUtil
 import git4idea.commands.GitLineHandlerListener
 import git4idea.repo.GitRepository
@@ -86,9 +86,8 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
         btnEnable(true)
     }
 
-    private fun btnEnable(enable: Boolean) {
-        myCancelAction.isEnabled = enable
-        myOKAction.isEnabled = enable
+    override fun btnEnable(enable: Boolean) {
+        super.btnEnable(enable)
         cbOp.isEnabled = enable
         cbBrn.isEnabled = enable
     }
@@ -120,6 +119,7 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
     fun File?.toRepo() = this?.takeIf { GitUtil.isGitRoot(it) }?.let { GitHelper.getRepo(it, project) }
 
 
+    /**  start run **/
     abstract inner class IGitRun {
         open fun visible(item: XItem): Boolean = item.get<GitRepository>(KEY_REPO) != null
         open fun run(item: XItem) {}
@@ -134,9 +134,8 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
 
     private inner class Clone : IGitRun() {
         override fun visible(item: XItem): Boolean = item.get<String>(KEY_URL) != null && !super.visible(item)
-
         override fun run(item: XItem) {
-            val clone = GitHelper.clone(project, item.get(KEY_FILE)!!, item.get(KEY_URL)!!)
+            val clone = GitHelper.clone(project, item.get(KEY_FILE)!!, item.get(KEY_URL)!!,listener)
             item.tag = if (clone) "Y" else "N"
         }
     }
