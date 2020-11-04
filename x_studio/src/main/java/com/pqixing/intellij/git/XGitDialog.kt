@@ -10,10 +10,13 @@ import com.pqixing.intellij.actions.XAnAction
 import com.pqixing.intellij.git.uitils.GitHelper
 import com.pqixing.intellij.ui.form.XDialog
 import com.pqixing.intellij.ui.form.XItem
+import com.pqixing.intellij.ui.form.addMouseClick
+import com.pqixing.intellij.ui.form.showPop
 import git4idea.GitUtil
 import git4idea.commands.GitLineHandlerListener
 import git4idea.repo.GitRepository
 import java.awt.MenuItem
+import java.awt.Point
 import java.awt.event.ActionListener
 import java.io.File
 import javax.swing.JComboBox
@@ -63,6 +66,11 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
                 item.params[KEY_URL] = url
                 item.params[KEY_DESC] = tag
                 item.content = url
+                item.tvContent.addMouseClick(item.left) { c, e ->
+                    val menus = setOf(name, item.tvContent.text, url).map { s -> MenuItem(s) }
+                    menus.forEach { m -> m.addActionListener { XApp.copy(m.label) } }
+                    c.showPop(menus, Point(e.x, e.y))
+                }
             }
         }
         val items = manifest.projects.map { p -> newItem(p.name, p.desc, p.url, File(codeRoot, p.path)) }.toMutableList()

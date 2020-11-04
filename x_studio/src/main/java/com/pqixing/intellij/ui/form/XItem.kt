@@ -1,5 +1,6 @@
 package com.pqixing.intellij.ui.form
 
+import com.pqixing.intellij.XApp
 import java.awt.Color
 import java.awt.MenuItem
 import java.awt.Point
@@ -41,10 +42,14 @@ class XItem {
             c.showPop(popMenu!!, point)
         } else {
             val label = c.getComponentAt(e.x, e.y) as? JLabel
-            if (label != null) c.showPop(popMenu ?: listOf(MenuItem(label.text)), Point(e.x, e.y))
+            if (label != null) {
+                val m = MenuItem(label.text)
+                m.addActionListener { XApp.copy(m.label) }
+                c.showPop(popMenu ?: listOf(m), Point(e.x, e.y))
+            }
         }
-
     }
+
 
     val normal = tvTag.foreground
 

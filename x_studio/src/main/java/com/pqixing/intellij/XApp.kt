@@ -13,11 +13,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.pqixing.EnvKeys
 import com.pqixing.tools.PropertiesUtils
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
 import java.io.File
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+
 
 object XApp {
 
@@ -102,6 +105,8 @@ object XApp {
             LOG.debug(msg)
         }
     }
+
+    fun copy(text: String) = Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
 }
 
 
