@@ -173,7 +173,7 @@ public class GitHelper {
             //有冲突未解决
             if (unMergeSize > 0) return "Conflict";
             //没有冲突，并且更新到了最新
-            if (!hadConflict && updateToDate.hasHappened()) return "UpToDate";
+            if (!hadConflict && updateToDate.hasHappened()) return "Success";
             //有冲突，已解决，或者，直接合并成功返回合并成功
             if (hadConflict || merge.success()) return "Success";
             //其他情况，返回错误情况

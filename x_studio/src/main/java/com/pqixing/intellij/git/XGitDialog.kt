@@ -63,13 +63,12 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
                 item.params[KEY_URL] = url
                 item.params[KEY_DESC] = tag
                 item.content = url
-                item.popMenu.add(MenuItem("pop1"))
             }
         }
         val items = manifest.projects.map { p -> newItem(p.name, p.desc, p.url, File(codeRoot, p.path)) }.toMutableList()
         items.add(0, newItem(EnvKeys.BASIC, "base library", "this is secret ~~", File(basePath, EnvKeys.BASIC)))
 
-        arrayOf(CheckOut(), Merge(), Clone(), Pull(), Push(), None(), Delete()).forEach { cbOp.addItem(it) }
+        arrayOf(Check(), Merge(), Clone(), Pull(), Push(), Create(), Delete()).forEach { cbOp.addItem(it) }
         cbOp.addActionListener { fetchRepo() }
         adapter.set(items)
         XApp.invoke { fetchRepo() }
@@ -147,15 +146,14 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
     private inner class Push : IGitRun() {
         override fun run(item: XItem) {
             val repo = item.get<GitRepository>(KEY_REPO)
-            val result = GitHelper.push(project, repo, listener)
-            item.tag = item.getState(result == "Success", result)
+            item.tag = GitHelper.push(project, repo, listener).let { item.getState(it == "Success", it) }
         }
     }
 
     private inner class Pull : IGitRun() {
         override fun run(item: XItem) {
             val repo = item.get<GitRepository>(KEY_REPO)
-            item.tag = GitHelper.update(project, repo, listener)
+            item.tag = GitHelper.update(project, repo, listener).let { item.getState(it == "Success", it) }
         }
     }
 
@@ -171,7 +169,7 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
         override fun run(item: XItem) {
             val branch = cbBrn.selectedItem?.toString()
             val repo = item.get<GitRepository>(KEY_REPO)
-            item.tag = if (!GitHelper.checkBranchExists(repo, branch)) "None" else GitHelper.merge(project, branch, repo, listener)
+            item.tag = (if (!GitHelper.checkBranchExists(repo, branch)) "None" else GitHelper.merge(project, branch, repo, listener)).let { item.getState(it == "Success", it) }
         }
     }
 
@@ -187,14 +185,21 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
         override fun run(item: XItem) {
 
             val branch = cbBrn.selectedItem?.toString() ?: return
-
-
             val repo = item.get<GitRepository>(KEY_REPO)
-            item.tag = GitHelper.delete(project, branch, repo, listener)
+            item.tag = GitHelper.delete(project, branch, repo, listener).let { item.getState(it == "Success", it) }
         }
     }
 
-    private inner class CheckOut : IGitRun() {
+    private inner class Create : IGitRun() {
+        override fun run(item: XItem) {
+            val branch = cbBrn.selectedItem?.toString() ?: return
+            val repo = item.get<GitRepository>(KEY_REPO)
+            item.tag = GitHelper.create(project, branch, repo, listener).let { item.getState(it == "Success", it) }
+
+        }
+    }
+
+    private inner class Check : IGitRun() {
         override fun run(item: XItem) {
             item.tag = item.getState(null)
         }

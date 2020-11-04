@@ -13,9 +13,9 @@ import javax.swing.JPanel
 
 class XItem {
     companion object {
-        const val KEY_SUCCESS = "√"
-        const val KEY_ERROR = "×"
-        const val KEY_WAIT = "--"
+        const val KEY_SUCCESS = "√ "
+        const val KEY_ERROR = "X "
+        const val KEY_WAIT = "- "
         fun state(sucess: Boolean?) = when (sucess) {
             true -> KEY_SUCCESS
             false -> KEY_ERROR
@@ -33,9 +33,18 @@ class XItem {
     lateinit var tvContent: JLabel
     lateinit var tvTag: JLabel
 
-    val popMenu = arrayListOf<MenuItem>()
+    var popMenu: List<MenuItem>? = null
     val left: (c: JComponent, e: MouseEvent) -> Unit = { _, _ -> cbSelect.isSelected = !cbSelect.isSelected }
-    val right: (c: JComponent, e: MouseEvent) -> Unit = { c, e -> c.showPop(popMenu, Point(e.x, e.y)) }
+    val right: (c: JComponent, e: MouseEvent) -> Unit = { c, e ->
+        val point = Point(e.x, e.y)
+        if (popMenu != null) {
+            c.showPop(popMenu!!, point)
+        } else {
+            val label = c.getComponentAt(e.x, e.y) as? JLabel
+            if (label != null) c.showPop(popMenu ?: listOf(MenuItem(label.text)), Point(e.x, e.y))
+        }
+
+    }
 
     val normal = tvTag.foreground
 
