@@ -5,7 +5,7 @@
       <xy x="20" y="20" width="710" height="400"/>
     </constraints>
     <properties/>
-    <border type="none"/>
+    <border type="etched"/>
     <children>
       <grid id="6e346" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints border-constraint="West"/>
@@ -20,43 +20,31 @@
               <text value="  "/>
             </properties>
           </component>
-          <component id="c450b" class="javax.swing.JButton" binding="tvTitle">
+          <component id="a159a" class="javax.swing.JLabel" binding="tvTitle">
             <constraints border-constraint="Center"/>
             <properties>
-              <borderPainted value="false"/>
-              <contentAreaFilled value="false"/>
               <horizontalAlignment value="2"/>
-              <iconTextGap value="4"/>
-              <preferredSize width="120" height="30"/>
-              <text value="Button"/>
+              <preferredSize width="120" height="0"/>
+              <text value="Label"/>
             </properties>
           </component>
         </children>
       </grid>
-      <component id="c85af" class="javax.swing.JButton" binding="tvContent">
+      <component id="124f8" class="javax.swing.JLabel" binding="tvContent">
         <constraints border-constraint="Center"/>
         <properties>
-          <autoscrolls value="true"/>
-          <borderPainted value="false"/>
-          <contentAreaFilled value="false"/>
-          <defaultCapable value="true"/>
-          <focusPainted value="false"/>
-          <focusable value="false"/>
+          <autoscrolls value="false"/>
           <horizontalAlignment value="4"/>
-          <text value="ButtonButtonButtonButto"/>
+          <preferredSize width="32" height="30"/>
+          <text value="Label"/>
         </properties>
       </component>
-      <component id="cf1c9" class="javax.swing.JButton" binding="tvTag">
+      <component id="b4b40" class="javax.swing.JLabel" binding="tvTag">
         <constraints border-constraint="East"/>
         <properties>
-          <borderPainted value="false"/>
-          <contentAreaFilled value="false"/>
-          <hideActionText value="false"/>
-          <horizontalAlignment value="4"/>
-          <horizontalTextPosition value="0"/>
-          <maximumSize width="120" height="30"/>
-          <preferredSize width="80" height="30"/>
-          <text value="Button"/>
+          <horizontalAlignment value="0"/>
+          <preferredSize width="100" height="30"/>
+          <text value="Label"/>
         </properties>
       </component>
     </children>

@@ -42,7 +42,7 @@ open class XDialog(project: Project?) : DialogWrapper(project, true, false) {
     }
 
     protected open fun btnEnable(enable: Boolean) {
-        myCancelAction.isEnabled = enable
+//        myCancelAction.isEnabled = enable
         myOKAction.isEnabled = enable
     }
 

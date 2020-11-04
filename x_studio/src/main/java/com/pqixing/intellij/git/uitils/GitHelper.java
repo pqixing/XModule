@@ -71,7 +71,7 @@ public class GitHelper {
         String update = update(project, repo, listeners);
         if (!"Already up to date".equals(update)) return update;
         GitLocalBranch branch = repo.getCurrentBranch();
-        if (branch == null) return "Not Branch";
+        if (branch == null) return "None";
         GitCommandResult push = getGit().push(repo, GitRemote.ORIGIN, repo.getPresentableUrl(), branch.getName(), branch.findTrackedBranch(repo) == null, listeners);
         if (push.success()) return "Success";
         return push.getErrorOutputAsJoinedString();
@@ -173,7 +173,7 @@ public class GitHelper {
             //有冲突未解决
             if (unMergeSize > 0) return "Conflict";
             //没有冲突，并且更新到了最新
-            if (!hadConflict && updateToDate.hasHappened()) return "up to date";
+            if (!hadConflict && updateToDate.hasHappened()) return "UpToDate";
             //有冲突，已解决，或者，直接合并成功返回合并成功
             if (hadConflict || merge.success()) return "Success";
             //其他情况，返回错误情况
@@ -235,10 +235,10 @@ public class GitHelper {
                 return h;
             });
             fail.detector(result.getErrorOutput());
-            if (fail.hasHappened()) return "Remote Branch Not Exists";
+            if (fail.hasHappened()) return "None";
             return result.success() ? "Success" : result.getErrorOutputAsJoinedString();
         }
-        return "Remote Branch Not Exists";
+        return "None";
     }
 
     public static boolean checkBranchExists(GitRepository repo, String name) {
@@ -267,7 +267,7 @@ public class GitHelper {
     public static String create(@NotNull Project project, @NotNull String targetBranch, @Nullable GitRepository repo, GitLineHandlerListener... listeners) {
         callListener("Prepare create " + targetBranch + " for " + repo.getRoot().getName(), listeners);
         String remoteBranchName = findRemoteBranchName(targetBranch);
-        if (checkBranchExists(repo, remoteBranchName)) return "Branch Exists";
+        if (checkBranchExists(repo, remoteBranchName)) return "Exists";
         String localBranchName = findLocalBranchName(targetBranch);
         boolean createByMe = false;
         if (!checkBranchExists(repo, localBranchName)) {

@@ -1,18 +1,43 @@
 package com.pqixing.intellij.ui.form
 
+import java.awt.Color
+import java.awt.MenuItem
+import java.awt.Point
+import java.awt.PopupMenu
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import javax.swing.JButton
 import javax.swing.JCheckBox
+import javax.swing.JComponent
+import javax.swing.JLabel
 import javax.swing.JPanel
 
 class XItem {
+    companion object {
+        const val KEY_SUCCESS = "√"
+        const val KEY_ERROR = "×"
+        const val KEY_WAIT = "--"
+        fun state(sucess: Boolean?) = when (sucess) {
+            true -> KEY_SUCCESS
+            false -> KEY_ERROR
+            else -> KEY_WAIT
+        }
+
+        val wait = Color(236, 117, 0)
+        val error = Color(236, 0, 0)
+        val success = Color(0, 187, 18)
+    }
+
     lateinit var jItemRoot: JPanel
     lateinit var cbSelect: JCheckBox
-    lateinit var tvTitle: JButton
-    lateinit var tvContent: JButton
-    lateinit var tvTag: JButton
+    lateinit var tvTitle: JLabel
+    lateinit var tvContent: JLabel
+    lateinit var tvTag: JLabel
 
+    val popMenu = arrayListOf<MenuItem>()
+    val left: (c: JComponent, e: MouseEvent) -> Unit = { _, _ -> cbSelect.isSelected = !cbSelect.isSelected }
+    val right: (c: JComponent, e: MouseEvent) -> Unit = { c, e -> c.showPop(popMenu, Point(e.x, e.y)) }
+
+    val normal = tvTag.foreground
 
     var title: String
         get() = tvTitle.text
@@ -24,7 +49,14 @@ class XItem {
         get() = tvTag.text
         set(value) {
             tvTag.text = value
+            tvTag.foreground = when {
+                value.startsWith(KEY_SUCCESS) -> success
+                value.startsWith(KEY_ERROR) -> error
+                value.startsWith(KEY_WAIT) -> wait
+                else -> normal
+            }
         }
+
     var content: String
         get() = tvContent.text
         set(value) {
@@ -53,19 +85,39 @@ class XItem {
         return params[key] as? T
     }
 
+    init {
+        jItemRoot.addMouseClick(left, right)
+    }
+}
+
+fun JComponent.showPop(menu: List<String>, point: Point, click: (index: Int) -> Unit) = showPop(menu.mapIndexed { i: Int, s: String -> MenuItem(s).also { it.addActionListener { click(i) } } }, point)
+
+fun JComponent.showPop(menu: List<MenuItem>, point: Point) {
+    if (menu.isEmpty()) return
+    val pop = PopupMenu()
+    this.add(pop)
+    menu.forEach { pop.add(it) }
+    pop.show(this, point.x, point.y)
+}
+
+fun JComponent.addMouseClickL(left: (c: JComponent, e: MouseEvent) -> Unit) = addMouseClick(left, { _, _ -> })
+fun JComponent.addMouseClickR(right: (c: JComponent, e: MouseEvent) -> Unit) = addMouseClick({ _, _ -> }, right)
+fun JComponent.addMouseClick(left: (c: JComponent, e: MouseEvent) -> Unit, right: (c: JComponent, e: MouseEvent) -> Unit = { _, _ -> }) = MouseHandle(this, left, right)
+
+class MouseHandle(val component: JComponent, val left: (c: JComponent, e: MouseEvent) -> Unit, val right: (c: JComponent, e: MouseEvent) -> Unit = { _, _ -> }) : MouseAdapter() {
+    var otherClick: (c: JComponent, e: MouseEvent) -> Unit = { _, _ -> }
 
     init {
-        tvTitle.addMouseListener(MouseHandle(tvTitle))
-
+        component.addMouseListener(this)
     }
 
-    inner class MouseHandle(tvTitle: JButton) : MouseAdapter() {
-
-        override fun mouseClicked(e: MouseEvent?) {
-            super.mouseClicked(e)
-            e ?: return
-            val right = e.button == MouseEvent.BUTTON3
-            val left = e.button == MouseEvent.BUTTON1
+    override fun mouseClicked(e: MouseEvent?) {
+        super.mouseClicked(e)
+        e ?: return
+        when (e.button) {
+            MouseEvent.BUTTON3 -> right(component, e)
+            MouseEvent.BUTTON1 -> left(component, e)
+            else -> otherClick(component, e)
         }
     }
 }

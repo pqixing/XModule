@@ -13,6 +13,7 @@ import com.pqixing.intellij.ui.form.XItem
 import git4idea.GitUtil
 import git4idea.commands.GitLineHandlerListener
 import git4idea.repo.GitRepository
+import java.awt.MenuItem
 import java.awt.event.ActionListener
 import java.io.File
 import javax.swing.JComboBox
@@ -30,6 +31,7 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
     private val KEY_FILE = "file"
     private val KEY_URL = "url"
     private val KEY_REPO = "repo"
+    private val KEY_DESC = "desc"
     private lateinit var pTop: JPanel
     private lateinit var cbBrn: JComboBox<String>
     private lateinit var cbOp: JComboBox<IGitRun>
@@ -59,16 +61,18 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
                 item.selectAble = true
                 item.params[KEY_FILE] = file
                 item.params[KEY_URL] = url
+                item.params[KEY_DESC] = tag
                 item.content = url
+                item.popMenu.add(MenuItem("pop1"))
             }
         }
         val items = manifest.projects.map { p -> newItem(p.name, p.desc, p.url, File(codeRoot, p.path)) }.toMutableList()
-        items.add(0, newItem(EnvKeys.BASIC, EnvKeys.BASIC, "Exception", File(basePath, EnvKeys.BASIC)))
+        items.add(0, newItem(EnvKeys.BASIC, "base library", "this is secret ~~", File(basePath, EnvKeys.BASIC)))
 
         arrayOf(CheckOut(), Merge(), Clone(), Pull(), Push(), None(), Delete()).forEach { cbOp.addItem(it) }
         cbOp.addActionListener { fetchRepo() }
-        fetchRepo()
         adapter.set(items)
+        XApp.invoke { fetchRepo() }
     }
 
     override fun doOKAction() = XApp.runAsyn { indicator ->
@@ -77,6 +81,7 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
         val gitOp = cbOp.selectedItem as IGitRun
         val selects = adapter.datas().filter { it.visible && it.select }
         if (gitOp.beforeRun(selects)) selects.onEach {
+            it.tag = it.getState(null)
             indicator.text = "${gitOp.javaClass.simpleName} -> ${it.title} : ${it.content}"
             gitOp.run(it)
         }
@@ -96,7 +101,7 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
     fun fetchRepo() {
         val gitOp = cbOp.selectedItem as IGitRun
         for (item in adapter.datas()) {
-            item.tag = ""
+            item.tag = item.get<String>(KEY_DESC).toString()
             if (item.get<GitRepository>(KEY_REPO) != null) {
                 item.visible = gitOp.visible(item)
                 continue
@@ -135,22 +140,21 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
     private inner class Clone : IGitRun() {
         override fun visible(item: XItem): Boolean = item.get<String>(KEY_URL) != null && !super.visible(item)
         override fun run(item: XItem) {
-            val clone = GitHelper.clone(project, item.get(KEY_FILE)!!, item.get(KEY_URL)!!,listener)
-            item.tag = if (clone) "Y" else "N"
+            item.tag = item.getState(GitHelper.clone(project, item.get(KEY_FILE)!!, item.get(KEY_URL)!!, listener))
         }
     }
 
     private inner class Push : IGitRun() {
         override fun run(item: XItem) {
             val repo = item.get<GitRepository>(KEY_REPO)
-            item.tag = GitHelper.push(project, repo, listener)
+            val result = GitHelper.push(project, repo, listener)
+            item.tag = item.getState(result == "Success", result)
         }
     }
 
     private inner class Pull : IGitRun() {
         override fun run(item: XItem) {
             val repo = item.get<GitRepository>(KEY_REPO)
-
             item.tag = GitHelper.update(project, repo, listener)
         }
     }
@@ -167,7 +171,7 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
         override fun run(item: XItem) {
             val branch = cbBrn.selectedItem?.toString()
             val repo = item.get<GitRepository>(KEY_REPO)
-            item.tag = if (!GitHelper.checkBranchExists(repo, branch)) "Not Found" else GitHelper.merge(project, branch, repo, listener)
+            item.tag = if (!GitHelper.checkBranchExists(repo, branch)) "None" else GitHelper.merge(project, branch, repo, listener)
         }
     }
 
@@ -183,6 +187,8 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
         override fun run(item: XItem) {
 
             val branch = cbBrn.selectedItem?.toString() ?: return
+
+
             val repo = item.get<GitRepository>(KEY_REPO)
             item.tag = GitHelper.delete(project, branch, repo, listener)
         }
@@ -190,7 +196,7 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
 
     private inner class CheckOut : IGitRun() {
         override fun run(item: XItem) {
-            item.tag = "O"
+            item.tag = item.getState(null)
         }
 
         override fun afterRun(items: List<XItem>) {
@@ -210,10 +216,13 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
                 if (newBranch != null) {
                     item.content = newBranch
                 }
-                item.tag = if (newBranch == branch) "Y" else "N"
+                item.tag = item.getState(newBranch == branch)
             }
         }
 
     }
+
+    private fun XItem.getState(success: Boolean?, newTag: String? = null): String = XItem.state(success) + (newTag
+            ?: this.get<String>(KEY_DESC).toString())
 }
 
