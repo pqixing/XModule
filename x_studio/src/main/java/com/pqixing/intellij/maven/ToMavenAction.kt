@@ -38,9 +38,10 @@ class ToMavenAction : AnAction() {
         filters.add(moduleName)
 
         //需要ToMaven的模块
-        val tModules = ModuleManager.getInstance(project).sortedModules
-                .filter { filters.contains(it.name) }
-                .map { JListInfo(it.name, "", 0, it.name == moduleName || it.name == "${moduleName}_api") }
+        val tModules = ModuleManager.getInstance(project).sortedModules.map { it.realName() }
+                .filter { filters.contains(it) }
+                .map { JListInfo(it, "", 0, it == moduleName || it == "${moduleName}_api") }
+        XApp.log("$moduleName -> $filters -> ${tModules.map { it.title }}")
 
         val dialog = ToMavenDialog(project, tModules, moduleName);
         dialog.setOnOk { toMaven(dialog, tModules) }

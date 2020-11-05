@@ -41,8 +41,9 @@ class XItem {
         if (popMenu != null) {
             c.showPop(popMenu!!, point)
         } else {
-            val label = c.getComponentAt(e.x, e.y) as? JLabel
-            if (label != null) {
+            var label = c.getComponentAt(e.x, e.y)
+            if (label is JPanel) label = label.getComponentAt(e.x, e.y)
+            if (label is JLabel) {
                 val m = MenuItem(label.text)
                 m.addActionListener { XApp.copy(m.label) }
                 c.showPop(popMenu ?: listOf(m), Point(e.x, e.y))

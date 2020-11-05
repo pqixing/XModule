@@ -116,14 +116,11 @@ public class GitHelper {
         Runnable runRemote = () -> {
             List<GitRepository> remotes = (List<GitRepository>) triple.getSecond();
             if (remotes.isEmpty()) allInAwtLater.run();
-            else
-                brancher.checkoutNewBranchStartingFrom(targetBranch, "origin/" + targetBranch, remotes, allInAwtLater);
+            else brancher.checkoutNewBranchStartingFrom(targetBranch, "origin/" + targetBranch, remotes, allInAwtLater);
         };
         List<GitRepository> locals = (List<GitRepository>) triple.getFirst();
         if (locals.isEmpty()) runRemote.run();
-        else brancher.checkout(targetBranch, false, locals, () -> {
-            runRemote.run();
-        });
+        else brancher.checkout(targetBranch, false, locals, () -> runRemote.run());
     }
 
     /**

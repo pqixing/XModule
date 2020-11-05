@@ -15,10 +15,10 @@ import com.pqixing.Config
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.XApp
-import com.pqixing.intellij.ui.adapter.JListInfo
 import com.pqixing.intellij.XGroup
-import com.pqixing.intellij.ui.NewImportDialog
 import com.pqixing.intellij.git.uitils.GitHelper
+import com.pqixing.intellij.ui.NewImportDialog
+import com.pqixing.intellij.ui.adapter.JListInfo
 import com.pqixing.intellij.utils.UiUtils.realName
 import com.pqixing.tools.FileUtils
 import git4idea.GitUtil
@@ -71,14 +71,11 @@ class ImportAction : AnAction() {
                 GitHelper.clone(project, it.key, it.value)
             }
 //                    如果快速导入不成功,则,同步一次
-            ActionManager.getInstance().getAction("ImportProject").actionPerformed(e)
+            ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
 
             disposeModule(project, allIncludes, dialog.codeRootStr == codeRoot)
             //添加basic的地址
-            Thread.sleep(2000)//先睡眠2秒,然后检查git管理是否有缺少
-            XApp.invoke {
-                syncVcs(gitPaths.keys.toMutableSet().also { it.add(File(basePath, EnvKeys.BASIC)) }, dialog.syncVcs(), project)
-            }
+            XApp.invoke { syncVcs(gitPaths.keys.toMutableSet().also { it.add(File(basePath, EnvKeys.BASIC)) }, dialog.syncVcs(), project) }
         }
         dialog.btnConfig.addActionListener {
             dialog.dispose()
@@ -124,9 +121,9 @@ class ImportAction : AnAction() {
     }
 
     private fun saveConfig(config: Config, dialog: NewImportDialog) = XApp.invokeWrite {
-            config.dependentModel = dialog.dpModel?.trim() ?: ""
-            config.codeRoot = dialog.codeRootStr.trim()
-            config.include = dialog.imports.filter { it.isNotEmpty() }.joinToString(",")
-            XmlHelper.saveConfig(basePath, config)
+        config.dependentModel = dialog.dpModel?.trim() ?: ""
+        config.codeRoot = dialog.codeRootStr.trim()
+        config.include = dialog.imports.filter { it.isNotEmpty() }.joinToString(",")
+        XmlHelper.saveConfig(basePath, config)
     }
 }

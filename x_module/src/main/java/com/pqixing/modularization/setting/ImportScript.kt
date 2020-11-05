@@ -1,6 +1,5 @@
 package com.pqixing.modularization.setting
 
-import com.pqixing.EnvKeys
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Module
@@ -85,18 +84,28 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
 
         //替换file的模板，重新
         var file = module.file
-        for (f in args.manifest.files) file = file.replace("$${f.key}", f.value)
+        val basicDir = args.env.basicDir.absolutePath
+        val curDir = File(args.env.codeRootDir, module.path).canonicalPath + "/"
+
+        val preFiles = args.manifest.files + mapOf("basicDir" to basicDir)
+        val keys = preFiles.keys
+        while (true) {
+            val key = keys.find { file.contains("$$it") } ?: break
+            file = file.replace("$$key", preFiles[key] ?: "")
+        }
+//        Tools.println("hookBuildFile: ${module.file} -> $file")
+
         tryCreateSrc(module)
 
-        val curDir = File(args.env.codeRootDir, module.path)
-        val basicDir = args.env.basicDir.absolutePath
+
         val target = File(args.env.codeRootDir, module.path + "/" + buildFileName)
 
-        val mergeFiles = file.split(",").filter { it.trim().isNotEmpty() }.map { if (it.startsWith("$")) File(it.replace("\$basicDir", basicDir)) else File(curDir, it) }.toMutableList()
+        val mergeFiles = file.split(",").mapNotNull { it.trim().takeIf { t -> t.isNotEmpty() } }.map { m ->
+            File((curDir.takeIf { !m.startsWith(basicDir) } ?: "") + m)
+        }.toMutableList()
 
         if (module.attach()) mergeFiles.add(File(args.env.basicDir, "gradle/api.gradle"))
         if (args.runAsApp(module) && !module.isApplication) mergeFiles.add(File(args.env.basicDir, "gradle/dev.gradle"))
-
         FileUtils.mergeFile(target, mergeFiles) { it.replace(Regex("apply *?plugin: *?['\"]com.android.(application|library)['\"]"), "") }
         module.api?.let { hookBuildFile(it, buildFileName) }
     }

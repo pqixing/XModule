@@ -3,6 +3,8 @@ package com.pqixing.intellij.git
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.vcs.VcsDirectoryMapping
+import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.XApp
@@ -18,6 +20,7 @@ import git4idea.repo.GitRepository
 import java.awt.MenuItem
 import java.awt.Point
 import java.awt.event.ActionListener
+import java.awt.event.MouseEvent
 import java.io.File
 import javax.swing.JComboBox
 import javax.swing.JComponent
@@ -66,20 +69,35 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
                 item.params[KEY_URL] = url
                 item.params[KEY_DESC] = tag
                 item.content = url
-                item.tvContent.addMouseClick(item.left) { c, e ->
-                    val menus = setOf(name, item.tvContent.text, url).map { s -> MenuItem(s) }
-                    menus.forEach { m -> m.addActionListener { XApp.copy(m.label) } }
-                    c.showPop(menus, Point(e.x, e.y))
-                }
+                item.tvContent.addMouseClick(item.left) { c, e -> onContentClickR(item, url, c, e) }
             }
         }
         val items = manifest.projects.map { p -> newItem(p.name, p.desc, p.url, File(codeRoot, p.path)) }.toMutableList()
-        items.add(0, newItem(EnvKeys.BASIC, "base library", "this is secret ~~", File(basePath, EnvKeys.BASIC)))
+        items.add(0, newItem(EnvKeys.BASIC, EnvKeys.BASIC, "https://github.com/pqixing/XModule", File(basePath, EnvKeys.BASIC)))
 
         arrayOf(Check(), Merge(), Clone(), Pull(), Push(), Create(), Delete()).forEach { cbOp.addItem(it) }
         cbOp.addActionListener { fetchRepo() }
         adapter.set(items)
         XApp.invoke { fetchRepo() }
+    }
+
+    private fun onContentClickR(item: XItem, url: String, c: JComponent, e: MouseEvent) {
+        val repo = item.get<GitRepository>(KEY_REPO)
+        val menus = mutableListOf(MenuItem(url).also { m -> m.addActionListener { XApp.copy(m.label) } })
+        if (repo != null) {
+            val brs = repo.branches.let { brs -> brs.localBranches.map { it.name }.plus(brs.remoteBranches.map { it.name.substringAfter("/") }) }.toSet()
+            menus += brs.sorted().map { MenuItem(it) }.onEach { m ->
+                m.addActionListener {
+                    GitHelper.checkout(project, m.label, listOf(repo)) {
+                        repo.update();
+                        val newBranch = repo.currentBranchName
+                        item.tag = item.getState(m.label == newBranch)
+                        if (newBranch != null) item.content = newBranch
+                    }
+                }
+            }
+        }
+        c.showPop(menus, Point(e.x, e.y))
     }
 
     override fun doOKAction() = XApp.runAsyn { indicator ->
@@ -90,12 +108,18 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
         if (gitOp.beforeRun(selects)) selects.onEach {
             it.tag = it.getState(null)
             indicator.text = "${gitOp.javaClass.simpleName} -> ${it.title} : ${it.content}"
-            gitOp.run(it)
+            kotlin.runCatching { gitOp.run(it) }
         }
         indicator.text = "${gitOp.javaClass.simpleName} -> run after"
         gitOp.afterRun(selects)
 
         btnEnable(true)
+        XApp.invoke {
+            //根据导入的CodeRoot目录,自动更改AS的版本管理
+            val pVcs: ProjectLevelVcsManagerImpl = ProjectLevelVcsManagerImpl.getInstance(project) as ProjectLevelVcsManagerImpl
+            pVcs.directoryMappings = adapter.datas().mapNotNull { it.get<File>(KEY_FILE) }.filter { GitUtil.isGitRoot(it) }.mapNotNull { VcsDirectoryMapping(it.absolutePath, "Git") }
+            pVcs.notifyDirectoryMappingChanged()
+        }
     }
 
     override fun btnEnable(enable: Boolean) {
@@ -120,7 +144,7 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
 
             item.content = repo.currentBranchName ?: "Not Found"
             val brs = repo.branches
-            val news = brs.localBranches.map { it.name }.plus(brs.remoteBranches.map { it.name.substringAfter("/") })
+            val news = brs.localBranches.map { it.name }.plus(brs.remoteBranches.map { it.name.substringAfter("/") }).sorted()
             news.filter { allBrns.add(it) }.forEach { cbBrn.addItem(it) }
         }
     }
@@ -147,7 +171,12 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
     private inner class Clone : IGitRun() {
         override fun visible(item: XItem): Boolean = item.get<String>(KEY_URL) != null && !super.visible(item)
         override fun run(item: XItem) {
-            item.tag = item.getState(GitHelper.clone(project, item.get(KEY_FILE)!!, item.get(KEY_URL)!!, listener))
+            val file = item.get<File>(KEY_FILE)
+            if (file != null && GitUtil.isGitRoot(file)) {
+                item.tag = item.getState(true)
+            } else {
+                item.tag = item.getState(GitHelper.clone(project, item.get(KEY_FILE)!!, item.get(KEY_URL)!!, listener))
+            }
         }
     }
 
@@ -217,12 +246,13 @@ class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) 
             val repos = items.mapNotNull { it.get<GitRepository>(KEY_REPO) }
 
             var wait = true
+            val end = System.currentTimeMillis() + 15000
             GitHelper.checkout(project, branch, repos) { wait = false }
 
-            while (wait) {
+            while (wait && System.currentTimeMillis() < end) {
             }
 
-            repos.forEach { it.update() }
+            repos.forEach { f -> f.update() }
 
             items.forEach { item ->
                 val newBranch = item.get<GitRepository>(KEY_REPO)?.currentBranchName
