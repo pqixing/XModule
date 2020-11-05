@@ -1,16 +1,28 @@
 package com.pqixing.intellij.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
-import com.pqixing.intellij.ui.BaseJDialog
+import com.pqixing.intellij.ui.weight.XEventDialog
 import java.awt.event.KeyEvent
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import javax.swing.*
 
-open class XProjectAction : XAnAction() {
+open class XProjectAction : XEventAction({ p, e, m -> XProject(p, e, m) })
+open class XProject(project: Project, e: AnActionEvent, m: Module?) : XEventDialog(project, e, m) {
+    lateinit var buttonOK: JButton
+    lateinit var buttonCancel: JButton
+    lateinit var tvDir: JTextField
+    lateinit var contentPane: JPanel
+    lateinit var tvFilePick: JButton
+    lateinit var tvGitUrl: JTextField
 
-    override fun actionPerformed(e: AnActionEvent) {
+    private fun onOK() {
+        // add your code here
+        dispose()
+
+    }
 
 //        val defaultProject = e.project ?: ProjectManagerImpl.getInstance().defaultProject ?: return
 //        val rootDir = e.project?.let { LocalFileSystem.getInstance().findFileByPath(it.basePath!!) }
@@ -46,21 +58,7 @@ open class XProjectAction : XAnAction() {
 //            }
 //        }
 //        showAndPack.showAndPack()
-    }
-}
 
-open class XProject(project: Project?) : BaseJDialog(project) {
-    lateinit var buttonOK: JButton
-    lateinit var buttonCancel: JButton
-    lateinit var tvDir: JTextField
-    lateinit var contentPane: JPanel
-    lateinit var tvFilePick: JButton
-    lateinit var tvGitUrl: JTextField
-
-    private fun onOK() {
-        // add your code here
-        dispose()
-    }
 
     private fun onCancel() {
         // add your code here if necessary
@@ -68,20 +66,20 @@ open class XProject(project: Project?) : BaseJDialog(project) {
     }
 
     init {
-        setContentPane(contentPane)
-        isModal = true
-        getRootPane().defaultButton = buttonOK
-        title = "Open New Project"
-        buttonOK!!.addActionListener { onOK() }
-        buttonCancel!!.addActionListener { onCancel() }
-
-        // call onCancel() when cross is clicked
-        defaultCloseOperation = DO_NOTHING_ON_CLOSE
-        addWindowListener(object : WindowAdapter() {
-            override fun windowClosing(e: WindowEvent) {
-                onCancel()
-            }
-        })
+//        setContentPane(contentPane)
+//        isModal = true
+//        getRootPane().defaultButton = buttonOK
+//        title = "Open New Project"
+//        buttonOK!!.addActionListener { onOK() }
+//        buttonCancel!!.addActionListener { onCancel() }
+//
+//        // call onCancel() when cross is clicked
+//        defaultCloseOperation = DO_NOTHING_ON_CLOSE
+//        addWindowListener(object : WindowAdapter() {
+//            override fun windowClosing(e: WindowEvent) {
+//                onCancel()
+//            }
+//        })
 
         // call onCancel() on ESCAPE
         contentPane!!.registerKeyboardAction({ onCancel() }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)

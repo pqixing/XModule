@@ -73,7 +73,7 @@
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="FileMenu" anchor="first"/>
             </action>
-            <action id="XModule.GitAction" class="com.pqixing.intellij.git.XGitAction" text="GitBatch"/>
+            <action id="XModule.GitAction" class="com.pqixing.intellij.actions.XGitAction" text="GitBatch"/>
         </group>
     </actions>
 </idea-plugin>

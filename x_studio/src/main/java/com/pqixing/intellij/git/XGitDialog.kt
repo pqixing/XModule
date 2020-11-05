@@ -1,6 +1,7 @@
 package com.pqixing.intellij.git
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.VcsDirectoryMapping
@@ -8,9 +9,9 @@ import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
 import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.XApp
-import com.pqixing.intellij.actions.XAnAction
+import com.pqixing.intellij.actions.XEventAction
 import com.pqixing.intellij.git.uitils.GitHelper
-import com.pqixing.intellij.ui.weight.XDialog
+import com.pqixing.intellij.ui.weight.XEventDialog
 import com.pqixing.intellij.ui.weight.XItem
 import com.pqixing.intellij.ui.weight.addMouseClick
 import com.pqixing.intellij.ui.weight.showPop
@@ -27,9 +28,8 @@ import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-
-
-class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) {
+class XGitAction : XEventAction({ p, e, m -> XGitDialog(p, e, m) })
+class XGitDialog(project: Project, e: AnActionEvent, m: Module?) : XEventDialog(project, e, m) {
     private val KEY_FILE = "file"
     private val KEY_URL = "url"
     private val KEY_REPO = "repo"

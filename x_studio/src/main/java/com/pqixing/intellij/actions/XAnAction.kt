@@ -8,13 +8,12 @@ import com.intellij.openapi.project.Project
 import com.pqixing.intellij.XGroup.Companion.isBasic
 import com.pqixing.intellij.ui.weight.XEventDialog
 
-class XEventAction(val block(project: Project, e: AnActionEvent, module: Module?)-> Unit) : XAnAction() {
+abstract class XEventAction(val block: (project: Project, e: AnActionEvent, module: Module?) -> XEventDialog?) : XAnAction() {
     override fun doPerformed(project: Project, e: AnActionEvent, module: Module?) {
-        super.doPerformed(project, e, module)
-        xEventDialog().co
+        block(project, e, module)?.show()
     }
-    abstract fun xEventDialog():Class<XEventDialog>
 }
+
 open class XAnAction : AnAction() {
     override fun update(e: AnActionEvent) {
         e.presentation.isVisible = isBasic(e.project)
@@ -22,7 +21,6 @@ open class XAnAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-        val
         doPerformed(project, e, e.getData(DataKey.create<Module>("module")))
     }
 
