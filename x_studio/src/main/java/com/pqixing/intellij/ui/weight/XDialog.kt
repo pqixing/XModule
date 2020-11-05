@@ -1,5 +1,7 @@
-package com.pqixing.intellij.ui.form
+package com.pqixing.intellij.ui.weight
 
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.pqixing.intellij.ui.adapter.XBaseAdapter
@@ -12,7 +14,8 @@ import javax.swing.JPanel
 import javax.swing.JScrollPane
 import javax.swing.KeyStroke
 
-open class XDialog(project: Project?) : DialogWrapper(project, true, false) {
+open class XEventDialog(project: Project, val e: AnActionEvent, val module: Module?) : XDialog(project)
+open class XDialog(val project: Project?) : DialogWrapper(project, true, false) {
     var adapter: XBaseAdapter
     private lateinit var scroll: JScrollPane
     private lateinit var center: JPanel
@@ -55,14 +58,4 @@ open class XDialog(project: Project?) : DialogWrapper(project, true, false) {
     }
 
     override fun createCenterPanel(): JComponent = scroll
-
-//    override fun createCenterPanel(): JComponent? {
-//        val frame = JFrame("XDialog")
-//        frame.contentPane = jpRoot
-//        frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-//        frame.pack()
-//        frame.setLocationRelativeTo(null)
-//        frame.isVisible = true
-//        return frame
-//    }
 }

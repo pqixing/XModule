@@ -1,7 +1,7 @@
 package com.pqixing.intellij.ui.adapter
 
 import com.intellij.openapi.ui.VerticalFlowLayout
-import com.pqixing.intellij.ui.form.XItem
+import com.pqixing.intellij.ui.weight.XItem
 import java.awt.Rectangle
 import javax.swing.JPanel
 

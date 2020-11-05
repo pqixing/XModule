@@ -1,6 +1,6 @@
 package com.pqixing.intellij.ui;
 
-import com.pqixing.intellij.ui.form.XDialog;
+import com.pqixing.intellij.ui.weight.XDialog;
 
 public class SingleTest {
     public static void main(String[] args) {

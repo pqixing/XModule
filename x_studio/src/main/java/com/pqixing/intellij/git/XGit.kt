@@ -10,10 +10,10 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.XApp
 import com.pqixing.intellij.actions.XAnAction
 import com.pqixing.intellij.git.uitils.GitHelper
-import com.pqixing.intellij.ui.form.XDialog
-import com.pqixing.intellij.ui.form.XItem
-import com.pqixing.intellij.ui.form.addMouseClick
-import com.pqixing.intellij.ui.form.showPop
+import com.pqixing.intellij.ui.weight.XDialog
+import com.pqixing.intellij.ui.weight.XItem
+import com.pqixing.intellij.ui.weight.addMouseClick
+import com.pqixing.intellij.ui.weight.showPop
 import git4idea.GitUtil
 import git4idea.commands.GitLineHandlerListener
 import git4idea.repo.GitRepository
@@ -27,11 +27,7 @@ import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-class XGitAction : XAnAction() {
-    override fun actionPerformed(e: AnActionEvent) {
-        XGitDialog(e.project ?: return, e).show()
-    }
-}
+
 
 class XGitDialog(val project: Project, val e: AnActionEvent) : XDialog(project) {
     private val KEY_FILE = "file"

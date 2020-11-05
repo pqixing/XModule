@@ -2,7 +2,7 @@ package com.pqixing.intellij.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.pqixing.intellij.XGroup
-import com.pqixing.intellij.ui.form.XDialog
+import com.pqixing.intellij.ui.weight.XDialog
 
 class DebugAction : XAnAction() {
 

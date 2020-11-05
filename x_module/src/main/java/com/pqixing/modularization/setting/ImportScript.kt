@@ -31,7 +31,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         //添加include配置
         val checks = mutableSetOf<Module>()
         for (module in imports) include(checks, module, buildFileName)
-        Tools.println("parse include ${args.config.codeRoot}  ${args.config.include} -> ${imports.map { it.name }}")
+        Tools.println("Import ${args.config.codeRoot}  ${args.config.include} -> ${imports.map { it.name }}")
         //尝试下载工程,hook build.gradle文件
         imports.forEach { tryCheckModule(it, buildFileName) }
 

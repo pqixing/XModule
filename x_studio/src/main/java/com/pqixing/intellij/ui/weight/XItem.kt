@@ -1,4 +1,4 @@
-package com.pqixing.intellij.ui.form
+package com.pqixing.intellij.ui.weight
 
 import com.pqixing.intellij.XApp
 import java.awt.Color

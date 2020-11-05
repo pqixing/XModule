@@ -69,7 +69,7 @@
             <action id="com.libiao.mvpcreator" class="com.pqixing.creator.actions.MvpCreator" text="MvpMaker"
                     description="auto create MVP code"/>
             <separator/>
-            <action id="XModule.OpenAction" class="com.pqixing.intellij.actions.XModuleAction" text="NewProject">
+            <action id="XModule.XProjectAction" class="com.pqixing.intellij.actions.XProjectAction" text="XProject">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="FileMenu" anchor="first"/>
             </action>
