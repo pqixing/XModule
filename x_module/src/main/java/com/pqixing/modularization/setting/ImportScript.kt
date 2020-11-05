@@ -31,7 +31,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         //添加include配置
         val checks = mutableSetOf<Module>()
         for (module in imports) include(checks, module, buildFileName)
-        Tools.println("parse include ${args.config.include} ${args.config.codeRoot} ${imports.map { it.name }}")
+        Tools.println("parse include ${args.config.codeRoot}  ${args.config.include} -> ${imports.map { it.name }}")
         //尝试下载工程,hook build.gradle文件
         imports.forEach { tryCheckModule(it, buildFileName) }
 
@@ -68,7 +68,6 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
 
     fun formatIncludeTxt(source: String): Set<String> {
         if (source.isNotEmpty() && source != "Auto") {
-            Tools.println("formatIncludeTxt :$source")
             return source.replace("+", ",")?.split(",").toSet()
         }
         val result = gradle.startParameter.taskNames.map { it.split(":") }.flatten().filter { it.isNotEmpty() }.toSet()

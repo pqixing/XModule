@@ -1,11 +1,11 @@
 package com.pqixing.modularization.utils
 
+import com.jcraft.jsch.Session
 import com.pqixing.help.Tools
 import com.pqixing.tools.FileUtils
 import org.eclipse.jgit.api.*
 import org.eclipse.jgit.lib.Ref
-import org.eclipse.jgit.transport.RefSpec
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
+import org.eclipse.jgit.transport.*
 import java.io.File
 
 object GitUtils {
@@ -14,14 +14,7 @@ object GitUtils {
 
     fun getPsw(value: String): String = Tools.getPsw(value)
 
-    fun open(file: File?): Git? {
-        if (file?.exists() == false) return null
-        return try {
-            Git.open(file)
-        } catch (e: Exception) {
-            null
-        }
-    }
+    fun open(file: File?): Git? = kotlin.runCatching { Git.open(file) }.getOrNull()
 
 
     /**
@@ -30,25 +23,26 @@ object GitUtils {
      * @param dirPath
      * @return
      */
-    fun clone(gitUrl: String, gitDir: File, branchName: String = "master"): Git? {
+    fun clone(gitUrl: String, gitDir: File, branch: String = "master"): Git? {
         if (gitDir.exists()) FileUtils.delete(gitDir)
-        val git = Git.cloneRepository()
-                .setURI(gitUrl).setDirectory(gitDir).setBranch(branchName)
-                .execute()
-        if (git == null) {
-            if (branchName != "master") return clone(gitUrl, gitDir, "master")
-        } else {
-            //如果名字不等（clone的分支不存在） checkout到master
-            if (git.repository.branch != branchName) {
-                git.checkout().setName("master")
-                        .setCreateBranch(true)
-                        .setStartPoint("refs/remotes/origin/master")
-                        .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
-                        .execute()
-            }
+
+        val git = Git.cloneRepository().setURI(gitUrl).setDirectory(gitDir).exe("clone $gitUrl ${gitDir.name}", gitDir.parentFile) ?: open(gitDir)
+        if (git != null && branch != "master") {
+            checkoutBranch(git, branch, false)
         }
         return git
     }
+
+    fun runGitCmd(cmd: String, dir: File?): String? = kotlin.runCatching {
+        Tools.println("Shell cmd -> 'git $cmd'  -> ${dir?.absolutePath ?: ""}")
+        val p = Runtime.getRuntime().exec("git $cmd", null, dir)
+        val input = p.inputStream.bufferedReader()
+        val error = p.errorStream.bufferedReader()
+        val result = input.readText() + error.readText()
+        input.close()
+        error.close()
+        result
+    }.getOrNull() ?: "Exception"
 
     /**
      * 删除分支
@@ -62,7 +56,7 @@ object GitUtils {
             val refSpec = RefSpec()
                     .setSource(null)
                     .setDestination("refs/heads/$branchName");
-            git.push().setRefSpecs(refSpec).setRemote("origin").execute(false);
+            git.push().setRefSpecs(refSpec).setRemote("origin").exe("push origin --delete $branchName");
             Tools.println("Delete ${git.repository.directory.parentFile.name} branch -> $branchName")
             true
         } catch (e: Exception) {
@@ -73,31 +67,12 @@ object GitUtils {
     }
 
     /**
-     * 添加文件并且上传
-     */
-    fun addAndPush(git: Git?, file: String, commitMsg: String, force: Boolean = false): Boolean {
-        git ?: return false
-        try {
-            git.pull().execute(false)
-            git.add().addFilepattern(file).execute(false)
-            git.commit().setMessage(commitMsg).execute(false)
-            push(git, force)
-        } catch (e: Exception) {
-            Tools.println("addAndPush Exception -> $e")
-            return false
-        }
-        Tools.println("addAndPush Complete -> add path :$file , msg $commitMsg")
-        return true
-
-    }
-
-    /**
      *刷新工程
      */
     fun push(git: Git?, force: Boolean = false): Boolean {
         git ?: return false
         try {
-            val call = git.push().setForce(force).execute(false)
+            val call = git.push().setForce(force).exe("push ${if (force) "--force" else ""}")
             Tools.println("Push ${git.repository.directory.parentFile.name} Complete push -> ${call?.map { it.messages }}")
         } catch (e: Exception) {
             Tools.println(" Exception push -> $e")
@@ -112,7 +87,7 @@ object GitUtils {
     fun pull(git: Git?): Boolean {
         git ?: return false
         return try {
-            val call = git.pull().execute(false)
+            val call = git.pull().exe("pull")
             val isSuccessful = call?.isSuccessful ?: false
             Tools.println("Pull ${git.repository.directory.parentFile.name} Complete-> $isSuccessful  ${git.log().setMaxCount(1).call().map { "${it.committerIdent} -> ${it.fullMessage}" }[0]}")
             isSuccessful
@@ -137,9 +112,9 @@ object GitUtils {
             return checkoutBranch(git, branchName, true)
         }
         //创建本地分支
-        val call = git.branchCreate().setName(branchName).execute(false)
+        val call = git.branchCreate().setName(branchName).exe("branch $branchName")
         //提交远程分支
-        git.push().add(call).execute(false);
+        git.push().add(call).exe("push origin $branchName");
         //删除本地分支（以便于checkout远程分支，方便关联）,
         git.branchDelete().setBranchNames(branchName).call()
         //关联本地和远程分支
@@ -165,7 +140,7 @@ object GitUtils {
         if (branchName == git.repository.branch) return true
         val isClean = checkIfClean(git)
         //将本地修改文件存到暂存区
-        if (!isClean) git.stashCreate().execute()
+        if (!isClean) git.stashCreate().exe("stash")
 
         var remote = false
         var tryCheckOut = tryCheckOut(git, branchName, git.branchList().call(), remote)
@@ -176,7 +151,7 @@ object GitUtils {
             tryCheckOut = tryCheckOut(git, branchName, git.branchList().setListMode(ListBranchCommand.ListMode.REMOTE).call(), remote)
         }
         //还原本地的代码
-        if (!isClean && !focusCheckOut) git.stashApply().execute()
+        if (!isClean && !focusCheckOut) git.stashApply().exe("stash pop")
 
         if (!tryCheckOut) Tools.println("Can not find branch: $branchName ")
 
@@ -211,7 +186,7 @@ object GitUtils {
                             .setStartPoint(c.name)
                             .setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.SET_UPSTREAM)
                 }
-                command.execute()
+                command.exe("checkout $branchName")
                 Tools.println("Checkout ${git.repository.directory.parentFile.name}-> ${if (remote) "remote" else "local"} branch $branchName")
                 return git.repository.branch == branchName//是否切换成功
             }
@@ -257,23 +232,28 @@ object GitUtils {
 
 }
 
-fun <T> GitCommand<T>.execute(safe: Boolean = true): T? {
-    Tools.println("${javaClass.simpleName} -> ${repository?.directory?.absolutePath?:""} ")
-    val exe = {
-        if (this is TransportCommand<*, *>) {
-            setTransportConfigCallback(GitSSHFactory.transportConfigCallback)
-            setCredentialsProvider(UsernamePasswordCredentialsProvider(GitUtils.gitUser, GitUtils.gitPsw))
-        }
-        if (this is CloneCommand) this.setProgressMonitor(PercentProgress())
-        call()
+fun <T> GitCommand<T>.exe(cmd: String, dir: File? = repository?.directory): T? = kotlin.runCatching {
+    Tools.println("JGit START ${this.javaClass.simpleName}")
+    if (this is TransportCommand<*, *>) {
+        setTransportConfigCallback(transportConfigCallback)
+        setCredentialsProvider(UsernamePasswordCredentialsProvider(GitUtils.gitUser, GitUtils.gitPsw))
     }
-    return if (safe) try {
-        exe()
-    } catch (e: Exception) {
-        Tools.println(e.toString())
-        Tools.println("try config user or password or set ssh-key use -> ssh-keygen -m PEM -t rsa -b 2048")
-        null
-    } else exe()
+    if (this is CloneCommand) this.setProgressMonitor(PercentProgress())
+    this.call()
+}.getOrNull() ?: kotlin.run {
+    Tools.println("JGit Fail -> try config user or password or set ssh-key use -> ssh-keygen -m PEM -t rsa -b 2048")
+    Tools.println(GitUtils.runGitCmd(cmd, dir))
+    null
+}
+
+private var sshSessionFactory: SshSessionFactory = object : JschConfigSessionFactory() {
+    override fun configure(hc: OpenSshConfig.Host, session: Session) {}
+}
+
+private var transportConfigCallback = TransportConfigCallback { transport: Transport? ->
+    if (transport is SshTransport) {
+        transport.sshSessionFactory = sshSessionFactory
+    }
 }
 
 
