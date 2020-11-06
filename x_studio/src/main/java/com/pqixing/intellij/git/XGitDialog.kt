@@ -28,7 +28,7 @@ import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-class XGitAction : XEventAction({ p, e, m -> XGitDialog(p, e, m) })
+open class XGitAction : XEventAction({ p, e, m -> XGitDialog(p, e, m) })
 class XGitDialog(project: Project, e: AnActionEvent, m: Module?) : XEventDialog(project, e, m) {
     private val KEY_FILE = "file"
     private val KEY_URL = "url"
