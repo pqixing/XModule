@@ -38,7 +38,6 @@ class XGitDialog(project: Project, e: AnActionEvent, m: Module?) : XEventDialog(
     private lateinit var cbBrn: JComboBox<String>
     private lateinit var cbOp: JComboBox<IGitRun>
     private lateinit var jlPath: JLabel
-    val basePath = e.project?.basePath!!
     val codeRoot = File(basePath, XmlHelper.loadConfig(basePath).codeRoot).canonicalPath
     val manifest = XmlHelper.loadManifest(basePath)!!
     val allBrns = mutableSetOf<String>()

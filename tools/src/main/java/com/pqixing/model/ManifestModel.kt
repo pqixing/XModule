@@ -10,6 +10,7 @@ class ManifestModel(val baseUrl: String) {
     var createSrc = false
     var fallbacks = mutableListOf<String>()
     var baseVersion = ""
+    var basicUrl = ""
 
     val projects = mutableListOf<ProjectModel>()
 
