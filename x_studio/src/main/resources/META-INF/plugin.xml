@@ -63,11 +63,8 @@
                     class="com.pqixing.intellij.maven.IndexMavenAction" text="SyncIndex"/>
 
             <separator/>
-            <action id="XModule.routercreator"
-                    class="com.pqixing.intellij.actions.RouteCreate" text="PathMaker"
-                    description="router auto create code"/>
-            <action id="com.libiao.mvpcreator" class="com.pqixing.creator.actions.MvpCreator" text="MvpMaker"
-                    description="auto create MVP code"/>
+            <action id="XModule.PathCreate" class="com.pqixing.intellij.actions.PathCreate" text="PathGen"/>
+            <action id="XModule.MvpCreator" class="com.pqixing.creator.actions.MvpCreator" text="MvpGen"/>
             <separator/>
             <action id="XModule.XProjectAction" class="com.pqixing.intellij.actions.XProjectAction" text="XProject">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>

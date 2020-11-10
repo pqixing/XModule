@@ -13,7 +13,7 @@ import com.pqixing.intellij.XGroup.Companion.isCreator
 import com.pqixing.tools.TextUtils
 import java.io.IOException
 
-open class RouteCreate : AnAction() {
+open class PathCreate : AnAction() {
     lateinit var project: Project
     override fun actionPerformed(e: AnActionEvent) {
         project = e.getData(PlatformDataKeys.PROJECT) ?: return

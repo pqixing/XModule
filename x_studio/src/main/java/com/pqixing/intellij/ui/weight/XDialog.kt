@@ -14,9 +14,10 @@ import javax.swing.JPanel
 import javax.swing.JScrollPane
 import javax.swing.KeyStroke
 
-open class XEventDialog(val project: Project, val e: AnActionEvent, val module: Module?) : XDialog(project){
-    protected var basePath = project.basePath!!
+open class XEventDialog(val project: Project, val e: AnActionEvent, val module: Module?) : XDialog(project) {
+    protected var basePath = project.basePath ?: System.getProperty("user.home")
 }
+
 open class XDialog(project: Project?) : DialogWrapper(project, true, false) {
     var adapter: XBaseAdapter
     private lateinit var scroll: JScrollPane

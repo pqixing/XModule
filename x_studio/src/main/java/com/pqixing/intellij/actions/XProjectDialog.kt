@@ -2,10 +2,12 @@ package com.pqixing.intellij.actions
 
 import com.intellij.ide.impl.ProjectUtil
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.DataKey
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.impl.ProjectManagerImpl
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.pqixing.EnvKeys
@@ -19,7 +21,16 @@ import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-open class XProjectAction : XEventAction({ p, e, m -> XProjectDialog(p, e, m) })
+open class XProjectAction : XAnAction() {
+    override fun update(e: AnActionEvent) {
+
+    }
+
+    override fun actionPerformed(e: AnActionEvent) {
+        XProjectDialog(e.project ?: ProjectManagerImpl.getInstance().defaultProject, e, e.getData(DataKey.create<Module>("module"))).show()
+    }
+}
+
 open class XProjectDialog(project: Project, e: AnActionEvent, m: Module?) : XEventDialog(project, e, m) {
     lateinit var tvDir: JTextField
     lateinit var centerPanal: JPanel
@@ -30,13 +41,11 @@ open class XProjectDialog(project: Project, e: AnActionEvent, m: Module?) : XEve
 
     override fun init() {
         super.init()
-        title = "Open New Project"
+        title = "Open X Project"
         tvFilePick.addActionListener {
-            btnEnable(false)
             FileChooser.chooseFiles(FileChooserDescriptor(false, true, false, false, false, false), project, rootDir?.parent) { files: List<VirtualFile> ->
                 files.firstOrNull()?.let { tvDir.text = it.canonicalPath }
             }
-            btnEnable(true)
         }
         tvDir.text = rootDir?.parent?.canonicalPath ?: ""
         tvGitUrl.text = XmlHelper.loadManifest(basePath)?.basicUrl?.takeIf { it.isNotEmpty() } ?: "https://github.com/pqixing/x_basic.git"
