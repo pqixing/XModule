@@ -18,6 +18,7 @@ class XGroup : DefaultActionGroup() {
     override fun update(e: AnActionEvent) {
         super.update(e)
         e.presentation.isVisible = XApp.isBasic(e.project, true)
+        e.presentation.isEnabled = true
 //        (ActionManager.getInstance().getAction("DeviceAndSnapshotComboBox") as DeviceAndSnapshotComboBoxAction).getSelectedDevice(e.project!!)
         //启动后，尝试打开socket连接，接收gradle插件的通知
 //        val oldUpdate = ActionManager.getInstance().getAction("Vcs.UpdateProject")

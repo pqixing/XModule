@@ -7,7 +7,7 @@
     <properties/>
     <border type="etched"/>
     <children>
-      <grid id="6e346" layout-manager="BorderLayout" hgap="0" vgap="0">
+      <grid id="6e346" layout-manager="BorderLayout" hgap="5" vgap="0">
         <constraints border-constraint="West"/>
         <properties/>
         <border type="none"/>
@@ -17,16 +17,18 @@
             <properties>
               <hideActionText value="false"/>
               <selected value="false"/>
-              <text value="  "/>
+              <text value=""/>
             </properties>
           </component>
           <component id="a159a" class="javax.swing.JLabel" binding="tvTitle">
             <constraints border-constraint="Center"/>
             <properties>
+              <alignmentX value="0.5"/>
               <horizontalAlignment value="2"/>
               <horizontalTextPosition value="11"/>
+              <iconTextGap value="4"/>
               <preferredSize width="120" height="0"/>
-              <text value="Label"/>
+              <text value=""/>
             </properties>
           </component>
         </children>
@@ -37,7 +39,7 @@
           <autoscrolls value="false"/>
           <horizontalAlignment value="4"/>
           <preferredSize width="32" height="30"/>
-          <text value="Label"/>
+          <text value=""/>
         </properties>
       </component>
       <component id="b4b40" class="javax.swing.JLabel" binding="tvTag">
@@ -46,7 +48,7 @@
           <alignmentX value="0.5"/>
           <horizontalAlignment value="0"/>
           <preferredSize width="100" height="30"/>
-          <text value="Label"/>
+          <text value=""/>
         </properties>
       </component>
     </children>

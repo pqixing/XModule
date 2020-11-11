@@ -88,6 +88,7 @@ object XApp {
     }
 
     fun String.getSp(default: String? = null) = if (maps.contains(this)) maps[this] else default
+    fun <T> Boolean?.getOrElse(get: T, e: T) = if (this == true) get else e
 
     @JvmStatic
     fun put(key: String, value: String?) = key.putSp(value)

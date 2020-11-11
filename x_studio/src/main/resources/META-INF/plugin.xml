@@ -40,13 +40,13 @@
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
 
-            <action id="XModule.test" class="com.pqixing.intellij.actions.DebugAction" text="Debug">
+            <action id="XModule.XDebugAction" class="com.pqixing.intellij.actions.XDebugAction" text="Debug">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="FileMenu" anchor="first"/>
             </action>
 
 
-            <action id="XModule.Import" class="com.pqixing.intellij.code.ImportAction"
+            <action id="XModule.XImportAction" class="com.pqixing.intellij.code.XImportAction"
                     text="Import">
                 <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt I"/>
             </action>
@@ -70,7 +70,7 @@
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="FileMenu" anchor="first"/>
             </action>
-            <action id="XModule.GitAction" class="com.pqixing.intellij.git.XGitAction" text="GitBatch"/>
+            <action id="XModule.XGitAction" class="com.pqixing.intellij.git.XGitAction" text="GitBatch"/>
         </group>
     </actions>
 </idea-plugin>

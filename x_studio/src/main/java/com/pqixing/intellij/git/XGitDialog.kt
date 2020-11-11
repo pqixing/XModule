@@ -1,8 +1,6 @@
 package com.pqixing.intellij.git
 
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.module.Module
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.VcsDirectoryMapping
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
@@ -11,16 +9,11 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.XApp
 import com.pqixing.intellij.actions.XEventAction
 import com.pqixing.intellij.git.uitils.GitHelper
-import com.pqixing.intellij.ui.weight.XEventDialog
-import com.pqixing.intellij.ui.weight.XItem
-import com.pqixing.intellij.ui.weight.addMouseClick
-import com.pqixing.intellij.ui.weight.showPop
+import com.pqixing.intellij.ui.weight.*
 import git4idea.GitUtil
 import git4idea.commands.GitLineHandlerListener
 import git4idea.repo.GitRepository
-import java.awt.MenuItem
 import java.awt.Point
-import java.awt.event.ActionListener
 import java.awt.event.MouseEvent
 import java.io.File
 import javax.swing.JComboBox
@@ -28,8 +21,8 @@ import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-open class XGitAction : XEventAction({ p, e, m -> XGitDialog(p, e, m) })
-class XGitDialog(project: Project, e: AnActionEvent, m: Module?) : XEventDialog(project, e, m) {
+open class XGitAction : XEventAction<XGitDialog>()
+class XGitDialog(e: AnActionEvent) : XEventDialog(e) {
     private val KEY_FILE = "file"
     private val KEY_URL = "url"
     private val KEY_REPO = "repo"
@@ -44,14 +37,12 @@ class XGitDialog(project: Project, e: AnActionEvent, m: Module?) : XEventDialog(
     val listener = GitLineHandlerListener { l, k -> XApp.log(l) }
 
     init {
-        title = "Git"
         jlPath.text = "  : $codeRoot"
-        myAll = ActionListener {
-            val isSelected = myCheckBoxDoNotShowDialog.isSelected
-            adapter.datas().filter { it.visible }.forEach { it.select = isSelected }
-        }
         XApp.post { loadItems() }
     }
+
+    override fun doOnAllChange(selected: Boolean) = adapter.datas().filter { it.visible }.forEach { it.select = selected }
+    override fun getTitleStr(): String = "Git"
 
     private fun loadItems() {
         val newItem = { name: String, tag: String, url: String, file: File ->
@@ -78,11 +69,11 @@ class XGitDialog(project: Project, e: AnActionEvent, m: Module?) : XEventDialog(
 
     private fun onContentClickR(item: XItem, url: String, c: JComponent, e: MouseEvent) {
         val repo = item.get<GitRepository>(KEY_REPO)
-        val menus = mutableListOf(MenuItem(url).also { m -> m.addActionListener { XApp.copy(m.label) } })
+        val menus = mutableListOf(MyMenuItem<Any>(url, null, false) { m -> XApp.copy(m.label) })
         if (repo != null) {
             val brs = repo.branches.let { brs -> brs.localBranches.map { it.name }.plus(brs.remoteBranches.map { it.name.substringAfter("/") }) }.toSet()
-            menus += brs.sorted().map { MenuItem(it) }.onEach { m ->
-                m.addActionListener {
+            menus += brs.sorted().map {
+                MyMenuItem(it, null, false) { m ->
                     GitHelper.checkout(project, m.label, listOf(repo)) {
                         repo.update();
                         val newBranch = repo.currentBranchName

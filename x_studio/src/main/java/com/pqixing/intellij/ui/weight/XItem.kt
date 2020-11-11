@@ -1,8 +1,8 @@
 package com.pqixing.intellij.ui.weight
 
 import com.pqixing.intellij.XApp
+import java.awt.CheckboxMenuItem
 import java.awt.Color
-import java.awt.MenuItem
 import java.awt.Point
 import java.awt.PopupMenu
 import java.awt.event.MouseAdapter
@@ -34,9 +34,9 @@ class XItem {
     lateinit var tvContent: JLabel
     lateinit var tvTag: JLabel
 
-    var popMenu: List<MenuItem>? = null
-    val left: (c: JComponent, e: MouseEvent) -> Unit = { _, _ -> cbSelect.isSelected = !cbSelect.isSelected }
-    val right: (c: JComponent, e: MouseEvent) -> Unit = { c, e ->
+    var popMenu: List<MyMenuItem<*>>? = null
+    var left: (c: JComponent, e: MouseEvent) -> Unit = { _, _ -> cbSelect.isSelected = !cbSelect.isSelected }
+    var right: (c: JComponent, e: MouseEvent) -> Unit = { c, e ->
         val point = Point(e.x, e.y)
         if (popMenu != null) {
             c.showPop(popMenu!!, point)
@@ -44,8 +44,7 @@ class XItem {
             var label = c.getComponentAt(e.x, e.y)
             if (label is JPanel) label = label.getComponentAt(e.x, e.y)
             if (label is JLabel) {
-                val m = MenuItem(label.text)
-                m.addActionListener { XApp.copy(m.label) }
+                val m = MyMenuItem<String>(label.text, null, false) { XApp.copy(it.label) }
                 c.showPop(popMenu ?: listOf(m), Point(e.x, e.y))
             }
         }
@@ -101,13 +100,13 @@ class XItem {
     }
 
     init {
-        jItemRoot.addMouseClick(left, right)
+        jItemRoot.addMouseClick({ c, e -> left(c, e) }, { c, e -> right(c, e) })
     }
 }
 
-fun JComponent.showPop(menu: List<String>, point: Point, click: (index: Int) -> Unit) = showPop(menu.mapIndexed { i: Int, s: String -> MenuItem(s).also { it.addActionListener { click(i) } } }, point)
+fun JComponent.showPop(menu: List<String>, point: Point, click: (item: MyMenuItem<String>) -> Unit) = showPop(menu.map { MyMenuItem<String>(it, it, false, click) }, point)
 
-fun JComponent.showPop(menu: List<MenuItem>, point: Point) {
+fun JComponent.showPop(menu: List<MyMenuItem<*>>, point: Point) {
     if (menu.isEmpty()) return
     val pop = PopupMenu()
     this.add(pop)
@@ -134,5 +133,11 @@ class MouseHandle(val component: JComponent, val left: (c: JComponent, e: MouseE
             MouseEvent.BUTTON1 -> left(component, e)
             else -> otherClick(component, e)
         }
+    }
+}
+
+class MyMenuItem<T>(label: String, val data: T? = null, state: Boolean = false, click: (item: MyMenuItem<T>) -> Unit) : CheckboxMenuItem(label, state) {
+    init {
+        addItemListener { click(this) }
     }
 }
