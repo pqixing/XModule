@@ -4,7 +4,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 
@@ -22,15 +21,6 @@ public class BaseJDialog extends JDialog {
         super.pack();
         JDialog put = showDialogs.put(getClass().getName(), this);
         if (put != null) put.dispose();
-        GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
-        TestDialog td = null;
-        if (devices != null && devices.length > 1) {
-            td = new TestDialog(pj0);
-            td.show();
-            Point location = td.getLocation();
-            setLocation(location.x - getWidth() / 2, location.y - getHeight() / 2);
-        } else setLocationRelativeTo(null);
-        if (td != null) td.unShow();
         getRootPane().registerKeyboardAction(a -> onCapsLockClick(), KeyStroke.getKeyStroke(KeyEvent.VK_CAPS_LOCK, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 

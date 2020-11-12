@@ -10,7 +10,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.XGroup
+import com.pqixing.intellij.common.XGroup
 import com.pqixing.intellij.ui.VersionDialog
 import com.pqixing.intellij.git.uitils.GitHelper
 import com.pqixing.intellij.gradle.GradleUtils.runTask

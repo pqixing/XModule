@@ -7,7 +7,7 @@ import com.pqixing.intellij.XApp
 import com.pqixing.intellij.XApp.getOrElse
 import com.pqixing.intellij.XApp.getSp
 import com.pqixing.intellij.XApp.putSp
-import com.pqixing.intellij.actions.XEventAction
+import com.pqixing.intellij.common.XEventAction
 import com.pqixing.intellij.git.uitils.GitHelper
 import com.pqixing.intellij.ui.weight.MyMenuItem
 import com.pqixing.intellij.ui.weight.XItem

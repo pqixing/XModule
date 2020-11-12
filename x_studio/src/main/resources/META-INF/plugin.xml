@@ -35,12 +35,12 @@
             <add-to-group group-id="ToolbarRunGroup" relative-to-action="DeviceAndSnapshotComboBox" anchor="after"/>
         </action>
 
-        <group id="XModule" popup="true" text="XTools" class="com.pqixing.intellij.XGroup">
+        <group id="XModule" popup="true" text="XTools" class="com.pqixing.intellij.common.XGroup">
             <add-to-group group-id="BuildMenu" anchor="first"/>
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="first"/>
 
-            <action id="XModule.XDebugAction" class="com.pqixing.intellij.actions.XDebugAction" text="Debug">
+            <action id="XModule.XDebugAction" class="com.pqixing.intellij.common.actions.XDebugAction" text="Debug">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="FileMenu" anchor="first"/>
             </action>
@@ -63,10 +63,10 @@
                     class="com.pqixing.intellij.maven.IndexMavenAction" text="SyncIndex"/>
 
             <separator/>
-            <action id="XModule.PathCreate" class="com.pqixing.intellij.actions.PathCreate" text="PathGen"/>
-            <action id="XModule.MvpCreator" class="com.pqixing.creator.actions.MvpCreator" text="MvpGen"/>
+            <action id="XModule.PathCreate" class="com.pqixing.intellij.creator.actions.PathCreate" text="PathGen"/>
+            <action id="XModule.MvpCreator" class="com.pqixing.intellij.creator.actions.MvpCreator" text="MvpGen"/>
             <separator/>
-            <action id="XModule.XProjectAction" class="com.pqixing.intellij.actions.XProjectAction" text="XProject">
+            <action id="XModule.XProjectAction" class="com.pqixing.intellij.common.actions.XProjectAction" text="XProject">
                 <add-to-group group-id="WelcomeScreen.Configure" anchor="first"/>
                 <add-to-group group-id="FileMenu" anchor="first"/>
             </action>

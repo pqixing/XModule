@@ -10,10 +10,10 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.XGroup
+import com.pqixing.intellij.common.XGroup
 import com.pqixing.intellij.gradle.GradleUtils
 import com.pqixing.intellij.gradle.TaskCallBack
-import com.pqixing.intellij.utils.UiUtils
+import com.pqixing.intellij.common.UiUtils
 import java.text.SimpleDateFormat
 import java.util.*
 

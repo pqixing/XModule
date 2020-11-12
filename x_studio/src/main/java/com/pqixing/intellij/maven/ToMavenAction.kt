@@ -11,11 +11,11 @@ import com.pqixing.EnvKeys
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.XApp
 import com.pqixing.intellij.ui.adapter.JListInfo
-import com.pqixing.intellij.XGroup
+import com.pqixing.intellij.common.XGroup
 import com.pqixing.intellij.ui.ToMavenDialog
 import com.pqixing.intellij.gradle.GradleUtils
 import com.pqixing.intellij.gradle.TaskCallBack
-import com.pqixing.intellij.utils.UiUtils.realName
+import com.pqixing.intellij.common.UiUtils.realName
 
 class ToMavenAction : AnAction() {
     lateinit var project: Project

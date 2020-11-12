@@ -18,7 +18,7 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.ui.NewBuilderDialog
 import com.pqixing.intellij.gradle.GradleUtils
 import com.pqixing.intellij.gradle.TaskCallBack
-import com.pqixing.intellij.utils.UiUtils
+import com.pqixing.intellij.common.UiUtils
 import com.pqixing.tools.FileUtils
 import java.io.File
 import java.text.SimpleDateFormat
