@@ -1,6 +1,7 @@
 package com.pqixing.intellij.git
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.VcsDirectoryMapping
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
@@ -34,7 +35,11 @@ class XGitDialog(e: AnActionEvent) : XEventDialog(e) {
     val codeRoot = File(basePath, XmlHelper.loadConfig(basePath).codeRoot).canonicalPath
     val manifest = XmlHelper.loadManifest(basePath)!!
     val allBrns = mutableSetOf<String>()
-    val listener = GitLineHandlerListener { l, k -> XApp.log(l) }
+    var indictor: ProgressIndicator? = null
+    val listener = GitLineHandlerListener { l, k ->
+        XApp.log(l)
+        indictor?.text = l
+    }
 
     init {
         jlPath.text = "  : $codeRoot"
@@ -87,6 +92,7 @@ class XGitDialog(e: AnActionEvent) : XEventDialog(e) {
     }
 
     override fun doOKAction() = XApp.runAsyn { indicator ->
+        this.indictor = indictor
         btnEnable(false)
 
         val gitOp = cbOp.selectedItem as IGitRun
@@ -106,6 +112,7 @@ class XGitDialog(e: AnActionEvent) : XEventDialog(e) {
             pVcs.directoryMappings = adapter.datas().mapNotNull { it.get<File>(KEY_FILE) }.filter { GitUtil.isGitRoot(it) }.mapNotNull { VcsDirectoryMapping(it.absolutePath, "Git") }
             pVcs.notifyDirectoryMappingChanged()
         }
+        this.indictor = null
     }
 
     override fun btnEnable(enable: Boolean) {
