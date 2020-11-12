@@ -2,6 +2,7 @@ package com.pqixing.intellij.code
 
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.util.Key
 import com.pqixing.help.XmlHelper
 import com.pqixing.intellij.XApp
 import com.pqixing.intellij.XApp.getOrElse
@@ -15,6 +16,7 @@ import com.pqixing.intellij.ui.weight.XModuleDialog
 import com.pqixing.intellij.ui.weight.showPop
 import com.pqixing.tools.FileUtils
 import git4idea.GitUtil
+import git4idea.commands.GitLineHandlerListener
 import java.awt.Point
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
@@ -107,7 +109,11 @@ class XImportDialog(e: AnActionEvent) : XModuleDialog(e) {
                 FileUtils.delete(dir)
                 indictor.text = "Start Clone ${p.url} -> ${config.codeRoot}"
                 //下载master分支
-                GitHelper.clone(project, dir, p.url)
+                GitHelper.clone(project, dir, p.url, object : GitLineHandlerListener {
+                    override fun onLineAvailable(line: String?, outputType: Key<*>?) {
+                        indictor.text = "Clone ${p.url} : $line"
+                    }
+                })
             }
 
             indictor.text = "Start Sync Code"

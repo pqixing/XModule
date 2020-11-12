@@ -6,6 +6,7 @@ import com.pqixing.intellij.common.XGroup
 
 class XDebugAction : XAnAction() {
     override fun update(e: AnActionEvent) {
-        XGroup.isDebug(e.project)
+        e.presentation.isVisible = XGroup.isDebug(e.project)
     }
+
 }
