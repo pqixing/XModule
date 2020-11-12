@@ -1,45 +1,4 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-buildscript {
-    ext.kotlin_version = '1.4.10'
-    repositories {
-//        maven {
-//            url "http://192.168.0.70:8081/repository/androidgroup/"
-//        }
-        mavenLocal()
-        google()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-        maven {
-            url "http://maven.aliyun.com/nexus/content/groups/public"
-        }
-    }
-
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:3.6.4'
-//        classpath 'com.novoda:bintray-release:0.9'
-//        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'//this
-        classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.4.16"
-    }
-} //
-
 ext.localMavenUri = uri("/Users/pqx/.repo")
 //本地Maven调试
 ext.localBuild = true
 group = "com.pqixing.gradle"
-
-allprojects {
-
-    repositories {
-        mavenLocal()
-        maven {
-            url "https://dl.bintray.com/pqixing86/modularization"
-        }
-        maven {
-            url "http://maven.aliyun.com/nexus/content/groups/public"
-        }
-        google()
-    }
-}

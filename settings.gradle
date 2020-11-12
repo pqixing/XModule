@@ -1,5 +1,0 @@
-include ":tools", ":x_module", ":x_studio", ":annotation", ":androidbase"
-//导入模板工程代码
-if (!file("x_basic").exists()) "git clone https://github.com/pqixing/x_basic.git".execute(null, rootDir)
-
-include ":leetcode"

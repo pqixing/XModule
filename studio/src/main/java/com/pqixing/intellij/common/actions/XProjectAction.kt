@@ -40,7 +40,7 @@ open class XProjectDialog(e: AnActionEvent) : XEventDialog(e, e.project ?: Proje
             }
         }
         tvDir.text = rootDir?.parent?.canonicalPath ?: ""
-        tvGitUrl.text = XmlHelper.loadManifest(basePath)?.basicUrl?.takeIf { it.isNotEmpty() } ?: "https://github.com/pqixing/x_basic.git"
+        tvGitUrl.text = XmlHelper.loadManifest(basePath)?.basicUrl?.takeIf { it.isNotEmpty() } ?: "https://github.com/pqixing/basic.git"
     }
 
     override fun getTitleStr(): String = "Open X Project"
@@ -57,7 +57,7 @@ open class XProjectDialog(e: AnActionEvent) : XEventDialog(e, e.project ?: Proje
                 FileUtils.copy(File(rootDir.path, "gradle.properties"), File(dir, "gradle.properties"))
 //                FileUtils.copy(File(rootDir.path, "Config.java"), File(dir, "Config.java"))
             }
-            FileUtils.writeText(File(dir, "settings.gradle"), "buildscript { apply from: 'https://gitee.com/pqixing/XModule/raw/master/script/install.gradle', to: it }; apply plugin: 'com.module.setting'\n")
+            FileUtils.writeText(File(dir, "settings.gradle"), "buildscript { apply from: 'https://github.com/pqixing/cmmon/raw/master/script/install.gradle', to: it }; apply plugin: 'com.module.setting'\n")
             ProjectUtil.openOrImport(dir.absolutePath, project, true)
         }
     }
