@@ -4,6 +4,7 @@ import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Module
 import com.pqixing.modularization.android.AndroidPlugin
+import com.pqixing.modularization.base.TaskPlugin
 import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.helper.JGroovyHelper
 import com.pqixing.modularization.root.RootPlugin
@@ -56,9 +57,11 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
             if (pro == pro.rootProject) pro.pluginManager.apply(RootPlugin::class.java)
             else {
                 pro.buildDir = File(pro.buildDir, buildTag)
-                checks.find { it.name == pro.name }?.takeIf { it.isAndroid }?.let {
+                val module = checks.find { it.name == pro.name }
+                if (module != null) {//这是管理的工程
+                    pro.pluginManager.apply(TaskPlugin::class.java)
                     //依赖Android插件
-                    pro.pluginManager.apply(AndroidPlugin::class.java)
+                    if (module.isAndroid) pro.pluginManager.apply(AndroidPlugin::class.java)
                 }
             }
         }

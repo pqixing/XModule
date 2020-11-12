@@ -1,6 +1,5 @@
 package com.pqixing.modularization.helper;
 
-import com.pqixing.modularization.impl.IGExtHelper;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.invocation.Gradle;
@@ -11,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @see IGExtHelper
  */
 public interface IExtHelper {
+
     public Object getExtValue(Project project, String key);
 
     public Object setExtValue(Project project, String key, Object value);

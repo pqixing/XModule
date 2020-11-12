@@ -1,18 +1,7 @@
-apply plugin: 'kotlin'
-apply plugin: 'java'
-//apply plugin: 'com.github.dcendents.android-maven'
 dependencies {
-    api "com.alibaba:fastjson:1.2.68"
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     compileOnly localGroovy()
-    testImplementation 'junit:junit:4.12'
 }
-compileKotlin.kotlinOptions.jvmTarget = "1.8"
-compileTestKotlin.kotlinOptions.jvmTarget = "1.8"
-compileJava {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
+
 ext.mainDir = new File(projectDir, "src/main")
 ext.resourceDir = new File(mainDir, "resources/com/pqixing")
 ext.javaFileDir = new File(mainDir, "java/com/pqixing")
@@ -35,8 +24,3 @@ def writeFile(String txt, File out) {
     writer.flush()
     writer.close()
 }
-
-ext.mVersion = "2.2.0"
-ext.mLocalVersion = "0.1"
-ext.mArtifactId = "tools"
-apply from: '../script/bintray.gradle'

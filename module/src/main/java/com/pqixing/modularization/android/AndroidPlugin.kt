@@ -2,15 +2,12 @@ package com.pqixing.modularization.android
 
 
 import com.android.build.gradle.BaseExtension
-import com.pqixing.EnvKeys
 import com.pqixing.model.Module
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.dps.DpsExtendsCompat
-import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.android.tasks.BuildApkTask
 import com.pqixing.modularization.android.tasks.DpsAnalysisTask
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.maven.ToMavenTask
 import com.pqixing.modularization.setting.ImportPlugin
 import com.pqixing.tools.FileUtils
@@ -38,16 +35,14 @@ open class AndroidPlugin : BasePlugin() {
 
     override val ignoreFields: Set<String> = emptySet()
 
-    override fun linkTask(): List<Class<out Task>> = mutableListOf(DpsAnalysisTask::class.java, ToMavenTask::class.java, BuildApkTask::class.java)
+    override fun linkTask(): List<Class<out Task>> = mutableListOf(DpsAnalysisTask::class.java, BuildApkTask::class.java)
     var doAfterList: MutableList<Runnable> = mutableListOf()
-    lateinit var dpsManager: DpsManager
     override fun apply(project: Project) {
         project.extensions.create("innerDps", DpsExtendsCompat::class.java)
         //查找当前项目对应的模块和依赖关系
         val args = ImportPlugin.findArgs(project)
         module = args.manifest.findModule(project.name)!!
         super.apply(project)
-        dpsManager = DpsManager(this)
         //如果是空同步，不做任何处理
         extHelper.setExtMethod(project, "doAfterEvaluate") { if (it is Closure<*>) doAfterList.add(it) }
         //在Android工程之前，执行
@@ -63,8 +58,6 @@ open class AndroidPlugin : BasePlugin() {
         doAfterList.add(Runnable {
             //开始注解切入
             if (buildAsApp && module.transform) (project.extensions.getByName("android") as? BaseExtension)?.registerTransform(PqxTransform())
-            //解析依赖
-            project.apply(mapOf("from" to FileUtils.writeText(File(cacheDir, EnvKeys.GRADLE_DEPENDENCIES), dpsManager.resolveDps(), true)/*.also {  Tools.println("Depend:$it") }*/))
             project.tasks.find { t -> t.name == "clean" }?.doLast { FileUtils.delete(File(project.projectDir, "build")) }
         })
 

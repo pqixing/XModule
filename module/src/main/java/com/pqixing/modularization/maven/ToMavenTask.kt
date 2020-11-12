@@ -6,8 +6,9 @@ import com.pqixing.help.XmlHelper
 import com.pqixing.model.Compile
 import com.pqixing.model.Module
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.android.pluginModule
+import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
+import com.pqixing.modularization.base.TaskPlugin
 import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.helper.JGroovyHelper
 import com.pqixing.modularization.root.getArgs
@@ -22,11 +23,12 @@ import java.io.File
 import java.util.*
 
 open class ToMavenTask : BaseTask() {
-    val plugin = project.pluginModule()
     val args = project.getArgs()
-    val library = plugin.module.type == "library"
+    val module = args.manifest.findModule(project.name)!!
+    val library = module.type == "library" || module.type == "java"
     var resultStr = ""
 
+    val dpsManager: DpsManager by lazy { project.plugins.getPlugin(TaskPlugin::class.java).dpsManager }
 
     override fun prepare() {
         super.prepare()
@@ -54,7 +56,7 @@ open class ToMavenTask : BaseTask() {
      */
     override fun whenReady() {
         if (!library) {
-            resultStr = "${plugin.module.getBranch()}:${project.name}:0.0"
+            resultStr = "${module?.getBranch()}:${project.name}:0.0"
             return
         }
         try {
@@ -65,8 +67,6 @@ open class ToMavenTask : BaseTask() {
 
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
 
-        val plugin = project.pluginModule()
-        val module = plugin.module
         val artifactId = module.name
 //        if (module.getBranch() != args.env.basicBranch) {
 //            Tools.println(unCheck(1), "${module.name} -> ${module.getBranch()} != ${args.env.basicBranch} ")
@@ -78,9 +78,9 @@ open class ToMavenTask : BaseTask() {
             return
         }
 
-        checkLocalDps(plugin.module.compiles.toHashSet())
+        checkLocalDps(module.compiles.toHashSet())
 
-        checkLoseDps(plugin.dpsManager.loseList)
+        checkLoseDps(dpsManager.loseList)
 
         val branch = open.repository.branch
         val groupId = "${args.manifest.groupId}.$branch"

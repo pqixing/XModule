@@ -1,30 +1,15 @@
-
 apply plugin: "org.jetbrains.intellij"
-apply plugin: 'java'
-apply plugin: 'kotlin'
 intellij {
     pluginName 'XModule'
     version 'IC-2020.1.1'
-    plugins = ['android','git4idea',"java","gradle"]
+    plugins = ['android', 'git4idea', "java", "gradle"]
     updateSinceUntilBuild false
 }
-compileKotlin.kotlinOptions.jvmTarget = "1.8"
-compileTestKotlin.kotlinOptions.jvmTarget = "1.8"
-compileJava {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
+
 publishPlugin {
 // Bintray
     def properties = new java.util.Properties()
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
     token properties.getProperty("jetbrains.token")
     channels 'stable'
-}
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    compile project(":tools")
-    compile "com.alibaba:fastjson:1.2.68"
 }

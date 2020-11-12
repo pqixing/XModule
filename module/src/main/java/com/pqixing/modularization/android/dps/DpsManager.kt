@@ -3,23 +3,22 @@ package com.pqixing.modularization.android.dps
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Compile
-import com.pqixing.modularization.android.AndroidPlugin
+import com.pqixing.model.Module
 import com.pqixing.modularization.root.getArgs
 import com.pqixing.modularization.setting.ArgsExtends
+import com.pqixing.modularization.setting.ImportPlugin
 import com.pqixing.tools.TextUtils
 import org.gradle.api.Project
 import java.util.*
 
-class DpsManager(val plugin: AndroidPlugin) {
+//组件工程
+class DpsManager(var project: Project, val module: Module) {
 
 
-    //组件工程
-    var project: Project = plugin.project
     var args: ArgsExtends = project.getArgs()
     var compileModel: String = args.config.dependentModel ?: "mavenOnly"
     val loseList = mutableListOf<String>()
     var localProject = setOf<String>()
-    val module = plugin.module
 
     //处理依赖
     fun resolveDps(): String {
@@ -28,7 +27,7 @@ class DpsManager(val plugin: AndroidPlugin) {
         localProject = project.rootProject.allprojects.map { it.name }.toSet()
 
         val dps = module.compiles.toMutableSet()
-        if (plugin.buildAsApp) module.devCompiles.forEach { dps.add(it.apply { dpType = "dev" }) }
+        if (ImportPlugin.findArgs(project).runAsApp(module)) module.devCompiles.forEach { dps.add(it.apply { dpType = "dev" }) }
 
         if (dps.isNotEmpty()) {
             val dpsV = mutableListOf<String>()
@@ -72,7 +71,7 @@ class DpsManager(val plugin: AndroidPlugin) {
 
     private fun checkLoseEnable(): Boolean {
         if (args.config.allowLose) return true
-        val apiChild = plugin.module.api ?: return false
+        val apiChild = module.api ?: return false
         return args.runTaskNames.find { it.contains("${apiChild.name}:ToMaven") } != null
     }
 
@@ -162,7 +161,7 @@ class DpsManager(val plugin: AndroidPlugin) {
         if (!localProject.contains(dpc.name) && !args.config.allowDpDiff) return false
 
         val branch = dpc.module.getBranch()
-        if (branch != plugin.module.getBranch()) {
+        if (branch != module.getBranch()) {
             Tools.println("    branch diff ${dpc.name} -> $branch")
 
             //如果本地依赖分支不同，则查处所有共同的依赖，然后只保留一个分支上。 保留优先顺序 ：  dpc模块所在分支，  当前project所在分支。 fallback分支
