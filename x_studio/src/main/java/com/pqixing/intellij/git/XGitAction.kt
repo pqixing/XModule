@@ -92,7 +92,7 @@ class XGitDialog(e: AnActionEvent) : XEventDialog(e) {
     }
 
     override fun doOKAction() = XApp.runAsyn { indicator ->
-        this.indictor = indictor
+        this.indictor = indicator
         btnEnable(false)
 
         val gitOp = cbOp.selectedItem as IGitRun
