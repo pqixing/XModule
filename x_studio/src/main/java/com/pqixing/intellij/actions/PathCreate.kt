@@ -1,7 +1,6 @@
 package com.pqixing.intellij.actions
 
 import com.intellij.ide.highlighter.JavaFileType
-import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.command.WriteCommandAction
@@ -13,7 +12,7 @@ import com.pqixing.intellij.XGroup.Companion.isCreator
 import com.pqixing.tools.TextUtils
 import java.io.IOException
 
-open class PathCreate : AnAction() {
+open class PathCreate : XAnAction() {
     lateinit var project: Project
     override fun actionPerformed(e: AnActionEvent) {
         project = e.getData(PlatformDataKeys.PROJECT) ?: return

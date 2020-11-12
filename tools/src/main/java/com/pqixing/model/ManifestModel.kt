@@ -67,7 +67,7 @@ data class Module(val name: String, val project: ProjectModel) {
     val compiles = mutableListOf<Compile>()
     val devCompiles = mutableListOf<Compile>()
 
-    fun allCompiles(): Set<String> = mutableSetOf<String>().also { loadCompiles(it, this) }
+    fun allCompiles(self:Boolean = true): Set<String> = mutableSetOf<String>().also { loadCompiles(it, this);if(self) it.add(name) }
     private fun loadCompiles(all: MutableSet<String>, module: Module) {
         if (!all.add(module.name)) return
         for (c in module.compiles) {

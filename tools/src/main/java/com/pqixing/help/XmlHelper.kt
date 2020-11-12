@@ -358,7 +358,7 @@ object XmlHelper {
 
     fun loadManifest(basePath: String?): ManifestModel? = fileManifest(basePath).takeIf { it.exists() }?.let { parseManifest(it) }
     fun loadAllModule(basePath: String?) = loadManifest(basePath)?.allModules() ?: mutableSetOf()
-    fun saveConfig(basePath: String?, config: Config): Boolean {
+    fun saveConfig(basePath: String, config: Config): Boolean {
         val configFile = File(basePath, EnvKeys.USER_CONFIG)
         if (!configFile.exists()) FileUtils.writeText(configFile, FileUtils.fromRes(EnvKeys.USER_CONFIG))
 

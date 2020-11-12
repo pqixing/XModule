@@ -1,6 +1,5 @@
 package com.pqixing.creator.actions;
 
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
@@ -11,10 +10,11 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.pqixing.creator.core.gennerator.RouterCreatorGenerator;
 import com.pqixing.intellij.XGroup;
+import com.pqixing.intellij.actions.XAnAction;
 
 import java.util.Objects;
 
-public class PathCreator extends AnAction {
+public class PathCreator extends XAnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {

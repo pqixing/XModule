@@ -16,4 +16,8 @@ abstract class XAnAction : AnAction() {
     override fun update(e: AnActionEvent) {
         e.presentation.isVisible = isBasic(e.project)
     }
+
+    override fun actionPerformed(e: AnActionEvent) {
+
+    }
 }

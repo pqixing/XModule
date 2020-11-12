@@ -1,6 +1,5 @@
 package com.pqixing.creator.actions;
 
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
@@ -12,8 +11,9 @@ import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.pqixing.creator.core.gennerator.MVPCreatorGenerator;
 import com.pqixing.intellij.XGroup;
+import com.pqixing.intellij.actions.XAnAction;
 
-public class MvpCreator extends AnAction {
+public class MvpCreator extends XAnAction {
 
     private String classPrefix;
 
