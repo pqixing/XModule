@@ -8,7 +8,7 @@ import com.pqixing.model.Module
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.base.TaskPlugin
+import com.pqixing.modularization.base.XPlugin
 import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.helper.JGroovyHelper
 import com.pqixing.modularization.root.getArgs
@@ -25,14 +25,14 @@ import java.util.*
 open class ToMavenTask : BaseTask() {
     val args = project.getArgs()
     val module = args.manifest.findModule(project.name)!!
-    val library = module.type == "library" || module.type == "java"
+    val forMaven = module.forMaven
     var resultStr = ""
 
-    val dpsManager: DpsManager by lazy { project.plugins.getPlugin(TaskPlugin::class.java).dpsManager }
+    val dpsManager: DpsManager by lazy { project.plugins.getPlugin(XPlugin::class.java).dpsManager }
 
     override fun prepare() {
         super.prepare()
-        if (library) {
+        if (forMaven) {
             val up1 = project.tasks.findByName("uploadArchives")
             val up2 = project.rootProject.tasks.findByName("uploadArchives")
 
@@ -55,7 +55,7 @@ open class ToMavenTask : BaseTask() {
      * 当准备运行该任务之前，先检测
      */
     override fun whenReady() {
-        if (!library) {
+        if (!forMaven) {
             resultStr = "${module?.getBranch()}:${project.name}:0.0"
             return
         }

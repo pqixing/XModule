@@ -41,6 +41,8 @@ data class Module(val name: String, val project: ProjectModel) {
         get() = type == "application" || type == "library"
     val isApplication
         get() = type == "application"
+    val forMaven: Boolean
+        get() = type == "library" || type == "java"
     var type: String = ""
     var file = ""
     var attach: Module? = null
@@ -67,7 +69,7 @@ data class Module(val name: String, val project: ProjectModel) {
     val compiles = mutableListOf<Compile>()
     val devCompiles = mutableListOf<Compile>()
 
-    fun allCompiles(self:Boolean = true): Set<String> = mutableSetOf<String>().also { loadCompiles(it, this);if(self) it.add(name) }
+    fun allCompiles(self: Boolean = true): Set<String> = mutableSetOf<String>().also { loadCompiles(it, this);if (self) it.add(name) }
     private fun loadCompiles(all: MutableSet<String>, module: Module) {
         if (!all.add(module.name)) return
         for (c in module.compiles) {

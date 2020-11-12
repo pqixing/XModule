@@ -17,6 +17,7 @@ import com.intellij.openapi.externalSystem.service.execution.ExternalSystemEvent
 import com.intellij.openapi.externalSystem.util.ExternalSystemUtil
 import com.intellij.openapi.project.Project
 import com.pqixing.tools.UrlUtils
+import org.jetbrains.plugins.gradle.service.task.GradleTaskManager
 import org.jetbrains.plugins.gradle.settings.DistributionType
 import org.jetbrains.plugins.gradle.settings.GradleExecutionSettings
 import org.jetbrains.plugins.gradle.util.GradleConstants
@@ -41,7 +42,7 @@ data class GradleRequest(val tasks: List<String>, val env: Map<String, String> =
         val parse = GradleParse(project, tasks.firstOrNull()?:"Build",taskId, visible, callBack)
         val setting = GradleExecutionSettings(null, null, DistributionType.BUNDLED, getVmOptions(), false)
 
-        AndroidGradleTaskManager().executeTasks(taskId, tasks, project.basePath!!, setting, null, parse)
+        GradleTaskManager().executeTasks(taskId, tasks, project.basePath!!, setting, null, parse)
     }
 }
 

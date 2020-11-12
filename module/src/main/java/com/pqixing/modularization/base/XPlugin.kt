@@ -9,14 +9,14 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import java.io.File
 
-class TaskPlugin : Plugin<Project> {
+class XPlugin : Plugin<Project> {
     lateinit var dpsManager: DpsManager
     override fun apply(pro: Project) {
         val args = pro.getArgs()
         val module = args.manifest.findModule(pro.name) ?: return
 
         dpsManager = DpsManager(pro, module)
-        if (module.isAndroid || module.type == "java") {
+        if (module.forMaven) {
             BaseTask.task(pro, ToMavenTask::class.java)
         }
         pro.afterEvaluate {

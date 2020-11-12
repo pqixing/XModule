@@ -27,13 +27,13 @@ class ToMavenAction : AnAction() {
         project = e.project ?: return
         val module = e.getData(DataKey.create<Module>("module"))
         val allModule = XmlHelper.loadManifest(project.basePath)?.allModules() ?: mutableSetOf()
-        val target = allModule.find { it.name == module?.realName() }?.takeIf { it.isAndroid }
+        val target = allModule.find { it.name == module?.realName() }?.takeIf { it.forMaven }
 
         val moduleName = target?.name ?: ""
 
         val projectMode = "MainMenu" == e.place || target == null
 
-        val filters = (if (projectMode) allModule.filter { it.isAndroid }.map { it.name } else ModuleRootManager.getInstance(module!!).dependencies.map { it.realName() }).toMutableSet()//过滤Android工程
+        val filters = (if (projectMode) allModule.filter { it.forMaven }.map { it.name } else ModuleRootManager.getInstance(module!!).dependencies.map { it.realName() }).toMutableSet()//过滤Android工程
         filters.remove(project.name)
         filters.add(moduleName)
 
