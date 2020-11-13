@@ -13,6 +13,7 @@ object GradleUtils {
     fun runTask(project: Project, tasks: List<String>, runTaskId: String = "", envs: Map<String, String> = emptyMap(), callback: TaskCallBack? = null) {
 
         GradleRequest(tasks, envs).runGradle(project) { callback?.onTaskEnd(it.success, it.getDefaultOrNull()) }
+        XApp.log("runTask end -> $project")
     }
 
     fun downloadBasic(target: Project, dir: File?, base: String?, after: () -> Unit) = XApp.invoke {
