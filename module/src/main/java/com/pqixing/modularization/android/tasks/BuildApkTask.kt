@@ -4,9 +4,9 @@ import com.android.build.gradle.AppExtension
 import com.pqixing.help.Tools
 import com.pqixing.EnvKeys
 import com.pqixing.help.getEnvValue
-import com.pqixing.modularization.android.pluginModule
+import com.pqixing.modularization.android.androidPlugin
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.root.getArgs
+import com.pqixing.modularization.base.getArgs
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 open class BuildApkTask : BaseTask() {
-    val plugin = project.pluginModule()
+    val plugin = project.androidPlugin()
     private lateinit var buildType: String
     private var buildApkPath: String? = null
 

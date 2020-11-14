@@ -102,6 +102,7 @@ object XmlHelper {
         manifest.mavenUser = node.get("@mavenUser")?.toString() ?: ""
         manifest.mavenPsw = node.get("@mavenPsw")?.toString() ?: ""
         manifest.basicUrl = node.get("@basicUrl")?.toString() ?: ""
+        manifest.uploadTask = node.get("@uploadTask")?.toString() ?:""
         manifest.createSrc = node.get("@createSrc") == "true"
         manifest.baseVersion = node.get("@baseVersion")?.toString() ?: ""
         manifest.fallbacks.addAll((node.get("@fallbacks")?.toString()

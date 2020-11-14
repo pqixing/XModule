@@ -11,6 +11,8 @@ class ManifestModel(val baseUrl: String) {
     var fallbacks = mutableListOf<String>()
     var baseVersion = ""
     var basicUrl = ""
+    var uploadTask = ""
+        get() = field.takeIf { it.isNotEmpty() } ?: "uploadArchives"
 
     val projects = mutableListOf<ProjectModel>()
 

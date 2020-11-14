@@ -7,7 +7,6 @@ import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.XPlugin
 import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.helper.JGroovyHelper
-import com.pqixing.modularization.root.RootPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
@@ -54,7 +53,7 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
             extHelper.setExtValue(pro, "mavenUser", manifest.mavenUser)
             extHelper.setExtValue(pro, "mavenPsw", manifest.mavenPsw)
 
-            if (pro == pro.rootProject) pro.pluginManager.apply(RootPlugin::class.java)
+            if (pro == pro.rootProject) pro.pluginManager.apply(XPlugin::class.java)
             else {
                 pro.buildDir = File(pro.buildDir, buildTag)
                 val module = checks.find { it.name == pro.name }

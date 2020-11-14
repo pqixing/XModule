@@ -11,7 +11,7 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.base.XPlugin
 import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.helper.JGroovyHelper
-import com.pqixing.modularization.root.getArgs
+import com.pqixing.modularization.base.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
@@ -33,9 +33,9 @@ open class ToMavenTask : BaseTask() {
     override fun prepare() {
         super.prepare()
         if (forMaven) {
-            val up1 = project.tasks.findByName("uploadArchives")
-            val up2 = project.rootProject.tasks.findByName("uploadArchives")
-
+            val uploadTask = args.manifest.uploadTask
+            val up1 = project.tasks.findByName(uploadTask)
+            val up2 = project.rootProject.tasks.findByName(uploadTask)
             up2?.mustRunAfter(up1)
 
             this.dependsOn(up2, up1)

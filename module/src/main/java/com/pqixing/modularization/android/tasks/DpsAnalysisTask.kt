@@ -2,11 +2,11 @@ package com.pqixing.modularization.android.tasks
 
 import com.pqixing.help.Tools
 import com.pqixing.modularization.Keys
-import com.pqixing.modularization.android.pluginModule
+import com.pqixing.modularization.android.androidPlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.helper.JGroovyHelper
-import com.pqixing.modularization.root.getArgs
+import com.pqixing.modularization.base.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
@@ -25,7 +25,7 @@ import kotlin.collections.HashSet
  * 2，
  */
 open class DpsAnalysisTask : BaseTask() {
-    val plugin = project.pluginModule()
+    val plugin = project.androidPlugin()
     val args = project.getArgs()
     val groupName = args.manifest.groupId
     val dir = File(plugin.cacheDir, "report")

@@ -3,8 +3,9 @@ package com.pqixing.modularization.setting
 import com.pqixing.Config
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
+import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.base.IPlugin
+import com.pqixing.modularization.base.XPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.Logger
 import com.pqixing.modularization.utils.ResultUtils
@@ -23,21 +24,35 @@ import java.lang.ref.WeakReference
  */
 class ImportPlugin : Plugin<Settings> {
     companion object {
+
+        fun Project.xPlugin() = ImportPlugin.findPlugin(this, XPlugin::class.java)!!
+        fun Project.rootXPlugin() = ImportPlugin.findPlugin(this.rootProject, XPlugin::class.java)!!
+        fun Project.androidPlugin() = ImportPlugin.findPlugin(this, AndroidPlugin::class.java)!!
+        
+        fun Project.getArgs() = ImportPlugin.findArgs(this)
+        fun Project.isRoot() = this == this.rootProject
+
         val settings = mutableMapOf<Int, WeakReference<ImportPlugin>>()
-        fun addPlugin(project: Project, plugin: IPlugin) {
-            settings[project.gradle.hashCode()]?.get()?.plugins?.put(project, plugin)
+
+        fun getImport(project: Project) = settings[project.gradle.hashCode()]?.get()
+        fun addPlugin(project: Project, plugin: Plugin<*>) {
+            val import = getImport(project) ?: return
+            val setOf = import.plugins[project] ?: mutableSetOf()
+            setOf.add(plugin)
+            import.plugins[project] = setOf
         }
 
-        fun findPlugin(project: Project): IPlugin? {
-            return settings[project.gradle.hashCode()]?.get()?.plugins?.get(project)
+        fun <T : Plugin<*>> findPlugin(project: Project, type: Class<T>): T? {
+            val import = getImport(project) ?: return null
+            return import.plugins[project]?.find { it.javaClass == type } as? T
         }
 
         fun findArgs(project: Project): ArgsExtends {
-            return settings[project.gradle.hashCode()]?.get()?.args!!
+            return getImport(project)?.args!!
         }
     }
 
-    var plugins = mutableMapOf<Project, IPlugin>()
+    var plugins = mutableMapOf<Project, MutableSet<Plugin<*>>>()
     lateinit var args: ArgsExtends
     override fun apply(setting: Settings) {
         Tools.logger = Logger()

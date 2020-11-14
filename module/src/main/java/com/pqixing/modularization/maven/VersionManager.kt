@@ -4,8 +4,8 @@ import com.pqixing.EnvKeys
 import com.pqixing.help.MavenPom
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
-import com.pqixing.modularization.root.getArgs
-import com.pqixing.modularization.root.rootPlugin
+import com.pqixing.modularization.base.getArgs
+import com.pqixing.modularization.base.rootXPlugin
 import com.pqixing.modularization.setting.ArgsExtends
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.PropertiesUtils
@@ -210,7 +210,7 @@ class VersionManager(val args: ArgsExtends) {
      * 获取仓库aar中，exclude的传递
      */
     fun getPom(project: Project, branch: String, module: String, version: String): MavenPom {
-        val plugin = project.rootPlugin()
+        val plugin = project.rootXPlugin()
         val extends = project.getArgs()
 
         val groupMaven = extends.manifest.mavenUrl

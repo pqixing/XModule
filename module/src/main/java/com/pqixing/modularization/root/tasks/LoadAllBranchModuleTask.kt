@@ -5,7 +5,7 @@ import com.pqixing.help.Tools
 import com.pqixing.help.getEnvValue
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.root.getArgs
+import com.pqixing.modularization.base.getArgs
 import com.pqixing.modularization.utils.ResultUtils
 
 /**

@@ -8,7 +8,6 @@ import com.pqixing.modularization.android.dps.DpsExtendsCompat
 import com.pqixing.modularization.android.tasks.BuildApkTask
 import com.pqixing.modularization.android.tasks.DpsAnalysisTask
 import com.pqixing.modularization.base.BasePlugin
-import com.pqixing.modularization.maven.ToMavenTask
 import com.pqixing.modularization.setting.ImportPlugin
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
@@ -63,5 +62,3 @@ open class AndroidPlugin : BasePlugin() {
 
     }
 }
-
-fun Project.pluginModule() = ImportPlugin.findPlugin(this) as AndroidPlugin
