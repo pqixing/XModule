@@ -4,9 +4,9 @@ import com.android.build.gradle.AppExtension
 import com.pqixing.help.Tools
 import com.pqixing.EnvKeys
 import com.pqixing.help.getEnvValue
-import com.pqixing.modularization.android.androidPlugin
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.base.getArgs
+import com.pqixing.modularization.setting.ImportPlugin.Companion.androidPlugin
+import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils

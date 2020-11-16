@@ -11,7 +11,7 @@ import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.base.XPlugin
 import com.pqixing.modularization.helper.IExtHelper
 import com.pqixing.modularization.helper.JGroovyHelper
-import com.pqixing.modularization.base.getArgs
+import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils

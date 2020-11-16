@@ -6,6 +6,7 @@ import com.pqixing.modularization.maven.IndexMavenTask
 import com.pqixing.modularization.maven.ToMavenTask
 import com.pqixing.modularization.root.tasks.*
 import com.pqixing.modularization.setting.ImportPlugin
+import com.pqixing.modularization.setting.ImportPlugin.Companion.isRoot
 import com.pqixing.tools.FileUtils
 import org.gradle.api.Project
 import java.io.File
@@ -23,15 +24,7 @@ open class XPlugin : BasePlugin() {
 
     @Override
     override fun linkTask() = listOf(
-            CloneProjectTask::class.java
-            , CleanProjectTask::class.java
-            , CheckOutTask::class.java
-            , LoadAllBranchModuleTask::class.java
-            , CreateBranchTask::class.java
-            , PullProjectTask::class.java
-            , DeleteBranchTask::class.java
-            , SyncBranchTask::class.java
-            , IndexMavenTask::class.java
+            CloneProjectTask::class.java, CleanProjectTask::class.java, CheckOutTask::class.java, LoadAllBranchModuleTask::class.java, CreateBranchTask::class.java, PullProjectTask::class.java, DeleteBranchTask::class.java, SyncBranchTask::class.java, IndexMavenTask::class.java
     )
 
     override fun apply(pro: Project) {
@@ -52,6 +45,8 @@ open class XPlugin : BasePlugin() {
 
         project.allprojects { p -> extHelper.addRepositories(p, arrayListOf(args.manifest.mavenUrl)) }
     }
+
+    fun isRoot() = project.isRoot()
 
 }
 

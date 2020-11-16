@@ -40,28 +40,17 @@ class ImportScript(val args: ArgsExtends, val setting: Settings) {
         FileUtils.mergeFile(File(args.env.rootDir, "build/build.gradle"), listOf(File(args.env.basicDir, "build.gradle"), File(args.env.rootDir, "build.gradle"), File(args.env.basicDir, "gradle/maven.gradle")))
 
         //hook配置的工程的build.gradle,合并原始build.gradle与预设的build.gradle文件,生成新的初始化文件，注入插件进行开发设置
-        val manifest = args.manifest
         val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         setting.gradle.beforeProject { pro ->
-            if (pro == pro.rootProject) {
-                extHelper.setExtValue(pro, "defArchivesFile", args.env.defArchivesFile)
-            }
+
+            //所有项目添加XPlugin依赖
+            pro.pluginManager.apply(XPlugin::class.java)
             extHelper.setExtValue(pro, "basicDir", args.env.basicDir.canonicalPath)
             extHelper.setExtValue(pro, "basicUrl", args.config.basicUrl)
-            extHelper.setExtValue(pro, "mavenUrl", manifest.mavenUrl)
-            extHelper.setExtValue(pro, "groupId", manifest.groupId)
-            extHelper.setExtValue(pro, "mavenUser", manifest.mavenUser)
-            extHelper.setExtValue(pro, "mavenPsw", manifest.mavenPsw)
-
-            if (pro == pro.rootProject) pro.pluginManager.apply(XPlugin::class.java)
-            else {
+            checks.find { it.name == pro.name }?.let { module ->
                 pro.buildDir = File(pro.buildDir, buildTag)
-                val module = checks.find { it.name == pro.name }
-                if (module != null) {//这是管理的工程
-                    pro.pluginManager.apply(XPlugin::class.java)
-                    //依赖Android插件
-                    if (module.isAndroid) pro.pluginManager.apply(AndroidPlugin::class.java)
-                }
+                //依赖Android插件
+                if (module.isAndroid) pro.pluginManager.apply(AndroidPlugin::class.java)
             }
         }
         return buildFileName

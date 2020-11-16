@@ -4,9 +4,9 @@ import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Compile
 import com.pqixing.model.Module
-import com.pqixing.modularization.base.getArgs
 import com.pqixing.modularization.setting.ArgsExtends
 import com.pqixing.modularization.setting.ImportPlugin
+import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
 import com.pqixing.tools.TextUtils
 import org.gradle.api.Project
 import java.util.*

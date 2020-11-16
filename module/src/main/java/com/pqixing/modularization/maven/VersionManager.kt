@@ -4,9 +4,9 @@ import com.pqixing.EnvKeys
 import com.pqixing.help.MavenPom
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
-import com.pqixing.modularization.base.getArgs
-import com.pqixing.modularization.base.rootXPlugin
 import com.pqixing.modularization.setting.ArgsExtends
+import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
+import com.pqixing.modularization.setting.ImportPlugin.Companion.rootXPlugin
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.PropertiesUtils
 import com.pqixing.tools.TextUtils

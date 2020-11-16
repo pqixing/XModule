@@ -5,7 +5,7 @@ import com.pqixing.help.Tools
 import com.pqixing.help.getEnvValue
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.base.getArgs
+import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import java.io.File

@@ -3,7 +3,7 @@ package com.pqixing.modularization.root.tasks
 import com.pqixing.help.Tools
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.base.getArgs
+import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import java.io.File

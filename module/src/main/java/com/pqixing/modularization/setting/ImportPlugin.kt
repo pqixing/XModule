@@ -25,11 +25,12 @@ import java.lang.ref.WeakReference
 class ImportPlugin : Plugin<Settings> {
     companion object {
 
-        fun Project.xPlugin() = ImportPlugin.findPlugin(this, XPlugin::class.java)!!
-        fun Project.rootXPlugin() = ImportPlugin.findPlugin(this.rootProject, XPlugin::class.java)!!
-        fun Project.androidPlugin() = ImportPlugin.findPlugin(this, AndroidPlugin::class.java)!!
-        
-        fun Project.getArgs() = ImportPlugin.findArgs(this)
+        fun Project.xPlugin() = findPlugin(this, XPlugin::class.java)!!
+        fun Project.androidPlugin() = findPlugin(this, AndroidPlugin::class.java)!!
+        fun Project.rootXPlugin() = this.rootProject.xPlugin()
+        fun Project.allProject() = this.rootProject.allprojects
+
+        fun Project.getArgs() = findArgs(this)
         fun Project.isRoot() = this == this.rootProject
 
         val settings = mutableMapOf<Int, WeakReference<ImportPlugin>>()
