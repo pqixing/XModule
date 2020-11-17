@@ -45,6 +45,8 @@ open class XPlugin : BasePlugin() {
         args = ImportPlugin.findArgs(project)
 
         val px = project.extensions.create("px", PXExtends::class.java)
+        px.config = args.config
+        px.manifest = args.manifest
 
         loadMaven(px)
 
@@ -90,9 +92,7 @@ open class XPlugin : BasePlugin() {
     }
 
     private fun loadMaven(px: PXExtends) {
-        val manifest = args.manifest
-        px.manifest = manifest
-        px.config = args.config
+        val manifest = px.manifest
         //初始化MavenInfo信息
         px.maven = MavenModel().also { maven ->
             maven.mavenUrl = manifest.mavenUrl

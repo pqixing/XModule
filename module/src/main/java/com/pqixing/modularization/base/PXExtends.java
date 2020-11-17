@@ -8,8 +8,6 @@ import com.pqixing.modularization.maven.MavenModel;
 
 public class PXExtends {
 
-    public boolean buildAsApp;
-
     public boolean transform;
     public MavenModel maven;
     public ManifestModel manifest;
