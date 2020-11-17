@@ -203,7 +203,7 @@ class VersionManager(val args: ArgsExtends) {
 
     fun storeToUp(map: Map<String, Any?> = emptyMap()) {
         Tools.println("storeToUp ->")
-        PropertiesUtils.writeProperties(args.env.defArchivesFile, map.map { it.key to it.value.toString() }.toMap().toProperties())//保存当前的版本信息等待上传
+        PropertiesUtils.writeProperties(args.env.archivesFile, map.map { it.key to it.value.toString() }.toMap().toProperties())//保存当前的版本信息等待上传
     }
 
     /**

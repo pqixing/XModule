@@ -1,8 +1,9 @@
-package com.pqixing.modularization.root.tasks
+package com.pqixing.modularization.unvail.tasks
 
 import com.pqixing.EnvKeys
 import com.pqixing.help.Tools
 import com.pqixing.help.getEnvValue
+import com.pqixing.model.Module
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
@@ -36,7 +37,7 @@ open class LoadAllBranchModuleTask: BaseTask() {
 
         project.getArgs().manifest.projects.forEach { p ->
             p.modules.forEach { s ->
-                if (s.isApplication) {
+                if (s.type == Module.TYPE_APP) {
                     result.append(s.name).append(",")
                 }
             }

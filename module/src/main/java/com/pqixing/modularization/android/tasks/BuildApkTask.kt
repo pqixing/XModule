@@ -1,12 +1,13 @@
 package com.pqixing.modularization.android.tasks
 
 import com.android.build.gradle.AppExtension
-import com.pqixing.help.Tools
 import com.pqixing.EnvKeys
+import com.pqixing.help.Tools
 import com.pqixing.help.getEnvValue
+import com.pqixing.model.Module
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.setting.ImportPlugin.Companion.androidPlugin
 import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
+import com.pqixing.modularization.setting.ImportPlugin.Companion.xPlugin
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
@@ -15,22 +16,24 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 open class BuildApkTask : BaseTask() {
-    val plugin = project.androidPlugin()
+    val plugin = project.xPlugin()
+    val module = project.getArgs().manifest.findModule(project.name)!!
     private lateinit var buildType: String
     private var buildApkPath: String? = null
+    val isApp = module.type == Module.TYPE_APP
 
     //解析出第一个Dev渠道的构建任务，防止有渠道包
 
     override fun prepare() {
         super.prepare()
-        buildType = if (!plugin.isApp) "dev" else EnvKeys.buildApkType.getEnvValue() ?: "release"
+        buildType = if (!isApp) "dev" else EnvKeys.buildApkType.getEnvValue() ?: "release"
         this.dependsOn("assemble${TextUtils.firstUp(buildType)}")
     }
 
     override fun whenReady() {
         super.whenReady()
         buildApkPath = EnvKeys.buildApkPath.getEnvValue()
-        if (!plugin.isApp && !plugin.module.attach()) createSrc()
+        if (!isApp) createSrc()
     }
 
     fun createSrc() {

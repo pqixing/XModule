@@ -3,19 +3,18 @@ package com.pqixing.modularization.setting
 import com.pqixing.Config
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
-import com.pqixing.modularization.android.AndroidPlugin
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.base.XPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.Logger
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
-import org.eclipse.jgit.api.Git
 import org.gradle.BuildAdapter
 import org.gradle.BuildResult
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.initialization.Settings
+import org.eclipse.jgit.api.Git
 import java.io.File
 import java.lang.ref.WeakReference
 
@@ -26,7 +25,6 @@ class ImportPlugin : Plugin<Settings> {
     companion object {
 
         fun Project.xPlugin() = findPlugin(this, XPlugin::class.java)!!
-        fun Project.androidPlugin() = findPlugin(this, AndroidPlugin::class.java)!!
         fun Project.rootXPlugin() = this.rootProject.xPlugin()
         fun Project.allProject() = this.rootProject.allprojects
 

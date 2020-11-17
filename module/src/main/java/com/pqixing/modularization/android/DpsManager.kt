@@ -1,4 +1,4 @@
-package com.pqixing.modularization.android.dps
+package com.pqixing.modularization.android
 
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
@@ -27,7 +27,7 @@ class DpsManager(var project: Project, val module: Module) {
         localProject = project.rootProject.allprojects.map { it.name }.toSet()
 
         val dps = module.compiles.toMutableSet()
-        if (ImportPlugin.findArgs(project).runAsApp(module)) module.devCompiles.forEach { dps.add(it.apply { dpType = "dev" }) }
+        if (ImportPlugin.findArgs(project).pxApp(module)) module.devCompiles.forEach { dps.add(it.apply { dpType = "dev" }) }
 
         if (dps.isNotEmpty()) {
             val dpsV = mutableListOf<String>()
@@ -160,15 +160,15 @@ class DpsManager(var project: Project, val module: Module) {
     private fun onLocalCompile(dpc: Compile, includes: ArrayList<String>, excludes: HashSet<String>): Boolean {
         if (!localProject.contains(dpc.name) && !args.config.allowDpDiff) return false
 
-        val branch = dpc.module.getBranch()
-        if (branch != module.getBranch()) {
+        val branch = dpc.module.branch()
+        if (branch != module.branch()) {
             Tools.println("    branch diff ${dpc.name} -> $branch")
 
             //如果本地依赖分支不同，则查处所有共同的依赖，然后只保留一个分支上。 保留优先顺序 ：  dpc模块所在分支，  当前project所在分支。 fallback分支
             val sameDps = dpc.module.allCompiles()
             val branches = args.manifest.fallbacks.toMutableList()
-            branches.add(0, module.getBranch())
-            branches.add(0, dpc.module.getBranch())
+            branches.add(0, module.branch())
+            branches.add(0, dpc.module.branch())
             sameDps.forEach { addBranchExcludeIfHas(branches, it, excludes) }
         }
         //如果该依赖没有本地导入，不进行本地依赖

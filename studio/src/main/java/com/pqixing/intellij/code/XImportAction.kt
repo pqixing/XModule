@@ -139,7 +139,7 @@ class XImportDialog(e: AnActionEvent) : XModuleDialog(e) {
     private fun initList() {
         val source = config.include.split(",").mapNotNull { it.trim().takeIf { t -> t.isNotEmpty() } }.toSet()
         val import = XmlHelper.parseInclude(manifest!!, source)
-        val allItems = manifest.allModules().filter { it.attach == null }.map { m ->
+        val allItems = manifest.allModules().map { m ->
             val item = XItem()
             item.select = import.contains(m.name)
             item.title = m.name

@@ -3,14 +3,13 @@ package com.pqixing.modularization.maven
 import com.pqixing.EnvKeys
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
+import com.pqixing.model.BrOpts
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.helper.IExtHelper
-import com.pqixing.modularization.helper.JGroovyHelper
+import com.pqixing.modularization.base.PXExtends
 import com.pqixing.modularization.setting.ArgsExtends
 import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
-import org.apache.commons.codec.digest.DigestUtils
 import java.io.File
 
 /**
@@ -20,22 +19,14 @@ open class IndexMavenTask : BaseTask() {
     lateinit var args: ArgsExtends
     override fun prepare() {
         super.prepare()
-        this.dependsOn("uploadArchives")
+        val px = project.extensions.getByType(PXExtends::class.java)
+        this.dependsOn(px.maven.uploadTask)
     }
 
     override fun whenReady() {
         super.whenReady()
-        val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
         args = project.getArgs()
-        val branches = args.config.opts?.toString()?.split(",")?.filter { it.isNotEmpty() }
-        if (branches?.isNotEmpty() != true) {//全量打包
-            extHelper.setMavenInfo(project, args.manifest.groupId, EnvKeys.BASIC, System.currentTimeMillis().toString(), "")
-            parseVersion()
-        } else {
-            val hash = DigestUtils.md5Hex(branches.first());
-            extHelper.setMavenInfo(project, args.manifest.groupId, EnvKeys.BASIC_TAG, hash + "-" + System.currentTimeMillis().toString(), "")
-            parseVersion(branches)
-        }
+        parseVersion(BrOpts(args.config.opts).brs)
     }
 
     fun readAllBranches(): Set<String> {
@@ -89,7 +80,7 @@ open class IndexMavenTask : BaseTask() {
         Thread.sleep(300)
         //更新本地版本信息
         XmlHelper.loadVersionFromNet(args.env.rootDir.absolutePath)
-        ResultUtils.writeResult(args.env.defArchivesFile.absolutePath)
+        ResultUtils.writeResult(args.env.archivesFile.absolutePath)
     }
 
     private fun reloadVersion(mavenUrl: String, branchs: Set<String>, versions: HashMap<String, Int>) {

@@ -1,16 +1,11 @@
 package com.pqixing.modularization.maven
 
-import com.pqixing.EnvKeys
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
 import com.pqixing.model.Compile
 import com.pqixing.model.Module
-import com.pqixing.modularization.Keys
-import com.pqixing.modularization.android.dps.DpsManager
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.base.XPlugin
-import com.pqixing.modularization.helper.IExtHelper
-import com.pqixing.modularization.helper.JGroovyHelper
+import com.pqixing.modularization.base.PXExtends
 import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
@@ -24,20 +19,18 @@ import java.util.*
 
 open class ToMavenTask : BaseTask() {
     val args = project.getArgs()
-    val module = args.manifest.findModule(project.name)!!
-    val forMaven = module.forMaven
     var resultStr = ""
-
-    val dpsManager: DpsManager by lazy { project.plugins.getPlugin(XPlugin::class.java).dpsManager }
+    val px = project.extensions.getByType(PXExtends::class.java)
+    val module = px.module
+    val forMaven = module.forMaven
 
     override fun prepare() {
         super.prepare()
         if (forMaven) {
-            val uploadTask = args.manifest.uploadTask
+            val uploadTask = px.maven.uploadTask
             val up1 = project.tasks.findByName(uploadTask)
             val up2 = project.rootProject.tasks.findByName(uploadTask)
             up2?.mustRunAfter(up1)
-
             this.dependsOn(up2, up1)
         }
     }
@@ -56,7 +49,7 @@ open class ToMavenTask : BaseTask() {
      */
     override fun whenReady() {
         if (!forMaven) {
-            resultStr = "${module?.getBranch()}:${project.name}:0.0"
+            resultStr = "${module?.branch()}:${project.name}:0.0"
             return
         }
         try {
@@ -64,13 +57,8 @@ open class ToMavenTask : BaseTask() {
         } catch (e: Exception) {
             Tools.println(e.toString())
         }
+        val maven = px.maven
 
-        val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
-
-        val artifactId = module.name
-//        if (module.getBranch() != args.env.basicBranch) {
-//            Tools.println(unCheck(1), "${module.name} -> ${module.getBranch()} != ${args.env.basicBranch} ")
-//        }
 
         val open = GitUtils.open(File(args.env.codeRootDir, module.project.path))
         if (open == null) {
@@ -80,39 +68,35 @@ open class ToMavenTask : BaseTask() {
 
         checkLocalDps(module.compiles.toHashSet())
 
-        checkLoseDps(dpsManager.loseList)
+        checkLoseDps(px.dpsManager.loseList)
 
-        val branch = open.repository.branch
-        val groupId = "${args.manifest.groupId}.$branch"
-        val baseVersion = module.version.takeIf { it != "+" } ?: args.manifest.baseVersion
+        val branch = module.branch()
+        val baseVersion = maven.version!!.substringBeforeLast(".")
         checkBaseVersion(baseVersion)
 
         checkGitStatus(open, module)
 
-        val v = args.vm.getNewerVersion(branch, artifactId, baseVersion)
-        val revCommit = loadGitInfo(open, module)
+        val revCommit = maven.lastRev
         if (revCommit == null) {
             Tools.printError(-1, "${module.name} Can not load git info!!")
             return
         }
-        checkLastLog(revCommit, artifactId, branch, baseVersion, v)
+        checkLastLog(revCommit, maven.artifactId!!, branch, baseVersion, module.version.substringAfterLast(".").toInt())
 
-        val version = "$baseVersion.${v + 1}"
-
-        val name = "${Keys.PREFIX_LOG}?hash=${revCommit.name}&commitTime=${revCommit.commitTime}&message=${revCommit.fullMessage}}"
-        extHelper.setMavenInfo(project, groupId, artifactId, version, name)
-        resultStr = "$branch:$artifactId:$version"
-
-
+        resultStr = "$branch:${maven.artifactId}:${maven.version}"
         //设置上传的版本号的文件
         args.vm.storeToUp()
-        extHelper.setMavenInfo(project.rootProject, "${args.manifest.groupId}.${EnvKeys.BASIC_LOG}", args.vm.lastVersion, "$groupId.$artifactId.$baseVersion.${v + 1}", "")
 
         FileUtils.delete(project.buildDir)
     }
 
     private fun checkGitStatus(git: Git, module: Module) {
         if (!GitUtils.checkIfClean(git, getRelativePath(module.path))) Tools.println(unCheck(3), "${module.name} Code not clean")
+    }
+
+    fun getRelativePath(path: String): String? {
+        val of = path.indexOf("/")
+        return if (of > 0) return path.substring(of + 1) else null
     }
 
     /**
@@ -176,16 +160,6 @@ open class ToMavenTask : BaseTask() {
         }
     }
 
-    fun getRelativePath(path: String): String? {
-        val of = path.indexOf("/")
-        return if (of > 0) return path.substring(of + 1) else null
-    }
-
-    fun loadGitInfo(git: Git, module: Module): RevCommit? {
-        val command = git.log().setMaxCount(1)
-        getRelativePath(module.path)?.apply { command.addPath(this) }
-        return command.call().find { true }
-    }
 
     override fun runTask() {
         Thread.sleep(300)

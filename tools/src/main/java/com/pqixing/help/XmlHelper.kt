@@ -102,7 +102,6 @@ object XmlHelper {
         manifest.mavenUser = node.get("@mavenUser")?.toString() ?: ""
         manifest.mavenPsw = node.get("@mavenPsw")?.toString() ?: ""
         manifest.basicUrl = node.get("@basicUrl")?.toString() ?: ""
-        manifest.uploadTask = node.get("@uploadTask")?.toString() ?:""
         manifest.createSrc = node.get("@createSrc") == "true"
         manifest.baseVersion = node.get("@baseVersion")?.toString() ?: ""
         manifest.fallbacks.addAll((node.get("@fallbacks")?.toString()
@@ -183,9 +182,9 @@ object XmlHelper {
             s.split(":").takeIf { it.size == 2 }?.let { compile.excludes.add(it[0] to it[1]) }
         }
 
-        val apiModule = compile.module.findApi()
+        val apiModule = compile.module.api
         if (apiModule == null) {
-            if (!compile.module.isApplication) container.add(compile)
+            if (compile.module.type != Module.TYPE_APP) container.add(compile)
             return
         }
         //先尝试加载
@@ -199,7 +198,7 @@ object XmlHelper {
         container.add(api)
 
         compile.scope = Compile.SCOP_RUNTIME
-        if (!compile.module.isApplication && !compile.justApi) container.add(compile)
+        if (compile.module.type != Module.TYPE_APP && !compile.justApi) container.add(compile)
     }
 
     private fun parseProjects(manifest: ManifestModel, node: Node?, path: String) {
@@ -260,7 +259,6 @@ object XmlHelper {
         module.type = node.get("@type")?.toString() ?: "library"
         module.file = node.get("@file")?.toString() ?: "$${module.type}"
         module.version = node.get("@version")?.toString() ?: ""
-        module.transform = (node.get("@transform")?.toString() ?: "true") == "true"
         module.node = node
         project.modules.add(module)
 
@@ -269,19 +267,7 @@ object XmlHelper {
         val apiName = apiStr[0]
 
         module.apiVersion = apiStr.takeIf { it.size >= 2 }?.get(1) ?: ""
-        if (apiName == "this") {//添加附属api模块
-            val api = Module("${name}_api", project)
-            api.path = "${module.path}/src/api"
-            api.desc = "api for $name"
-            api.type = "library"
-            api.file = module.file
-            api.attach = module
-            api.version = module.version
-            module.api = api
-            project.modules.add(api)
-        } else {
-            module.api = Module(apiName, project)
-        }
+        module.api = Module(apiName, project)
     }
 
     fun strToPair(s: String): Pair<String?, String?> {

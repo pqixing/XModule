@@ -11,8 +11,7 @@ class ManifestModel(val baseUrl: String) {
     var fallbacks = mutableListOf<String>()
     var baseVersion = ""
     var basicUrl = ""
-    var uploadTask = ""
-        get() = field.takeIf { it.isNotEmpty() } ?: "uploadArchives"
+
 
     val projects = mutableListOf<ProjectModel>()
 
@@ -37,36 +36,39 @@ data class ProjectModel(val manifest: ManifestModel, val name: String, var path:
 }
 
 data class Module(val name: String, val project: ProjectModel) {
+    companion object {
+        const val TYPE_APP = "application"
+        const val TYPE_LIB = "library"
+        const val TYPE_JAVA = "java"
+        const val TYPE_DOC = "document"
+    }
+
     var path: String = ""
     var desc: String = ""
     val isAndroid: Boolean
-        get() = type == "application" || type == "library"
-    val isApplication
-        get() = type == "application"
+        get() = type == TYPE_APP || type == TYPE_LIB
     val forMaven: Boolean
-        get() = type == "library" || type == "java"
+        get() = type == TYPE_LIB || type == TYPE_JAVA
+    val forDps: Boolean
+        get() = isAndroid || forMaven
     var type: String = ""
     var file = ""
-    var attach: Module? = null
     var api: Module? = null
     var node: Any? = null
-    var transform = true
 
     var apiVersion = ""
-        get() = field.takeIf { it.isNotEmpty() } ?: api?.takeIf { !it.attach() }?.version ?: version
+        get() = field.takeIf { it.isNotEmpty() } ?: api?.version ?: version
 
     /**
      * 上传到Maven的版本
      */
     var version = ""
-        get() = field.takeIf { it.isNotEmpty() } ?: attach?.apiVersion ?: project.manifest.baseVersion
+        get() = field.takeIf { it.isNotEmpty() } ?: project.manifest.baseVersion
 
 
     //    var apiModel:SubModule?=null//该模块的api模块
-    fun getBranch() = project.branch
+    fun branch() = project.branch
     fun findApi() = api
-
-    fun attach() = attach != null
 
     val compiles = mutableListOf<Compile>()
     val devCompiles = mutableListOf<Compile>()

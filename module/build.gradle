@@ -1,32 +1,19 @@
 // 应用插件
-apply plugin: "groovy"
-
-sourceSets {
-    main.java.srcDirs += "src/groovy"
-    test.java.srcDirs += "src/groovy"
-}
-compileGroovy {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
+//apply plugin: "groovy"
+//
+//sourceSets {
+//    main.java.srcDirs += "src/groovy"
+//    test.java.srcDirs += "src/groovy"
+//}
+//compileGroovy {
+//    sourceCompatibility = JavaVersion.VERSION_1_8
+//    targetCompatibility = JavaVersion.VERSION_1_8
+//}
 
 // 添加依赖
 dependencies {
-    implementation "com.pqixing.gradle:annotation:2.2.0"
-    implementation gradleApi()
-    implementation localGroovy()
-    implementation 'org.aspectj:aspectjrt:1.8.11'
-    implementation 'org.aspectj:aspectjtools:1.8.5'
-    implementation 'org.eclipse.jgit:org.eclipse.jgit:5.6.1.202002131546-r'
-    compileOnly 'com.android.tools.build:gradle:3.6.4'
+    api 'org.eclipse.jgit:org.eclipse.jgit:5.6.1.202002131546-r'
+    api gradleApi()
+    api localGroovy()
+    api 'com.android.tools.build:gradle:3.6.4'
 }
-
-
-//afterEvaluate {
-//    Task j = project.compileJava
-//    Task g = project.compileGroovy
-////    g.getDependsOn().clear()
-////    j.dependsOn(g)
-//
-//    j.classpath += files(g.destinationDir)
-//}

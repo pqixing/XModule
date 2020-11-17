@@ -15,10 +15,10 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VirtualFile
 import com.pqixing.help.XmlHelper
-import com.pqixing.intellij.ui.NewBuilderDialog
+import com.pqixing.intellij.common.UiUtils
 import com.pqixing.intellij.gradle.GradleUtils
 import com.pqixing.intellij.gradle.TaskCallBack
-import com.pqixing.intellij.common.UiUtils
+import com.pqixing.intellij.ui.NewBuilderDialog
 import com.pqixing.tools.FileUtils
 import java.io.File
 import java.text.SimpleDateFormat
@@ -27,7 +27,7 @@ import java.util.*
 class NewBuilderAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-        val all = XmlHelper.loadAllModule(project.basePath).filter { it.isAndroid&&!it.attach() }.map { it.name }
+        val all = XmlHelper.loadAllModule(project.basePath).filter { it.isAndroid }.map { it.name }
         val modules = ModuleManager.getInstance(project).sortedModules.filter { all.contains(it.name) }.mapNotNull { it.name }.let { it.plus(all.filter { f -> !it.contains(f) }) }
         val curModule = e.getData(LangDataKeys.MODULE)?.name?.takeIf { modules.contains(it) } ?: modules.firstOrNull()
         val config = XmlHelper.loadConfig(project.basePath!!)
@@ -41,8 +41,7 @@ class NewBuilderAction : AnAction() {
                 ?: "").lines().filter { it.isNotEmpty() }.map { BuildParam(it) }.toMutableList()
         val dialog = NewBuilderDialog(project, buildParam, modules, logs)
         dialog.btnVersion.addActionListener {
-            FileChooser.chooseFiles(FileChooserDescriptor(true, false, false, false, false, false)
-                    , project, project.projectFile) { files: List<VirtualFile> ->
+            FileChooser.chooseFiles(FileChooserDescriptor(true, false, false, false, false, false), project, project.projectFile) { files: List<VirtualFile> ->
                 files.firstOrNull()?.let { dialog.tvVersion.text = it.canonicalPath }
                 dialog.resetBtn(false)
             }
@@ -73,17 +72,13 @@ class NewBuilderAction : AnAction() {
                 while (logs.size > 50) logs.removeAt(logs.size - 1)
                 FileUtils.writeText(logFile, logs.joinToString("\n"))
             }
-            GradleUtils.runTask(project, listOf(":${param.module}:BuildApk")
-                    , envs = mapOf("include" to if (param.module == "mavenOnly") param.module else "${param.module},${config.include}"
-                    , "dependentModel" to param.depend, "versionFile" to param.version)
-                    , callback = buildCallBack)
+            GradleUtils.runTask(project, listOf(":${param.module}:BuildApk"), envs = mapOf("include" to if (param.module == "mavenOnly") param.module else "${param.module},${config.include}", "dependentModel" to param.depend, "versionFile" to param.version), callback = buildCallBack)
         }
 
         dialog.btnInstall.addActionListener { UiUtils.tryInstall(project, null, dialog.param.result, dialog.param.install) }
         dialog.showAndPack()
 
     }
-
 
 
 }

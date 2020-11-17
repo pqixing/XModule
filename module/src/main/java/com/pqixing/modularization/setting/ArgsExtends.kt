@@ -13,7 +13,7 @@ class ArgsExtends(val config: Config, val env: EnvArgs, val manifest: ManifestMo
     var vm: VersionManager = VersionManager(this)
     var runTaskNames = mutableListOf<String>()
 
-    fun runAsApp(module: Module) = module.isApplication || runTaskNames.contains(":${module.name}:BuildApk") || runTaskNames.find { it.matches(Regex(":${module.name}:assemble.*?Dev")) } != null
+    fun pxApp(module: Module) = module.type == Module.TYPE_APP || runTaskNames.contains(":${module.name}:BuildPxApk") || runTaskNames.find { it.matches(Regex(":${module.name}:assemble.*?Dev")) } != null
 
     fun getPsw(value: String): String = GitUtils.getPsw(value)
 
@@ -31,7 +31,7 @@ class ArgsExtends(val config: Config, val env: EnvArgs, val manifest: ManifestMo
 
 class EnvArgs(val rootDir: File, val config: Config, val gradleCache: File) {
     var basicDir: File = File(rootDir, EnvKeys.BASIC)
-    var defArchivesFile: File = File(rootDir, "build/upload.txt")
+    var archivesFile: File = File(rootDir, "build/upload.txt")
     var codeRootDir: File = File(File(rootDir, config.codeRoot).canonicalPath)
 }
 

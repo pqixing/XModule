@@ -13,6 +13,15 @@ import org.gradle.api.tasks.TaskAction
  */
 
 abstract class BaseTask : DefaultTask() {
+
+    init {
+        if (matchTask()) initByUserExe()
+    }
+
+    protected open fun initByUserExe() {
+
+    }
+
     open fun prepare() {
         group = Keys.GROUP_TASK
     }
@@ -30,6 +39,7 @@ abstract class BaseTask : DefaultTask() {
         Tools.println("Spend :  ${endTime - startTime}")
     }
 
+    public open fun matchTask(): Boolean = Companion.matchTask(listOf(name), project.gradle.startParameter.taskNames)
 
     open fun start() {}
 
@@ -50,6 +60,19 @@ abstract class BaseTask : DefaultTask() {
 
         fun getTaskName(tClass: Class<*>): String {
             return tClass.simpleName.replace("Task", "")
+        }
+
+        fun matchTask(task: Class<*>, taskNames: List<String>): Boolean = matchTask(listOf(getTaskName(task)),taskNames)
+        fun matchTask(keys: List<String>, taskNames: List<String>): Boolean {
+            if (keys.isEmpty()) return false
+            for (key in keys) {
+                for (task in taskNames) {
+                    var k = 0
+                    var l = -1
+                    while (++l < task.length) if (key[k] == task[l] && ++k == key.length) return true
+                }
+            }
+            return false
         }
     }
 }

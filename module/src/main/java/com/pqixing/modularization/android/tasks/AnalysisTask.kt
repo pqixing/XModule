@@ -3,10 +3,8 @@ package com.pqixing.modularization.android.tasks
 import com.pqixing.help.Tools
 import com.pqixing.modularization.Keys
 import com.pqixing.modularization.base.BaseTask
-import com.pqixing.modularization.helper.IExtHelper
-import com.pqixing.modularization.helper.JGroovyHelper
-import com.pqixing.modularization.setting.ImportPlugin.Companion.androidPlugin
 import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
+import com.pqixing.modularization.setting.ImportPlugin.Companion.xPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
@@ -24,9 +22,10 @@ import kotlin.collections.HashSet
  * 1,生成模块的依赖分析文件
  * 2，
  */
-open class DpsAnalysisTask : BaseTask() {
-    val plugin = project.androidPlugin()
+open class AnalysisTask : BaseTask() {
+    val plugin = project.xPlugin()
     val args = project.getArgs()
+    val module = args.manifest.findModule(project.name)!!
     val groupName = args.manifest.groupId
     val dir = File(plugin.cacheDir, "report")
     val temp = File(dir, "AndroidReport.txt")
@@ -46,8 +45,6 @@ open class DpsAnalysisTask : BaseTask() {
 
     //依赖分析第一步
     val allDps = LinkedList<Vertex>()
-    val extHelper = JGroovyHelper.getImpl(IExtHelper::class.java)
-    val dependentModel: String = args.config.dependentModel
 
     //生成DpsReport.txt
     override fun start() {
@@ -213,18 +210,17 @@ open class DpsAnalysisTask : BaseTask() {
     //生成 DpsAnalysis.txt
     override fun runTask() {
         saveVersionTag()
-        val module = plugin.module
         //依赖排序起点
         val topVertex = Vertex(project.name)
         allDps.add(topVertex)
 
-        val findApi = plugin.module.findApi()
+        val findApi = module.api
         //如果是Api类型，先添加api模块依赖
         if (findApi != null) {
             topVertex.dps.add(findApi.name)
         }
         module.compiles.forEach { topVertex.dps.add(it.name) }
-        val branch = plugin.module.getBranch()
+        val branch = module.branch()
 
         //加载定点依赖的全部依赖
         topVertex.dps.forEach { }
@@ -255,13 +251,13 @@ open class DpsAnalysisTask : BaseTask() {
 
     private fun saveVersionTag() {
 
-        val branch = plugin.module.getBranch()
+        val branch = module.branch()
         val tags = args.vm.readCurVersions().map { it.key to it.value.toString() }.toMap().toProperties()
         tags.putAll(args.vm.readBranchVersion(branch))
-        tags["TargetName"] = plugin.module.name
-        GitUtils.open(File(args.env.codeRootDir, plugin.module.project.path))?.runCatching {
+        tags["TargetName"] = module.name
+        GitUtils.open(File(args.env.codeRootDir, module.project.path))?.runCatching {
             tags["TargetBranch"] = branch
-            tags["TargetRevision"] = getLastRevision(this, plugin.module.path.substringAfterLast("/", "")) ?: ""
+            tags["TargetRevision"] = getLastRevision(this, module.path.substringAfterLast("/", "")) ?: ""
             tags["TargetProjectRevision"] = getLastRevision(this, "") ?: ""
             close()
         }
@@ -271,7 +267,7 @@ open class DpsAnalysisTask : BaseTask() {
             close()
         }
         val extends: com.android.build.gradle.BaseExtension = plugin.project.extensions.getByName("android") as com.android.build.gradle.BaseExtension
-        PropertiesUtils.writeProperties(File(dir, "${TextUtils.numOrLetter(plugin.module.name)}_${extends.defaultConfig.versionName}_${extends.defaultConfig.versionCode}.version"), tags)
+        PropertiesUtils.writeProperties(File(dir, "${TextUtils.numOrLetter(module.name)}_${extends.defaultConfig.versionName}_${extends.defaultConfig.versionCode}.version"), tags)
     }
 
     fun getLastRevision(git: Git, path: String?): String? {
