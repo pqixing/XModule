@@ -25,6 +25,7 @@ object XmlHelper {
      */
     fun parsePomExclude(pomText: String, matchGroup: String): MavenPom {
         val pom = MavenPom()
+        if(pomText.isEmpty()) return pom
         val node = XmlParser().parseText(pomText)
 
         pom.groupId = getChildNodeValue(node, "groupId")

@@ -11,6 +11,7 @@ import com.intellij.openapi.externalSystem.model.task.ExternalSystemTaskNotifica
 import com.intellij.openapi.externalSystem.model.task.ExternalSystemTaskType
 import com.intellij.openapi.project.Project
 import com.intellij.util.execution.ParametersListUtil
+import com.pqixing.intellij.XApp
 import com.pqixing.tools.UrlUtils
 import org.jetbrains.plugins.gradle.service.task.GradleTaskManager
 import org.jetbrains.plugins.gradle.settings.DistributionType
@@ -53,6 +54,7 @@ data class GradleRequest(val tasks: List<String>, val env: Map<String, String> =
                 .waitForCompletion()
         // @formatter:on
         gradleBuildInvoker.executeTasks(request)
+        XApp.log("./gradlew ${tasks.joinToString(" ")} ${getVmOptions()}  -Dorg.gradle.debug=true  --no-daemon ")
 
 //        AndroidGradleTaskManager().executeTasks(taskId, tasks, project.basePath!!, setting, null, parse)
     }
@@ -76,7 +78,7 @@ class GradleParse(val project: Project, val title: String, taskId: ExternalSyste
     }
 
     override fun onFailure(id: ExternalSystemTaskId, e: Exception) {
-        out.append(e.message ?: "")
+        out.append(e.message ?: "",true)
         result.error = e
         result.success = false
     }
