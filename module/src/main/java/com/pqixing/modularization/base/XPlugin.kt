@@ -104,8 +104,8 @@ open class XPlugin : BasePlugin() {
 
         if (project.isRoot()) {
             toMaven = loadRootMaven(px.maven)
+            BaseTask.task(project, IndexMavenTask::class.java)
         }
-
         val rootX = project.rootXPlugin()
         rootX.toMaven?.takeIf { it.artifactId == project.name }?.let { m ->
             px.maven.groupId = m.groupId
@@ -122,15 +122,15 @@ open class XPlugin : BasePlugin() {
         //如果执行的 IndexMavenTask
         if (BaseTask.matchTask(IndexMavenTask::class.java, args.runTaskNames)) {
             val brOpts = BrOpts(args.config.opts)
-            if (brOpts.target != null) {//全量打包
+            if (brOpts.target == null) {//全量打包
                 maven.artifactId = EnvKeys.BASIC
                 maven.version = System.currentTimeMillis().toString()
-                maven.artifactFile = args.env.archivesFile
+                maven.artifactFile = File(cacheDir, "${EnvKeys.BASIC}.txt")
             } else {
                 val hash = DigestUtils.md5Hex(brOpts.target);
                 maven.artifactId = EnvKeys.BASIC_TAG
                 maven.version = hash + "-" + System.currentTimeMillis().toString()
-                maven.artifactFile = args.env.archivesFile
+                maven.artifactFile = File(cacheDir, "${EnvKeys.BASIC_TAG}.txt")
             }
             return null
         }
@@ -163,7 +163,7 @@ open class XPlugin : BasePlugin() {
         //设置root工程的上传信息
         maven.groupId = "${args.manifest.groupId}.${EnvKeys.BASIC_LOG}"
         maven.artifactId = args.vm.lastVersion
-        maven.artifactFile = args.env.archivesFile
+        maven.artifactFile = File(cacheDir, "${args.vm.lastVersion}.txt")
         maven.version = "$groupId.$artifactId.$version"
 
         return toMaven

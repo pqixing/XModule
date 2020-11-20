@@ -17,9 +17,9 @@ import java.io.File
  */
 open class IndexMavenTask : BaseTask() {
     lateinit var args: ArgsExtends
+    val px = project.extensions.getByType(PXExtends::class.java)
     override fun prepare() {
         super.prepare()
-        val px = project.extensions.getByType(PXExtends::class.java)
         this.dependsOn(px.maven.uploadTask)
     }
 
@@ -33,9 +33,10 @@ open class IndexMavenTask : BaseTask() {
         val groupId = args.manifest.groupId
         val branchs = mutableSetOf<String>()
         val basePath = args.env.rootDir.absolutePath
-        val versionDir = XmlHelper.fileVersion(basePath)
+        val versionDir = XmlHelper.fileVersion(basePath,args.manifest.mavenUrl)
         //加载所有版本信息相关的文件
         val versions = XmlHelper.parseMetadata(FileUtils.readText(File(versionDir, "${EnvKeys.BASIC}.xml"))).versions
+        versions.add(0,"default")
         val toIndex = versions.size - 1
 
         val format = { txt: String ->
@@ -72,7 +73,8 @@ open class IndexMavenTask : BaseTask() {
         reloadVersion(args.manifest.fullUrl(), readAllBranches().minus(excludes), versions)
 
         Tools.println("parseVersion  end -> ${System.currentTimeMillis() - start} ms -> $excludes")
-        args.vm.storeToUp(versions)
+
+        args.vm.storeToUp(px.maven.artifactFile?:return,versions)
     }
 
     override fun runTask() {
@@ -80,7 +82,7 @@ open class IndexMavenTask : BaseTask() {
         Thread.sleep(300)
         //更新本地版本信息
         XmlHelper.loadVersionFromNet(args.env.rootDir.absolutePath)
-        ResultUtils.writeResult(args.env.archivesFile.absolutePath)
+        ResultUtils.writeResult(px.maven.artifactFile?.absolutePath?:"")
     }
 
     private fun reloadVersion(mavenUrl: String, branchs: Set<String>, versions: HashMap<String, Int>) {

@@ -25,7 +25,7 @@ object XmlHelper {
      */
     fun parsePomExclude(pomText: String, matchGroup: String): MavenPom {
         val pom = MavenPom()
-        if(pomText.isEmpty()) return pom
+        if (pomText.isEmpty()) return pom
         val node = XmlParser().parseText(pomText)
 
         pom.groupId = getChildNodeValue(node, "groupId")
@@ -81,15 +81,17 @@ object XmlHelper {
         return mate
     }
 
-    private fun getChildNode(paren: Node, name: String) = getChildNodeList(paren, name)[0] as Node
-    private fun getChildNodeList(paren: Node, name: String): NodeList {
+    private fun getChildNode(paren: Node?, name: String) = getChildNodeList(paren, name).firstOrNull() as? Node
+    private fun getChildNodeList(paren: Node?, name: String): NodeList {
+        paren ?: return NodeList()
         val at = paren.getAt(QName(name))
         if (at.size > 0) return at
         return paren.get(name) as NodeList
     }
 
-    private fun getChildNodeValue(paren: Node, name: String) = getNodeValue(getChildNode(paren, name))
-    private fun getNodeValue(node: Node): String {
+    private fun getChildNodeValue(paren: Node?, name: String) = getNodeValue(getChildNode(paren, name))
+    private fun getNodeValue(node: Node?): String {
+        node ?: return ""
         val value = node.value().toString();
         return value.substring(1, value.length - 1)
     }
@@ -365,7 +367,7 @@ object XmlHelper {
 
     fun loadVersionFromNet(basePath: String?) {
         val manifest = loadManifest(basePath) ?: return
-        val versionDir = fileVersion(basePath)
+        val versionDir = fileVersion(basePath,manifest.mavenUrl)
 
         val fromUrl = { name: String -> readUrlTxt(manifest.fullUrl(name, EnvKeys.XML_META)).also { FileUtils.writeText(File(versionDir, "${name}.xml"), it) } }
 
@@ -378,7 +380,9 @@ object XmlHelper {
     }
 
 
-    fun fileVersion(basePath: String?): File = File(basePath, "build/${EnvKeys.XMODULE}/version")
+    fun fileVersion(basePath: String?, url: String = loadManifest(basePath)?.mavenUrl
+            ?: "default"): File = File(basePath, "build/${EnvKeys.XMODULE}/version/${url.hashCode()}")
+
     fun fileBasic(basePath: String?): File = File(basePath, EnvKeys.BASIC)
     fun fileConfig(basePath: String?): File = File(basePath, EnvKeys.USER_CONFIG)
     fun fileManifest(basePath: String?): File = File(basePath, EnvKeys.XML_MANIFEST)

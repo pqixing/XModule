@@ -9,7 +9,7 @@ class BrOpts(val opts: String = "") {
         if (split.size > 1) {
             target = split[0]
         }
-        brs = split[1].split(",")
+        brs = split.lastOrNull()?.split(",")?: emptyList()
     }
 
     override fun toString(): String {

@@ -7,6 +7,7 @@ import com.pqixing.model.Module
 import com.pqixing.modularization.base.BaseTask
 import com.pqixing.modularization.base.PXExtends
 import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
+import com.pqixing.modularization.setting.ImportPlugin.Companion.rootXPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.modularization.utils.ResultUtils
 import com.pqixing.tools.FileUtils
@@ -81,13 +82,13 @@ open class ToMavenTask : BaseTask() {
             Tools.printError(-1, "${module.name} Can not load git info!!")
             return
         }
-        checkLastLog(revCommit, maven.artifactId!!, branch, baseVersion, module.version.substringAfterLast(".").toInt())
+        checkLastLog(revCommit, maven.artifactId!!, branch, baseVersion, maven.version.substringAfterLast(".").toInt())
 
         resultStr = "$branch:${maven.artifactId}:${maven.version}"
-        //设置上传的版本号的文件
-        args.vm.storeToUp()
-
         FileUtils.delete(project.buildDir)
+
+        //设置上传的版本号的文件
+        args.vm.storeToUp(project.rootXPlugin().getExtends(PXExtends::class.java).maven.artifactFile ?: return)
     }
 
     private fun checkGitStatus(git: Git, module: Module) {
@@ -106,7 +107,7 @@ open class ToMavenTask : BaseTask() {
         revCommit ?: return
 
         //检查Maven仓库最后的一个版本的信息
-        var lastVersion = v
+        var lastVersion = v - 1
         var matchBranch = branch
         val match = project.getArgs().manifest.fallbacks
         var i = match.indexOf(matchBranch)

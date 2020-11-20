@@ -1,6 +1,8 @@
 package com.pqixing.intellij.code
 
 import com.android.tools.idea.gradle.project.build.invoker.GradleBuildInvoker
+import com.android.tools.idea.projectsystem.ProjectSystemSyncManager
+import com.android.tools.idea.projectsystem.getProjectSystem
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.util.Key
@@ -119,6 +121,7 @@ class XImportDialog(e: AnActionEvent) : XModuleDialog(e) {
 
             indictor.text = "Start Sync Code"
             //如果快速导入不成功,则,同步一次
+            //ActionManager.getInstance().getAction("ExternalSystem.RefreshAllProjects").actionPerformed(e)
             ActionManager.getInstance().getAction("Android.SyncProject").actionPerformed(e)
 
             indictor.text = "Start Sync Vcs"

@@ -19,7 +19,7 @@ class MavenModel {
     var lastRev: RevCommit? = null
     var artifactFile: File? = null
 
-    fun mavenUri(): URI = mavenUrl.let { URI(if (it.startsWith("http")) it else "file:/$it") }
+    fun mavenUri(): URI = mavenUrl.let { URI(if (it.startsWith("http")) it else "file://$it") }
 
-    fun getLog() = "${Keys.PREFIX_LOG}?hash=${lastRev?.name}&commitTime=${lastRev?.commitTime}&message=${lastRev?.fullMessage}}"
+    fun getLog() = "${Keys.PREFIX_LOG}?hash=${lastRev?.name}&commitTime=${lastRev?.commitTime}&message=${lastRev?.fullMessage}".trim()
 }

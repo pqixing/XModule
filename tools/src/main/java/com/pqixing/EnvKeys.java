@@ -46,7 +46,7 @@ public class EnvKeys {
     /**
      * 一个tab空格度
      */
-    public static final String XMODULE = "x_module";
+    public static final String XMODULE = "px";
 
 
     /**

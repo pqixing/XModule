@@ -4,6 +4,7 @@ import com.pqixing.EnvKeys
 import com.pqixing.help.MavenPom
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
+import com.pqixing.modularization.base.PXExtends
 import com.pqixing.modularization.setting.ArgsExtends
 import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
 import com.pqixing.modularization.setting.ImportPlugin.Companion.rootXPlugin
@@ -147,7 +148,7 @@ class VersionManager(val args: ArgsExtends) {
 
     fun readVersionFromFile(artifactId: String, version: String?): Map<String, Int> {
         version ?: return emptyMap()
-        val versionDir = XmlHelper.fileVersion(args.env.rootDir.absolutePath)
+        val versionDir = XmlHelper.fileVersion(args.env.rootDir.absolutePath,args.manifest.mavenUrl)
         val file = File(versionDir, "$artifactId/${version}.txt")
         if (!file.exists()) {
             val netTxt = XmlHelper.readUrlTxt(args.manifest.fullUrl(artifactId, version, "${artifactId}-${version}.txt"))
@@ -168,7 +169,7 @@ class VersionManager(val args: ArgsExtends) {
 //        println("readCurVersions---- -> $curVersions")
         if (loads.contains("curVersions")) return curVersions
         val basePath = args.env.rootDir.absolutePath
-        val versionDir = XmlHelper.fileVersion(basePath)
+        val versionDir = XmlHelper.fileVersion(basePath,args.manifest.mavenUrl)
         //重新冲仓库更新一次版本信息
         if (args.config.sync || !versionDir.exists() || args.runTaskNames.find { it.contains("ToMaven") } != null) {//如果当前文件不存，从新生成
             XmlHelper.loadVersionFromNet(basePath)
@@ -201,9 +202,9 @@ class VersionManager(val args: ArgsExtends) {
         return curVersions
     }
 
-    fun storeToUp(map: Map<String, Any?> = emptyMap()) {
-        Tools.println("storeToUp ->")
-        PropertiesUtils.writeProperties(args.env.archivesFile, map.map { it.key to it.value.toString() }.toMap().toProperties())//保存当前的版本信息等待上传
+    fun storeToUp(archivesFile: File,map: Map<String, Any?> = mapOf("time" to System.currentTimeMillis().toString())) {
+        Tools.println("storeToUp -> ${archivesFile.absolutePath}")
+        PropertiesUtils.writeProperties(archivesFile, map.map { it.key to it.value.toString() }.toMap().toProperties())//保存当前的版本信息等待上传
     }
 
     /**
