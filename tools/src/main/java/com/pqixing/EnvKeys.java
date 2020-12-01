@@ -9,6 +9,8 @@ public class EnvKeys {
      * 从系统env中读取
      */
     public static final String buildApkPath = "buildApkPath";
+
+    public static final String seperator = ".s.";
     /**
      * git 任务操作的目标分支
      */

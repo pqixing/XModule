@@ -10,6 +10,7 @@ import com.pqixing.modularization.android.PqxTransform
 import com.pqixing.modularization.maven.IndexMavenTask
 import com.pqixing.modularization.maven.MavenModel
 import com.pqixing.modularization.maven.ToMavenTask
+import com.pqixing.modularization.maven.VersionParse
 import com.pqixing.modularization.setting.ArgsExtends
 import com.pqixing.modularization.setting.ImportPlugin
 import com.pqixing.modularization.setting.ImportPlugin.Companion.isRoot
@@ -17,7 +18,6 @@ import com.pqixing.modularization.setting.ImportPlugin.Companion.rootXPlugin
 import com.pqixing.modularization.utils.GitUtils
 import com.pqixing.tools.FileUtils
 import com.pqixing.tools.TextUtils
-import org.apache.commons.codec.digest.DigestUtils
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.revwalk.RevCommit
 import org.gradle.api.Project
@@ -122,16 +122,9 @@ open class XPlugin : BasePlugin() {
         //如果执行的 IndexMavenTask
         if (BaseTask.matchTask(IndexMavenTask::class.java, args.runTaskNames)) {
             val brOpts = BrOpts(args.config.opts)
-            if (brOpts.target == null) {//全量打包
-                maven.artifactId = EnvKeys.BASIC
-                maven.version = System.currentTimeMillis().toString()
-                maven.artifactFile = File(cacheDir, "${EnvKeys.BASIC}.txt")
-            } else {
-                val hash = DigestUtils.md5Hex(brOpts.target);
-                maven.artifactId = EnvKeys.BASIC_TAG
-                maven.version = hash + "-" + System.currentTimeMillis().toString()
-                maven.artifactFile = File(cacheDir, "${EnvKeys.BASIC_TAG}.txt")
-            }
+            maven.artifactId = EnvKeys.BASIC
+            maven.version = VersionParse.getVersion(brOpts.target ?: EnvKeys.BASIC)
+            maven.artifactFile = File(cacheDir, "${EnvKeys.BASIC}.txt")
             return null
         }
 
@@ -147,8 +140,8 @@ open class XPlugin : BasePlugin() {
 
         val artifactId = module.name
         val branch = open.repository.branch
-        val groupId = "${args.manifest.groupId}.$branch"
-        val baseVersion = module.version.takeIf { it != "+" } ?: args.manifest.baseVersion
+        val groupId = VersionParse.getGroupId(args.manifest.groupId, branch)
+        val baseVersion = module.version.takeIf { it != "+" } ?: args.manifest.initVersion
 
         val v = args.vm.getNewerVersion(branch, artifactId, baseVersion)
         val version = "$baseVersion.${v + 1}"
@@ -163,8 +156,8 @@ open class XPlugin : BasePlugin() {
         //设置root工程的上传信息
         maven.groupId = "${args.manifest.groupId}.${EnvKeys.BASIC_LOG}"
         maven.artifactId = args.vm.lastVersion
-        maven.artifactFile = File(cacheDir, "${args.vm.lastVersion}.txt")
-        maven.version = "$groupId.$artifactId.$version"
+        maven.artifactFile = File(cacheDir, "${args.vm.lastVersion}.zip")
+        maven.version = "$groupId${EnvKeys.seperator}$artifactId${EnvKeys.seperator}$version"
 
         return toMaven
     }

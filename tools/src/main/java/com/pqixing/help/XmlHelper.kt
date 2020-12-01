@@ -106,7 +106,8 @@ object XmlHelper {
         manifest.mavenPsw = node.get("@mavenPsw")?.toString() ?: ""
         manifest.basicUrl = node.get("@basicUrl")?.toString() ?: ""
         manifest.createSrc = node.get("@createSrc") == "true"
-        manifest.baseVersion = node.get("@baseVersion")?.toString() ?: ""
+        manifest.useBranch = node.get("@useBranch") == "true"
+        manifest.initVersion = node.get("@initVersion")?.toString() ?: ""
         manifest.fallbacks.addAll((node.get("@fallbacks")?.toString()
                 ?: "").split(",").filter { it.isNotEmpty() })
 
@@ -216,7 +217,7 @@ object XmlHelper {
             val p: Node = it as? Node ?: return@forEach
 
             val name = p.get("@name").toString()
-            var desc = p.get("@desc")?.toString() ?: ""
+            val desc = p.get("@desc")?.toString() ?: ""
 
 
             //该工程的git地址
@@ -225,6 +226,7 @@ object XmlHelper {
             if (CheckUtils.isEmpty(gitUrl)) gitUrl = "${manifest.baseUrl}/$name.git"
 
             val project = ProjectModel(manifest, name, "$path/$name", desc, gitUrl)
+            project.groupId = p.get("@groupId")?.toString() ?: manifest.groupId
 
             manifest.projects.add(project)
 
@@ -261,6 +263,7 @@ object XmlHelper {
         module.desc = node.get("@desc")?.toString() ?: ""
         module.type = node.get("@type")?.toString() ?: "library"
         module.file = node.get("@file")?.toString() ?: "$${module.type}"
+        module.groupId = node.get("@groupId")?.toString() ?: project.manifest.groupId
         module.version = node.get("@version")?.toString() ?: ""
         module.node = node
         project.modules.add(module)
@@ -367,7 +370,7 @@ object XmlHelper {
 
     fun loadVersionFromNet(basePath: String?) {
         val manifest = loadManifest(basePath) ?: return
-        val versionDir = fileVersion(basePath,manifest.mavenUrl)
+        val versionDir = fileVersion(basePath, manifest.mavenUrl)
 
         val fromUrl = { name: String -> readUrlTxt(manifest.fullUrl(name, EnvKeys.XML_META)).also { FileUtils.writeText(File(versionDir, "${name}.xml"), it) } }
 

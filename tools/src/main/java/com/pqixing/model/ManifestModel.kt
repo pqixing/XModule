@@ -9,8 +9,9 @@ class ManifestModel(val baseUrl: String) {
     var groupId = ""
     var createSrc = false
     var fallbacks = mutableListOf<String>()
-    var baseVersion = ""
+    var initVersion = ""
     var basicUrl = ""
+    var useBranch = true
 
 
     val projects = mutableListOf<ProjectModel>()
@@ -32,6 +33,8 @@ class ManifestModel(val baseUrl: String) {
 
 data class ProjectModel(val manifest: ManifestModel, val name: String, var path: String, val desc: String, val url: String) {
     var branch: String = ""
+    var groupId = ""
+        get() = field.takeIf { it.isNotEmpty() } ?: manifest.groupId
     val modules = mutableListOf<Module>()
 }
 
@@ -53,6 +56,8 @@ data class Module(val name: String, val project: ProjectModel) {
         get() = isAndroid || forMaven
     var type: String = ""
     var file = ""
+    var groupId = ""
+        get() = field.takeIf { it.isNotEmpty() } ?: project.groupId
     var api: Module? = null
     var node: Any? = null
 
@@ -63,12 +68,23 @@ data class Module(val name: String, val project: ProjectModel) {
      * 上传到Maven的版本
      */
     var version = ""
-        get() = field.takeIf { it.isNotEmpty() } ?: project.manifest.baseVersion
+        get() = field.takeIf { it.isNotEmpty() } ?: project.manifest.initVersion
 
 
     //    var apiModel:SubModule?=null//该模块的api模块
     fun branch() = project.branch
-    fun findApi() = api
+
+    fun branchHex() = TextUtils.md5Hex(branch())
+
+    fun groupId(): String {
+        val manifest = project.manifest
+        var groupId = groupId
+        val hex = branchHex()
+        if (manifest.useBranch && hex != null) {
+            groupId += ".$hex"
+        }
+        return groupId
+    }
 
     val compiles = mutableListOf<Compile>()
     val devCompiles = mutableListOf<Compile>()

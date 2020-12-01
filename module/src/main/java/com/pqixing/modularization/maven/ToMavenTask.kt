@@ -49,16 +49,16 @@ open class ToMavenTask : BaseTask() {
      * 当准备运行该任务之前，先检测
      */
     override fun whenReady() {
-        if (!forMaven) {
-            resultStr = "${module?.branch()}:${project.name}:0.0"
-            return
-        }
+        val maven = px.maven
+        val branch = module.branch()
+        val revCommit = maven.lastRev
+
+        //如果是可以正常上传的，检测是否合法
         try {
             unCheck = project.getArgs().config.toMavenUnCheck.toInt()
         } catch (e: Exception) {
             Tools.println(e.toString())
         }
-        val maven = px.maven
 
 
         val open = GitUtils.open(File(args.env.codeRootDir, module.project.path))
@@ -71,24 +71,31 @@ open class ToMavenTask : BaseTask() {
 
         checkLoseDps(px.dpsManager.loseList)
 
-        val branch = module.branch()
+        checkGitStatus(open, module)
+
+
         val baseVersion = maven.version!!.substringBeforeLast(".")
         checkBaseVersion(baseVersion)
 
-        checkGitStatus(open, module)
-
-        val revCommit = maven.lastRev
         if (revCommit == null) {
             Tools.printError(-1, "${module.name} Can not load git info!!")
             return
         }
-        checkLastLog(revCommit, maven.artifactId!!, branch, baseVersion, maven.version.substringAfterLast(".").toInt())
+
+        if (module.forMaven) {
+            checkLastLog(revCommit, maven.artifactId, branch, baseVersion, maven.version.substringAfterLast(".").toInt())
+        }
 
         resultStr = "$branch:${maven.artifactId}:${maven.version}"
         FileUtils.delete(project.buildDir)
 
+        val allVersion: MutableMap<String, Any?> = args.vm.readBranchVersion(module.branch()).toMutableMap()
+
+        allVersion["last_commit"] = revCommit?.name
+        allVersion["basic_commit"] = revCommit?.name
+
         //设置上传的版本号的文件
-        args.vm.storeToUp(project.rootXPlugin().getExtends(PXExtends::class.java).maven.artifactFile ?: return)
+        args.vm.storeToUp(project.rootXPlugin().getExtends(PXExtends::class.java).maven.artifactFile ?: return, allVersion)
     }
 
     private fun checkGitStatus(git: Git, module: Module) {
@@ -163,7 +170,7 @@ open class ToMavenTask : BaseTask() {
 
 
     override fun runTask() {
-        Thread.sleep(300)
+        Thread.sleep(1000)
         //更新本地版本信息
         XmlHelper.loadVersionFromNet(args.env.rootDir.absolutePath)
         ResultUtils.writeResult(resultStr)

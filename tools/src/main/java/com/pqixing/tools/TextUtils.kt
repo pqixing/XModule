@@ -1,5 +1,6 @@
 package com.pqixing.tools
 
+import com.pqixing.codec.digest.DigestUtils
 import com.pqixing.help.getEnvValue
 
 
@@ -9,6 +10,7 @@ object TextUtils {
     val onlyName: String
         get() = "${System.currentTimeMillis()}${count++}"
 
+    fun md5Hex(str: String?) = str?.let { DigestUtils.md5Hex(it) }
     /**
      * 只保留数字和字母
      * @param str

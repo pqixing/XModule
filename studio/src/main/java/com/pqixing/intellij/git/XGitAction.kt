@@ -12,6 +12,7 @@ import com.pqixing.intellij.common.XEventAction
 import com.pqixing.intellij.git.uitils.GitHelper
 import com.pqixing.intellij.ui.weight.*
 import git4idea.GitUtil
+import git4idea.commands.Git
 import git4idea.commands.GitLineHandlerListener
 import git4idea.repo.GitRepository
 import java.awt.Point

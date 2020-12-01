@@ -4,7 +4,6 @@ import com.pqixing.EnvKeys
 import com.pqixing.help.MavenPom
 import com.pqixing.help.Tools
 import com.pqixing.help.XmlHelper
-import com.pqixing.modularization.base.PXExtends
 import com.pqixing.modularization.setting.ArgsExtends
 import com.pqixing.modularization.setting.ImportPlugin.Companion.getArgs
 import com.pqixing.modularization.setting.ImportPlugin.Companion.rootXPlugin
@@ -49,7 +48,7 @@ class VersionManager(val args: ArgsExtends) {
     /**
      * 获取指定分支指定baseVersion版本的最新版本号
      */
-    fun getNewerVersion(branch: String, module: String, version: String): Int = readCurVersions()["$groupName.$branch.$module.$version"]
+    fun getNewerVersion(branch: String, module: String, version: String): Int = readCurVersions()[VersionParse.getKey(groupName, branch, module, version)]
             ?: -1
 
     /**
@@ -148,7 +147,7 @@ class VersionManager(val args: ArgsExtends) {
 
     fun readVersionFromFile(artifactId: String, version: String?): Map<String, Int> {
         version ?: return emptyMap()
-        val versionDir = XmlHelper.fileVersion(args.env.rootDir.absolutePath,args.manifest.mavenUrl)
+        val versionDir = XmlHelper.fileVersion(args.env.rootDir.absolutePath, args.manifest.mavenUrl)
         val file = File(versionDir, "$artifactId/${version}.txt")
         if (!file.exists()) {
             val netTxt = XmlHelper.readUrlTxt(args.manifest.fullUrl(artifactId, version, "${artifactId}-${version}.txt"))
@@ -169,18 +168,19 @@ class VersionManager(val args: ArgsExtends) {
 //        println("readCurVersions---- -> $curVersions")
         if (loads.contains("curVersions")) return curVersions
         val basePath = args.env.rootDir.absolutePath
-        val versionDir = XmlHelper.fileVersion(basePath,args.manifest.mavenUrl)
+        val versionDir = XmlHelper.fileVersion(basePath, args.manifest.mavenUrl)
         //重新冲仓库更新一次版本信息
         if (args.config.sync || !versionDir.exists() || args.runTaskNames.find { it.contains("ToMaven") } != null) {//如果当前文件不存，从新生成
             XmlHelper.loadVersionFromNet(basePath)
         }
 
-        lastVersion = XmlHelper.parseMetadata(FileUtils.readText(File(versionDir, "${EnvKeys.BASIC}.xml"))).versions.lastOrNull()
-                ?: "default"
+        lastVersion = XmlHelper.parseMetadata(FileUtils.readText(File(versionDir, "${EnvKeys.BASIC}.xml")))
+                .versions.lastOrNull()?.substringAfterLast(".") ?: "default"
 
         //加载所有版本信息相关的文件
         for (v in XmlHelper.parseMetadata(FileUtils.readText(File(versionDir, "${EnvKeys.BASIC_TAG}.xml"))).versions) {
-            tagVersions[v.substring(0, v.lastIndexOf("-"))] = v
+            val version = v.substringAfterLast(".")
+            tagVersions[version.substring(0, version.lastIndexOf("-"))] = version
         }
 
         //加载full版本记录
@@ -202,7 +202,7 @@ class VersionManager(val args: ArgsExtends) {
         return curVersions
     }
 
-    fun storeToUp(archivesFile: File,map: Map<String, Any?> = mapOf("time" to System.currentTimeMillis().toString())) {
+    fun storeToUp(archivesFile: File, map: Map<String, Any?> = mapOf("time" to System.currentTimeMillis().toString())) {
         Tools.println("storeToUp -> ${archivesFile.absolutePath}")
         PropertiesUtils.writeProperties(archivesFile, map.map { it.key to it.value.toString() }.toMap().toProperties())//保存当前的版本信息等待上传
     }
