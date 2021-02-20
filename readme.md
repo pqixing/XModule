@@ -1,4 +1,4 @@
-##  XModule
+##  XModule : (此项目已废弃 ,移动到 : [AEX项目](https://github.com/pqixing/aex.git))
 #### 介绍
 XModule 是一个组件化管理系统,实现像开发一个独立应用一样开发组件，提供快捷进行多分支多产品开发
 
